@@ -80,3 +80,43 @@ hadamardSprite.cursor = 'pointer';
 
 // リスナーを解除する(on()の逆)
 // hadamardSprite.off('pointertap',showAlert);
+
+
+/** =======================================================================================
+ * 1.7 オブジェクトをドラッグして動かす
+ */
+
+// Hスプライトにイベントリスナーを設定する
+// .on()をつなげて連続で設定することができる
+hadamardSprite.on('pointerdown', onGatePointerDown)    // ぶたの上でマウスがクリック(orタップ)されたとき
+              .on('pointerup', onGatePointerUp);      // ぶたの上でマウスクリックが外れたとき
+
+
+
+// ぶたの上でマウスがクリック(orタップ)されたときの処理定義
+function onGatePointerDown() {
+    hadamardSprite.on('pointermove', moveGate);    // ドラッグイベントリスナーを設定
+
+    // 分かる人向けTIPS:
+    // ドラッグ処理が重かったり、Hが他のオブジェクトの下に入ったりするとpointerupを拾えず、
+    // ドラッグイベントのリスナーが解除されない場合がある。
+    // こうなるとマウスをクリックした状態でなくても、Hにマウスが重なるとぶたが追従してくる。
+    // これはwindowにマウスクリック解除時のリスナーを設定することで解除できる...かも
+    // window.addEventListener('pointerup', onGatePointerUp);
+}
+
+// ぶたをドラッグ中の処理定義
+function moveGate(e) {
+    // PIXI.interaction.InteractionData.getLoalPosition(オブジェクト)
+    // イベント発火地点(=ドラッグ中のマウス位置)がapp.stageのどこの位置にあるかを取得
+    let position = e.data.getLocalPosition(app.stage);
+
+    // 位置変更
+    hadamardSprite.x = position.x;
+    hadamardSprite.y = position.y;
+}
+
+// ぶたの上でマウスクリックが外れたときの処理定義
+function onGatePointerUp() {
+    hadamardSprite.off('pointermove', moveGate); // ドラッグイベントリスナーを解除
+}
