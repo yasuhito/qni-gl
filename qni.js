@@ -1,29 +1,30 @@
-// Pixiアプリケーション生成
+/* eslint-disable no-undef */
+
 const app = new PIXI.Application({
-  width: 800,                 // スクリーン(ビュー)横幅
-  height: 800,                // スクリーン(ビュー)縦幅
-  backgroundColor: 0x1099bb,  // 背景色 16進 0xRRGGBB
+  width: 800,
+  height: 800,
+  backgroundColor: 0x1099bb,
   autoDensity: true,
 })
 
-// console.log(app.screen.width)
-// console.log(app.screen.height)
-
-// HTMLの<main id="app"></main>の中に上で作ったPIXIアプリケーション(app)のビュー(canvas)を突っ込む
+// Add PIXI application (app) view (canvas) to #app
 let el = document.getElementById('app');
 el.appendChild(app.view);
 
-// 画像を読み込み、テクスチャにする
+// Create H gate texture
 const hadamardTexture = PIXI.Texture.from('./img/H.png');
-// Scale mode for pixelation
-hadamardTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+hadamardTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST; // Scale mode for pixelation
 
-// ゲートをつかんだ時のテクスチャ
+// Create H gate (hover state) texture
+const hadamardHoverTexture = PIXI.Texture.from('./img/H_hover.png');
+hadamardHoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+// Create H gate (grab state) texture
 const hadamardGrabTexture = PIXI.Texture.from('./img/H_grab.png');
 hadamardGrabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 100; i++) {
   createHGate(
     Math.floor(Math.random() * app.screen.width),
     Math.floor(Math.random() * app.screen.height),
@@ -31,25 +32,25 @@ for (let i = 0; i < 10; i++) {
 }
 
 function createHGate(x, y) {
-  // create our little hGate friend..
   const hGate = new PIXI.Sprite(hadamardTexture);
 
   // enable the hGate to be interactive... this will allow it to respond to mouse and touch events
   hGate.eventMode = 'static'
-  // hGate.interactive = true;
 
-  // this button mode will mean the hand cursor appears when you roll over the hGate with your mouse
+  // the hand cursor appears when you roll over the hGate with your mouse
   hGate.cursor = 'pointer';
 
   // center the hGate's anchor point
   hGate.anchor.set(0.5);
 
   // make it a bit bigger, so it's easier to grab
-  hGate.scale.set(2);
+  hGate.scale.set(1.5);
 
   // setup events for mouse + touch using
   // the pointer events
-  hGate.on('pointerdown', onDragStart, hGate);
+  hGate.on('pointerdown', onDragStart, hGate)
+       .on('pointerover', onGateOver, hGate)
+       .on('pointerout', onGateOut, hGate);
 
   // move the sprite to its designated position
   hGate.x = x;
@@ -57,6 +58,18 @@ function createHGate(x, y) {
 
   // add it to the stage
   app.stage.addChild(hGate);
+}
+
+function onGateOver() {
+  if (dragTarget === null) {
+    this.texture = hadamardHoverTexture;
+  }
+}
+
+function onGateOut() {
+  if (dragTarget === null) {
+    this.texture = hadamardTexture;
+  }
 }
 
 let dragTarget = null
