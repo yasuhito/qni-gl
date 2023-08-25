@@ -55,3 +55,28 @@ app.stage.addChild(hadamardSprite);
 // butaSprite2.x = app.screen.width / 2 + 150;
 // butaSprite2.y = app.screen.height / 2;
 // app.stage.addChild(butaSprite2);
+
+
+
+/** =======================================================================================
+ * 1.6 オブジェクトがクリックされたときになんかする
+ */
+
+// 中央のHのインタラクション(イベント)を有効化
+hadamardSprite.eventMode = 'static';
+
+// Hにマウスが重なった時、表示をポインターにする
+hadamardSprite.cursor = 'pointer';
+
+// 中央のHスプライトにクリックイベントのリスナーを設定する
+// オブジェクト.on('イベントの種類', イベントハンドラ) で設定する
+// hadamardSprite.on('pointertap', showAlert);
+
+// イベントハンドラの定義
+// function showAlert(e) {
+//     console.log(e);
+//     alert('Hがクリック(タップ)されました');
+// }
+
+// リスナーを解除する(on()の逆)
+// hadamardSprite.off('pointertap',showAlert);
