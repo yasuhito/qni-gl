@@ -25,6 +25,7 @@ el.appendChild(app.view);
  */
 // 画像を読み込み、テクスチャにする
 let hadamardTexture = PIXI.Texture.from('./img/H.png');
+
 // 読み込んだテクスチャから、スプライトを生成する
 let hadamardSprite = new PIXI.Sprite(hadamardTexture);
 // Hの基準点を設定(%) 0.5はそれぞれの中心 位置・回転の基準になる
@@ -35,6 +36,18 @@ hadamardSprite.x = app.screen.width / 2;        // ビューの幅 / 2 = x中央
 hadamardSprite.y = app.screen.height / 2;       // ビューの高さ / 2 = y中央
 // 表示領域に追加する
 app.stage.addChild(hadamardSprite);
+
+
+// 読み込んだテクスチャから、スプライトを生成する
+let hadamardSprite2 = new PIXI.Sprite(hadamardTexture);
+// Hの基準点を設定(%) 0.5はそれぞれの中心 位置・回転の基準になる
+hadamardSprite2.anchor.x = 0.5;
+hadamardSprite2.anchor.y = 0.5;
+// Hの位置決め
+hadamardSprite2.x = app.screen.width / 3;        // ビューの幅 / 2 = x中央
+hadamardSprite2.y = app.screen.height / 3;       // ビューの高さ / 2 = y中央
+// 表示領域に追加する
+app.stage.addChild(hadamardSprite2);
 
 
 // // 別のぶたを作る
@@ -68,6 +81,14 @@ hadamardSprite.eventMode = 'static';
 // Hにマウスが重なった時、表示をポインターにする
 hadamardSprite.cursor = 'pointer';
 
+
+// 中央のHのインタラクション(イベント)を有効化
+hadamardSprite2.eventMode = 'static';
+
+// Hにマウスが重なった時、表示をポインターにする
+hadamardSprite2.cursor = 'pointer';
+
+
 // 中央のHスプライトにクリックイベントのリスナーを設定する
 // オブジェクト.on('イベントの種類', イベントハンドラ) で設定する
 // hadamardSprite.on('pointertap', showAlert);
@@ -83,6 +104,20 @@ hadamardSprite.cursor = 'pointer';
 
 
 /** =======================================================================================
+ * 1.8 オブジェクトの前後関係(描画順序)を変更する
+ */
+
+// zIndexによる自動ソートを有効化(どんなコンテナでも設定可能)
+app.stage.sortableChildren = true;
+
+// でかいぶたを最前面に描画(どのオブジェクトもzIndexの初期値は0)
+hadamardSprite.zIndex = 10;
+
+// でかいぶたを最背面に描画
+// butaSprite2.zIndex = -1;
+
+
+/** =======================================================================================
  * 1.7 オブジェクトをドラッグして動かす
  */
 
@@ -91,32 +126,38 @@ hadamardSprite.cursor = 'pointer';
 hadamardSprite.on('pointerdown', onGatePointerDown)    // ぶたの上でマウスがクリック(orタップ)されたとき
               .on('pointerup', onGatePointerUp);      // ぶたの上でマウスクリックが外れたとき
 
+hadamardSprite2.on('pointerdown', onGatePointerDown)    // ぶたの上でマウスがクリック(orタップ)されたとき
+               .on('pointerup', onGatePointerUp);      // ぶたの上でマウスクリックが外れたとき
 
 
 // ぶたの上でマウスがクリック(orタップ)されたときの処理定義
 function onGatePointerDown() {
-    hadamardSprite.on('pointermove', moveGate);    // ドラッグイベントリスナーを設定
+  this.on('pointermove', moveGate);    // ドラッグイベントリスナーを設定
+  this.zIndex = 10;
 
-    // 分かる人向けTIPS:
-    // ドラッグ処理が重かったり、Hが他のオブジェクトの下に入ったりするとpointerupを拾えず、
-    // ドラッグイベントのリスナーが解除されない場合がある。
-    // こうなるとマウスをクリックした状態でなくても、Hにマウスが重なるとぶたが追従してくる。
-    // これはwindowにマウスクリック解除時のリスナーを設定することで解除できる...かも
-    // window.addEventListener('pointerup', onGatePointerUp);
+  // 分かる人向けTIPS:
+  // ドラッグ処理が重かったり、Hが他のオブジェクトの下に入ったりするとpointerupを拾えず、
+  // ドラッグイベントのリスナーが解除されない場合がある。
+  // こうなるとマウスをクリックした状態でなくても、Hにマウスが重なるとぶたが追従してくる。
+  // これはwindowにマウスクリック解除時のリスナーを設定することで解除できる...かも
+  // window.addEventListener('pointerup', onGatePointerUp);
 }
 
 // ぶたをドラッグ中の処理定義
 function moveGate(e) {
-    // PIXI.interaction.InteractionData.getLoalPosition(オブジェクト)
-    // イベント発火地点(=ドラッグ中のマウス位置)がapp.stageのどこの位置にあるかを取得
-    let position = e.data.getLocalPosition(app.stage);
+  // PIXI.interaction.InteractionData.getLoalPosition(オブジェクト)
+  // イベント発火地点(=ドラッグ中のマウス位置)がapp.stageのどこの位置にあるかを取得
+  let position = e.data.getLocalPosition(app.stage);
 
-    // 位置変更
-    hadamardSprite.x = position.x;
-    hadamardSprite.y = position.y;
+  // 位置変更
+  this.x = position.x;
+  this.y = position.y;
 }
 
 // ぶたの上でマウスクリックが外れたときの処理定義
 function onGatePointerUp() {
-    hadamardSprite.off('pointermove', moveGate); // ドラッグイベントリスナーを解除
+  this.off('pointermove', moveGate); // ドラッグイベントリスナーを解除
+  this.zIndex = 0;
 }
+
+
