@@ -18,6 +18,11 @@ const hadamardTexture = PIXI.Texture.from('./img/H.png');
 // Scale mode for pixelation
 hadamardTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
+// ゲートをつかんだ時のテクスチャ
+const hadamardGrabTexture = PIXI.Texture.from('./img/H_grab.png');
+hadamardGrabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+
 for (let i = 0; i < 10; i++) {
   createHGate(
     Math.floor(Math.random() * app.screen.width),
@@ -73,7 +78,7 @@ function onDragStart() {
   // we want to track the movement of this particular touch
   dragTarget = this;
   dragTarget.zIndex = 10;
-  dragTarget.tint = 0xffff00;
+  dragTarget.texture = hadamardGrabTexture
   app.stage.on('pointermove', onDragMove);
 }
 
@@ -81,6 +86,7 @@ function onDragEnd() {
   if (dragTarget) {
     app.stage.off('pointermove', onDragMove);
     dragTarget.zIndex = 0;
+    dragTarget.texture = hadamardTexture
     dragTarget.tint = 0xffffff;
     dragTarget = null;
   }
