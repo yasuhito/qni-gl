@@ -1,14 +1,17 @@
 {
-  "name": "qni-gl",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "qni-gl-new",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "author": "Yasuhito Takamiya <yasuhito@hey.com> (https://github.com/yasuhito)",
-  "license": "MIT",
+  "devDependencies": {
+    "vite": "^4.4.5"
+  },
   "dependencies": {
-    "eslint": "^8.47.0"
+    "pixi.js": "^7.2.4"
   }
 }
