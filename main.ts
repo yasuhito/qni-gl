@@ -119,8 +119,9 @@ app.stage.sortableChildren = true;
 app.stage.on("pointerup", onDragEnd);
 app.stage.on("pointerupoutside", onDragEnd);
 
-function onDragMove(event) {
+function onDragMove(event: PIXI.FederatedPointerEvent) {
   if (dragTarget) {
+    // event.global is the global position of the mouse/touch
     dragTarget.parent.toLocal(event.global, undefined, dragTarget.position);
 
     if (
@@ -136,6 +137,10 @@ function onDragMove(event) {
       )
     ) {
       dragTarget.tint = 0x00ffff;
+      dragTarget.position.set(
+        dropzoneX + dropzoneWidth / 2,
+        dropzoneY + dropzoneHeight / 2
+      );
     } else {
       dragTarget.tint = 0xffffff;
     }
