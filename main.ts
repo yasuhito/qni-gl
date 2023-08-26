@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-const app = new PIXI.Application({
+const app = new PIXI.Application<HTMLCanvasElement>({
   width: 800,
   height: 800,
   backgroundColor: 0x1099bb,
@@ -9,6 +9,9 @@ const app = new PIXI.Application({
 
 // Add PIXI application (app) view (canvas) to #app
 const el = document.getElementById("app");
+if (el === null) {
+  throw new Error("Could not find #app");
+}
 el.appendChild(app.view);
 
 // Create H gate texture
