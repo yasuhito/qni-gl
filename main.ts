@@ -31,14 +31,20 @@ createWorld();
 // ドロップゾーンの定義
 const dropzoneWidth = 32;
 const dropzoneHeight = 32;
-const dropzoneX = app.screen.width / 2 - dropzoneWidth / 2;
-const dropzoneY = app.screen.height / 2 - dropzoneHeight / 2;
+const dropzoneX = app.screen.width / 2;
+const dropzoneY = app.screen.height / 2;
+const snapRatio = 0.5
 
 // デバッグ用にドロップゾーンを表示する
 const graphics = new PIXI.Graphics();
 graphics.lineStyle(2, 0x1111ff, 1, 0);
 graphics.beginFill(0xffffff, 0);
-graphics.drawRect(dropzoneX, dropzoneY, dropzoneWidth, dropzoneHeight);
+graphics.drawRect(
+  dropzoneX - dropzoneWidth / 2,
+  dropzoneY - dropzoneHeight / 2,
+  dropzoneWidth,
+  dropzoneHeight
+);
 graphics.endFill();
 
 app.stage.addChild(graphics);
@@ -130,17 +136,14 @@ function onDragMove(event: PIXI.FederatedPointerEvent) {
         dragTarget.y - dragTarget.height / 2,
         dragTarget.width,
         dragTarget.height,
-        dropzoneX,
-        dropzoneY,
-        dropzoneWidth,
-        dropzoneHeight
+        dropzoneX - (dropzoneWidth * snapRatio) / 2,
+        dropzoneY - (dropzoneHeight * snapRatio) / 2,
+        dropzoneWidth * snapRatio,
+        dropzoneHeight * snapRatio
       )
     ) {
       dragTarget.tint = 0x00ffff;
-      dragTarget.position.set(
-        dropzoneX + dropzoneWidth / 2,
-        dropzoneY + dropzoneHeight / 2
-      );
+      dragTarget.position.set(dropzoneX, dropzoneY);
     } else {
       dragTarget.tint = 0xffffff;
     }
