@@ -1,5 +1,8 @@
 import * as PIXI from "pixi.js";
 
+const nameMap = new Map();
+
+// view, stage などをまとめた application を作成
 const app = new PIXI.Application<HTMLCanvasElement>({
   width: 800,
   height: 800,
@@ -13,6 +16,64 @@ if (el === null) {
   throw new Error("Could not find #app");
 }
 el.appendChild(app.view);
+
+// const title = app.stage.addChild(
+//   new PIXI.Text(
+//     `Move your mouse slowly over the boxes to
+//   see the order of pointerenter, pointerleave,
+//   pointerover, pointerout events on each target!`,
+//     {
+//       fontSize: 16,
+//     }
+//   )
+// );
+// title.x = 2;
+// title.zIndex = 20;
+
+const logs: string[] = [];
+const logText = app.stage.addChild(
+  new PIXI.Text("", {
+    fontSize: 14,
+  })
+);
+
+// logText.y = 80;
+logText.x = 2;
+logText.zIndex = 20;
+
+nameMap.set(app.stage, "stage");
+
+function onEvent(e: PIXI.FederatedPointerEvent) {
+  const type = e.type;
+  let targetName: string | undefined;
+  if (e.target) {
+    targetName = nameMap.get(e.target);
+  }
+  const currentTargetName = nameMap.get(e.currentTarget);
+
+  // Add event to top of logs
+  logs.push(
+    `${currentTargetName} received ${type} event (target is ${targetName})`
+  );
+
+  if (
+    currentTargetName === "stage" ||
+    type === "pointerenter" ||
+    type === "pointerleave"
+  ) {
+    logs.push("-----------------------------------------", "");
+  }
+
+  // Prevent logs from growing too long
+  if (logs.length > 30) {
+    while (logs.length > 30) {
+      logs.shift();
+    }
+  }
+
+  // Update logText
+  logText.text = logs.join("\n");
+}
 
 // Create H gate texture
 const hadamardTexture = PIXI.Texture.from("./assets/H.svg");
@@ -33,7 +94,7 @@ const dropzoneWidth = 32;
 const dropzoneHeight = 32;
 const dropzoneX = app.screen.width / 2;
 const dropzoneY = app.screen.height / 2;
-const snapRatio = 0.5
+const snapRatio = 0.5;
 
 // デバッグ用にドロップゾーンを表示する
 const graphics = new PIXI.Graphics();
@@ -97,6 +158,12 @@ function createHGate(x: number, y: number) {
     .on("pointerover", onGateOver, hGate)
     .on("pointerout", onGateOut, hGate);
 
+  nameMap.set(hGate, "hGate");
+  // hGate.name = "hGate";
+  hGate.addEventListener("pointerdown", onEvent);
+  hGate.addEventListener("pointerover", onEvent);
+  hGate.addEventListener("pointerout", onEvent);
+
   // move the sprite to its designated position
   hGate.x = x;
   hGate.y = y;
@@ -105,25 +172,51 @@ function createHGate(x: number, y: number) {
   app.stage.addChild(hGate);
 }
 
+function onDragStart() {
+  // the reason for this is because of multitouch
+  // we want to track the movement of this particular touch
+  dragTarget = this;
+  if (dragTarget === null) {
+    throw new Error("dragTarget is null");
+  }
+
+  dragTarget.zIndex = 10;
+  dragTarget.texture = hadamardGrabTexture;
+  app.stage.on("pointermove", onDragMove);
+}
+
 function onGateOver() {
   if (dragTarget === null) {
     this.texture = hadamardHoverTexture;
+    app.stage.cursor = "pointer";
   }
 }
 
 function onGateOut() {
   if (dragTarget === null) {
     this.texture = hadamardTexture;
+    app.stage.cursor = "default";
   }
 }
 
 let dragTarget: PIXI.Sprite | null = null;
 
+// stage: 画面に表示するオブジェクトたちの入れ物
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
 app.stage.sortableChildren = true;
-app.stage.on("pointerup", onDragEnd);
-app.stage.on("pointerupoutside", onDragEnd);
+app.stage.on("pointerup", onDragEnd); // マウスでクリックを離した、タッチパネルでタッチを離した
+app.stage.on("pointerupoutside", onDragEnd); // 描画オブジェクトの外側でクリック、タッチを離した
+
+function onDragEnd() {
+  if (dragTarget) {
+    app.stage.off("pointermove", onDragMove);
+    dragTarget.zIndex = 0;
+    dragTarget.texture = hadamardTexture;
+    dragTarget.tint = 0xffffff;
+    dragTarget = null;
+  }
+}
 
 function onDragMove(event: PIXI.FederatedPointerEvent) {
   if (dragTarget) {
@@ -150,50 +243,11 @@ function onDragMove(event: PIXI.FederatedPointerEvent) {
   }
 }
 
-function onDragStart() {
-  // the reason for this is because of multitouch
-  // we want to track the movement of this particular touch
-  dragTarget = this;
-  if (dragTarget === null) {
-    throw new Error("dragTarget is null");
-  }
-
-  dragTarget.zIndex = 10;
-  dragTarget.texture = hadamardGrabTexture;
-  app.stage.on("pointermove", onDragMove);
-}
-
-function onDragEnd() {
-  if (dragTarget) {
-    app.stage.off("pointermove", onDragMove);
-    dragTarget.zIndex = 0;
-    dragTarget.texture = hadamardTexture;
-    dragTarget.tint = 0xffffff;
-    dragTarget = null;
-  }
-}
-
-// import './style.css'
-// import javascriptLogo from './javascript.svg'
-// import viteLogo from '/vite.svg'
-// import { setupCounter } from './counter.js'
-
-// document.querySelector('#app').innerHTML = `
-//   <div>
-//     <a href="https://vitejs.dev" target="_blank">
-//       <img src="${viteLogo}" class="logo" alt="Vite logo" />
-//     </a>
-//     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-//       <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-//     </a>
-//     <h1>Hello Vite!</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the Vite logo to learn more
-//     </p>
-//   </div>
-// `
-
-// setupCounter(document.querySelector('#counter'))
+[app.stage].forEach((object) => {
+  // object.addEventListener("pointerenter", onEvent);
+  // object.addEventListener("pointerleave", onEvent);
+  // object.addEventListener("pointerover", onEvent);
+  // object.addEventListener("pointerout", onEvent);
+  object.addEventListener("pointerup", onEvent);
+  object.addEventListener("pointerupoutside", onEvent);
+});
