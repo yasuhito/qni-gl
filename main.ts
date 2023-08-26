@@ -12,15 +12,15 @@ const el = document.getElementById("app");
 el.appendChild(app.view);
 
 // Create H gate texture
-const hadamardTexture = PIXI.Texture.from("./assets/H.png");
+const hadamardTexture = PIXI.Texture.from("./assets/H.svg");
 hadamardTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST; // Scale mode for pixelation
 
 // Create H gate (hover state) texture
-const hadamardHoverTexture = PIXI.Texture.from("./assets/H_hover.png");
+const hadamardHoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
 hadamardHoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 // Create H gate (grab state) texture
-const hadamardGrabTexture = PIXI.Texture.from("./assets/H_grab.png");
+const hadamardGrabTexture = PIXI.Texture.from("./assets/H_grab.svg");
 hadamardGrabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 for (let i = 0; i < 100; i++) {
@@ -43,7 +43,7 @@ function createHGate(x, y) {
   hGate.anchor.set(0.5);
 
   // make it a bit bigger, so it's easier to grab
-  hGate.scale.set(1.5);
+  // hGate.scale.set(3);
 
   // setup events for mouse + touch using
   // the pointer events
