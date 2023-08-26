@@ -26,14 +26,50 @@ hadamardHoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 const hadamardGrabTexture = PIXI.Texture.from("./assets/H_grab.svg");
 hadamardGrabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-for (let i = 0; i < 100; i++) {
-  createHGate(
-    Math.floor(Math.random() * app.screen.width),
-    Math.floor(Math.random() * app.screen.height)
-  );
+createWorld();
+
+// ドロップゾーンの定義
+const dropzoneWidth = 32;
+const dropzoneHeight = 32;
+const dropzoneX = app.screen.width / 2 - dropzoneWidth / 2;
+const dropzoneY = app.screen.height / 2 - dropzoneHeight / 2;
+
+// デバッグ用にドロップゾーンを表示する
+const graphics = new PIXI.Graphics();
+graphics.lineStyle(2, 0x1111ff, 1, 0);
+graphics.beginFill(0xffffff, 0);
+graphics.drawRect(dropzoneX, dropzoneY, dropzoneWidth, dropzoneHeight);
+graphics.endFill();
+
+app.stage.addChild(graphics);
+
+function createWorld() {
+  for (let i = 0; i < 100; i++) {
+    createHGate(
+      Math.floor(Math.random() * app.screen.width),
+      Math.floor(Math.random() * app.screen.height)
+    );
+  }
 }
 
-function createHGate(x, y) {
+function rectIntersect(
+  x1: number,
+  y1: number,
+  w1: number,
+  h1: number,
+  x2: number,
+  y2: number,
+  w2: number,
+  h2: number
+) {
+  // Check x and y for overlap
+  if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2) {
+    return false;
+  }
+  return true;
+}
+
+function createHGate(x: number, y: number) {
   const hGate = new PIXI.Sprite(hadamardTexture);
 
   // enable the hGate to be interactive... this will allow it to respond to mouse and touch events
@@ -75,7 +111,7 @@ function onGateOut() {
   }
 }
 
-let dragTarget = null;
+let dragTarget: PIXI.Sprite | null = null;
 
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
@@ -85,7 +121,24 @@ app.stage.on("pointerupoutside", onDragEnd);
 
 function onDragMove(event) {
   if (dragTarget) {
-    dragTarget.parent.toLocal(event.global, null, dragTarget.position);
+    dragTarget.parent.toLocal(event.global, undefined, dragTarget.position);
+
+    if (
+      rectIntersect(
+        dragTarget.x - dragTarget.width / 2,
+        dragTarget.y - dragTarget.height / 2,
+        dragTarget.width,
+        dragTarget.height,
+        dropzoneX,
+        dropzoneY,
+        dropzoneWidth,
+        dropzoneHeight
+      )
+    ) {
+      dragTarget.tint = 0x00ffff;
+    } else {
+      dragTarget.tint = 0xffffff;
+    }
   }
 }
 
@@ -93,6 +146,10 @@ function onDragStart() {
   // the reason for this is because of multitouch
   // we want to track the movement of this particular touch
   dragTarget = this;
+  if (dragTarget === null) {
+    throw new Error("dragTarget is null");
+  }
+
   dragTarget.zIndex = 10;
   dragTarget.texture = hadamardGrabTexture;
   app.stage.on("pointermove", onDragMove);
