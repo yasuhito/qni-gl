@@ -84,19 +84,19 @@ const hadamardHoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
 hadamardHoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 // Create H gate (grab state) texture
-const hadamardGrabTexture = PIXI.Texture.from("./assets/H_grab.svg");
+const hadamardGrabTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
 hadamardGrabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 createWorld();
 
-// ドロップゾーンの定義
+// Dropzone definitions
 const dropzoneWidth = 32;
 const dropzoneHeight = 32;
 const dropzoneX = app.screen.width / 2;
 const dropzoneY = app.screen.height / 2;
 const snapRatio = 0.5;
 
-// デバッグ用にドロップゾーンを表示する
+// for debugging
 const graphics = new PIXI.Graphics();
 graphics.lineStyle(2, 0x1111ff, 1, 0);
 graphics.beginFill(0xffffff, 0);
