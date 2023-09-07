@@ -1,10 +1,12 @@
 import * as PIXI from "pixi.js";
+import { Dropzone } from "./dropzone";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 
 export class App {
   _currentDraggable: HGate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
+  dropzone: Dropzone;
   logger: Logger;
   nameMap = new Map();
 
@@ -33,33 +35,16 @@ export class App {
     this.pixiApp.stage.on("pointerup", this.releaseGate.bind(this)); // マウスでクリックを離した、タッチパネルでタッチを離した
     this.pixiApp.stage.on("pointerupoutside", this.releaseGate.bind(this)); // 描画オブジェクトの外側でクリック、タッチを離した
 
-    // ダブっているので一か所にまとめる
+    // 中央に dropzone を作成
     const dropzoneX = this.pixiApp.screen.width / 2;
     const dropzoneY = this.pixiApp.screen.height / 2;
-    const dropzoneWidth = 32;
-    const dropzoneHeight = 32;
-
-    const graphics = new PIXI.Graphics();
-    graphics.lineStyle(2, 0x1111ff, 1, 0);
-    graphics.beginFill(0xffffff, 0);
-    graphics.drawRect(
-      dropzoneX - dropzoneWidth / 2,
-      dropzoneY - dropzoneHeight / 2,
-      dropzoneWidth,
-      dropzoneHeight
-    );
-    graphics.endFill();
-    this.pixiApp.stage.addChild(graphics);
+    this.dropzone = new Dropzone(dropzoneX, dropzoneY);
+    this.pixiApp.stage.addChild(this.dropzone.graphics);
 
     this.logger = new Logger(this.pixiApp);
-
     this.nameMap.set(this.pixiApp.stage, "stage");
 
     [this.pixiApp.stage].forEach((object) => {
-      // object.addEventListener("pointerenter", onEvent);
-      // object.addEventListener("pointerleave", onEvent);
-      // object.addEventListener("pointerover", onEvent);
-      // object.addEventListener("pointerout", onEvent);
       object.addEventListener("pointerup", this.onEvent.bind(this));
       object.addEventListener("pointerupoutside", this.onEvent.bind(this));
     });
@@ -150,31 +135,11 @@ export class App {
   private moveGate(gate: HGate, globalPosition: PIXI.Point) {
     gate.sprite.parent.toLocal(globalPosition, undefined, gate.sprite.position);
 
-    const dropzoneX = this.pixiApp.screen.width / 2;
-    const dropzoneY = this.pixiApp.screen.height / 2;
-
-    if (this.isSnappable(gate, dropzoneX, dropzoneY)) {
-      gate.snap(dropzoneX, dropzoneY);
+    if (this.dropzone.isSnappable(gate)) {
+      gate.snap(this.dropzone.x, this.dropzone.y);
     } else {
       gate.unSnap();
     }
-  }
-
-  private isSnappable(gate: HGate, dropzoneX: number, dropzoneY: number) {
-    const dropzoneWidth = 32;
-    const dropzoneHeight = 32;
-    const snapRatio = 0.5;
-
-    return this.rectIntersect(
-      gate.x - gate.width / 2,
-      gate.y - gate.height / 2,
-      gate.width,
-      gate.height,
-      dropzoneX - (dropzoneWidth * snapRatio) / 2,
-      dropzoneY - (dropzoneHeight * snapRatio) / 2,
-      dropzoneWidth * snapRatio,
-      dropzoneHeight * snapRatio
-    );
   }
 
   private releaseGate() {
@@ -207,22 +172,5 @@ export class App {
       this.logger.push("-----------------------------------------");
       this.logger.push("");
     }
-  }
-
-  private rectIntersect(
-    x1: number,
-    y1: number,
-    w1: number,
-    h1: number,
-    x2: number,
-    y2: number,
-    w2: number,
-    h2: number
-  ) {
-    // Check x and y for overlap
-    if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2) {
-      return false;
-    }
-    return true;
   }
 }
