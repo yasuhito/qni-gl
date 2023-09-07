@@ -30,8 +30,8 @@ export class App {
     this.pixiApp.stage.eventMode = "static";
     this.pixiApp.stage.hitArea = this.pixiApp.screen;
     this.pixiApp.stage.sortableChildren = true;
-    this.pixiApp.stage.on("pointerup", this.onDragEnd.bind(this)); // マウスでクリックを離した、タッチパネルでタッチを離した
-    this.pixiApp.stage.on("pointerupoutside", this.onDragEnd.bind(this)); // 描画オブジェクトの外側でクリック、タッチを離した
+    this.pixiApp.stage.on("pointerup", this.releaseGate.bind(this)); // マウスでクリックを離した、タッチパネルでタッチを離した
+    this.pixiApp.stage.on("pointerupoutside", this.releaseGate.bind(this)); // 描画オブジェクトの外側でクリック、タッチを離した
 
     // ダブっているので一か所にまとめる
     const dropzoneX = this.pixiApp.screen.width / 2;
@@ -127,62 +127,63 @@ export class App {
     this.pixiApp.stage.cursor = "default";
   }
 
-  onDragStart(gate: HGate) {
+  grabGate(gate: HGate) {
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
     this.currentDraggable = gate;
+
     this.currentDraggable.sprite.zIndex = 10;
-    this.currentDraggable.changeTextureToGrabbedState();
-    this.pixiApp.stage.on("pointermove", this.onDragMove.bind(this));
+    this.currentDraggable.grab();
+
+    this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }
 
-  private onDragMove(event: PIXI.FederatedPointerEvent) {
+  private maybeMoveGate(event: PIXI.FederatedPointerEvent) {
     if (this.currentDraggable === null) {
       return;
     }
 
-    // event.global is the global position of the mouse/touch
-    this.currentDraggable.sprite.parent.toLocal(
-      event.global,
-      undefined,
-      this.currentDraggable.sprite.position
-    );
+    this.moveGate(this.currentDraggable, event.global);
+  }
+
+  // globalPosition is the global position of the mouse/touch
+  private moveGate(gate: HGate, globalPosition: PIXI.Point) {
+    gate.sprite.parent.toLocal(globalPosition, undefined, gate.sprite.position);
 
     const dropzoneX = this.pixiApp.screen.width / 2;
     const dropzoneY = this.pixiApp.screen.height / 2;
+
+    if (this.isSnappable(gate, dropzoneX, dropzoneY)) {
+      gate.snap(dropzoneX, dropzoneY);
+    } else {
+      gate.unSnap();
+    }
+  }
+
+  private isSnappable(gate: HGate, dropzoneX: number, dropzoneY: number) {
     const dropzoneWidth = 32;
     const dropzoneHeight = 32;
     const snapRatio = 0.5;
 
-    if (
-      this.rectIntersect(
-        this.currentDraggable.sprite.x - this.currentDraggable.sprite.width / 2,
-        this.currentDraggable.sprite.y -
-          this.currentDraggable.sprite.height / 2,
-        this.currentDraggable.sprite.width,
-        this.currentDraggable.sprite.height,
-        dropzoneX - (dropzoneWidth * snapRatio) / 2,
-        dropzoneY - (dropzoneHeight * snapRatio) / 2,
-        dropzoneWidth * snapRatio,
-        dropzoneHeight * snapRatio
-      )
-    ) {
-      this.currentDraggable.sprite.tint = 0x00ffff;
-      this.currentDraggable.sprite.position.set(dropzoneX, dropzoneY);
-    } else {
-      this.currentDraggable.sprite.tint = 0xffffff;
-    }
+    return this.rectIntersect(
+      gate.x - gate.width / 2,
+      gate.y - gate.height / 2,
+      gate.width,
+      gate.height,
+      dropzoneX - (dropzoneWidth * snapRatio) / 2,
+      dropzoneY - (dropzoneHeight * snapRatio) / 2,
+      dropzoneWidth * snapRatio,
+      dropzoneHeight * snapRatio
+    );
   }
 
-  private onDragEnd() {
+  private releaseGate() {
     if (this.currentDraggable === null) {
       return;
     }
 
-    this.pixiApp.stage.off("pointermove", this.onDragMove);
-    this.currentDraggable.sprite.zIndex = 0;
+    this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
     this.currentDraggable.default();
-    this.currentDraggable.sprite.tint = 0xffffff;
     this.currentDraggable = null;
   }
 

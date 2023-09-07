@@ -18,6 +18,14 @@ export class HGate {
     return this.sprite.y;
   }
 
+  get width(): number {
+    return this.sprite.width;
+  }
+
+  get height(): number {
+    return this.sprite.height;
+  }
+
   constructor(x: number, y: number, app: App) {
     this.app = app;
     this.sprite = new PIXI.Sprite(HGate.defaultTexture);
@@ -53,18 +61,29 @@ export class HGate {
 
     this.state = "default";
     this.sprite.texture = HGate.defaultTexture;
+    this.sprite.zIndex = 0;
+    this.sprite.tint = 0xffffff;
   }
 
   hover() {
     if (this.state !== "default") {
-      throw new Error("Invalid state transition");
+      throw new Error("Invalid state transition: state = ${this.state}");
     }
 
     this.state = "hover";
     this.sprite.texture = HGate.hoverTexture;
   }
 
-  changeTextureToGrabbedState() {
+  grab() {
+    // 現状では、つかんでいたゲートをリリースした時に状態が active ではなく default に遷移する。
+    // このため、ゲートをリリースして再度つかむと default → grabbed に遷移する。
+    //
+    // TODO: つかんだゲートをリリースした時、ゲートの状態を active にし、
+    // this.state !== "default" を this.state !== "active" に変更する
+    if (this.state !== "default" && this.state !== "hover") {
+      throw new Error(`Invalid state transition: state = ${this.state}`);
+    }
+
     this.state = "grabbed";
     this.sprite.texture = HGate.grabbedTexture;
   }
@@ -75,6 +94,15 @@ export class HGate {
     }
 
     this.app.enterGate(this);
+  }
+
+  snap(x: number, y: number) {
+    this.sprite.tint = 0x00ffff;
+    this.sprite.position.set(x, y);
+  }
+
+  unSnap() {
+    this.sprite.tint = 0xffffff;
   }
 
   private onGateOut() {
@@ -91,7 +119,7 @@ export class HGate {
   }
 
   private onDragStart() {
-    this.app.onDragStart(this);
+    this.app.grabGate(this);
   }
 }
 
