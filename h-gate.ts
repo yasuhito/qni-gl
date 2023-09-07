@@ -4,10 +4,11 @@ import { App } from "./app";
 export class HGate {
   static defaultTexture = PIXI.Texture.from("./assets/H.svg");
   static hoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
-  static grabTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
+  static grabbedTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
 
   app: App;
   sprite: PIXI.Sprite;
+  state = "default";
 
   constructor(x: number, y: number, app: App) {
     this.app = app;
@@ -37,20 +38,35 @@ export class HGate {
     this.app.pixiApp.stage.addChild(this.sprite);
   }
 
-  changeTextureToDefault() {
+  default() {
+    if (this.state !== "hover" && this.state !== "grabbed") {
+      throw new Error(`Invalid state transition: state = ${this.state}`);
+    }
+
+    this.state = "default";
     this.sprite.texture = HGate.defaultTexture;
   }
 
-  changeTextureToHoverState() {
+  hover() {
+    if (this.state !== "default") {
+      throw new Error("Invalid state transition");
+    }
+
+    this.state = "hover";
     this.sprite.texture = HGate.hoverTexture;
   }
 
   changeTextureToGrabbedState() {
-    this.sprite.texture = HGate.grabTexture;
+    this.state = "grabbed";
+    this.sprite.texture = HGate.grabbedTexture;
   }
 
   private onGateOver(_event: PIXI.FederatedEvent) {
-    this.app.onGateOver(this);
+    if (this.state === "hover") {
+      return;
+    }
+
+    this.app.enterGate(this);
   }
 
   private onGateOut() {
@@ -65,4 +81,4 @@ export class HGate {
 // Scale mode for pixelation
 HGate.defaultTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 HGate.hoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.grabTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.grabbedTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;

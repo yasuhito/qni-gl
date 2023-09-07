@@ -97,21 +97,28 @@ export class App {
     this.nameMap.set(hGate.sprite, "H Gate");
   }
 
-  onGateOver(gate: HGate) {
+  enterGate(gate: HGate) {
     if (this.currentDraggable !== null) {
       return;
     }
 
-    gate.changeTextureToHoverState();
+    const type = "enterGate";
+    const targetName = this.nameMap.get(gate.sprite);
+    const currentTargetName = this.nameMap.get(gate.sprite);
+    this.logger.push(
+      `${currentTargetName} received ${type} event (target is ${targetName})`
+    );
+
+    gate.hover();
     this.pixiApp.stage.cursor = "pointer";
   }
 
   onGateOut(gate: HGate) {
-    if (this.currentDraggable !== null) {
+    if (this.currentDraggable !== null || gate.state === "default") {
       return;
     }
 
-    gate.changeTextureToDefault();
+    gate.default();
     this.pixiApp.stage.cursor = "default";
   }
 
@@ -169,7 +176,7 @@ export class App {
 
     this.pixiApp.stage.off("pointermove", this.onDragMove);
     this.currentDraggable.sprite.zIndex = 0;
-    this.currentDraggable.changeTextureToDefault();
+    this.currentDraggable.default();
     this.currentDraggable.sprite.tint = 0xffffff;
     this.currentDraggable = null;
   }
@@ -194,8 +201,6 @@ export class App {
       this.logger.push("-----------------------------------------");
       this.logger.push("");
     }
-
-    this.logger.update();
   }
 
   private rectIntersect(

@@ -18,10 +18,10 @@ export class Logger {
   // Add event to top of logs
   push(log: string) {
     this.logs.push(log);
+    this.update();
   }
 
-  // update logtext
-  update() {
+  private update() {
     if (this.logs.length > 30) {
       while (this.logs.length > 30) {
         this.logs.shift();
