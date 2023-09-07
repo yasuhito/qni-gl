@@ -10,6 +10,14 @@ export class HGate {
   sprite: PIXI.Sprite;
   state = "default";
 
+  get x(): number {
+    return this.sprite.x;
+  }
+
+  get y(): number {
+    return this.sprite.y;
+  }
+
   constructor(x: number, y: number, app: App) {
     this.app = app;
     this.sprite = new PIXI.Sprite(HGate.defaultTexture);
@@ -70,7 +78,16 @@ export class HGate {
   }
 
   private onGateOut() {
-    this.app.onGateOut(this);
+    // 現状では、つかんでいたゲートをリリースした時に状態が default に遷移する
+    // この時ポインタはゲート上にあるので、ポインタがゲートから離れた時に onGateOut() が呼ばれる。
+    // このため、この時には何もしないようにする。
+    //
+    // TODO: つかんだゲートをリリースした時、ゲートの状態を active にし、以下の処理をなくす
+    if (this.state === "default") {
+      return;
+    }
+
+    this.app.leaveGate(this);
   }
 
   private onDragStart() {

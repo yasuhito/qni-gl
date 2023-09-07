@@ -104,19 +104,24 @@ export class App {
 
     const type = "enterGate";
     const targetName = this.nameMap.get(gate.sprite);
-    const currentTargetName = this.nameMap.get(gate.sprite);
     this.logger.push(
-      `${currentTargetName} received ${type} event (target is ${targetName})`
+      `${targetName} received ${type} event (${gate.x}, ${gate.y})`
     );
 
     gate.hover();
     this.pixiApp.stage.cursor = "pointer";
   }
 
-  onGateOut(gate: HGate) {
-    if (this.currentDraggable !== null || gate.state === "default") {
+  leaveGate(gate: HGate) {
+    if (this.currentDraggable !== null) {
       return;
     }
+
+    const type = "leaveGate";
+    const targetName = this.nameMap.get(gate.sprite);
+    this.logger.push(
+      `${targetName} received ${type} event (${gate.x}, ${gate.y})`
+    );
 
     gate.default();
     this.pixiApp.stage.cursor = "default";
