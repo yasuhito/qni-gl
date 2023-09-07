@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
 import { HGate } from "./h-gate";
+import { Logger } from "./logger";
 
 export class App {
-  _dragTarget: HGate | null = null;
+  _currentDraggable: HGate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  logs: string[] = [];
-  logText: PIXI.Text;
+  logger: Logger;
   nameMap = new Map();
 
   constructor(elementId: string) {
@@ -14,7 +14,7 @@ export class App {
       throw new Error("Could not find #app");
     }
 
-    this._dragTarget = null;
+    this._currentDraggable = null;
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -51,15 +51,7 @@ export class App {
     graphics.endFill();
     this.pixiApp.stage.addChild(graphics);
 
-    this.logText = this.pixiApp.stage.addChild(
-      new PIXI.Text("", {
-        fontSize: 14,
-      })
-    );
-
-    // logText.y = 80;
-    this.logText.x = 2;
-    this.logText.zIndex = 20;
+    this.logger = new Logger(this.pixiApp);
 
     this.nameMap.set(this.pixiApp.stage, "stage");
 
@@ -81,12 +73,12 @@ export class App {
     return this.pixiApp.screen.height;
   }
 
-  get dragTarget(): HGate | null {
-    return this._dragTarget;
+  get currentDraggable(): HGate | null {
+    return this._currentDraggable;
   }
 
-  set dragTarget(value: HGate | null) {
-    this._dragTarget = value;
+  set currentDraggable(value: HGate | null) {
+    this._currentDraggable = value;
   }
 
   createWorld() {
@@ -99,79 +91,87 @@ export class App {
   }
 
   private createHGate(x: number, y: number) {
-    new HGate(x, y, this);
+    const hGate = new HGate(x, y, this);
+
+    hGate.sprite.addEventListener("pointerdown", this.onEvent.bind(this));
+    this.nameMap.set(hGate.sprite, "H Gate");
   }
 
   onGateOver(gate: HGate) {
-    if (this.dragTarget === null) {
-      gate.changeTextureToHoverState();
-      this.pixiApp.stage.cursor = "pointer";
+    if (this.currentDraggable !== null) {
+      return;
     }
+
+    gate.changeTextureToHoverState();
+    this.pixiApp.stage.cursor = "pointer";
   }
 
   onGateOut(gate: HGate) {
-    if (this.dragTarget === null) {
-      gate.changeTextureToDefault();
-      this.pixiApp.stage.cursor = "default";
+    if (this.currentDraggable !== null) {
+      return;
     }
+
+    gate.changeTextureToDefault();
+    this.pixiApp.stage.cursor = "default";
   }
 
   onDragStart(gate: HGate) {
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
-    this.dragTarget = gate;
-    if (this.dragTarget === null) {
-      throw new Error("dragTarget is null");
-    }
-
-    this.dragTarget.sprite.zIndex = 10;
-    this.dragTarget.changeTextureToGrabbedState();
+    this.currentDraggable = gate;
+    this.currentDraggable.sprite.zIndex = 10;
+    this.currentDraggable.changeTextureToGrabbedState();
     this.pixiApp.stage.on("pointermove", this.onDragMove.bind(this));
   }
 
   private onDragMove(event: PIXI.FederatedPointerEvent) {
-    if (this.dragTarget) {
-      // event.global is the global position of the mouse/touch
-      this.dragTarget.sprite.parent.toLocal(
-        event.global,
-        undefined,
-        this.dragTarget.sprite.position
-      );
+    if (this.currentDraggable === null) {
+      return;
+    }
 
-      const dropzoneX = this.pixiApp.screen.width / 2;
-      const dropzoneY = this.pixiApp.screen.height / 2;
-      const dropzoneWidth = 32;
-      const dropzoneHeight = 32;
-      const snapRatio = 0.5;
+    // event.global is the global position of the mouse/touch
+    this.currentDraggable.sprite.parent.toLocal(
+      event.global,
+      undefined,
+      this.currentDraggable.sprite.position
+    );
 
-      if (
-        this.rectIntersect(
-          this.dragTarget.sprite.x - this.dragTarget.sprite.width / 2,
-          this.dragTarget.sprite.y - this.dragTarget.sprite.height / 2,
-          this.dragTarget.sprite.width,
-          this.dragTarget.sprite.height,
-          dropzoneX - (dropzoneWidth * snapRatio) / 2,
-          dropzoneY - (dropzoneHeight * snapRatio) / 2,
-          dropzoneWidth * snapRatio,
-          dropzoneHeight * snapRatio
-        )
-      ) {
-        this.dragTarget.sprite.tint = 0x00ffff;
-        this.dragTarget.sprite.position.set(dropzoneX, dropzoneY);
-      } else {
-        this.dragTarget.sprite.tint = 0xffffff;
-      }
+    const dropzoneX = this.pixiApp.screen.width / 2;
+    const dropzoneY = this.pixiApp.screen.height / 2;
+    const dropzoneWidth = 32;
+    const dropzoneHeight = 32;
+    const snapRatio = 0.5;
+
+    if (
+      this.rectIntersect(
+        this.currentDraggable.sprite.x - this.currentDraggable.sprite.width / 2,
+        this.currentDraggable.sprite.y -
+          this.currentDraggable.sprite.height / 2,
+        this.currentDraggable.sprite.width,
+        this.currentDraggable.sprite.height,
+        dropzoneX - (dropzoneWidth * snapRatio) / 2,
+        dropzoneY - (dropzoneHeight * snapRatio) / 2,
+        dropzoneWidth * snapRatio,
+        dropzoneHeight * snapRatio
+      )
+    ) {
+      this.currentDraggable.sprite.tint = 0x00ffff;
+      this.currentDraggable.sprite.position.set(dropzoneX, dropzoneY);
+    } else {
+      this.currentDraggable.sprite.tint = 0xffffff;
     }
   }
 
   private onDragEnd() {
-    if (this.dragTarget) {
-      this.pixiApp.stage.off("pointermove", this.onDragMove);
-      this.dragTarget.sprite.zIndex = 0;
-      this.dragTarget.changeTextureToDefault();
-      this.dragTarget.sprite.tint = 0xffffff;
-      this.dragTarget = null;
+    if (this.currentDraggable === null) {
+      return;
     }
+
+    this.pixiApp.stage.off("pointermove", this.onDragMove);
+    this.currentDraggable.sprite.zIndex = 0;
+    this.currentDraggable.changeTextureToDefault();
+    this.currentDraggable.sprite.tint = 0xffffff;
+    this.currentDraggable = null;
   }
 
   private onEvent(e: PIXI.FederatedPointerEvent) {
@@ -182,8 +182,7 @@ export class App {
     }
     const currentTargetName = this.nameMap.get(e.currentTarget);
 
-    // Add event to top of logs
-    this.logs.push(
+    this.logger.push(
       `${currentTargetName} received ${type} event (target is ${targetName})`
     );
 
@@ -192,18 +191,11 @@ export class App {
       type === "pointerenter" ||
       type === "pointerleave"
     ) {
-      this.logs.push("-----------------------------------------", "");
+      this.logger.push("-----------------------------------------");
+      this.logger.push("");
     }
 
-    // Prevent logs from growing too long
-    if (this.logs.length > 30) {
-      while (this.logs.length > 30) {
-        this.logs.shift();
-      }
-    }
-
-    // Update logText
-    this.logText.text = this.logs.join("\n");
+    this.logger.update();
   }
 
   private rectIntersect(
