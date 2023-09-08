@@ -104,7 +104,18 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
-    this.grabbedGate.click(globalPosition);
+    if (
+      this.dropzone.isSnappable(
+        globalPosition.x,
+        globalPosition.y,
+        gate.width,
+        gate.height
+      )
+    ) {
+      this.grabbedGate.click(globalPosition, this.dropzone);
+    } else {
+      this.grabbedGate.click(globalPosition);
+    }
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }

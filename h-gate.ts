@@ -6,6 +6,7 @@ import { Dropzone } from "./dropzone";
 type ClickEvent = {
   type: "Click";
   globalPosition: PIXI.Point;
+  dropzone: Dropzone | null;
 };
 type DragEvent = {
   type: "Drag";
@@ -110,24 +111,16 @@ export class HGate {
           this.sprite.texture = HGate.activeTexture;
         },
         moveToPointerPosition: (_context, event: ClickEvent | DragEvent) => {
-          if (event.type === "Click") {
+          if (event.dropzone) {
+            const x = event.dropzone.x;
+            const y = event.dropzone.y;
+            this.sprite.position.set(x, y);
+          } else {
             this.sprite.parent.toLocal(
               event.globalPosition,
               undefined,
               this.sprite.position
             );
-          } else {
-            if (event.dropzone) {
-              const x = event.dropzone.x;
-              const y = event.dropzone.y;
-              this.sprite.position.set(x, y);
-            } else {
-              this.sprite.parent.toLocal(
-                event.globalPosition,
-                undefined,
-                this.sprite.position
-              );
-            }
           }
         },
       },
@@ -193,10 +186,11 @@ export class HGate {
     this.actor.send("Mouse leave");
   }
 
-  click(globalPosition: PIXI.Point) {
+  click(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
     this.actor.send({
       type: "Click",
       globalPosition: globalPosition,
+      dropzone: dropzone
     });
   }
 
