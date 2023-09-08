@@ -104,7 +104,6 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
-    this.grabbedGate.sprite.zIndex = 10;
     this.grabbedGate.click(globalPosition);
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
@@ -120,12 +119,17 @@ export class App {
 
   // globalPosition is the global position of the mouse/touch
   private moveGate(gate: HGate, globalPosition: PIXI.Point) {
-    gate.sprite.parent.toLocal(globalPosition, undefined, gate.sprite.position);
-
-    if (this.dropzone.isSnappable(gate)) {
-      gate.snap(this.dropzone.x, this.dropzone.y);
+    if (
+      this.dropzone.isSnappable(
+        globalPosition.x,
+        globalPosition.y,
+        gate.width,
+        gate.height
+      )
+    ) {
+      gate.move(globalPosition, this.dropzone);
     } else {
-      gate.unSnap();
+      gate.move(globalPosition, null);
     }
   }
 

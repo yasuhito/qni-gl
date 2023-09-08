@@ -24,14 +24,14 @@ export class Dropzone {
     this.graphics.endFill();
   }
 
-  isSnappable(gate: HGate) {
+  isSnappable(x: number, y: number, width: number, height: number) {
     const snapRatio = 0.5;
 
     return this.rectIntersect(
-      gate.x - gate.width / 2,
-      gate.y - gate.height / 2,
-      gate.width,
-      gate.height,
+      x - width / 2,
+      y - height / 2,
+      width,
+      height,
       this.x - (this.width * snapRatio) / 2,
       this.y - (this.height * snapRatio) / 2,
       this.width * snapRatio,

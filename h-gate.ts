@@ -1,8 +1,17 @@
 import * as PIXI from "pixi.js";
 import { App } from "./app";
-import { ActorRefFrom, assign, createMachine, interpret } from "xstate";
+import { ActorRefFrom, createMachine, interpret } from "xstate";
+import { Dropzone } from "./dropzone";
 
-type ClickEvent = { type: "Click"; globalPosition: PIXI.Point };
+type ClickEvent = {
+  type: "Click";
+  globalPosition: PIXI.Point;
+};
+type DragEvent = {
+  type: "Drag";
+  globalPosition: PIXI.Point;
+  dropzone: Dropzone | null;
+};
 
 export class HGate {
   static defaultTexture = PIXI.Texture.from("./assets/H.svg");
@@ -45,6 +54,31 @@ export class HGate {
             "Mouse up": {
               target: "active",
             },
+            Drag: {
+              target: "dragging",
+            },
+          },
+        },
+        dragging: {
+          entry: ["moveToPointerPosition"],
+          initial: "unknown",
+          states: {
+            unknown: {
+              always: [
+                { target: "snapped", cond: "isOnDropzone" },
+                { target: "unsnapped", cond: "isNotOnDropzone" },
+              ],
+            },
+            snapped: {},
+            unsnapped: {},
+          },
+          on: {
+            Drag: {
+              target: "dragging",
+            },
+            "Mouse up": {
+              target: "idle",
+            },
           },
         },
         active: {
@@ -62,7 +96,8 @@ export class HGate {
           | { type: "Mouse leave" }
           | ClickEvent
           | { type: "Deactivate" }
-          | { type: "Mouse up" },
+          | { type: "Mouse up" }
+          | DragEvent,
       },
     },
     {
@@ -76,17 +111,40 @@ export class HGate {
           this.sprite.texture = HGate.hoverTexture;
         },
         setGrabbedStyle: () => {
+          this.sprite.zIndex = 10;
           this.sprite.texture = HGate.grabbedTexture;
         },
         setActiveStyle: () => {
           this.sprite.texture = HGate.activeTexture;
         },
-        moveToPointerPosition: (_context, event: ClickEvent) => {
-          this.sprite.parent.toLocal(
-            event.globalPosition,
-            undefined,
-            this.sprite.position
-          );
+        moveToPointerPosition: (_context, event: ClickEvent | DragEvent) => {
+          if (event.type === "Click") {
+            this.sprite.parent.toLocal(
+              event.globalPosition,
+              undefined,
+              this.sprite.position
+            );
+          } else {
+            if (event.dropzone) {
+              const x = event.dropzone.x;
+              const y = event.dropzone.y;
+              this.sprite.position.set(x, y);
+            } else {
+              this.sprite.parent.toLocal(
+                event.globalPosition,
+                undefined,
+                this.sprite.position
+              );
+            }
+          }
+        },
+      },
+      guards: {
+        isOnDropzone: (_context, event) => {
+          return false;
+        },
+        isNotOnDropzone: (_context, event) => {
+          return true;
         },
       },
     }
@@ -152,7 +210,10 @@ export class HGate {
   }
 
   click(globalPosition: PIXI.Point) {
-    this.actor.send({ type: "Click", globalPosition: globalPosition });
+    this.actor.send({
+      type: "Click",
+      globalPosition: globalPosition,
+    });
   }
 
   deactivate() {
@@ -161,6 +222,14 @@ export class HGate {
 
   mouseUp() {
     this.actor.send("Mouse up");
+  }
+
+  move(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
+    this.actor.send({
+      type: "Drag",
+      globalPosition: globalPosition,
+      dropzone: dropzone,
+    });
   }
 
   snap(x: number, y: number) {
