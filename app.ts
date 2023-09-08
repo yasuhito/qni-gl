@@ -114,7 +114,7 @@ export class App {
     ) {
       this.grabbedGate.click(globalPosition, this.dropzone);
     } else {
-      this.grabbedGate.click(globalPosition);
+      this.grabbedGate.click(globalPosition, null);
     }
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
