@@ -93,7 +93,7 @@ export class App {
       `${targetName} received ${type} event (${gate.x}, ${gate.y})`
     );
 
-    gate.hover();
+    gate.mouseEnter();
     this.pixiApp.stage.cursor = "pointer";
   }
 
@@ -108,7 +108,7 @@ export class App {
       `${targetName} received ${type} event (${gate.x}, ${gate.y})`
     );
 
-    gate.default();
+    gate.mouseLeave();
     this.pixiApp.stage.cursor = "default";
   }
 
@@ -118,7 +118,7 @@ export class App {
     this.currentDraggable = gate;
 
     this.currentDraggable.sprite.zIndex = 10;
-    this.currentDraggable.grab();
+    this.currentDraggable.click();
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }
@@ -148,7 +148,7 @@ export class App {
     }
 
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
-    this.currentDraggable.default();
+    this.currentDraggable.mouseUp();
     this.currentDraggable = null;
   }
 

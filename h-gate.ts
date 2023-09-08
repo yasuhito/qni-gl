@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { App } from "./app";
+import { ActorRefFrom, createMachine, interpret } from "xstate";
 
 export class HGate {
   static defaultTexture = PIXI.Texture.from("./assets/H.svg");
@@ -9,6 +10,43 @@ export class HGate {
   app: App;
   sprite: PIXI.Sprite;
   state = "default";
+  stateMachine = createMachine({
+    initial: "idle",
+    states: {
+      idle: {
+        on: {
+          "Mouse enter": {
+            target: "hover",
+          },
+        },
+      },
+      hover: {
+        on: {
+          Click: {
+            target: "grabbed",
+          },
+          "Mouse leave": {
+            target: "idle",
+          },
+        },
+      },
+      grabbed: {
+        on: {
+          "Mouse up": {
+            target: "hover",
+          },
+        },
+      },
+    },
+    schema: {
+      events: {} as
+        | { type: "Mouse enter" }
+        | { type: "Mouse leave" }
+        | { type: "Click" }
+        | { type: "Mouse up" },
+    },
+  });
+  actor: ActorRefFrom<typeof this.stateMachine>;
 
   get x(): number {
     return this.sprite.x;
@@ -27,6 +65,12 @@ export class HGate {
   }
 
   constructor(x: number, y: number, app: App) {
+    this.actor = interpret(this.stateMachine).start();
+    // Fires whenever the state changes
+    const { unsubscribe } = this.actor.subscribe((state) => {
+      console.log(state.value);
+    });
+
     this.app = app;
     this.sprite = new PIXI.Sprite(HGate.defaultTexture);
 
@@ -65,16 +109,23 @@ export class HGate {
     this.sprite.tint = 0xffffff;
   }
 
-  hover() {
+  mouseEnter() {
     if (this.state !== "default") {
       throw new Error("Invalid state transition: state = ${this.state}");
     }
+    this.actor.send("Mouse enter");
 
     this.state = "hover";
     this.sprite.texture = HGate.hoverTexture;
   }
 
-  grab() {
+  mouseLeave() {
+    this.actor.send("Mouse leave");
+
+    this.default();
+  }
+
+  click() {
     // 現状では、つかんでいたゲートをリリースした時に状態が active ではなく default に遷移する。
     // このため、ゲートをリリースして再度つかむと default → grabbed に遷移する。
     //
@@ -84,8 +135,15 @@ export class HGate {
       throw new Error(`Invalid state transition: state = ${this.state}`);
     }
 
+    this.actor.send("Click");
+
     this.state = "grabbed";
     this.sprite.texture = HGate.grabbedTexture;
+  }
+
+  mouseUp() {
+    this.actor.send("Mouse up");
+    this.default();
   }
 
   private onGateOver(_event: PIXI.FederatedEvent) {
