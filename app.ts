@@ -31,8 +31,10 @@ export class App {
     this.pixiApp.stage.eventMode = "static";
     this.pixiApp.stage.hitArea = this.pixiApp.screen;
     this.pixiApp.stage.sortableChildren = true;
-    this.pixiApp.stage.on("pointerup", this.releaseGate.bind(this)); // マウスでクリックを離した、タッチパネルでタッチを離した
-    this.pixiApp.stage.on("pointerupoutside", this.releaseGate.bind(this)); // 描画オブジェクトの外側でクリック、タッチを離した
+    this.pixiApp.stage
+      .on("pointerup", this.releaseGate.bind(this)) // マウスでクリックを離した、タッチパネルでタッチを離した
+      .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
+      .on("pointerdown", this.maybeDeactivateGate.bind(this))
 
     // 中央に dropzone を作成
     const dropzoneX = this.pixiApp.screen.width / 2;
@@ -152,6 +154,12 @@ export class App {
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
+  }
+
+  private maybeDeactivateGate() {
+    if (this.activeGate !== null) {
+      this.activeGate.deactivate();
+    }
   }
 
   private onEvent(e: PIXI.FederatedPointerEvent) {
