@@ -28,57 +28,57 @@ export class HGate {
     {
       id: "draggable",
       predictableActionArguments: true,
-      initial: "idle",
+      initial: "Idle",
       states: {
-        idle: {
-          entry: "setIdleStyle",
+        Idle: {
+          entry: "applyIdleStyle",
           on: {
             "Mouse enter": {
-              target: "hover",
+              target: "Hover",
             },
           },
         },
-        hover: {
-          entry: "setHoverStyle",
+        Hover: {
+          entry: "applyHoverStyle",
           on: {
             Click: {
-              target: "grabbed",
+              target: "Grabbed",
             },
             "Mouse leave": {
-              target: "idle",
+              target: "Idle",
             },
           },
         },
-        grabbed: {
-          entry: ["setGrabbedStyle", "moveToPointerPosition"],
+        Grabbed: {
+          entry: ["applyGrabbedStyle", "updatePosition"],
           on: {
             "Mouse up": {
-              target: "active",
+              target: "Active",
             },
             Drag: {
-              target: "dragging",
+              target: "Dragging",
             },
           },
         },
-        dragging: {
-          entry: ["moveToPointerPosition"],
+        Dragging: {
+          entry: ["updatePosition"],
           on: {
             Drag: {
-              target: "dragging",
+              target: "Dragging",
             },
             "Mouse up": {
-              target: "active",
+              target: "Active",
             },
           },
         },
-        active: {
-          entry: "setActiveStyle",
+        Active: {
+          entry: "applyActiveStyle",
           on: {
             Click: {
-              target: "grabbed",
+              target: "Grabbed",
             },
             Deactivate: {
-              target: "idle",
+              target: "Idle",
             },
           },
         },
@@ -95,22 +95,22 @@ export class HGate {
     },
     {
       actions: {
-        setIdleStyle: () => {
+        applyIdleStyle: () => {
           this.sprite.texture = HGate.idleTexture;
           this.sprite.zIndex = 0;
           this.sprite.tint = 0xffffff;
         },
-        setHoverStyle: () => {
+        applyHoverStyle: () => {
           this.sprite.texture = HGate.hoverTexture;
         },
-        setGrabbedStyle: () => {
+        applyGrabbedStyle: () => {
           this.sprite.zIndex = 10;
           this.sprite.texture = HGate.grabbedTexture;
         },
-        setActiveStyle: () => {
+        applyActiveStyle: () => {
           this.sprite.texture = HGate.activeTexture;
         },
-        moveToPointerPosition: (_context, event: ClickEvent | DragEvent) => {
+        updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
             const x = event.dropzone.x;
             const y = event.dropzone.y;
@@ -190,7 +190,7 @@ export class HGate {
     this.actor.send({
       type: "Click",
       globalPosition: globalPosition,
-      dropzone: dropzone
+      dropzone: dropzone,
     });
   }
 
