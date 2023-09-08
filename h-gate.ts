@@ -1,51 +1,96 @@
 import * as PIXI from "pixi.js";
 import { App } from "./app";
-import { ActorRefFrom, createMachine, interpret } from "xstate";
+import { ActorRefFrom, assign, createMachine, interpret } from "xstate";
+
+type ClickEvent = { type: "Click"; globalPosition: PIXI.Point };
 
 export class HGate {
   static defaultTexture = PIXI.Texture.from("./assets/H.svg");
+  static idleTexture = PIXI.Texture.from("./assets/H_idle.svg");
   static hoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
   static grabbedTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
+  static activeTexture = PIXI.Texture.from("./assets/H_active.svg");
 
   app: App;
   sprite: PIXI.Sprite;
   state = "default";
-  stateMachine = createMachine({
-    initial: "idle",
-    states: {
-      idle: {
-        on: {
-          "Mouse enter": {
-            target: "hover",
+  stateMachine = createMachine(
+    {
+      id: "draggable",
+      predictableActionArguments: true,
+      initial: "idle",
+      states: {
+        idle: {
+          entry: "setIdleStyle",
+          on: {
+            "Mouse enter": {
+              target: "hover",
+            },
+          },
+        },
+        hover: {
+          entry: "setHoverStyle",
+          on: {
+            Click: {
+              target: "grabbed",
+            },
+            "Mouse leave": {
+              target: "idle",
+            },
+          },
+        },
+        grabbed: {
+          entry: ["setGrabbedStyle", "moveToPointerPosition"],
+          on: {
+            "Mouse up": {
+              target: "active",
+            },
+          },
+        },
+        active: {
+          entry: "setActiveStyle",
+          on: {
+            Deactivate: {
+              target: "idle",
+            },
           },
         },
       },
-      hover: {
-        on: {
-          Click: {
-            target: "grabbed",
-          },
-          "Mouse leave": {
-            target: "idle",
-          },
-        },
-      },
-      grabbed: {
-        on: {
-          "Mouse up": {
-            target: "hover",
-          },
-        },
+      schema: {
+        events: {} as
+          | { type: "Mouse enter" }
+          | { type: "Mouse leave" }
+          | ClickEvent
+          | { type: "Deactivate" }
+          | { type: "Mouse up" },
       },
     },
-    schema: {
-      events: {} as
-        | { type: "Mouse enter" }
-        | { type: "Mouse leave" }
-        | { type: "Click" }
-        | { type: "Mouse up" },
-    },
-  });
+    {
+      actions: {
+        setIdleStyle: () => {
+          this.sprite.texture = HGate.idleTexture;
+          this.sprite.zIndex = 0;
+          this.sprite.tint = 0xffffff;
+        },
+        setHoverStyle: () => {
+          this.sprite.texture = HGate.hoverTexture;
+        },
+        setGrabbedStyle: () => {
+          this.sprite.texture = HGate.grabbedTexture;
+        },
+        setActiveStyle: () => {
+          this.sprite.texture = HGate.activeTexture;
+        },
+        moveToPointerPosition: (_context, event: ClickEvent) => {
+          this.sprite.parent.toLocal(
+            event.globalPosition,
+            undefined,
+            this.sprite.position
+          );
+        },
+      },
+    }
+  );
   actor: ActorRefFrom<typeof this.stateMachine>;
 
   get x(): number {
@@ -65,12 +110,6 @@ export class HGate {
   }
 
   constructor(x: number, y: number, app: App) {
-    this.actor = interpret(this.stateMachine).start();
-    // Fires whenever the state changes
-    const { unsubscribe } = this.actor.subscribe((state) => {
-      console.log(state.value);
-    });
-
     this.app = app;
     this.sprite = new PIXI.Sprite(HGate.defaultTexture);
 
@@ -86,9 +125,9 @@ export class HGate {
     // setup events for mouse + touch using
     // the pointer events
     this.sprite
-      .on("pointerover", this.onGateOver.bind(this), this.sprite)
-      .on("pointerout", this.onGateOut.bind(this), this.sprite)
-      .on("pointerdown", this.onDragStart.bind(this), this.sprite);
+      .on("pointerover", this.onPointerOver.bind(this), this.sprite)
+      .on("pointerout", this.onPointerOut.bind(this), this.sprite)
+      .on("pointerdown", this.onPointerDown.bind(this), this.sprite);
 
     // move the sprite to its designated position
     this.sprite.x = x;
@@ -96,62 +135,32 @@ export class HGate {
 
     // add it to the stage
     this.app.pixiApp.stage.addChild(this.sprite);
-  }
 
-  default() {
-    if (this.state !== "hover" && this.state !== "grabbed") {
-      throw new Error(`Invalid state transition: state = ${this.state}`);
-    }
-
-    this.state = "default";
-    this.sprite.texture = HGate.defaultTexture;
-    this.sprite.zIndex = 0;
-    this.sprite.tint = 0xffffff;
+    this.actor = interpret(this.stateMachine).start();
+    // Fires whenever the state changes
+    const { unsubscribe } = this.actor.subscribe((state) => {
+      console.log(state.value);
+    });
   }
 
   mouseEnter() {
-    if (this.state !== "default") {
-      throw new Error("Invalid state transition: state = ${this.state}");
-    }
     this.actor.send("Mouse enter");
-
-    this.state = "hover";
-    this.sprite.texture = HGate.hoverTexture;
   }
 
   mouseLeave() {
     this.actor.send("Mouse leave");
-
-    this.default();
   }
 
-  click() {
-    // 現状では、つかんでいたゲートをリリースした時に状態が active ではなく default に遷移する。
-    // このため、ゲートをリリースして再度つかむと default → grabbed に遷移する。
-    //
-    // TODO: つかんだゲートをリリースした時、ゲートの状態を active にし、
-    // this.state !== "default" を this.state !== "active" に変更する
-    if (this.state !== "default" && this.state !== "hover") {
-      throw new Error(`Invalid state transition: state = ${this.state}`);
-    }
+  click(globalPosition: PIXI.Point) {
+    this.actor.send({ type: "Click", globalPosition: globalPosition });
+  }
 
-    this.actor.send("Click");
-
-    this.state = "grabbed";
-    this.sprite.texture = HGate.grabbedTexture;
+  deactivate() {
+    this.actor.send("Deactivate");
   }
 
   mouseUp() {
     this.actor.send("Mouse up");
-    this.default();
-  }
-
-  private onGateOver(_event: PIXI.FederatedEvent) {
-    if (this.state === "hover") {
-      return;
-    }
-
-    this.app.enterGate(this);
   }
 
   snap(x: number, y: number) {
@@ -163,21 +172,16 @@ export class HGate {
     this.sprite.tint = 0xffffff;
   }
 
-  private onGateOut() {
-    // 現状では、つかんでいたゲートをリリースした時に状態が default に遷移する
-    // この時ポインタはゲート上にあるので、ポインタがゲートから離れた時に onGateOut() が呼ばれる。
-    // このため、この時には何もしないようにする。
-    //
-    // TODO: つかんだゲートをリリースした時、ゲートの状態を active にし、以下の処理をなくす
-    if (this.state === "default") {
-      return;
-    }
+  private onPointerOver(_event: PIXI.FederatedEvent) {
+    this.app.enterGate(this);
+  }
 
+  private onPointerOut() {
     this.app.leaveGate(this);
   }
 
-  private onDragStart() {
-    this.app.grabGate(this);
+  private onPointerDown(event: PIXI.FederatedPointerEvent) {
+    this.app.grabGate(this, event.global);
   }
 }
 
