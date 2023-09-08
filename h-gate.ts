@@ -61,29 +61,21 @@ export class HGate {
         },
         dragging: {
           entry: ["moveToPointerPosition"],
-          initial: "unknown",
-          states: {
-            unknown: {
-              always: [
-                { target: "snapped", cond: "isOnDropzone" },
-                { target: "unsnapped", cond: "isNotOnDropzone" },
-              ],
-            },
-            snapped: {},
-            unsnapped: {},
-          },
           on: {
             Drag: {
               target: "dragging",
             },
             "Mouse up": {
-              target: "idle",
+              target: "active",
             },
           },
         },
         active: {
           entry: "setActiveStyle",
           on: {
+            Click: {
+              target: "grabbed",
+            },
             Deactivate: {
               target: "idle",
             },
@@ -137,14 +129,6 @@ export class HGate {
               );
             }
           }
-        },
-      },
-      guards: {
-        isOnDropzone: (_context, event) => {
-          return false;
-        },
-        isNotOnDropzone: (_context, event) => {
-          return true;
         },
       },
     }
