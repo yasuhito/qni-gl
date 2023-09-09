@@ -44,11 +44,6 @@ export class App {
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
-
-    // [this.pixiApp.stage].forEach((object) => {
-    //   object.addEventListener("pointerup", this.onEvent.bind(this));
-    //   object.addEventListener("pointerupoutside", this.onEvent.bind(this));
-    // });
   }
 
   get screenWidth(): number {
@@ -78,12 +73,6 @@ export class App {
   }
 
   leaveGate(gate: HGate) {
-    // const type = "leaveGate";
-    // const targetName = this.nameMap.get(gate.sprite);
-    // this.logger.push(
-    //   `${targetName} received ${type} event (${gate.x}, ${gate.y})`
-    // );
-
     gate.mouseLeave();
     this.pixiApp.stage.cursor = "default";
   }
@@ -109,6 +98,7 @@ export class App {
     } else {
       this.grabbedGate.click(globalPosition, null);
     }
+    this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }
@@ -142,36 +132,15 @@ export class App {
       return;
     }
 
+    this.pixiApp.stage.cursor = "grab";
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
   }
 
-  private maybeDeactivateGate() {
-    if (this.activeGate !== null) {
-      this.activeGate.deactivate();
-    }
-  }
-
-  private onEvent(e: PIXI.FederatedPointerEvent) {
-    const type = e.type;
-    let targetName: string | undefined;
-    if (e.target) {
-      targetName = this.nameMap.get(e.target);
-    }
-    const currentTargetName = this.nameMap.get(e.currentTarget);
-
-    this.logger.push(
-      `${currentTargetName} received ${type} event (target is ${targetName})`
-    );
-
-    if (
-      currentTargetName === "stage" ||
-      type === "pointerenter" ||
-      type === "pointerleave"
-    ) {
-      this.logger.push("-----------------------------------------");
-      this.logger.push("");
+  private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
+    if (event.target === this.pixiApp.stage) {
+      this.activeGate?.deactivate();
     }
   }
 }

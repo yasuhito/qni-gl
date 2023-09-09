@@ -97,7 +97,6 @@ export class HGate {
         applyIdleStyle: () => {
           this.sprite.texture = HGate.idleTexture;
           this.sprite.zIndex = 0;
-          this.sprite.tint = 0xffffff;
           this.sprite.cursor = "default";
         },
         applyHoverStyle: () => {
@@ -107,9 +106,11 @@ export class HGate {
         applyGrabbedStyle: () => {
           this.sprite.zIndex = 10;
           this.sprite.texture = HGate.grabbedTexture;
+          this.sprite.cursor = "grabbing";
         },
         applyActiveStyle: () => {
           this.sprite.texture = HGate.activeTexture;
+          this.sprite.cursor = "grab";
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
@@ -149,7 +150,8 @@ export class HGate {
     this.app = app;
     this.sprite = new PIXI.Sprite(HGate.idleTexture);
 
-    // enable the hGate to be interactive... this will allow it to respond to mouse and touch events
+    // enable the hGate to be interactive...
+    // this will allow it to respond to mouse and touch events
     this.sprite.eventMode = "static";
 
     // center the hGate's anchor point
@@ -170,8 +172,10 @@ export class HGate {
     this.app.pixiApp.stage.addChild(this.sprite);
 
     this.actor = interpret(this.stateMachine).start();
+
     // Fires whenever the state changes
     const { unsubscribe } = this.actor.subscribe((state) => {
+      console.log(`🌟 ${state.event.type}`);
       console.log(state.value);
     });
   }
@@ -209,12 +213,11 @@ export class HGate {
   }
 
   snap(x: number, y: number) {
-    this.sprite.tint = 0x00ffff;
     this.sprite.position.set(x, y);
   }
 
   unSnap() {
-    this.sprite.tint = 0xffffff;
+    // this.sprite.tint = 0xffffff;
   }
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
