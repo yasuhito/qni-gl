@@ -4,7 +4,8 @@ import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 
 export class App {
-  _currentDraggable: HGate | null = null;
+  activeGate: HGate | null = null;
+  grabbedGate: HGate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   dropzone: Dropzone;
   logger: Logger;
@@ -15,8 +16,6 @@ export class App {
     if (el === null) {
       throw new Error("Could not find #app");
     }
-
-    this._currentDraggable = null;
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -32,8 +31,10 @@ export class App {
     this.pixiApp.stage.eventMode = "static";
     this.pixiApp.stage.hitArea = this.pixiApp.screen;
     this.pixiApp.stage.sortableChildren = true;
-    this.pixiApp.stage.on("pointerup", this.releaseGate.bind(this)); // マウスでクリックを離した、タッチパネルでタッチを離した
-    this.pixiApp.stage.on("pointerupoutside", this.releaseGate.bind(this)); // 描画オブジェクトの外側でクリック、タッチを離した
+    this.pixiApp.stage
+      .on("pointerup", this.releaseGate.bind(this)) // マウスでクリックを離した、タッチパネルでタッチを離した
+      .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
+      .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
     // 中央に dropzone を作成
     const dropzoneX = this.pixiApp.screen.width / 2;
@@ -43,11 +44,6 @@ export class App {
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
-
-    [this.pixiApp.stage].forEach((object) => {
-      object.addEventListener("pointerup", this.onEvent.bind(this));
-      object.addEventListener("pointerupoutside", this.onEvent.bind(this));
-    });
   }
 
   get screenWidth(): number {
@@ -56,14 +52,6 @@ export class App {
 
   get screenHeight(): number {
     return this.pixiApp.screen.height;
-  }
-
-  get currentDraggable(): HGate | null {
-    return this._currentDraggable;
-  }
-
-  set currentDraggable(value: HGate | null) {
-    this._currentDraggable = value;
   }
 
   createWorld() {
@@ -77,100 +65,82 @@ export class App {
 
   private createHGate(x: number, y: number) {
     const hGate = new HGate(x, y, this);
-
-    hGate.sprite.addEventListener("pointerdown", this.onEvent.bind(this));
     this.nameMap.set(hGate.sprite, "H Gate");
   }
 
   enterGate(gate: HGate) {
-    if (this.currentDraggable !== null) {
-      return;
-    }
-
-    const type = "enterGate";
-    const targetName = this.nameMap.get(gate.sprite);
-    this.logger.push(
-      `${targetName} received ${type} event (${gate.x}, ${gate.y})`
-    );
-
-    gate.hover();
-    this.pixiApp.stage.cursor = "pointer";
+    gate.mouseEnter();
   }
 
   leaveGate(gate: HGate) {
-    if (this.currentDraggable !== null) {
-      return;
-    }
-
-    const type = "leaveGate";
-    const targetName = this.nameMap.get(gate.sprite);
-    this.logger.push(
-      `${targetName} received ${type} event (${gate.x}, ${gate.y})`
-    );
-
-    gate.default();
+    gate.mouseLeave();
     this.pixiApp.stage.cursor = "default";
   }
 
-  grabGate(gate: HGate) {
+  grabGate(gate: HGate, globalPosition: PIXI.Point) {
+    if (this.activeGate !== null && this.activeGate !== gate) {
+      this.activeGate.deactivate();
+    }
+
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
-    this.currentDraggable = gate;
-
-    this.currentDraggable.sprite.zIndex = 10;
-    this.currentDraggable.grab();
+    this.activeGate = gate;
+    this.grabbedGate = gate;
+    if (
+      this.dropzone.isSnappable(
+        globalPosition.x,
+        globalPosition.y,
+        gate.width,
+        gate.height
+      )
+    ) {
+      this.grabbedGate.click(globalPosition, this.dropzone);
+    } else {
+      this.grabbedGate.click(globalPosition, null);
+    }
+    this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }
 
   private maybeMoveGate(event: PIXI.FederatedPointerEvent) {
-    if (this.currentDraggable === null) {
+    if (this.grabbedGate === null) {
       return;
     }
 
-    this.moveGate(this.currentDraggable, event.global);
+    this.moveGate(this.grabbedGate, event.global);
   }
 
   // globalPosition is the global position of the mouse/touch
   private moveGate(gate: HGate, globalPosition: PIXI.Point) {
-    gate.sprite.parent.toLocal(globalPosition, undefined, gate.sprite.position);
-
-    if (this.dropzone.isSnappable(gate)) {
-      gate.snap(this.dropzone.x, this.dropzone.y);
+    if (
+      this.dropzone.isSnappable(
+        globalPosition.x,
+        globalPosition.y,
+        gate.width,
+        gate.height
+      )
+    ) {
+      gate.move(globalPosition, this.dropzone);
     } else {
-      gate.unSnap();
+      gate.move(globalPosition, null);
     }
   }
 
   private releaseGate() {
-    if (this.currentDraggable === null) {
+    if (this.grabbedGate === null) {
       return;
     }
 
+    this.pixiApp.stage.cursor = "grab";
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
-    this.currentDraggable.default();
-    this.currentDraggable = null;
+    this.grabbedGate.mouseUp();
+    this.grabbedGate = null;
   }
 
-  private onEvent(e: PIXI.FederatedPointerEvent) {
-    const type = e.type;
-    let targetName: string | undefined;
-    if (e.target) {
-      targetName = this.nameMap.get(e.target);
-    }
-    const currentTargetName = this.nameMap.get(e.currentTarget);
-
-    this.logger.push(
-      `${currentTargetName} received ${type} event (target is ${targetName})`
-    );
-
-    if (
-      currentTargetName === "stage" ||
-      type === "pointerenter" ||
-      type === "pointerleave"
-    ) {
-      this.logger.push("-----------------------------------------");
-      this.logger.push("");
+  private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
+    if (event.target === this.pixiApp.stage) {
+      this.activeGate?.deactivate();
     }
   }
 }
