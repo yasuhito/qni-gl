@@ -15,7 +15,6 @@ type DragEvent = {
 };
 
 export class HGate {
-  static defaultTexture = PIXI.Texture.from("./assets/H.svg");
   static idleTexture = PIXI.Texture.from("./assets/H_idle.svg");
   static hoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
   static grabbedTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
@@ -146,7 +145,7 @@ export class HGate {
 
   constructor(x: number, y: number, app: App) {
     this.app = app;
-    this.sprite = new PIXI.Sprite(HGate.defaultTexture);
+    this.sprite = new PIXI.Sprite(HGate.idleTexture);
 
     // enable the hGate to be interactive... this will allow it to respond to mouse and touch events
     this.sprite.eventMode = "static";
@@ -233,6 +232,7 @@ export class HGate {
 }
 
 // Scale mode for pixelation
-HGate.defaultTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.idleTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 HGate.hoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 HGate.grabbedTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.activeTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
