@@ -98,9 +98,11 @@ export class HGate {
           this.sprite.texture = HGate.idleTexture;
           this.sprite.zIndex = 0;
           this.sprite.tint = 0xffffff;
+          this.sprite.cursor = "default";
         },
         applyHoverStyle: () => {
           this.sprite.texture = HGate.hoverTexture;
+          this.sprite.cursor = "grab";
         },
         applyGrabbedStyle: () => {
           this.sprite.zIndex = 10;
@@ -149,9 +151,6 @@ export class HGate {
 
     // enable the hGate to be interactive... this will allow it to respond to mouse and touch events
     this.sprite.eventMode = "static";
-
-    // the hand cursor appears when you roll over the hGate with your mouse
-    this.sprite.cursor = "pointer";
 
     // center the hGate's anchor point
     this.sprite.anchor.set(0.5);

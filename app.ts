@@ -34,7 +34,7 @@ export class App {
     this.pixiApp.stage
       .on("pointerup", this.releaseGate.bind(this)) // マウスでクリックを離した、タッチパネルでタッチを離した
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
-      .on("pointerdown", this.maybeDeactivateGate.bind(this))
+      .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
     // 中央に dropzone を作成
     const dropzoneX = this.pixiApp.screen.width / 2;
@@ -70,20 +70,11 @@ export class App {
 
   private createHGate(x: number, y: number) {
     const hGate = new HGate(x, y, this);
-
-    // hGate.sprite.addEventListener("pointerdown", this.onEvent.bind(this));
     this.nameMap.set(hGate.sprite, "H Gate");
   }
 
   enterGate(gate: HGate) {
-    // const type = "enterGate";
-    // const targetName = this.nameMap.get(gate.sprite);
-    // this.logger.push(
-    //   `${targetName} received ${type} event (${gate.x}, ${gate.y})`
-    // );
-
     gate.mouseEnter();
-    this.pixiApp.stage.cursor = "pointer";
   }
 
   leaveGate(gate: HGate) {
