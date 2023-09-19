@@ -1,11 +1,12 @@
 import * as PIXI from "pixi.js";
 import { Dropzone } from "./dropzone";
 import { HGate } from "./h-gate";
+import { XGate } from "./x-gate";
 import { Logger } from "./logger";
 
 export class App {
-  activeGate: HGate | null = null;
-  grabbedGate: HGate | null = null;
+  activeGate: HGate | XGate | null = null;
+  grabbedGate: HGate | XGate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   dropzone: Dropzone;
   logger: Logger;
@@ -60,6 +61,10 @@ export class App {
         Math.floor(Math.random() * this.pixiApp.screen.width),
         Math.floor(Math.random() * this.pixiApp.screen.height)
       );
+      this.createXGate(
+        Math.floor(Math.random() * this.pixiApp.screen.width),
+        Math.floor(Math.random() * this.pixiApp.screen.height)
+      );
     }
   }
 
@@ -68,16 +73,21 @@ export class App {
     this.nameMap.set(hGate.sprite, "H Gate");
   }
 
-  enterGate(gate: HGate) {
+  private createXGate(x: number, y: number) {
+    const xGate = new XGate(x, y, this);
+    this.nameMap.set(xGate.sprite, "X Gate");
+  }
+
+  enterGate(gate: HGate | XGate) {
     gate.mouseEnter();
   }
 
-  leaveGate(gate: HGate) {
+  leaveGate(gate: HGate | XGate) {
     gate.mouseLeave();
     this.pixiApp.stage.cursor = "default";
   }
 
-  grabGate(gate: HGate, globalPosition: PIXI.Point) {
+  grabGate(gate: HGate | XGate, globalPosition: PIXI.Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
@@ -112,7 +122,7 @@ export class App {
   }
 
   // globalPosition is the global position of the mouse/touch
-  private moveGate(gate: HGate, globalPosition: PIXI.Point) {
+  private moveGate(gate: HGate | XGate, globalPosition: PIXI.Point) {
     if (
       this.dropzone.isSnappable(
         globalPosition.x,

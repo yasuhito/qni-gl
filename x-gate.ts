@@ -15,16 +15,16 @@ type DragEvent = {
   dropzone: Dropzone | null;
 };
 
-export class HGate extends Gate {
-  static idleTexture = PIXI.Texture.from("./assets/H_idle.svg");
-  static hoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
-  static grabbedTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
-  static activeTexture = PIXI.Texture.from("./assets/H_active.svg");
+export class XGate extends Gate {
+  static idleTexture = PIXI.Texture.from("./assets/X_idle.svg");
+  static hoverTexture = PIXI.Texture.from("./assets/X_hover.svg");
+  static grabbedTexture = PIXI.Texture.from("./assets/X_grabbed.svg");
+  static activeTexture = PIXI.Texture.from("./assets/X_active.svg");
 
   constructor(x: number, y: number, app: App) {
     super(x, y, app);
 
-    this.sprite = new PIXI.Sprite(HGate.idleTexture);
+    this.sprite = new PIXI.Sprite(XGate.idleTexture);
 
     // enable the hGate to be interactive...
     // this will allow it to respond to mouse and touch events
@@ -109,30 +109,30 @@ export class HGate extends Gate {
   }
 
   applyIdleStyle() {
-    this.sprite.texture = HGate.idleTexture;
+    this.sprite.texture = XGate.idleTexture;
     this.sprite.zIndex = 0;
     this.sprite.cursor = "default";
   }
 
   applyHoverStyle(): void {
-    this.sprite.texture = HGate.hoverTexture;
+    this.sprite.texture = XGate.hoverTexture;
     this.sprite.cursor = "grab";
   }
 
   applyGrabbedStyle(): void {
     this.sprite.zIndex = 10;
-    this.sprite.texture = HGate.grabbedTexture;
+    this.sprite.texture = XGate.grabbedTexture;
     this.sprite.cursor = "grabbing";
   }
 
   applyActiveStyle(): void {
-    this.sprite.texture = HGate.activeTexture;
+    this.sprite.texture = XGate.activeTexture;
     this.sprite.cursor = "grab";
   }
 }
 
 // Scale mode for pixelation
-HGate.idleTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.hoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.grabbedTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.activeTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+XGate.idleTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+XGate.hoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+XGate.grabbedTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+XGate.activeTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
