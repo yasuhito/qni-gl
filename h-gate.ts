@@ -2,19 +2,16 @@ import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
 
 export class HGate extends Gate {
-  static idleTexture = PIXI.Texture.from("./assets/H_idle.svg");
-  static hoverTexture = PIXI.Texture.from("./assets/H_hover.svg");
-  static grabbedTexture = PIXI.Texture.from("./assets/H_grabbed.svg");
-  static activeTexture = PIXI.Texture.from("./assets/H_active.svg");
-
-  applyActiveStyle(): void {
-    this.sprite.texture = HGate.activeTexture;
-    this.sprite.cursor = "grab";
-  }
+  static texture: { [key: string]: PIXI.Texture } = {
+    idle: PIXI.Texture.from("./assets/H_idle.svg"),
+    hover: PIXI.Texture.from("./assets/H_hover.svg"),
+    grabbed: PIXI.Texture.from("./assets/H_grabbed.svg"),
+    active: PIXI.Texture.from("./assets/H_active.svg"),
+  };
 }
 
 // Scale mode for pixelation
-HGate.idleTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.hoverTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.grabbedTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-HGate.activeTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.texture.idle.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.texture.hover.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.texture.grabbed.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+HGate.texture.active.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;

@@ -15,11 +15,13 @@ type DragEvent = {
 };
 
 export class Gate {
-  static idleTexture = PIXI.Texture.from("./assets/idle.svg");
-  static hoverTexture = PIXI.Texture.from("./assets/hover.svg");
-  static grabbedTexture = PIXI.Texture.from("./assets/grabbed.svg");
-  static activeTexture = PIXI.Texture.from("./assets/active.svg");
-  static disabledTexture = PIXI.Texture.from("./assets/disabled.svg");
+  static texture: { [key: string]: PIXI.Texture } = {
+    idle: PIXI.Texture.from("./assets/idle.svg"),
+    hover: PIXI.Texture.from("./assets/hover.svg"),
+    grabbed: PIXI.Texture.from("./assets/grabbed.svg"),
+    active: PIXI.Texture.from("./assets/active.svg"),
+    disabled: PIXI.Texture.from("./assets/disabled.svg"),
+  };
 
   app: App;
   sprite: PIXI.Sprite;
@@ -97,24 +99,24 @@ export class Gate {
       actions: {
         applyIdleStyle: () => {
           const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.idleTexture;
+          this.sprite.texture = klass.texture.idle;
           this.sprite.zIndex = 0;
           this.sprite.cursor = "default";
         },
         applyHoverStyle: () => {
           const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.hoverTexture;
+          this.sprite.texture = klass.texture.hover;
           this.sprite.cursor = "grab";
         },
         applyGrabbedStyle: () => {
           const klass = this.constructor as typeof Gate;
           this.sprite.zIndex = 10;
-          this.sprite.texture = klass.grabbedTexture;
+          this.sprite.texture = klass.texture.grabbed;
           this.sprite.cursor = "grabbing";
         },
         applyActiveStyle: () => {
           const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.activeTexture;
+          this.sprite.texture = klass.texture.active;
           this.sprite.cursor = "grab";
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
@@ -155,7 +157,7 @@ export class Gate {
     this.app = app;
 
     this.sprite = new PIXI.Sprite(
-      (this.constructor as typeof Gate).idleTexture
+      (this.constructor as typeof Gate).texture.idle
     );
 
     // enable the hGate to be interactive...
