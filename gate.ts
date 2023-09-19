@@ -154,11 +154,16 @@ export class Gate {
   }
 
   constructor(x: number, y: number, app: App) {
+    const klass = this.constructor as typeof Gate;
+
     this.app = app;
 
-    this.sprite = new PIXI.Sprite(
-      (this.constructor as typeof Gate).texture.idle
-    );
+    // Scale mode for pixelation
+    for (const key in klass.texture) {
+      klass.texture[key].baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    }
+
+    this.sprite = new PIXI.Sprite(klass.texture.idle);
 
     // enable the hGate to be interactive...
     // this will allow it to respond to mouse and touch events
