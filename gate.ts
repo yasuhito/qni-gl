@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { App } from "./app";
-import { ActorRefFrom, createMachine } from "xstate";
+import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
 
 type ClickEvent = {
@@ -96,16 +96,26 @@ export class Gate {
     {
       actions: {
         applyIdleStyle: () => {
-          this.applyIdleStyle();
+          const klass = this.constructor as typeof Gate;
+          this.sprite.texture = klass.idleTexture;
+          this.sprite.zIndex = 0;
+          this.sprite.cursor = "default";
         },
         applyHoverStyle: () => {
-          this.applyHoverStyle();
+          const klass = this.constructor as typeof Gate;
+          this.sprite.texture = klass.hoverTexture;
+          this.sprite.cursor = "grab";
         },
         applyGrabbedStyle: () => {
-          this.applyGrabbedStyle();
+          const klass = this.constructor as typeof Gate;
+          this.sprite.zIndex = 10;
+          this.sprite.texture = klass.grabbedTexture;
+          this.sprite.cursor = "grabbing";
         },
         applyActiveStyle: () => {
-          this.applyActiveStyle();
+          const klass = this.constructor as typeof Gate;
+          this.sprite.texture = klass.activeTexture;
+          this.sprite.cursor = "grab";
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
@@ -143,13 +153,84 @@ export class Gate {
 
   constructor(x: number, y: number, app: App) {
     this.app = app;
+
+    this.sprite = new PIXI.Sprite(
+      (this.constructor as typeof Gate).idleTexture
+    );
+
+    // enable the hGate to be interactive...
+    // this will allow it to respond to mouse and touch events
+    this.sprite.eventMode = "static";
+
+    // center the gate's anchor point
+    this.sprite.anchor.set(0.5);
+
+    // setup events for mouse + touch using
+    // the pointer events
+    this.sprite
+      .on("pointerover", this.onPointerOver.bind(this), this.sprite)
+      .on("pointerout", this.onPointerOut.bind(this), this.sprite)
+      .on("pointerdown", this.onPointerDown.bind(this), this.sprite);
+
+    // move the sprite to its designated position
+    this.sprite.x = x;
+    this.sprite.y = y;
+
+    // add it to the stage
+    this.app.pixiApp.stage.addChild(this.sprite);
+
+    this.actor = interpret(this.stateMachine).start();
+
+    // Fires whenever the state changes
+    const { unsubscribe } = this.actor.subscribe((state) => {
+      console.log(`🌟 ${state.event.type}`);
+      console.log(state.value);
+    });
   }
 
-  applyIdleStyle() {}
+  click(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
+    this.actor.send({
+      type: "Click",
+      globalPosition: globalPosition,
+      dropzone: dropzone,
+    });
+  }
 
-  applyHoverStyle() {}
+  mouseUp() {
+    this.actor.send("Mouse up");
+  }
 
-  applyGrabbedStyle() {}
+  deactivate() {
+    this.actor.send("Deactivate");
+  }
+
+  move(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
+    this.actor.send({
+      type: "Drag",
+      globalPosition: globalPosition,
+      dropzone: dropzone,
+    });
+  }
 
   applyActiveStyle() {}
+
+  mouseEnter() {
+    this.actor.send("Mouse enter");
+  }
+
+  mouseLeave() {
+    this.actor.send("Mouse leave");
+  }
+
+  private onPointerOver(_event: PIXI.FederatedEvent) {
+    this.app.enterGate(this);
+  }
+
+  private onPointerOut() {
+    this.app.leaveGate(this);
+  }
+
+  private onPointerDown(event: PIXI.FederatedPointerEvent) {
+    this.app.grabGate(this, event.global);
+  }
 }
