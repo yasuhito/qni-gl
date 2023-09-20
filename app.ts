@@ -3,6 +3,7 @@ import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
 import { Logger } from "./logger";
 
 export class App {
@@ -66,6 +67,10 @@ export class App {
         Math.floor(Math.random() * this.pixiApp.screen.width),
         Math.floor(Math.random() * this.pixiApp.screen.height)
       );
+      this.createYGate(
+        Math.floor(Math.random() * this.pixiApp.screen.width),
+        Math.floor(Math.random() * this.pixiApp.screen.height)
+      );
     }
   }
 
@@ -77,6 +82,11 @@ export class App {
   private createXGate(x: number, y: number) {
     const xGate = new XGate(x, y, this);
     this.nameMap.set(xGate.sprite, "X Gate");
+  }
+
+  private createYGate(x: number, y: number) {
+    const yGate = new YGate(x, y, this);
+    this.nameMap.set(yGate.sprite, "Y Gate");
   }
 
   enterGate(gate: Gate) {
