@@ -12,6 +12,7 @@ export class App {
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   dropzone: Dropzone;
+  dropzones: Dropzone[] = [];
   logger: Logger;
   nameMap = new Map();
 
@@ -40,11 +41,14 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    // 中央に dropzone を作成
-    const dropzoneX = this.pixiApp.screen.width / 2;
-    const dropzoneY = this.pixiApp.screen.height / 2;
-    this.dropzone = new Dropzone(dropzoneX, dropzoneY);
-    this.pixiApp.stage.addChild(this.dropzone.graphics);
+    // ランダムな位置に dropzone を複数作成
+    for (let i = 0; i < 10; i++) {
+      const dropzoneX = Math.floor(Math.random() * this.pixiApp.screen.width);
+      const dropzoneY = Math.floor(Math.random() * this.pixiApp.screen.height);
+      const dropzone = new Dropzone(dropzoneX, dropzoneY);
+      this.dropzones.push(dropzone);
+      this.pixiApp.stage.addChild(dropzone.graphics);
+    }
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -106,18 +110,29 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
-    if (
-      this.dropzone.isSnappable(
-        globalPosition.x,
-        globalPosition.y,
-        gate.width,
-        gate.height
-      )
-    ) {
-      this.grabbedGate.click(globalPosition, this.dropzone);
-    } else {
+
+    // this.dropzones についてループを回す
+    // その中で、dropzone が snappable かどうかを判定する
+    let snapped = false;
+
+    for (const each of this.dropzones) {
+      if (
+        each.isSnappable(
+          globalPosition.x,
+          globalPosition.y,
+          gate.width,
+          gate.height
+        )
+      ) {
+        snapped = true;
+        this.grabbedGate.click(globalPosition, each);
+      }
+    }
+
+    if (!snapped) {
       this.grabbedGate.click(globalPosition, null);
     }
+
     this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
@@ -133,16 +148,23 @@ export class App {
 
   // globalPosition is the global position of the mouse/touch
   private moveGate(gate: Gate, globalPosition: PIXI.Point) {
-    if (
-      this.dropzone.isSnappable(
-        globalPosition.x,
-        globalPosition.y,
-        gate.width,
-        gate.height
-      )
-    ) {
-      gate.move(globalPosition, this.dropzone);
-    } else {
+    let snapped = false;
+
+    for (const each of this.dropzones) {
+      if (
+        each.isSnappable(
+          globalPosition.x,
+          globalPosition.y,
+          gate.width,
+          gate.height
+        )
+      ) {
+        snapped = true;
+        gate.move(globalPosition, each);
+      }
+    }
+
+    if (!snapped) {
       gate.move(globalPosition, null);
     }
   }
