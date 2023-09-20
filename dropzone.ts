@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { HGate } from "./h-gate";
 
 export class Dropzone {
   x: number;

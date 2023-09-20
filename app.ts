@@ -5,14 +5,14 @@ import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
 
 export class App {
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  dropzone: Dropzone;
-  dropzones: Dropzone[] = [];
+  circuitSteps: CircuitStep[] = [];
   logger: Logger;
   nameMap = new Map();
 
@@ -41,14 +41,31 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    // ランダムな位置に dropzone を複数作成
+    // ランダムな位置に circuit step を複数作成
     for (let i = 0; i < 10; i++) {
-      const dropzoneX = Math.floor(Math.random() * this.pixiApp.screen.width);
-      const dropzoneY = Math.floor(Math.random() * this.pixiApp.screen.height);
-      const dropzone = new Dropzone(dropzoneX, dropzoneY);
-      this.dropzones.push(dropzone);
-      this.pixiApp.stage.addChild(dropzone.graphics);
+      const circuitStepX = Math.floor(
+        Math.random() * this.pixiApp.screen.width
+      );
+      const circuitStepY = Math.floor(
+        Math.random() * this.pixiApp.screen.height
+      );
+      const circuitStep = new CircuitStep(3, circuitStepX, circuitStepY);
+      this.circuitSteps.push(circuitStep);
+      this.pixiApp.stage.addChild(circuitStep.graphics);
+
+      for (const each of circuitStep.dropzones) {
+        this.pixiApp.stage.addChild(each.graphics);
+      }
     }
+
+    // // ランダムな位置に dropzone を複数作成
+    // for (let i = 0; i < 10; i++) {
+    //   const dropzoneX = Math.floor(Math.random() * this.pixiApp.screen.width);
+    //   const dropzoneY = Math.floor(Math.random() * this.pixiApp.screen.height);
+    //   const dropzone = new Dropzone(dropzoneX, dropzoneY);
+    //   this.dropzones.push(dropzone);
+    //   this.pixiApp.stage.addChild(dropzone.graphics);
+    // }
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -115,17 +132,19 @@ export class App {
     // その中で、dropzone が snappable かどうかを判定する
     let snapped = false;
 
-    for (const each of this.dropzones) {
-      if (
-        each.isSnappable(
-          globalPosition.x,
-          globalPosition.y,
-          gate.width,
-          gate.height
-        )
-      ) {
-        snapped = true;
-        this.grabbedGate.click(globalPosition, each);
+    for (const circuitStep of this.circuitSteps) {
+      for (const each of circuitStep.dropzones) {
+        if (
+          each.isSnappable(
+            globalPosition.x,
+            globalPosition.y,
+            gate.width,
+            gate.height
+          )
+        ) {
+          snapped = true;
+          this.grabbedGate.click(globalPosition, each);
+        }
       }
     }
 
@@ -150,17 +169,19 @@ export class App {
   private moveGate(gate: Gate, globalPosition: PIXI.Point) {
     let snapped = false;
 
-    for (const each of this.dropzones) {
-      if (
-        each.isSnappable(
-          globalPosition.x,
-          globalPosition.y,
-          gate.width,
-          gate.height
-        )
-      ) {
-        snapped = true;
-        gate.move(globalPosition, each);
+    for (const circuitStep of this.circuitSteps) {
+      for (const each of circuitStep.dropzones) {
+        if (
+          each.isSnappable(
+            globalPosition.x,
+            globalPosition.y,
+            gate.width,
+            gate.height
+          )
+        ) {
+          snapped = true;
+          gate.move(globalPosition, each);
+        }
       }
     }
 
