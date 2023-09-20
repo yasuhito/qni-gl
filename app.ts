@@ -4,6 +4,7 @@ import { Gate } from "./gate";
 import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
 import { Logger } from "./logger";
 
 export class App {
@@ -59,34 +60,32 @@ export class App {
 
   createWorld() {
     for (let i = 0; i < 50; i++) {
-      this.createHGate(
+      this.createGate(
+        HGate,
         Math.floor(Math.random() * this.pixiApp.screen.width),
         Math.floor(Math.random() * this.pixiApp.screen.height)
       );
-      this.createXGate(
+      this.createGate(
+        XGate,
         Math.floor(Math.random() * this.pixiApp.screen.width),
         Math.floor(Math.random() * this.pixiApp.screen.height)
       );
-      this.createYGate(
+      this.createGate(
+        YGate,
+        Math.floor(Math.random() * this.pixiApp.screen.width),
+        Math.floor(Math.random() * this.pixiApp.screen.height)
+      );
+      this.createGate(
+        ZGate,
         Math.floor(Math.random() * this.pixiApp.screen.width),
         Math.floor(Math.random() * this.pixiApp.screen.height)
       );
     }
   }
 
-  private createHGate(x: number, y: number) {
-    const hGate = new HGate(x, y, this);
-    this.nameMap.set(hGate.sprite, "H Gate");
-  }
-
-  private createXGate(x: number, y: number) {
-    const xGate = new XGate(x, y, this);
-    this.nameMap.set(xGate.sprite, "X Gate");
-  }
-
-  private createYGate(x: number, y: number) {
-    const yGate = new YGate(x, y, this);
-    this.nameMap.set(yGate.sprite, "Y Gate");
+  private createGate(gateClass: typeof Gate, x: number, y: number) {
+    const gate = new gateClass(x, y, this);
+    this.nameMap.set(gate.sprite, gateClass.name);
   }
 
   enterGate(gate: Gate) {
