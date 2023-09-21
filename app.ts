@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
@@ -58,15 +57,6 @@ export class App {
       }
     }
 
-    // // ランダムな位置に dropzone を複数作成
-    // for (let i = 0; i < 10; i++) {
-    //   const dropzoneX = Math.floor(Math.random() * this.pixiApp.screen.width);
-    //   const dropzoneY = Math.floor(Math.random() * this.pixiApp.screen.height);
-    //   const dropzone = new Dropzone(dropzoneX, dropzoneY);
-    //   this.dropzones.push(dropzone);
-    //   this.pixiApp.stage.addChild(dropzone.graphics);
-    // }
-
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
   }
@@ -105,7 +95,12 @@ export class App {
   }
 
   private createGate(gateClass: typeof Gate, x: number, y: number) {
-    const gate = new gateClass(x, y, this);
+    const gate = new gateClass(x, y);
+    this.pixiApp.stage.addChild(gate.sprite);
+    gate.enterGateRunner.add(this);
+    gate.leaveGateRunner.add(this);
+    gate.grabGateRunner.add(this);
+
     this.nameMap.set(gate.sprite, gateClass.name);
   }
 

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { App } from "./app";
+import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
 
@@ -23,8 +23,10 @@ export class Gate {
     disabled: PIXI.Texture.from("./assets/disabled.svg"),
   };
 
-  app: App;
   sprite: PIXI.Sprite;
+  enterGateRunner: Runner;
+  leaveGateRunner: Runner;
+  grabGateRunner: Runner;
 
   stateMachine = createMachine(
     {
@@ -153,10 +155,12 @@ export class Gate {
     return this.sprite.height;
   }
 
-  constructor(x: number, y: number, app: App) {
+  constructor(x: number, y: number) {
     const klass = this.constructor as typeof Gate;
 
-    this.app = app;
+    this.enterGateRunner = new Runner("enterGate");
+    this.leaveGateRunner = new Runner("leaveGate");
+    this.grabGateRunner = new Runner("grabGate");
 
     // Scale mode for pixelation
     for (const key in klass.texture) {
@@ -182,9 +186,6 @@ export class Gate {
     // move the sprite to its designated position
     this.sprite.x = x;
     this.sprite.y = y;
-
-    // add it to the stage
-    this.app.pixiApp.stage.addChild(this.sprite);
 
     this.actor = interpret(this.stateMachine).start();
 
@@ -230,14 +231,14 @@ export class Gate {
   }
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
-    this.app.enterGate(this);
+    this.enterGateRunner.emit(this);
   }
 
   private onPointerOut() {
-    this.app.leaveGate(this);
+    this.leaveGateRunner.emit(this);
   }
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {
-    this.app.grabGate(this, event.global);
+    this.grabGateRunner.emit(this, event.global);
   }
 }
