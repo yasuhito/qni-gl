@@ -4,6 +4,7 @@ import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
@@ -12,6 +13,7 @@ export class App {
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
+  gatePalette: GatePalette;
   circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
   logger: Logger;
@@ -41,6 +43,9 @@ export class App {
       .on("pointerup", this.releaseGate.bind(this)) // マウスでクリックを離した、タッチパネルでタッチを離した
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
+
+    this.gatePalette = new GatePalette(150, 32);
+    this.pixiApp.stage.addChild(this.gatePalette.graphics);
 
     this.circuit = new Circuit(8, 10, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);

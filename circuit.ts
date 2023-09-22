@@ -9,7 +9,6 @@ export class Circuit {
   graphics: PIXI.Graphics;
   circuitSteps: CircuitStep[] = [];
 
-  // TODO: レイアウトを自動化 https://github.com/pixijs/layout
   constructor(qubitCount: number, stepCount: number, x: number, y: number) {
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
@@ -26,11 +25,6 @@ export class Circuit {
       this.circuitSteps.push(circuitStep);
       this.graphics.addChild(circuitStep.graphics);
     }
-
-    // this.graphics.lineStyle(1, 0x11ff11, 1, 0);
-    // this.graphics.beginFill(0xffffff, 0);
-    // this.graphics.drawRect(this.x, this.y, this.width, this.height);
-    // this.graphics.endFill();
   }
 
   get width(): number {
