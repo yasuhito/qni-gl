@@ -29,7 +29,7 @@ export class App {
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
       width: 800,
       height: 800,
-      backgroundColor: 0x1099bb,
+      backgroundColor: 0xfafafa, // Zinc/50 https://tailwindcss.com/docs/customizing-colors
       autoDensity: true,
     });
 

@@ -12,6 +12,7 @@
     "vite": "^4.4.5"
   },
   "dependencies": {
+    "@pixi/filter-drop-shadow": "^5.2.0",
     "pixi.js": "^7.2.4",
     "xstate": "^4.38.2"
   }
