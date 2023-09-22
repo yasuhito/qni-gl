@@ -1,12 +1,31 @@
 import * as PIXI from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
+import { Gate } from "./gate";
+import { GateSource } from "./gate-source";
+import { Runner } from "@pixi/runner";
 
 export class GatePalette {
+  static horizontalPadding = 24;
+  static verticalPadding = 16;
+  static horizontalGapBetweenGates = 8;
   static cornerRadius = 12;
 
   x: number; // 左上の x 座標
   y: number; // 左上の y 座標
   graphics: PIXI.Graphics;
+  gateClasses: (typeof Gate)[] = [];
+
+  enterGateRunner: Runner;
+  leaveGateRunner: Runner;
+  grabGateRunner: Runner;
+
+  get width(): number {
+    return 560;
+  }
+
+  get height(): number {
+    return 104;
+  }
 
   constructor(x: number, y: number) {
     const klass = this.constructor as typeof GatePalette;
@@ -14,6 +33,10 @@ export class GatePalette {
     this.x = x;
     this.y = y;
     this.graphics = new PIXI.Graphics();
+
+    this.enterGateRunner = new Runner("enterGate");
+    this.leaveGateRunner = new Runner("leaveGate");
+    this.grabGateRunner = new Runner("grabGate");
 
     this.graphics.lineStyle(1, 0xd4d4d8, 1, 0); // Zinc/300 https://tailwindcss.com/docs/customizing-colors
     this.graphics.beginFill(0xffffff, 1);
@@ -33,11 +56,31 @@ export class GatePalette {
     ];
   }
 
-  get width(): number {
-    return 560;
+  addGate(gateClass: typeof Gate): void {
+    this.gateClasses.push(gateClass);
+    const x =
+      this.x +
+      GatePalette.horizontalPadding +
+      (this.gateClasses.length - 1) *
+        (Gate.size + GatePalette.horizontalGapBetweenGates);
+    const y = this.y + GatePalette.verticalPadding;
+    const gateSource = new GateSource(gateClass, x, y);
+    this.graphics.addChild(gateSource.graphics);
+
+    gateSource.enterGateRunner.add(this);
+    gateSource.leaveGateRunner.add(this);
+    gateSource.grabGateRunner.add(this);
   }
 
-  get height(): number {
-    return 104;
+  private enterGate(gate: Gate) {
+    this.enterGateRunner.emit(gate);
+  }
+
+  private leaveGate(gate: Gate) {
+    this.leaveGateRunner.emit(gate);
+  }
+
+  private grabGate(gate: Gate, globalPosition: PIXI.Point) {
+    this.grabGateRunner.emit(gate, globalPosition);
   }
 }

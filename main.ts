@@ -1,5 +1,5 @@
 import { App } from "./app";
 
-const app = new App("app");
+const app = App.instance;
 
-app.createWorld();
+// app.createWorld();

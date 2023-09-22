@@ -10,6 +10,9 @@ import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
 
 export class App {
+  static elementId = "app";
+  private static _instance: App;
+
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
@@ -18,6 +21,15 @@ export class App {
   circuitSteps: CircuitStep[] = [];
   logger: Logger;
   nameMap = new Map();
+
+  public static get instance(): App {
+    if (!this._instance) {
+      this._instance = new App(this.elementId);
+    }
+
+    // 自身が持つインスタンスを返す
+    return this._instance;
+  }
 
   constructor(elementId: string) {
     const el = document.getElementById(elementId);
@@ -46,6 +58,14 @@ export class App {
 
     this.gatePalette = new GatePalette(150, 32);
     this.pixiApp.stage.addChild(this.gatePalette.graphics);
+    this.gatePalette.addGate(HGate);
+    this.gatePalette.addGate(XGate);
+    this.gatePalette.addGate(YGate);
+    this.gatePalette.addGate(ZGate);
+
+    this.gatePalette.enterGateRunner.add(this);
+    this.gatePalette.leaveGateRunner.add(this);
+    this.gatePalette.grabGateRunner.add(this);
 
     this.circuit = new Circuit(8, 10, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
