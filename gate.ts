@@ -15,6 +15,8 @@ type DragEvent = {
 };
 
 export class Gate {
+  static size = 32;
+
   static texture: { [key: string]: PIXI.Texture } = {
     idle: PIXI.Texture.from("./assets/idle.svg"),
     hover: PIXI.Texture.from("./assets/hover.svg"),
@@ -148,11 +150,13 @@ export class Gate {
   }
 
   get width(): number {
-    return this.sprite.width;
+    const klass = this.constructor as typeof Gate;
+    return klass.size;
   }
 
   get height(): number {
-    return this.sprite.height;
+    const klass = this.constructor as typeof Gate;
+    return klass.size;
   }
 
   constructor(x: number, y: number) {

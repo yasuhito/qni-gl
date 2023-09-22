@@ -4,6 +4,7 @@ import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
 
@@ -11,6 +12,7 @@ export class App {
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
+  circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
   logger: Logger;
   nameMap = new Map();
@@ -40,22 +42,8 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    // ランダムな位置に circuit step を複数作成
-    for (let i = 0; i < 10; i++) {
-      const circuitStepX = Math.floor(
-        Math.random() * this.pixiApp.screen.width
-      );
-      const circuitStepY = Math.floor(
-        Math.random() * this.pixiApp.screen.height
-      );
-      const circuitStep = new CircuitStep(3, circuitStepX, circuitStepY);
-      this.circuitSteps.push(circuitStep);
-      this.pixiApp.stage.addChild(circuitStep.graphics);
-
-      for (const each of circuitStep.dropzones) {
-        this.pixiApp.stage.addChild(each.graphics);
-      }
-    }
+    this.circuit = new Circuit(8, 10, 150, 200);
+    this.pixiApp.stage.addChild(this.circuit.graphics);
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -127,7 +115,7 @@ export class App {
     // その中で、dropzone が snappable かどうかを判定する
     let snapped = false;
 
-    for (const circuitStep of this.circuitSteps) {
+    for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
@@ -164,7 +152,7 @@ export class App {
   private moveGate(gate: Gate, globalPosition: PIXI.Point) {
     let snapped = false;
 
-    for (const circuitStep of this.circuitSteps) {
+    for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
