@@ -224,8 +224,6 @@ export class Gate {
     });
   }
 
-  applyActiveStyle() {}
-
   mouseEnter() {
     this.actor.send("Mouse enter");
   }

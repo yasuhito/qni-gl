@@ -15,6 +15,7 @@ export class GatePalette {
   graphics: PIXI.Graphics;
   gateClasses: (typeof Gate)[] = [];
 
+  newGateRunner: Runner;
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
   grabGateRunner: Runner;
@@ -34,6 +35,7 @@ export class GatePalette {
     this.y = y;
     this.graphics = new PIXI.Graphics();
 
+    this.newGateRunner = new Runner("newGate");
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
@@ -67,9 +69,16 @@ export class GatePalette {
     const gateSource = new GateSource(gateClass, x, y);
     this.graphics.addChild(gateSource.graphics);
 
+    gateSource.newGateRunner.add(this);
     gateSource.enterGateRunner.add(this);
     gateSource.leaveGateRunner.add(this);
     gateSource.grabGateRunner.add(this);
+
+    gateSource.generateNewGate();
+  }
+
+  private newGate(gate: Gate) {
+    this.newGateRunner.emit(gate);
   }
 
   private enterGate(gate: Gate) {

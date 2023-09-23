@@ -44,6 +44,7 @@ export class App {
       backgroundColor: 0xfafafa, // Zinc/50 https://tailwindcss.com/docs/customizing-colors
       autoDensity: true,
     });
+    this.pixiApp.renderer.options.preserveDrawingBuffer = true;
 
     el.appendChild(this.pixiApp.view);
 
@@ -58,16 +59,18 @@ export class App {
 
     this.gatePalette = new GatePalette(150, 32);
     this.pixiApp.stage.addChild(this.gatePalette.graphics);
+
+    this.gatePalette.newGateRunner.add(this);
+    this.gatePalette.enterGateRunner.add(this);
+    this.gatePalette.leaveGateRunner.add(this);
+    this.gatePalette.grabGateRunner.add(this);
+
     this.gatePalette.addGate(HGate);
     this.gatePalette.addGate(XGate);
     this.gatePalette.addGate(YGate);
     this.gatePalette.addGate(ZGate);
 
-    this.gatePalette.enterGateRunner.add(this);
-    this.gatePalette.leaveGateRunner.add(this);
-    this.gatePalette.grabGateRunner.add(this);
-
-    this.circuit = new Circuit(8, 10, 150, 200);
+    this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
 
     this.logger = new Logger(this.pixiApp);
@@ -115,6 +118,10 @@ export class App {
     gate.grabGateRunner.add(this);
 
     this.nameMap.set(gate.sprite, gateClass.name);
+  }
+
+  newGate(gate: Gate) {
+    this.pixiApp.stage.addChild(gate.sprite);
   }
 
   enterGate(gate: Gate) {

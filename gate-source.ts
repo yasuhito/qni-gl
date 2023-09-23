@@ -10,6 +10,7 @@ export class GateSource {
   y: number; // 左上の y 座標
   graphics: PIXI.Graphics;
 
+  newGateRunner: Runner;
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
   grabGateRunner: Runner;
@@ -30,19 +31,19 @@ export class GateSource {
     this.y = y;
     this.graphics = new PIXI.Graphics();
 
+    this.newGateRunner = new Runner("newGate");
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
-
-    this.generateNewGate();
   }
 
-  private generateNewGate(): void {
+  generateNewGate(): void {
     const gate = new this.gateClass(
       this.x + Gate.size / 2,
       this.y + Gate.size / 2
     );
-    this.graphics.addChild(gate.sprite);
+    this.newGateRunner.emit(gate);
+    // this.graphics.addChild(gate.sprite);
 
     gate.enterGateRunner.add(this);
     gate.leaveGateRunner.add(this);
