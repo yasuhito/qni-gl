@@ -46,7 +46,6 @@ export class App {
       autoDensity: true,
       preserveDrawingBuffer: true,
     });
-    this.pixiApp.renderer.options.preserveDrawingBuffer = true;
 
     el.appendChild(this.pixiApp.view);
 
