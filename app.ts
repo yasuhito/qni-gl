@@ -44,6 +44,7 @@ export class App {
       height: 800,
       backgroundColor: 0xfafafa, // Zinc/50 https://tailwindcss.com/docs/customizing-colors
       autoDensity: true,
+      preserveDrawingBuffer: true,
     });
     this.pixiApp.renderer.options.preserveDrawingBuffer = true;
 
