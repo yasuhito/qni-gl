@@ -14,8 +14,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          start: yarn dev
-          wait-on: "http://localhost:5173/"
-          command-prefix: "percy exec -- "
+          start: yarn test
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
