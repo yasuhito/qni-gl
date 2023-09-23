@@ -1,0 +1,25 @@
+name: Visual Regression Test
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  visual-regression-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14.x"
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: yarn dev
+          wait-on: "http://localhost:5173/"
+          command-prefix: "percy exec -- yarn"
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
