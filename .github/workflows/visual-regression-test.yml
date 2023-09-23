@@ -3,7 +3,7 @@ name: Visual Regression Test
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   visual-regression-test:
@@ -16,6 +16,6 @@ jobs:
         with:
           start: yarn dev
           wait-on: "http://localhost:5173/"
-          command-prefix: "percy exec -- cypress run"
+          command-prefix: "percy exec -- "
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
