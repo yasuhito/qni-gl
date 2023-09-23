@@ -4,6 +4,7 @@ import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { RnotGate } from "./rnot-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -69,6 +70,7 @@ export class App {
     this.gatePalette.addGate(XGate);
     this.gatePalette.addGate(YGate);
     this.gatePalette.addGate(ZGate);
+    this.gatePalette.addGate(RnotGate);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
