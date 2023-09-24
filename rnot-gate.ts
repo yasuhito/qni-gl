@@ -3,11 +3,4 @@ import { Gate } from "./gate";
 
 export class RnotGate extends Gate {
   static icon = PIXI.Texture.from("./assets/Rnot.svg");
-
-  static texture = {
-    idle: PIXI.Texture.from("./assets/Rnot_idle.svg"),
-    hover: PIXI.Texture.from("./assets/Rnot_hover.svg"),
-    grabbed: PIXI.Texture.from("./assets/Rnot_grabbed.svg"),
-    active: PIXI.Texture.from("./assets/Rnot_active.svg"),
-  };
 }

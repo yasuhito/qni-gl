@@ -167,7 +167,7 @@ export class Gate {
       0,
       Gate.size,
       Gate.size,
-      Gate.cornerRadius
+      klass.cornerRadius
     );
     this.graphics.endFill();
     this.graphics.x = xCenter - Gate.size / 2;
@@ -179,9 +179,6 @@ export class Gate {
 
     // Scale mode for pixelation
     klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    for (const key in klass.texture) {
-      klass.texture[key].baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    }
 
     this.sprite = new PIXI.Sprite(klass.icon);
     this.graphics.addChild(this.sprite);
@@ -243,7 +240,6 @@ export class Gate {
   }
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {
-    console.dir(event);
     this.grabGateRunner.emit(this, event.global);
   }
 }

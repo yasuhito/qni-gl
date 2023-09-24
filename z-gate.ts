@@ -3,11 +3,4 @@ import { Gate } from "./gate";
 
 export class ZGate extends Gate {
   static icon = PIXI.Texture.from("./assets/Z.svg");
-
-  static texture = {
-    idle: PIXI.Texture.from("./assets/Z_idle.svg"),
-    hover: PIXI.Texture.from("./assets/Z_hover.svg"),
-    grabbed: PIXI.Texture.from("./assets/Z_grabbed.svg"),
-    active: PIXI.Texture.from("./assets/Z_active.svg"),
-  };
 }
