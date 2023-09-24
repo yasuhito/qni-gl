@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
+import * as tailwindColors from "tailwindcss/colors";
 
 type ClickEvent = {
   type: "Click";
@@ -16,6 +17,9 @@ type DragEvent = {
 
 export class Gate {
   static size = 32;
+  static color = {
+    body: tailwindColors.emerald["500"],
+  };
 
   static texture: { [key: string]: PIXI.Texture } = {
     idle: PIXI.Texture.from("./assets/idle.svg"),
