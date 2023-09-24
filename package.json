@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "cypress": "start-test dev http://localhost:5173 'percy exec -- cypress open'",
     "test": "vitest",
-    "test:system": "start-test dev http://localhost:5173 'percy exec -- cypress run'"
+    "cypress:open": "start-test dev http://localhost:5173 'percy exec -- cypress open'",
+    "cypress:run": "start-test dev http://localhost:5173 'percy exec -- cypress run'"
   },
   "devDependencies": {
     "@percy/cli": "^1.27.2",
