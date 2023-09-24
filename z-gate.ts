@@ -2,6 +2,8 @@ import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
 
 export class ZGate extends Gate {
+  static icon = PIXI.Texture.from("./assets/Z.svg");
+
   static texture = {
     idle: PIXI.Texture.from("./assets/Z_idle.svg"),
     hover: PIXI.Texture.from("./assets/Z_hover.svg"),

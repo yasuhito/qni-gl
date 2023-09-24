@@ -87,43 +87,8 @@ export class App {
     return this.pixiApp.screen.height;
   }
 
-  createWorld() {
-    for (let i = 0; i < 50; i++) {
-      this.createGate(
-        HGate,
-        Math.floor(Math.random() * this.pixiApp.screen.width),
-        Math.floor(Math.random() * this.pixiApp.screen.height)
-      );
-      this.createGate(
-        XGate,
-        Math.floor(Math.random() * this.pixiApp.screen.width),
-        Math.floor(Math.random() * this.pixiApp.screen.height)
-      );
-      this.createGate(
-        YGate,
-        Math.floor(Math.random() * this.pixiApp.screen.width),
-        Math.floor(Math.random() * this.pixiApp.screen.height)
-      );
-      this.createGate(
-        ZGate,
-        Math.floor(Math.random() * this.pixiApp.screen.width),
-        Math.floor(Math.random() * this.pixiApp.screen.height)
-      );
-    }
-  }
-
-  private createGate(gateClass: typeof Gate, x: number, y: number) {
-    const gate = new gateClass(x, y);
-    this.pixiApp.stage.addChild(gate.sprite);
-    gate.enterGateRunner.add(this);
-    gate.leaveGateRunner.add(this);
-    gate.grabGateRunner.add(this);
-
-    this.nameMap.set(gate.sprite, gateClass.name);
-  }
-
   newGate(gate: Gate) {
-    this.pixiApp.stage.addChild(gate.sprite);
+    this.pixiApp.stage.addChild(gate.graphics);
   }
 
   enterGate(gate: Gate) {

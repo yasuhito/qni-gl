@@ -43,7 +43,6 @@ export class GateSource {
       this.y + Gate.size / 2
     );
     this.newGateRunner.emit(gate);
-    // this.graphics.addChild(gate.sprite);
 
     gate.enterGateRunner.add(this);
     gate.leaveGateRunner.add(this);
