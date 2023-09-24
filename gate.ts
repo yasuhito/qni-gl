@@ -24,14 +24,6 @@ export class Gate {
   static cornerRadius = 4;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
-  static texture: { [key: string]: PIXI.Texture } = {
-    idle: PIXI.Texture.from("./assets/idle.svg"),
-    hover: PIXI.Texture.from("./assets/hover.svg"),
-    grabbed: PIXI.Texture.from("./assets/grabbed.svg"),
-    active: PIXI.Texture.from("./assets/active.svg"),
-    disabled: PIXI.Texture.from("./assets/disabled.svg"),
-  };
-
   graphics: PIXI.Graphics;
   sprite: PIXI.Sprite;
   enterGateRunner: Runner;
