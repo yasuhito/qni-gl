@@ -11,6 +11,7 @@ import { TDaggerGate } from "./t-dagger-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { PhaseGate } from "./phase-gate";
 import { RxGate } from "./rx-gate";
+import { RyGate } from "./ry-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -83,6 +84,7 @@ export class App {
     this.gatePalette.addGate(TDaggerGate);
     this.gatePalette.addGate(PhaseGate);
     this.gatePalette.addGate(RxGate);
+    this.gatePalette.addGate(RyGate);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
