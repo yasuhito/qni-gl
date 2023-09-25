@@ -264,6 +264,7 @@ export class Gate {
 
   updateGraphics(bodyColor: string, borderColor: string, borderWidth: number) {
     const klass = this.constructor as typeof Gate;
+
     this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
     this.graphics.beginFill(bodyColor, 1);
     this.graphics.drawRoundedRect(
