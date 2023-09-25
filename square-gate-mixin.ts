@@ -4,6 +4,7 @@ import * as tailwindColors from "tailwindcss/colors";
 
 export declare class SquareGate {
   static style: { [key: string]: number | string };
+  style: { [key: string]: number | string };
   applyIdleStyle(): void;
   applyHoverStyle(): void;
   applyGrabbedStyle(): void;
@@ -29,6 +30,10 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       activeBorderWidth: 2,
       cornerRadius: 4,
     };
+
+    get style(): typeof SquareGateMixinClass.style {
+      return SquareGateMixinClass.style;
+    }
 
     applyIdleStyle() {
       this.graphics.clear();
