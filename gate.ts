@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
-import * as tailwindColors from "tailwindcss/colors";
 
 type ClickEvent = {
   type: "Click";
@@ -17,21 +16,6 @@ type DragEvent = {
 
 export class Gate {
   static size = 32;
-  // static style = {
-  //   idleBodyColor: tailwindColors.emerald["500"],
-  //   idleBorderColor: tailwindColors.emerald["600"],
-  //   idleBorderWidth: 1,
-  //   hoverBodyColor: tailwindColors.emerald["500"],
-  //   hoverBorderColor: tailwindColors.purple["500"],
-  //   hoverBorderWidth: 2,
-  //   grabbedBodyColor: tailwindColors.purple["500"],
-  //   grabbedBorderColor: tailwindColors.purple["600"],
-  //   grabbedBorderWidth: 1,
-  //   activeBodyColor: tailwindColors.emerald["500"],
-  //   activeBorderColor: tailwindColors.teal["300"],
-  //   activeBorderWidth: 2,
-  //   cornerRadius: 4,
-  // };
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   graphics: PIXI.Graphics;
