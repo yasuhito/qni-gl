@@ -17,11 +17,21 @@ type DragEvent = {
 
 export class Gate {
   static size = 32;
-  static color = {
-    body: tailwindColors.emerald["500"],
-    idleBorder: tailwindColors.emerald["600"],
+  static style = {
+    idleBodyColor: tailwindColors.emerald["500"],
+    idleBorderColor: tailwindColors.emerald["600"],
+    idleBorderWidth: 1,
+    hoverBodyColor: tailwindColors.emerald["500"],
+    hoverBorderColor: tailwindColors.purple["500"],
+    hoverBorderWidth: 2,
+    grabbedBodyColor: tailwindColors.purple["500"],
+    grabbedBorderColor: tailwindColors.purple["600"],
+    grabbedBorderWidth: 1,
+    activeBodyColor: tailwindColors.emerald["500"],
+    activeBorderColor: tailwindColors.teal["300"],
+    activeBorderWidth: 2,
+    cornerRadius: 4,
   };
-  static cornerRadius = 4;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   graphics: PIXI.Graphics;
@@ -102,18 +112,50 @@ export class Gate {
     {
       actions: {
         applyIdleStyle: () => {
+          this.graphics.clear();
           this.graphics.zIndex = 0;
           this.graphics.cursor = "default";
+
+          const klass = this.constructor as typeof Gate;
+          this.updateGraphics(
+            klass.style.idleBodyColor,
+            klass.style.idleBorderColor,
+            klass.style.idleBorderWidth
+          );
         },
         applyHoverStyle: () => {
+          this.graphics.clear();
           this.graphics.cursor = "grab";
+
+          const klass = this.constructor as typeof Gate;
+          this.updateGraphics(
+            klass.style.hoverBodyColor,
+            klass.style.hoverBorderColor,
+            klass.style.hoverBorderWidth
+          );
         },
         applyGrabbedStyle: () => {
+          this.graphics.clear();
           this.graphics.zIndex = 10;
           this.graphics.cursor = "grabbing";
+
+          const klass = this.constructor as typeof Gate;
+          this.updateGraphics(
+            klass.style.grabbedBodyColor,
+            klass.style.grabbedBorderColor,
+            klass.style.grabbedBorderWidth
+          );
         },
         applyActiveStyle: () => {
+          this.graphics.clear();
           this.graphics.cursor = "grab";
+
+          const klass = this.constructor as typeof Gate;
+          this.updateGraphics(
+            klass.style.activeBodyColor,
+            klass.style.activeBorderColor,
+            klass.style.activeBorderWidth
+          );
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
@@ -159,17 +201,6 @@ export class Gate {
     this.grabGateRunner = new Runner("grabGate");
 
     this.graphics = new PIXI.Graphics();
-
-    this.graphics.lineStyle(1, Gate.color.idleBorder, 1, 0);
-    this.graphics.beginFill(Gate.color.body, 1);
-    this.graphics.drawRoundedRect(
-      0,
-      0,
-      Gate.size,
-      Gate.size,
-      klass.cornerRadius
-    );
-    this.graphics.endFill();
     this.graphics.x = xCenter - Gate.size / 2;
     this.graphics.y = yCenter - Gate.size / 2;
 
@@ -229,6 +260,20 @@ export class Gate {
 
   mouseLeave() {
     this.actor.send("Mouse leave");
+  }
+
+  updateGraphics(bodyColor: string, borderColor: string, borderWidth: number) {
+    const klass = this.constructor as typeof Gate;
+    this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
+    this.graphics.beginFill(bodyColor, 1);
+    this.graphics.drawRoundedRect(
+      0,
+      0,
+      Gate.size,
+      Gate.size,
+      klass.style.cornerRadius
+    );
+    this.graphics.endFill();
   }
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
