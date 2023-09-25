@@ -4,6 +4,10 @@ import * as tailwindColors from "tailwindcss/colors";
 
 export declare class CircularGate {
   static style: { [key: string]: number | string };
+  applyIdleStyle(): void;
+  applyHoverStyle(): void;
+  applyGrabbedStyle(): void;
+  applyActiveStyle(): void;
 }
 
 export function CircularGateMixin<TBase extends Constructor<Gate>>(
@@ -25,6 +29,77 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       activeBorderWidth: 2,
       cornerRadius: 9999,
     };
+
+    applyIdleStyle() {
+      this.graphics.clear();
+      this.graphics.zIndex = 0;
+      this.graphics.cursor = "default";
+
+      const klass = this.constructor as typeof CircularGateMixinClass;
+      this.updateGraphics(
+        klass.style.idleBodyColor,
+        klass.style.idleBorderColor,
+        klass.style.idleBorderWidth
+      );
+    }
+
+    applyHoverStyle() {
+      this.graphics.clear();
+      this.graphics.zIndex = 0;
+      this.graphics.cursor = "grab";
+
+      const klass = this.constructor as typeof CircularGateMixinClass;
+      this.updateGraphics(
+        klass.style.hoverBodyColor,
+        klass.style.hoverBorderColor,
+        klass.style.hoverBorderWidth
+      );
+    }
+
+    applyGrabbedStyle() {
+      this.graphics.clear();
+      this.graphics.zIndex = 10;
+      this.graphics.cursor = "grabbing";
+
+      const klass = this.constructor as typeof CircularGateMixinClass;
+      this.updateGraphics(
+        klass.style.grabbedBodyColor,
+        klass.style.grabbedBorderColor,
+        klass.style.grabbedBorderWidth
+      );
+    }
+
+    applyActiveStyle() {
+      this.graphics.clear();
+      this.graphics.zIndex = 0;
+      this.graphics.cursor = "grab";
+
+      const klass = this.constructor as typeof CircularGateMixinClass;
+      this.updateGraphics(
+        klass.style.activeBodyColor,
+        klass.style.activeBorderColor,
+        klass.style.activeBorderWidth
+      );
+    }
+
+    private updateGraphics(
+      bodyColor: string,
+      borderColor: string,
+      borderWidth: number
+    ) {
+      const klass = this.constructor as typeof CircularGateMixinClass;
+
+      this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
+      this.graphics.beginFill(bodyColor, 1);
+      this.graphics.drawRoundedRect(
+        0,
+        0,
+        Gate.size,
+        Gate.size,
+        klass.style.cornerRadius
+      );
+      this.graphics.endFill();
+    }
   }
 
   return CircularGateMixinClass as Constructor<CircularGate> & TBase;
