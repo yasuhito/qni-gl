@@ -7,6 +7,7 @@ import { ZGate } from "./z-gate";
 import { RnotGate } from "./rnot-gate";
 import { SGate } from "./s-gate";
 import { TGate } from "./t-gate";
+import { TDaggerGate } from "./t-dagger-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
@@ -77,6 +78,7 @@ export class App {
     this.gatePalette.addGate(SGate);
     this.gatePalette.addGate(SDaggerGate);
     this.gatePalette.addGate(TGate);
+    this.gatePalette.addGate(TDaggerGate);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
