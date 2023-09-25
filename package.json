@@ -7,21 +7,25 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "cypress": "start-test dev http://localhost:5173 'percy exec -- cypress open'",
-    "test": "start-test dev http://localhost:5173 'percy exec -- cypress run'"
+    "test": "vitest",
+    "cypress:open": "start-test dev http://localhost:5173 'percy exec -- cypress open'",
+    "cypress:run": "start-test dev http://localhost:5173 'percy exec -- cypress run'"
   },
   "devDependencies": {
     "@percy/cli": "^1.27.2",
     "@percy/cypress": "^3.1.2",
     "@types/node": "^20.6.3",
+    "@vitest/browser": "^0.34.5",
     "cypress": "^13.2.0",
     "cypress-vite": "^1.4.2",
     "start-server-and-test": "^2.0.1",
-    "vitest": "^0.34.5"
+    "vitest": "^0.34.5",
+    "webdriverio": "^8.16.12"
   },
   "dependencies": {
     "@pixi/filter-drop-shadow": "^5.2.0",
     "pixi.js": "^7.2.4",
+    "tailwindcss": "^3.3.3",
     "xstate": "^4.38.2"
   }
 }

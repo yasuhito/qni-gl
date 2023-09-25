@@ -1,11 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import { SquareGateMixin } from "./square-gate-mixin";
 
-export class ZGate extends Gate {
-  static texture = {
-    idle: PIXI.Texture.from("./assets/Z_idle.svg"),
-    hover: PIXI.Texture.from("./assets/Z_hover.svg"),
-    grabbed: PIXI.Texture.from("./assets/Z_grabbed.svg"),
-    active: PIXI.Texture.from("./assets/Z_active.svg"),
-  };
+export class ZGate extends SquareGateMixin(Gate) {
+  static icon = PIXI.Texture.from("./assets/Z.svg");
 }

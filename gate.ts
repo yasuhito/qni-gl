@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
+import * as tailwindColors from "tailwindcss/colors";
 
 type ClickEvent = {
   type: "Click";
@@ -16,15 +17,24 @@ type DragEvent = {
 
 export class Gate {
   static size = 32;
+  // static style = {
+  //   idleBodyColor: tailwindColors.emerald["500"],
+  //   idleBorderColor: tailwindColors.emerald["600"],
+  //   idleBorderWidth: 1,
+  //   hoverBodyColor: tailwindColors.emerald["500"],
+  //   hoverBorderColor: tailwindColors.purple["500"],
+  //   hoverBorderWidth: 2,
+  //   grabbedBodyColor: tailwindColors.purple["500"],
+  //   grabbedBorderColor: tailwindColors.purple["600"],
+  //   grabbedBorderWidth: 1,
+  //   activeBodyColor: tailwindColors.emerald["500"],
+  //   activeBorderColor: tailwindColors.teal["300"],
+  //   activeBorderWidth: 2,
+  //   cornerRadius: 4,
+  // };
+  static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
-  static texture: { [key: string]: PIXI.Texture } = {
-    idle: PIXI.Texture.from("./assets/idle.svg"),
-    hover: PIXI.Texture.from("./assets/hover.svg"),
-    grabbed: PIXI.Texture.from("./assets/grabbed.svg"),
-    active: PIXI.Texture.from("./assets/active.svg"),
-    disabled: PIXI.Texture.from("./assets/disabled.svg"),
-  };
-
+  graphics: PIXI.Graphics;
   sprite: PIXI.Sprite;
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
@@ -102,37 +112,27 @@ export class Gate {
     {
       actions: {
         applyIdleStyle: () => {
-          const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.texture.idle;
-          this.sprite.zIndex = 0;
-          this.sprite.cursor = "default";
+          this.applyIdleStyle();
         },
         applyHoverStyle: () => {
-          const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.texture.hover;
-          this.sprite.cursor = "grab";
+          this.applyHoverStyle();
         },
         applyGrabbedStyle: () => {
-          const klass = this.constructor as typeof Gate;
-          this.sprite.zIndex = 10;
-          this.sprite.texture = klass.texture.grabbed;
-          this.sprite.cursor = "grabbing";
+          this.applyGrabbedStyle();
         },
         applyActiveStyle: () => {
-          const klass = this.constructor as typeof Gate;
-          this.sprite.texture = klass.texture.active;
-          this.sprite.cursor = "grab";
+          this.applyActiveStyle();
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
             const x = event.dropzone.x;
             const y = event.dropzone.y;
-            this.sprite.position.set(x, y);
+            this.graphics.position.set(x - Gate.size / 2, y - Gate.size / 2);
           } else {
-            this.sprite.parent.toLocal(
-              event.globalPosition,
-              undefined,
-              this.sprite.position
+            const newPoint = this.graphics.parent.toLocal(event.globalPosition);
+            this.graphics.position.set(
+              newPoint.x - Gate.size / 2,
+              newPoint.y - Gate.size / 2
             );
           }
         },
@@ -142,11 +142,11 @@ export class Gate {
   actor: ActorRefFrom<typeof this.stateMachine>;
 
   get x(): number {
-    return this.sprite.x;
+    return this.graphics.x + Gate.size / 2;
   }
 
   get y(): number {
-    return this.sprite.y;
+    return this.graphics.y + Gate.size / 2;
   }
 
   get width(): number {
@@ -159,37 +159,33 @@ export class Gate {
     return klass.size;
   }
 
-  constructor(x: number, y: number) {
+  constructor(xCenter: number, yCenter: number) {
     const klass = this.constructor as typeof Gate;
 
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
 
-    // Scale mode for pixelation
-    for (const key in klass.texture) {
-      klass.texture[key].baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    }
-
-    this.sprite = new PIXI.Sprite(klass.texture.idle);
+    this.graphics = new PIXI.Graphics();
+    this.graphics.x = xCenter - Gate.size / 2;
+    this.graphics.y = yCenter - Gate.size / 2;
 
     // enable the hGate to be interactive...
     // this will allow it to respond to mouse and touch events
-    this.sprite.eventMode = "static";
+    this.graphics.eventMode = "static";
 
-    // center the gate's anchor point
-    this.sprite.anchor.set(0.5);
+    // Scale mode for pixelation
+    klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+    this.sprite = new PIXI.Sprite(klass.icon);
+    this.graphics.addChild(this.sprite);
 
     // setup events for mouse + touch using
     // the pointer events
-    this.sprite
-      .on("pointerover", this.onPointerOver.bind(this), this.sprite)
-      .on("pointerout", this.onPointerOut.bind(this), this.sprite)
-      .on("pointerdown", this.onPointerDown.bind(this), this.sprite);
-
-    // move the sprite to its designated position
-    this.sprite.x = x;
-    this.sprite.y = y;
+    this.graphics
+      .on("pointerover", this.onPointerOver.bind(this), this.graphics)
+      .on("pointerout", this.onPointerOut.bind(this), this.graphics)
+      .on("pointerdown", this.onPointerDown.bind(this), this.graphics);
 
     this.actor = interpret(this.stateMachine).start();
 
@@ -231,6 +227,14 @@ export class Gate {
   mouseLeave() {
     this.actor.send("Mouse leave");
   }
+
+  applyIdleStyle() {}
+
+  applyHoverStyle() {}
+
+  applyGrabbedStyle() {}
+
+  applyActiveStyle() {}
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
     this.enterGateRunner.emit(this);
