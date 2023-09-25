@@ -16,13 +16,13 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
   class CircularGateMixinClass extends Base {
     static style = {
       idleBodyColor: tailwindColors.emerald["500"],
-      idleBorderColor: tailwindColors.emerald["600"],
+      idleBorderColor: tailwindColors.emerald["700"],
       idleBorderWidth: 1,
       hoverBodyColor: tailwindColors.emerald["500"],
       hoverBorderColor: tailwindColors.purple["500"],
       hoverBorderWidth: 2,
       grabbedBodyColor: tailwindColors.purple["500"],
-      grabbedBorderColor: tailwindColors.purple["600"],
+      grabbedBorderColor: tailwindColors.purple["700"],
       grabbedBorderWidth: 1,
       activeBodyColor: tailwindColors.emerald["500"],
       activeBorderColor: tailwindColors.teal["300"],
