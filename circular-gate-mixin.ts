@@ -30,16 +30,19 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       cornerRadius: 9999,
     };
 
+    get style(): typeof CircularGateMixinClass.style {
+      return CircularGateMixinClass.style;
+    }
+
     applyIdleStyle() {
       this.graphics.clear();
       this.graphics.zIndex = 0;
       this.graphics.cursor = "default";
 
-      const klass = this.constructor as typeof CircularGateMixinClass;
       this.updateGraphics(
-        klass.style.idleBodyColor,
-        klass.style.idleBorderColor,
-        klass.style.idleBorderWidth
+        this.style.idleBodyColor,
+        this.style.idleBorderColor,
+        this.style.idleBorderWidth
       );
     }
 
@@ -48,11 +51,10 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       this.graphics.zIndex = 0;
       this.graphics.cursor = "grab";
 
-      const klass = this.constructor as typeof CircularGateMixinClass;
       this.updateGraphics(
-        klass.style.hoverBodyColor,
-        klass.style.hoverBorderColor,
-        klass.style.hoverBorderWidth
+        this.style.hoverBodyColor,
+        this.style.hoverBorderColor,
+        this.style.hoverBorderWidth
       );
     }
 
@@ -61,11 +63,10 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       this.graphics.zIndex = 10;
       this.graphics.cursor = "grabbing";
 
-      const klass = this.constructor as typeof CircularGateMixinClass;
       this.updateGraphics(
-        klass.style.grabbedBodyColor,
-        klass.style.grabbedBorderColor,
-        klass.style.grabbedBorderWidth
+        this.style.grabbedBodyColor,
+        this.style.grabbedBorderColor,
+        this.style.grabbedBorderWidth
       );
     }
 
@@ -74,11 +75,10 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       this.graphics.zIndex = 0;
       this.graphics.cursor = "grab";
 
-      const klass = this.constructor as typeof CircularGateMixinClass;
       this.updateGraphics(
-        klass.style.activeBodyColor,
-        klass.style.activeBorderColor,
-        klass.style.activeBorderWidth
+        this.style.activeBodyColor,
+        this.style.activeBorderColor,
+        this.style.activeBorderWidth
       );
     }
 
@@ -87,8 +87,6 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
       borderColor: string,
       borderWidth: number
     ) {
-      const klass = this.constructor as typeof CircularGateMixinClass;
-
       this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
       this.graphics.beginFill(bodyColor, 1);
       this.graphics.drawRoundedRect(
@@ -96,7 +94,7 @@ export function CircularGateMixin<TBase extends Constructor<Gate>>(
         0,
         Gate.size,
         Gate.size,
-        klass.style.cornerRadius
+        this.style.cornerRadius
       );
       this.graphics.endFill();
     }
