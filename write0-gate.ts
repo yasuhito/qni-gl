@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
-export class WriteGate extends Gate {
+export class Write0Gate extends Gate {
   static icon = PIXI.Texture.from("./assets/Write0.svg");
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Write0_idle_dropzone.svg"
@@ -36,23 +36,23 @@ export class WriteGate extends Gate {
     cornerRadius: 4,
   };
 
-  get style(): typeof WriteGate.style {
-    return WriteGate.style;
+  get style(): typeof Write0Gate.style {
+    return Write0Gate.style;
   }
 
   snap() {
-    this.sprite.texture = WriteGate.iconGrabbedDropzone;
+    this.sprite.texture = Write0Gate.iconGrabbedDropzone;
   }
 
   unsnap() {
-    this.sprite.texture = WriteGate.iconGrabbed;
+    this.sprite.texture = Write0Gate.iconGrabbed;
   }
 
   applyIdleStyle() {
     if (this.dropzone) {
-      this.sprite.texture = WriteGate.iconIdleDropzone;
+      this.sprite.texture = Write0Gate.iconIdleDropzone;
     } else {
-      this.sprite.texture = WriteGate.icon;
+      this.sprite.texture = Write0Gate.icon;
     }
 
     this.graphics.clear();
@@ -64,9 +64,9 @@ export class WriteGate extends Gate {
 
   applyHoverStyle() {
     if (this.dropzone) {
-      this.sprite.texture = WriteGate.iconHoverDropzone;
+      this.sprite.texture = Write0Gate.iconHoverDropzone;
     } else {
-      this.sprite.texture = WriteGate.iconHover;
+      this.sprite.texture = Write0Gate.iconHover;
     }
 
     this.graphics.clear();
@@ -82,9 +82,9 @@ export class WriteGate extends Gate {
 
   applyGrabbedStyle() {
     if (this.dropzone) {
-      this.sprite.texture = WriteGate.iconGrabbedDropzone;
+      this.sprite.texture = Write0Gate.iconGrabbedDropzone;
     } else {
-      this.sprite.texture = WriteGate.iconGrabbed;
+      this.sprite.texture = Write0Gate.iconGrabbed;
     }
 
     this.graphics.clear();
@@ -99,7 +99,7 @@ export class WriteGate extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = WriteGate.iconActive;
+    this.sprite.texture = Write0Gate.iconActive;
 
     this.graphics.clear();
     this.graphics.zIndex = 0;
