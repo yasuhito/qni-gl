@@ -15,6 +15,7 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SwapGate } from "./swap-gate";
 import { ControlGate } from "./control-gate";
+import { AntiControlGate } from "./anti-control-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -91,6 +92,7 @@ export class App {
     this.gatePalette.addGate(RzGate);
     this.gatePalette.addGate(SwapGate, 2);
     this.gatePalette.addGate(ControlGate, 2);
+    this.gatePalette.addGate(AntiControlGate, 2);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
