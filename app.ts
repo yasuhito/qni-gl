@@ -17,6 +17,7 @@ import { SwapGate } from "./swap-gate";
 import { ControlGate } from "./control-gate";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
+import { Write0Gate } from "./write0-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -95,6 +96,7 @@ export class App {
     this.gatePalette.addGate(ControlGate, 2);
     this.gatePalette.addGate(AntiControlGate, 2);
     this.gatePalette.addGate(BlochSphere, 2);
+    this.gatePalette.addGate(Write0Gate, 2);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
@@ -136,7 +138,7 @@ export class App {
 
     // this.dropzones についてループを回す
     // その中で、dropzone が snappable かどうかを判定する
-    let snapped = false;
+    let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
@@ -148,13 +150,14 @@ export class App {
             gate.height
           )
         ) {
-          snapped = true;
+          dropzone = each;
           this.grabbedGate.click(globalPosition, each);
         }
       }
     }
 
-    if (!snapped) {
+    gate.dropzone = dropzone;
+    if (!gate.dropzone) {
       this.grabbedGate.click(globalPosition, null);
     }
 
@@ -173,7 +176,7 @@ export class App {
 
   // globalPosition is the global position of the mouse/touch
   private moveGate(gate: Gate, globalPosition: PIXI.Point) {
-    let snapped = false;
+    let snapDropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
@@ -185,14 +188,25 @@ export class App {
             gate.height
           )
         ) {
-          snapped = true;
-          gate.move(globalPosition, each);
+          snapDropzone = each;
+          gate.snapToDropzone(each, globalPosition);
         }
       }
     }
 
-    if (!snapped) {
-      gate.move(globalPosition, null);
+    if (
+      snapDropzone &&
+      (gate.dropzone === null || gate.dropzone !== snapDropzone)
+    ) {
+      gate.snap();
+    }
+    if (gate.dropzone && !snapDropzone) {
+      gate.unsnap();
+    }
+
+    gate.dropzone = snapDropzone;
+    if (!gate.dropzone) {
+      gate.move(globalPosition);
     }
   }
 

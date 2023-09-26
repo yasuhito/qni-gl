@@ -18,11 +18,13 @@ export class Gate {
   static size = 32;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
+  _dropzone: Dropzone | null = null;
   graphics: PIXI.Graphics;
   sprite: PIXI.Sprite;
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
   grabGateRunner: Runner;
+  snapDropzoneRunner: Runner;
 
   stateMachine = createMachine(
     {
@@ -109,6 +111,7 @@ export class Gate {
         },
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
+            // snap した場合
             const x = event.dropzone.x;
             const y = event.dropzone.y;
             this.graphics.position.set(x - Gate.size / 2, y - Gate.size / 2);
@@ -143,12 +146,22 @@ export class Gate {
     return klass.size;
   }
 
+  set dropzone(value: Dropzone | null) {
+    this._dropzone = value;
+    this.snapDropzoneRunner.emit(this);
+  }
+
+  get dropzone(): Dropzone | null {
+    return this._dropzone;
+  }
+
   constructor(xCenter: number, yCenter: number) {
     const klass = this.constructor as typeof Gate;
 
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
+    this.snapDropzoneRunner = new Runner("snapDropzone");
 
     this.graphics = new PIXI.Graphics();
     this.graphics.x = xCenter - Gate.size / 2;
@@ -175,8 +188,8 @@ export class Gate {
 
     // Fires whenever the state changes
     const { unsubscribe } = this.actor.subscribe((state) => {
-      console.log(`🌟 ${state.event.type}`);
-      console.log(state.value);
+      // console.log(`🌟 ${state.event.type}`);
+      // console.log(state.value);
     });
   }
 
@@ -196,13 +209,25 @@ export class Gate {
     this.actor.send("Deactivate");
   }
 
-  move(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
+  move(globalPosition: PIXI.Point) {
+    this.actor.send({
+      type: "Drag",
+      globalPosition: globalPosition,
+      dropzone: null,
+    });
+  }
+
+  snapToDropzone(dropzone: Dropzone, globalPosition: PIXI.Point) {
     this.actor.send({
       type: "Drag",
       globalPosition: globalPosition,
       dropzone: dropzone,
     });
   }
+
+  snap() {}
+
+  unsnap() {}
 
   mouseEnter() {
     this.actor.send("Mouse enter");
