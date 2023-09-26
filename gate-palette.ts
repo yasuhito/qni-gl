@@ -7,13 +7,13 @@ import { Runner } from "@pixi/runner";
 export class GatePalette {
   static horizontalPadding = 24;
   static verticalPadding = 16;
-  static horizontalGapBetweenGates = 8;
+  static gapBetweenGates = 8;
   static cornerRadius = 12;
 
   x: number; // 左上の x 座標
   y: number; // 左上の y 座標
   graphics: PIXI.Graphics;
-  gateClasses: (typeof Gate)[] = [];
+  gateClasses: (typeof Gate)[][] = [];
 
   newGateRunner: Runner;
   enterGateRunner: Runner;
@@ -29,8 +29,6 @@ export class GatePalette {
   }
 
   constructor(x: number, y: number) {
-    const klass = this.constructor as typeof GatePalette;
-
     this.x = x;
     this.y = y;
     this.graphics = new PIXI.Graphics();
@@ -47,7 +45,7 @@ export class GatePalette {
       this.y,
       this.width,
       this.height,
-      klass.cornerRadius
+      GatePalette.cornerRadius
     );
     this.graphics.endFill();
 
@@ -58,14 +56,20 @@ export class GatePalette {
     ];
   }
 
-  addGate(gateClass: typeof Gate): void {
-    this.gateClasses.push(gateClass);
+  addGate(gateClass: typeof Gate, row = 1): void {
+    if (this.gateClasses[row] === undefined) {
+      this.gateClasses[row] = [];
+    }
+    this.gateClasses[row].push(gateClass);
     const x =
       this.x +
       GatePalette.horizontalPadding +
-      (this.gateClasses.length - 1) *
-        (Gate.size + GatePalette.horizontalGapBetweenGates);
-    const y = this.y + GatePalette.verticalPadding;
+      (this.gateClasses[row].length - 1) *
+        (Gate.size + GatePalette.gapBetweenGates);
+    const y =
+      this.y +
+      GatePalette.verticalPadding +
+      (row - 1) * (Gate.size + GatePalette.gapBetweenGates);
     const gateSource = new GateSource(gateClass, x, y);
     this.graphics.addChild(gateSource.graphics);
 
