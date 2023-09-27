@@ -18,6 +18,7 @@ import { ControlGate } from "./control-gate";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -97,6 +98,7 @@ export class App {
     this.gatePalette.addGate(AntiControlGate, 2);
     this.gatePalette.addGate(BlochSphere, 2);
     this.gatePalette.addGate(Write0Gate, 2);
+    this.gatePalette.addGate(Write1Gate, 2);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
