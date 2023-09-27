@@ -20,6 +20,8 @@ import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { MeasurementGate } from "./measurement-gate";
 import { BlochSphere } from "./bloch-sphere";
+import { QFTGate } from "./qft-gate";
+import { QFTDaggerGate } from "./qft-dagger-gate";
 import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
@@ -101,6 +103,8 @@ export class App {
     this.gatePalette.addGate(Write1Gate, 2);
     this.gatePalette.addGate(MeasurementGate, 2);
     this.gatePalette.addGate(BlochSphere, 2);
+    this.gatePalette.addGate(QFTGate, 2);
+    this.gatePalette.addGate(QFTDaggerGate, 2);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
