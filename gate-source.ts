@@ -1,6 +1,13 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
 import { Runner } from "@pixi/runner";
+import { SwapGate } from "./swap-gate";
+import { ControlGate } from "./control-gate";
+import { AntiControlGate } from "./anti-control-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class GateSource {
   static size = Gate.size;
@@ -35,6 +42,19 @@ export class GateSource {
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
+
+    // 枠線を入れる
+    if (
+      gateClass === SwapGate ||
+      gateClass === ControlGate ||
+      gateClass === AntiControlGate ||
+      gateClass === Write0Gate ||
+      gateClass === Write1Gate ||
+      gateClass === MeasurementGate
+    ) {
+      this.graphics.lineStyle(1, tailwindColors.zinc["300"], 1, 0);
+      this.graphics.drawRoundedRect(this.x, this.y, Gate.size, Gate.size, 4); // TODO: 4 を定数にする
+    }
   }
 
   generateNewGate(): void {
