@@ -3,15 +3,8 @@ import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { Gate } from "./gate";
 import { GateSource } from "./gate-source";
 import { Runner } from "@pixi/runner";
+import { spacingInPx } from "./util";
 import * as tailwindColors from "tailwindcss/colors";
-import defaultTheme from "tailwindcss/defaultTheme";
-
-const spacingInPx = function (value: number): number {
-  const remValue = parseFloat(defaultTheme.spacing[value]);
-  const pxValue = remValue * 16; // 1rem = 16px
-
-  return parseInt(pxValue.toFixed(0));
-};
 
 export class GatePalette {
   static horizontalPadding = spacingInPx(6);
