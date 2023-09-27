@@ -1,9 +1,17 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
 import { Runner } from "@pixi/runner";
+import { SwapGate } from "./swap-gate";
+import { ControlGate } from "./control-gate";
+import { AntiControlGate } from "./anti-control-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class GateSource {
   static size = Gate.size;
+  static borderColor = tailwindColors.zinc["300"];
 
   gateClass: typeof Gate;
   x: number; // 左上の x 座標
@@ -14,16 +22,6 @@ export class GateSource {
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
   grabGateRunner: Runner;
-
-  get width(): number {
-    const klass = this.constructor as typeof GateSource;
-    return klass.size;
-  }
-
-  get height(): number {
-    const klass = this.constructor as typeof GateSource;
-    return klass.size;
-  }
 
   constructor(gateClass: typeof Gate, x: number, y: number) {
     this.gateClass = gateClass;
@@ -47,6 +45,25 @@ export class GateSource {
     gate.enterGateRunner.add(this);
     gate.leaveGateRunner.add(this);
     gate.grabGateRunner.add(this);
+
+    // 枠線を入れる
+    if (
+      this.gateClass === SwapGate ||
+      this.gateClass === ControlGate ||
+      this.gateClass === AntiControlGate ||
+      this.gateClass === Write0Gate ||
+      this.gateClass === Write1Gate ||
+      this.gateClass === MeasurementGate
+    ) {
+      this.graphics.lineStyle(1, GateSource.borderColor, 1, 0);
+      this.graphics.drawRoundedRect(
+        this.x,
+        this.y,
+        gate.width,
+        gate.height,
+        gate.cornerRadius
+      );
+    }
   }
 
   private enterGate(gate: Gate) {

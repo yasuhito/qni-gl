@@ -3,12 +3,17 @@ import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { Gate } from "./gate";
 import { GateSource } from "./gate-source";
 import { Runner } from "@pixi/runner";
+import { spacingInPx } from "./util";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class GatePalette {
-  static horizontalPadding = 24;
-  static verticalPadding = 16;
-  static gapBetweenGates = 8;
-  static cornerRadius = 12;
+  static horizontalPadding = spacingInPx(6);
+  static verticalPadding = spacingInPx(4);
+  static gapBetweenGates = spacingInPx(2);
+  static cornerRadius = spacingInPx(3);
+  static backgroundColor = tailwindColors.white;
+  static borderWidth = 1;
+  static borderColor = tailwindColors.zinc["300"];
 
   x: number; // 左上の x 座標
   y: number; // 左上の y 座標
@@ -21,11 +26,37 @@ export class GatePalette {
   grabGateRunner: Runner;
 
   get width(): number {
-    return 560;
+    return (
+      Gate.size * this.horizontalGateCount +
+      GatePalette.gapBetweenGates * (this.horizontalGateCount - 1) +
+      GatePalette.horizontalPadding * 2
+    );
+  }
+
+  private get horizontalGateCount(): number {
+    if (this.gateClasses[1] === undefined) {
+      this.gateClasses[1] = [];
+    }
+    if (this.gateClasses[2] === undefined) {
+      this.gateClasses[2] = [];
+    }
+
+    return Math.max(this.gateClasses[1].length, this.gateClasses[2].length);
   }
 
   get height(): number {
-    return 104;
+    let gateRows = 0;
+    for (const each of this.gateClasses) {
+      if (each !== undefined && each.length > 0) {
+        gateRows += 1;
+      }
+    }
+
+    return (
+      Gate.size * gateRows +
+      GatePalette.gapBetweenGates * (gateRows - 1) +
+      GatePalette.verticalPadding * 2
+    );
   }
 
   constructor(x: number, y: number) {
@@ -38,22 +69,7 @@ export class GatePalette {
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
 
-    this.graphics.lineStyle(1, 0xd4d4d8, 1, 0); // Zinc/300 https://tailwindcss.com/docs/customizing-colors
-    this.graphics.beginFill(0xffffff, 1);
-    this.graphics.drawRoundedRect(
-      this.x,
-      this.y,
-      this.width,
-      this.height,
-      GatePalette.cornerRadius
-    );
-    this.graphics.endFill();
-
-    // TODO: dropshadow の定義を別ファイルに移動
-    this.graphics.filters = [
-      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
-      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
-    ];
+    this.draw();
   }
 
   addGate(gateClass: typeof Gate, row = 1): void {
@@ -79,6 +95,28 @@ export class GatePalette {
     gateSource.grabGateRunner.add(this);
 
     gateSource.generateNewGate();
+
+    this.draw();
+  }
+
+  draw(): void {
+    this.graphics.clear();
+
+    this.graphics.beginFill(GatePalette.backgroundColor);
+    this.graphics.drawRoundedRect(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      GatePalette.cornerRadius
+    );
+    this.graphics.endFill();
+
+    // TODO: dropshadow の定義を別ファイルに移動
+    this.graphics.filters = [
+      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
+      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
+    ];
   }
 
   private newGate(gate: Gate) {

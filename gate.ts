@@ -146,6 +146,10 @@ export class Gate {
     return klass.size;
   }
 
+  get cornerRadius(): number {
+    return 4;
+  }
+
   set dropzone(value: Dropzone | null) {
     this._dropzone = value;
     this.snapDropzoneRunner.emit(this);
