@@ -17,6 +17,7 @@
     "@types/node": "^20.6.3",
     "@vitest/browser": "^0.34.5",
     "cypress": "^13.2.0",
+    "cypress-real-events": "^1.10.3",
     "cypress-vite": "^1.4.2",
     "start-server-and-test": "^2.0.1",
     "vitest": "^0.34.5",
