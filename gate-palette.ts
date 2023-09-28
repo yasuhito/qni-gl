@@ -13,7 +13,7 @@ export class GatePalette {
   static cornerRadius = spacingInPx(3);
   static backgroundColor = tailwindColors.white;
   static borderWidth = 1;
-  static borderColor = tailwindColors.zinc["300"];
+  static borderColor = tailwindColors.zinc["400"];
 
   x: number; // 左上の x 座標
   y: number; // 左上の y 座標
@@ -102,6 +102,7 @@ export class GatePalette {
   draw(): void {
     this.graphics.clear();
 
+    this.graphics.lineStyle(1, GatePalette.borderColor, 1, 0);
     this.graphics.beginFill(GatePalette.backgroundColor);
     this.graphics.drawRoundedRect(
       this.x,
