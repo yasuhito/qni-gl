@@ -72,7 +72,7 @@ export class GatePalette {
     this.draw();
   }
 
-  addGate(gateClass: typeof Gate, row = 1): void {
+  addGate(gateClass: typeof Gate, row = 1): Gate {
     if (this.gateClasses[row] === undefined) {
       this.gateClasses[row] = [];
     }
@@ -94,9 +94,11 @@ export class GatePalette {
     gateSource.leaveGateRunner.add(this);
     gateSource.grabGateRunner.add(this);
 
-    gateSource.generateNewGate();
+    const gate = gateSource.generateNewGate();
 
     this.draw();
+
+    return gate;
   }
 
   draw(): void {

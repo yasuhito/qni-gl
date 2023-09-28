@@ -83,7 +83,7 @@ export class App {
     this.gatePalette.leaveGateRunner.add(this);
     this.gatePalette.grabGateRunner.add(this);
 
-    this.gatePalette.addGate(HGate);
+    const hGate = this.gatePalette.addGate(HGate);
     this.gatePalette.addGate(XGate);
     this.gatePalette.addGate(YGate);
     this.gatePalette.addGate(ZGate);
@@ -105,6 +105,8 @@ export class App {
     this.gatePalette.addGate(BlochSphere, 2);
     this.gatePalette.addGate(QFTGate, 2);
     this.gatePalette.addGate(QFTDaggerGate, 2);
+
+    console.dir(`hGate x=${hGate.graphics.x}, y=${hGate.graphics.y}`);
 
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
