@@ -7,6 +7,7 @@ import { SGate } from "../../s-gate";
 import { SDaggerGate } from "../../s-dagger-gate";
 import { TGate } from "../../t-gate";
 import { TDaggerGate } from "../../t-dagger-gate";
+import { PhaseGate } from "../../phase-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -124,6 +125,18 @@ describe("Gate Palette", () => {
           gatePalette.TDaggerGate.y + TDaggerGate.size / 2
         )
         .percySnapshot("Hover over the T† gate");
+    });
+  });
+
+  describe("Phase Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.PhaseGate.x + PhaseGate.size / 2,
+          gatePalette.PhaseGate.y + PhaseGate.size / 2
+        )
+        .percySnapshot("Hover over the Phase gate");
     });
   });
 });
