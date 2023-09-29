@@ -11,6 +11,7 @@ import { PhaseGate } from "../../phase-gate";
 import { RxGate } from "../../rx-gate";
 import { RyGate } from "../../ry-gate";
 import { RzGate } from "../../rz-gate";
+import { SwapGate } from "../../swap-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -176,6 +177,18 @@ describe("Gate Palette", () => {
           gatePalette.RzGate.y + RzGate.size / 2
         )
         .percySnapshot("Hover over the Rz gate");
+    });
+  });
+
+  describe("Swap Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.SwapGate.x + SwapGate.size / 2,
+          gatePalette.SwapGate.y + SwapGate.size / 2
+        )
+        .percySnapshot("Hover over the Swap gate");
     });
   });
 });

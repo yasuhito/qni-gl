@@ -15,6 +15,7 @@ type DragEvent = {
 };
 
 export class Gate {
+  static gateType = "Gate";
   static size = 32;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
@@ -251,7 +252,7 @@ export class Gate {
 
   gateType(): string {
     const klass = this.constructor as typeof Gate;
-    return klass.name;
+    return klass.gateType;
   }
 
   toJSON() {
