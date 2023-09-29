@@ -5,6 +5,7 @@ import { ZGate } from "../../z-gate";
 import { RnotGate } from "../../rnot-gate";
 import { SGate } from "../../s-gate";
 import { SDaggerGate } from "../../s-dagger-gate";
+import { TGate } from "../../t-gate";
 
 describe("Gate Palette", () => {
   let gatePaletteComponents;
@@ -98,6 +99,18 @@ describe("Gate Palette", () => {
           gatePaletteComponents.SDaggerGate.y + SDaggerGate.size / 2
         )
         .percySnapshot("Hover over the S† gate");
+    });
+  });
+
+  describe("T Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePaletteComponents.TGate.x + TGate.size / 2,
+          gatePaletteComponents.TGate.y + TGate.size / 2
+        )
+        .percySnapshot("Hover over the T gate");
     });
   });
 });
