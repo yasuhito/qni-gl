@@ -13,6 +13,7 @@ import { RyGate } from "../../ry-gate";
 import { RzGate } from "../../rz-gate";
 import { SwapGate } from "../../swap-gate";
 import { ControlGate } from "../../control-gate";
+import { AntiControlGate } from "../../anti-control-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -201,7 +202,19 @@ describe("Gate Palette", () => {
           gatePalette.ControlGate.x + ControlGate.size / 2,
           gatePalette.ControlGate.y + ControlGate.size / 2
         )
-        .percySnapshot("Hover over the Swap gate");
+        .percySnapshot("Hover over the Control gate");
+    });
+  });
+
+  describe("Anti Control Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.AntiControlGate.x + AntiControlGate.size / 2,
+          gatePalette.AntiControlGate.y + AntiControlGate.size / 2
+        )
+        .percySnapshot("Hover over the Anti Control gate");
     });
   });
 });
