@@ -1,13 +1,11 @@
 import { HGate } from "../../h-gate";
 
-describe("hover H gate", () => {
-  it("passes", () => {
+describe("H gate", () => {
+  it("changes style when mouseover", () => {
     cy.visit("/");
 
     cy.get("#app").then(($appEl) => {
-      const appEl = $appEl.get(0);
-      const dataComponents = JSON.parse(appEl.dataset.components);
-      const hGatePosition = dataComponents.gatePalette.gates.HGate;
+      const hGatePosition = $appEl.data().components.gatePalette.gates.HGate;
 
       cy.get("canvas")
         .realMouseMove(
