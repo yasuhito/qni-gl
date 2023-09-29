@@ -10,6 +10,7 @@ import { TDaggerGate } from "../../t-dagger-gate";
 import { PhaseGate } from "../../phase-gate";
 import { RxGate } from "../../rx-gate";
 import { RyGate } from "../../ry-gate";
+import { RzGate } from "../../rz-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -163,6 +164,18 @@ describe("Gate Palette", () => {
           gatePalette.RyGate.y + RyGate.size / 2
         )
         .percySnapshot("Hover over the Ry gate");
+    });
+  });
+
+  describe("Rz Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.RzGate.x + RzGate.size / 2,
+          gatePalette.RzGate.y + RzGate.size / 2
+        )
+        .percySnapshot("Hover over the Rz gate");
     });
   });
 });
