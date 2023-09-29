@@ -6,14 +6,15 @@ import { RnotGate } from "../../rnot-gate";
 import { SGate } from "../../s-gate";
 import { SDaggerGate } from "../../s-dagger-gate";
 import { TGate } from "../../t-gate";
+import { TDaggerGate } from "../../t-dagger-gate";
 
 describe("Gate Palette", () => {
-  let gatePaletteComponents;
+  let gatePalette;
 
   before(() => {
     cy.visit("/").then(() => {
       cy.get("#app").then(($appEl) => {
-        gatePaletteComponents = $appEl.data().components.gatePalette.gates;
+        gatePalette = $appEl.data().components.gatePalette.gates;
       });
     });
   });
@@ -23,8 +24,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.HGate.x + HGate.size / 2,
-          gatePaletteComponents.HGate.y + HGate.size / 2
+          gatePalette.HGate.x + HGate.size / 2,
+          gatePalette.HGate.y + HGate.size / 2
         )
         .percySnapshot("Hover over the H gate");
     });
@@ -35,8 +36,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.XGate.x + XGate.size / 2,
-          gatePaletteComponents.XGate.y + XGate.size / 2
+          gatePalette.XGate.x + XGate.size / 2,
+          gatePalette.XGate.y + XGate.size / 2
         )
         .percySnapshot("Hover over the X gate");
     });
@@ -47,8 +48,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.YGate.x + YGate.size / 2,
-          gatePaletteComponents.YGate.y + YGate.size / 2
+          gatePalette.YGate.x + YGate.size / 2,
+          gatePalette.YGate.y + YGate.size / 2
         )
         .percySnapshot("Hover over the Y gate");
     });
@@ -59,8 +60,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.ZGate.x + ZGate.size / 2,
-          gatePaletteComponents.ZGate.y + ZGate.size / 2
+          gatePalette.ZGate.x + ZGate.size / 2,
+          gatePalette.ZGate.y + ZGate.size / 2
         )
         .percySnapshot("Hover over the Z gate");
     });
@@ -71,8 +72,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.RnotGate.x + RnotGate.size / 2,
-          gatePaletteComponents.RnotGate.y + RnotGate.size / 2
+          gatePalette.RnotGate.x + RnotGate.size / 2,
+          gatePalette.RnotGate.y + RnotGate.size / 2
         )
         .percySnapshot("Hover over the √X gate");
     });
@@ -83,8 +84,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.SGate.x + SGate.size / 2,
-          gatePaletteComponents.SGate.y + SGate.size / 2
+          gatePalette.SGate.x + SGate.size / 2,
+          gatePalette.SGate.y + SGate.size / 2
         )
         .percySnapshot("Hover over the S gate");
     });
@@ -95,8 +96,8 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.SDaggerGate.x + SDaggerGate.size / 2,
-          gatePaletteComponents.SDaggerGate.y + SDaggerGate.size / 2
+          gatePalette.SDaggerGate.x + SDaggerGate.size / 2,
+          gatePalette.SDaggerGate.y + SDaggerGate.size / 2
         )
         .percySnapshot("Hover over the S† gate");
     });
@@ -107,10 +108,22 @@ describe("Gate Palette", () => {
       cy.visit("/")
         .get("canvas")
         .realMouseMove(
-          gatePaletteComponents.TGate.x + TGate.size / 2,
-          gatePaletteComponents.TGate.y + TGate.size / 2
+          gatePalette.TGate.x + TGate.size / 2,
+          gatePalette.TGate.y + TGate.size / 2
         )
         .percySnapshot("Hover over the T gate");
+    });
+  });
+
+  describe("T† Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.TDaggerGate.x + TDaggerGate.size / 2,
+          gatePalette.TDaggerGate.y + TDaggerGate.size / 2
+        )
+        .percySnapshot("Hover over the T† gate");
     });
   });
 });
