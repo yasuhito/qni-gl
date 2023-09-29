@@ -12,6 +12,7 @@ import { RxGate } from "../../rx-gate";
 import { RyGate } from "../../ry-gate";
 import { RzGate } from "../../rz-gate";
 import { SwapGate } from "../../swap-gate";
+import { ControlGate } from "../../control-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -187,6 +188,18 @@ describe("Gate Palette", () => {
         .realMouseMove(
           gatePalette.SwapGate.x + SwapGate.size / 2,
           gatePalette.SwapGate.y + SwapGate.size / 2
+        )
+        .percySnapshot("Hover over the Swap gate");
+    });
+  });
+
+  describe("Control Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.ControlGate.x + ControlGate.size / 2,
+          gatePalette.ControlGate.y + ControlGate.size / 2
         )
         .percySnapshot("Hover over the Swap gate");
     });
