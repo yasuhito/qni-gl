@@ -15,6 +15,7 @@ import { SwapGate } from "../../swap-gate";
 import { ControlGate } from "../../control-gate";
 import { AntiControlGate } from "../../anti-control-gate";
 import { Write0Gate } from "../../write0-gate";
+import { Write1Gate } from "../../write1-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -228,6 +229,18 @@ describe("Gate Palette", () => {
           gatePalette.Write0Gate.y + Write0Gate.size / 2
         )
         .percySnapshot("Hover over the |0> gate");
+    });
+  });
+
+  describe("|1> Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.Write1Gate.x + Write1Gate.size / 2,
+          gatePalette.Write1Gate.y + Write1Gate.size / 2
+        )
+        .percySnapshot("Hover over the |1> gate");
     });
   });
 });
