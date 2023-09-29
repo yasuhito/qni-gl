@@ -18,6 +18,8 @@ import { Write0Gate } from "../../write0-gate";
 import { Write1Gate } from "../../write1-gate";
 import { MeasurementGate } from "../../measurement-gate";
 import { BlochSphere } from "../../bloch-sphere";
+import { QFTGate } from "../../qft-gate";
+import { QFTDaggerGate } from "../../qft-dagger-gate";
 
 describe("Gate Palette", () => {
   let gatePalette;
@@ -267,6 +269,30 @@ describe("Gate Palette", () => {
           gatePalette.BlochSphere.y + BlochSphere.size / 2
         )
         .percySnapshot("Hover over the Bloch Sphere");
+    });
+  });
+
+  describe("QFT Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.QFTGate.x + QFTGate.size / 2,
+          gatePalette.QFTGate.y + QFTGate.size / 2
+        )
+        .percySnapshot("Hover over the QFT gate");
+    });
+  });
+
+  describe("QFT† Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePalette.QFTDaggerGate.x + QFTDaggerGate.size / 2,
+          gatePalette.QFTDaggerGate.y + QFTDaggerGate.size / 2
+        )
+        .percySnapshot("Hover over the QFT† gate");
     });
   });
 });

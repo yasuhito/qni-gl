@@ -96,7 +96,6 @@ export class GatePalette {
     gateSource.grabGateRunner.add(this);
 
     const gate = gateSource.generateNewGate();
-    this.gates[gate.gateType()] = gate;
 
     this.draw();
 
@@ -136,6 +135,7 @@ export class GatePalette {
   }
 
   private newGate(gate: Gate) {
+    this.gates[gate.gateType()] = gate;
     this.newGateRunner.emit(gate);
   }
 
