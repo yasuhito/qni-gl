@@ -249,6 +249,18 @@ export class Gate {
 
   applyActiveStyle() {}
 
+  gateType(): string {
+    const klass = this.constructor as typeof Gate;
+    return klass.name;
+  }
+
+  toJSON() {
+    return {
+      x: this.graphics.x,
+      y: this.graphics.y,
+    };
+  }
+
   private onPointerOver(_event: PIXI.FederatedEvent) {
     this.enterGateRunner.emit(this);
   }

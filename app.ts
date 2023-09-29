@@ -26,11 +26,13 @@ import { GatePalette } from "./gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class App {
   static elementId = "app";
   private static _instance: App;
 
+  element: HTMLElement;
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
@@ -54,12 +56,13 @@ export class App {
     if (el === null) {
       throw new Error("Could not find #app");
     }
+    this.element = el;
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
       width: 800,
       height: 800,
-      backgroundColor: 0xfafafa, // Zinc/50 https://tailwindcss.com/docs/customizing-colors
+      backgroundColor: tailwindColors.zinc["50"],
       autoDensity: true,
       preserveDrawingBuffer: true,
     });
@@ -83,7 +86,7 @@ export class App {
     this.gatePalette.leaveGateRunner.add(this);
     this.gatePalette.grabGateRunner.add(this);
 
-    const hGate = this.gatePalette.addGate(HGate);
+    this.gatePalette.addGate(HGate);
     this.gatePalette.addGate(XGate);
     this.gatePalette.addGate(YGate);
     this.gatePalette.addGate(ZGate);
@@ -106,8 +109,6 @@ export class App {
     this.gatePalette.addGate(QFTGate, 2);
     this.gatePalette.addGate(QFTDaggerGate, 2);
 
-    console.dir(`hGate x=${hGate.graphics.x}, y=${hGate.graphics.y}`);
-
     this.circuit = new Circuit(10, 15, 150, 200);
     this.pixiApp.stage.addChild(this.circuit.graphics);
 
@@ -125,6 +126,7 @@ export class App {
 
   newGate(gate: Gate) {
     this.pixiApp.stage.addChild(gate.graphics);
+    this.element.dataset.components = this.gatePalette.toJSON();
   }
 
   enterGate(gate: Gate) {
