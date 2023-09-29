@@ -2,6 +2,7 @@ import { HGate } from "../../h-gate";
 import { XGate } from "../../x-gate";
 import { YGate } from "../../y-gate";
 import { ZGate } from "../../z-gate";
+import { RnotGate } from "../../rnot-gate";
 
 describe("Gate Palette", () => {
   let gatePaletteComponents;
@@ -59,6 +60,18 @@ describe("Gate Palette", () => {
           gatePaletteComponents.ZGate.y + ZGate.size / 2
         )
         .percySnapshot("Hover over the Z gate");
+    });
+  });
+
+  describe("√X Gate", () => {
+    it("changes style when mouseover", () => {
+      cy.visit("/")
+        .get("canvas")
+        .realMouseMove(
+          gatePaletteComponents.RnotGate.x + RnotGate.size / 2,
+          gatePaletteComponents.RnotGate.y + RnotGate.size / 2
+        )
+        .percySnapshot("Hover over the √X gate");
     });
   });
 });
