@@ -1,8 +1,12 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class Dropzone {
   static size = Gate.size;
+
+  static wireWidth = 2;
+  static quantumWireColor = tailwindColors.zinc["900"];
 
   x: number; // 中心の x 座標
   y: number; // 中心の y 座標
@@ -19,13 +23,10 @@ export class Dropzone {
     this.y = y;
 
     this.graphics = new PIXI.Graphics();
-    this.graphics.lineStyle(1, 0x1111ff, 1, 0);
-    this.graphics.drawRect(
-      this.x - this.size / 2,
-      this.y - this.size / 2,
-      this.size,
-      this.size
-    );
+    this.graphics
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.x, this.y - Dropzone.size * 0.75)
+      .lineTo(this.x, this.y + Dropzone.size * 0.75);
   }
 
   isSnappable(x: number, y: number, width: number, height: number) {
