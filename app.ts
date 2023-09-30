@@ -126,7 +126,7 @@ export class App {
 
   newGate(gate: Gate) {
     this.pixiApp.stage.addChild(gate.graphics);
-    this.element.dataset.components = this.gatePalette.toJSON();
+    this.element.dataset.app = JSON.stringify(this);
   }
 
   enterGate(gate: Gate) {
@@ -176,6 +176,13 @@ export class App {
     this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
+  }
+
+  toJSON() {
+    return {
+      gatePalette: this.gatePalette,
+      circuit: this.circuit,
+    };
   }
 
   private maybeMoveGate(event: PIXI.FederatedPointerEvent) {

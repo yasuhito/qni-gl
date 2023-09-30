@@ -123,15 +123,12 @@ export class GatePalette {
     ];
   }
 
-  toJSON(): string {
-    const json = {
-      gatePalette: {
-        x: this.x,
-        y: this.y,
-        gates: this.gates,
-      },
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+      gates: this.gates,
     };
-    return JSON.stringify(json);
   }
 
   private newGate(gate: Gate) {

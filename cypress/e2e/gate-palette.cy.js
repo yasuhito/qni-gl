@@ -27,7 +27,7 @@ describe("Gate Palette", () => {
   before(() => {
     cy.visit("/").then(() => {
       cy.get("#app").then(($appEl) => {
-        gatePalette = $appEl.data().components.gatePalette.gates;
+        gatePalette = $appEl.data().app.gatePalette.gates;
       });
     });
   });

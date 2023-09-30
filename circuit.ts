@@ -9,6 +9,14 @@ export class Circuit {
   graphics: PIXI.Graphics;
   circuitSteps: CircuitStep[] = [];
 
+  get width(): number {
+    return this.circuitSteps[0].width;
+  }
+
+  get height(): number {
+    return this.circuitSteps.length * this.circuitSteps[0].height;
+  }
+
   constructor(qubitCount: number, stepCount: number, x: number, y: number) {
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
@@ -27,11 +35,7 @@ export class Circuit {
     }
   }
 
-  get width(): number {
-    return this.circuitSteps[0].width;
-  }
-
-  get height(): number {
-    return this.circuitSteps.length * this.circuitSteps[0].height;
+  toJSON() {
+    return "";
   }
 }
