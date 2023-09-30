@@ -44,11 +44,12 @@ export class MeasurementGate extends Gate {
   }
 
   snap(dropzone: Dropzone) {
-    this.sprite.texture = MeasurementGate.iconGrabbedDropzone;
     super.snap(dropzone);
+    this.sprite.texture = MeasurementGate.iconGrabbedDropzone;
   }
 
   unsnap() {
+    super.unsnap();
     this.sprite.texture = MeasurementGate.iconGrabbed;
   }
 

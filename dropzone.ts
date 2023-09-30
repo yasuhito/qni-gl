@@ -74,7 +74,11 @@ export class Dropzone {
   }
 
   unsnap(gate: Gate) {
-    console.log("UNSNAP");
+    // 関数にまとめる (constructor() でも使っている)
+    this.graphics
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.x, this.y - Dropzone.size * 0.75)
+      .lineTo(this.x, this.y + Dropzone.size * 0.75);
   }
 
   private rectIntersect(

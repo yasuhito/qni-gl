@@ -35,12 +35,13 @@ export class WriteGate extends Gate {
   }
 
   snap(dropzone: Dropzone) {
+    super.snap(dropzone);
     const klass = this.constructor as typeof WriteGate;
     this.sprite.texture = klass.iconGrabbedDropzone;
-    super.snap(dropzone);
   }
 
   unsnap() {
+    super.unsnap();
     const klass = this.constructor as typeof WriteGate;
     this.sprite.texture = klass.iconGrabbed;
   }
