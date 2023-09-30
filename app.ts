@@ -210,8 +210,9 @@ export class App {
       snapDropzone &&
       (gate.dropzone === null || gate.dropzone !== snapDropzone)
     ) {
-      gate.snap();
+      gate.snap(snapDropzone);
     }
+
     if (gate.dropzone && !snapDropzone) {
       gate.unsnap();
     }
