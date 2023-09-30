@@ -19,6 +19,7 @@ export class GatePalette {
   y: number; // 左上の y 座標
   graphics: PIXI.Graphics;
   gateClasses: (typeof Gate)[][] = [];
+  gates = {};
 
   newGateRunner: Runner;
   enterGateRunner: Runner;
@@ -72,7 +73,7 @@ export class GatePalette {
     this.draw();
   }
 
-  addGate(gateClass: typeof Gate, row = 1): void {
+  addGate(gateClass: typeof Gate, row = 1): Gate {
     if (this.gateClasses[row] === undefined) {
       this.gateClasses[row] = [];
     }
@@ -94,9 +95,11 @@ export class GatePalette {
     gateSource.leaveGateRunner.add(this);
     gateSource.grabGateRunner.add(this);
 
-    gateSource.generateNewGate();
+    const gate = gateSource.generateNewGate();
 
     this.draw();
+
+    return gate;
   }
 
   draw(): void {
@@ -120,7 +123,19 @@ export class GatePalette {
     ];
   }
 
+  toJSON(): string {
+    const json = {
+      gatePalette: {
+        x: this.x,
+        y: this.y,
+        gates: this.gates,
+      },
+    };
+    return JSON.stringify(json);
+  }
+
   private newGate(gate: Gate) {
+    this.gates[gate.gateType()] = gate;
     this.newGateRunner.emit(gate);
   }
 

@@ -35,7 +35,7 @@ export class GateSource {
     this.grabGateRunner = new Runner("grabGate");
   }
 
-  generateNewGate(): void {
+  generateNewGate(): Gate {
     const gate = new this.gateClass(
       this.x + Gate.size / 2,
       this.y + Gate.size / 2
@@ -64,6 +64,8 @@ export class GateSource {
         gate.cornerRadius
       );
     }
+
+    return gate;
   }
 
   private enterGate(gate: Gate) {

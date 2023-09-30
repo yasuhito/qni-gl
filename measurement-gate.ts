@@ -3,6 +3,8 @@ import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class MeasurementGate extends Gate {
+  static gateType = "MeasurementGate";
+
   static icon = PIXI.Texture.from("./assets/Measurement.svg");
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Measurement_idle_dropzone.svg"

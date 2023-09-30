@@ -15,6 +15,7 @@ type DragEvent = {
 };
 
 export class Gate {
+  static gateType = "Gate";
   static size = 32;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
@@ -248,6 +249,18 @@ export class Gate {
   applyGrabbedStyle() {}
 
   applyActiveStyle() {}
+
+  gateType(): string {
+    const klass = this.constructor as typeof Gate;
+    return klass.gateType;
+  }
+
+  toJSON() {
+    return {
+      x: this.graphics.x,
+      y: this.graphics.y,
+    };
+  }
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
     this.enterGateRunner.emit(this);
