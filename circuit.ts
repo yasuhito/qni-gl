@@ -17,6 +17,7 @@ export class Circuit {
     return this.circuitSteps.length * this.circuitSteps[0].height;
   }
 
+  // x, y は回路の右上の座標 (モバイルの場合)
   constructor(qubitCount: number, stepCount: number, x: number, y: number) {
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
@@ -36,6 +37,8 @@ export class Circuit {
   }
 
   toJSON() {
-    return "";
+    return {
+      steps: this.circuitSteps,
+    };
   }
 }

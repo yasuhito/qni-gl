@@ -109,8 +109,14 @@ export class App {
     this.gatePalette.addGate(QFTGate, 2);
     this.gatePalette.addGate(QFTDaggerGate, 2);
 
-    this.circuit = new Circuit(10, 15, 150, 200);
+    this.circuit = new Circuit(
+      10,
+      5,
+      this.gatePalette.x + this.gatePalette.width,
+      200
+    );
     this.pixiApp.stage.addChild(this.circuit.graphics);
+    this.element.dataset.app = JSON.stringify(this);
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -181,7 +187,7 @@ export class App {
   toJSON() {
     return {
       gatePalette: this.gatePalette,
-      circuit: this.circuit,
+      circuit: this.circuit || "",
     };
   }
 

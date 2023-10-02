@@ -81,6 +81,13 @@ export class Dropzone {
       .lineTo(this.x, this.y + Dropzone.size * 0.75);
   }
 
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+    };
+  }
+
   private rectIntersect(
     x1: number,
     y1: number,

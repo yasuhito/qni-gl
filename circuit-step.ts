@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Dropzone } from "./dropzone";
+import { Gate } from "./gate";
 
 export class CircuitStep {
   qubitCount: number; // 量子ビットの数
@@ -24,6 +25,7 @@ export class CircuitStep {
     return Dropzone.size / 4;
   }
 
+  // x, y はステップの右上の座標 (モバイルの場合)
   constructor(qubitCount: number, x: number, y: number) {
     this.qubitCount = qubitCount;
     this.x = x;
@@ -31,7 +33,7 @@ export class CircuitStep {
     this.graphics = new PIXI.Graphics();
 
     for (let i = 0; i < this.qubitCount; i++) {
-      const dropzoneX = this.x + this.paddingX + (32 + 16) * i + 16;
+      const dropzoneX = this.x - this.paddingX - (32 + 16) * i - 16;
       const dropzoneY = this.y + this.paddingY + Dropzone.size / 2;
       const dropzone = new Dropzone(dropzoneX, dropzoneY);
       this.dropzones.push(dropzone);
@@ -39,15 +41,18 @@ export class CircuitStep {
     }
 
     this.graphics.lineStyle(1, 0xeeeeee, 1, 0);
-    this.graphics.drawRect(this.x, this.y, this.width, this.height);
+    this.graphics.drawRect(
+      this.x - this.width,
+      this.y,
+      this.width,
+      this.height
+    );
   }
 
   get width(): number {
-    const klass = this.constructor as typeof CircuitStep;
-
     return (
-      this.qubitCount * 32 +
-      (this.qubitCount - 1) * klass.gapBetweenGates +
+      this.qubitCount * Gate.size +
+      (this.qubitCount - 1) * CircuitStep.gapBetweenGates +
       this.paddingX * 2
     );
   }
@@ -65,5 +70,11 @@ export class CircuitStep {
   get paddingY(): number {
     const klass = this.constructor as typeof CircuitStep;
     return klass.paddingY;
+  }
+
+  toJSON() {
+    return {
+      dropzones: this.dropzones,
+    };
   }
 }
