@@ -218,4 +218,24 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("bloch-sphere-hover.png");
     });
   });
+
+  test.describe("QFT Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.QFTGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("qft-gate-hover.png");
+    });
+  });
+
+  test.describe("QFT† Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.QFTDaggerGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("qft-dagger-gate-hover.png");
+    });
+  });
 });
