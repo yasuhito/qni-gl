@@ -72,4 +72,15 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("rnot-gate-hover.png");
     });
   });
+
+  test.describe("S Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      await page.mouse.move(
+        gatePalette.gates.SGate.x + gatePalette.gates.SGate.width / 2,
+        gatePalette.gates.SGate.y + gatePalette.gates.SGate.height / 2
+      );
+
+      await expect(page).toHaveScreenshot("s-gate-hover.png");
+    });
+  });
 });
