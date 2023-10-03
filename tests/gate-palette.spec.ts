@@ -168,4 +168,14 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("control-gate-hover.png");
     });
   });
+
+  test.describe("Anti Control Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.AntiControlGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("anti-control-gate-hover.png");
+    });
+  });
 });
