@@ -83,4 +83,17 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("s-gate-hover.png");
     });
   });
+
+  test.describe("S† Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      await page.mouse.move(
+        gatePalette.gates.SDaggerGate.x +
+          gatePalette.gates.SDaggerGate.width / 2,
+        gatePalette.gates.SDaggerGate.y +
+          gatePalette.gates.SDaggerGate.height / 2
+      );
+
+      await expect(page).toHaveScreenshot("s†-gate-hover.png");
+    });
+  });
 });
