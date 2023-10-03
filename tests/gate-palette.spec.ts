@@ -5,6 +5,7 @@ test.describe("Gate Palette", () => {
   let gatePalette;
 
   test.beforeEach(async ({ page }) => {
+    // TODO: ポート番号を設定から取得する
     await page.goto("http://localhost:5173/");
 
     const appEl = await page.locator("#app");
@@ -20,10 +21,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("H Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.HGate.x + gatePalette.gates.HGate.width / 2,
-        gatePalette.gates.HGate.y + gatePalette.gates.HGate.height / 2
-      );
+      const gate = gatePalette.gates.HGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("h-gate-hover.png");
     });
@@ -31,10 +31,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("X Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.XGate.x + gatePalette.gates.XGate.width / 2,
-        gatePalette.gates.XGate.y + gatePalette.gates.XGate.height / 2
-      );
+      const gate = gatePalette.gates.XGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("x-gate-hover.png");
     });
@@ -42,10 +41,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("Y Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.YGate.x + gatePalette.gates.YGate.width / 2,
-        gatePalette.gates.YGate.y + gatePalette.gates.YGate.height / 2
-      );
+      const gate = gatePalette.gates.YGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("y-gate-hover.png");
     });
@@ -53,10 +51,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("Z Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.ZGate.x + gatePalette.gates.ZGate.width / 2,
-        gatePalette.gates.ZGate.y + gatePalette.gates.ZGate.height / 2
-      );
+      const gate = gatePalette.gates.ZGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("z-gate-hover.png");
     });
