@@ -271,6 +271,8 @@ export class Gate {
     return {
       x: this.graphics.x,
       y: this.graphics.y,
+      width: this.width,
+      height: this.height,
     };
   }
 

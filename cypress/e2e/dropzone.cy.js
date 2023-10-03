@@ -1,5 +1,4 @@
 import { Gate } from "../../gate";
-import { HGate } from "../../h-gate";
 
 describe("Dropzone", () => {
   let app;
