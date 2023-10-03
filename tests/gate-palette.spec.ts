@@ -96,4 +96,14 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("s†-gate-hover.png");
     });
   });
+
+  test.describe("T Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.TGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("t-gate-hover.png");
+    });
+  });
 });
