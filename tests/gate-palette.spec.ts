@@ -64,10 +64,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("√X Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.RnotGate.x + gatePalette.gates.RnotGate.width / 2,
-        gatePalette.gates.RnotGate.y + gatePalette.gates.RnotGate.height / 2
-      );
+      const gate = gatePalette.gates.RnotGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("rnot-gate-hover.png");
     });
