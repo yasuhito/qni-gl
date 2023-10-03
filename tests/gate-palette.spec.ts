@@ -121,4 +121,14 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("phase-gate-hover.png");
     });
   });
+
+  test.describe("Rx Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.RxGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("rx-gate-hover.png");
+    });
+  });
 });
