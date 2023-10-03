@@ -198,4 +198,14 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("write1-gate-hover.png");
     });
   });
+
+  test.describe("Measurement Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.MeasurementGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("measurement-gate-hover.png");
+    });
+  });
 });
