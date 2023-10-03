@@ -86,12 +86,9 @@ test.describe("Gate Palette", () => {
 
   test.describe("S† Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      await page.mouse.move(
-        gatePalette.gates.SDaggerGate.x +
-          gatePalette.gates.SDaggerGate.width / 2,
-        gatePalette.gates.SDaggerGate.y +
-          gatePalette.gates.SDaggerGate.height / 2
-      );
+      const gate = gatePalette.gates.SDaggerGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
 
       await expect(page).toHaveScreenshot("s†-gate-hover.png");
     });
