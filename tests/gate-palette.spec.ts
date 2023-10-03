@@ -178,4 +178,24 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("anti-control-gate-hover.png");
     });
   });
+
+  test.describe("|0> Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.Write0Gate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("write0-gate-hover.png");
+    });
+  });
+
+  test.describe("|1> Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.Write1Gate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("write1-gate-hover.png");
+    });
+  });
 });
