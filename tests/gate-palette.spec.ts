@@ -208,4 +208,14 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("measurement-gate-hover.png");
     });
   });
+
+  test.describe("Bloch Sphere", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.BlochSphere;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("bloch-sphere-hover.png");
+    });
+  });
 });
