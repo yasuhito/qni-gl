@@ -128,4 +128,24 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("rx-gate-hover.png");
     });
   });
+
+  test.describe("Ry Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.RyGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("ry-gate-hover.png");
+    });
+  });
+
+  test.describe("Rz Gate", () => {
+    test("changes style when mouseover", async ({ page }) => {
+      const gate = gatePalette.gates.RzGate;
+
+      await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+
+      await expect(page).toHaveScreenshot("rz-gate-hover.png");
+    });
+  });
 });
