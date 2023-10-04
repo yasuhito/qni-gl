@@ -75,4 +75,15 @@ test.describe("Dropzone", () => {
 
     await expect(page).toHaveScreenshot("drag-and-drop-swap-gate.png");
   });
+
+  test("Drag and drop Control gate", async ({ page }) => {
+    const gate = gatePalette.gates.ControlGate;
+
+    await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(firstDropzone.x, firstDropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("drag-and-drop-control-gate.png");
+  });
 });
