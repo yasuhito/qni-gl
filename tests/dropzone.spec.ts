@@ -97,4 +97,26 @@ test.describe("Dropzone", () => {
 
     await expect(page).toHaveScreenshot("drag-and-drop-anti-control-gate.png");
   });
+
+  test("Drag and drop |0> gate", async ({ page }) => {
+    const gate = gatePalette.gates.Write0Gate;
+
+    await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(firstDropzone.x, firstDropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("drag-and-drop-write0-gate.png");
+  });
+
+  test("Drag and drop |1> gate", async ({ page }) => {
+    const gate = gatePalette.gates.Write1Gate;
+
+    await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(firstDropzone.x, firstDropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("drag-and-drop-write1-gate.png");
+  });
 });
