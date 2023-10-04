@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import { Dropzone } from "./dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class WriteGate extends Gate {
@@ -33,12 +34,14 @@ export class WriteGate extends Gate {
     return WriteGate.style;
   }
 
-  snap() {
+  snap(dropzone: Dropzone) {
+    super.snap(dropzone);
     const klass = this.constructor as typeof WriteGate;
     this.sprite.texture = klass.iconGrabbedDropzone;
   }
 
   unsnap() {
+    super.unsnap();
     const klass = this.constructor as typeof WriteGate;
     this.sprite.texture = klass.iconGrabbed;
   }

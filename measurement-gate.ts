@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import { Dropzone } from "./dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class MeasurementGate extends Gate {
@@ -42,11 +43,13 @@ export class MeasurementGate extends Gate {
     return MeasurementGate.style;
   }
 
-  snap() {
+  snap(dropzone: Dropzone) {
+    super.snap(dropzone);
     this.sprite.texture = MeasurementGate.iconGrabbedDropzone;
   }
 
   unsnap() {
+    super.unsnap();
     this.sprite.texture = MeasurementGate.iconGrabbed;
   }
 

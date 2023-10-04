@@ -223,6 +223,10 @@ export class Gate {
   }
 
   snapToDropzone(dropzone: Dropzone, globalPosition: PIXI.Point) {
+    if (this.dropzone && this.dropzone !== dropzone) {
+      this.unsnap();
+    }
+
     this.actor.send({
       type: "Drag",
       globalPosition: globalPosition,
@@ -230,9 +234,17 @@ export class Gate {
     });
   }
 
-  snap() {}
+  snap(dropzone: Dropzone) {
+    dropzone.snap(this);
+  }
 
-  unsnap() {}
+  unsnap() {
+    if (this.dropzone === null) {
+      throw new Error("Cannot unsnap a gate that is not snapped");
+    }
+
+    this.dropzone.unsnap(this);
+  }
 
   mouseEnter() {
     this.actor.send("Mouse enter");
@@ -259,6 +271,8 @@ export class Gate {
     return {
       x: this.graphics.x,
       y: this.graphics.y,
+      width: this.width,
+      height: this.height,
     };
   }
 

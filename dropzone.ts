@@ -1,12 +1,21 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import { Runner } from "@pixi/runner";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
+import * as tailwindColors from "tailwindcss/colors";
 
 export class Dropzone {
   static size = Gate.size;
 
+  static wireWidth = 2;
+  static quantumWireColor = tailwindColors.zinc["900"];
+
   x: number; // 中心の x 座標
   y: number; // 中心の y 座標
   graphics: PIXI.Graphics;
+  snapRunner: Runner;
 
   get size(): number {
     const klass = this.constructor as typeof Gate;
@@ -18,14 +27,13 @@ export class Dropzone {
     this.x = x;
     this.y = y;
 
+    this.snapRunner = new Runner("snap");
+
     this.graphics = new PIXI.Graphics();
-    this.graphics.lineStyle(1, 0x1111ff, 1, 0);
-    this.graphics.drawRect(
-      this.x - this.size / 2,
-      this.y - this.size / 2,
-      this.size,
-      this.size
-    );
+    this.graphics
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.x, this.y - Dropzone.size * 0.75)
+      .lineTo(this.x, this.y + Dropzone.size * 0.75);
   }
 
   isSnappable(x: number, y: number, width: number, height: number) {
@@ -41,6 +49,43 @@ export class Dropzone {
       this.size * snapRatio,
       this.size * snapRatio
     );
+  }
+
+  snap(gate: Gate) {
+    if (
+      gate instanceof Write0Gate ||
+      gate instanceof Write1Gate ||
+      gate instanceof MeasurementGate
+    ) {
+      this.graphics.clear();
+
+      // インプットワイヤを描く
+      this.graphics
+        .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+        .moveTo(this.x, this.y - Dropzone.size * 0.75)
+        .lineTo(this.x, this.y - Dropzone.size * 0.5);
+
+      // アウトプットワイヤを描く
+      this.graphics
+        .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+        .moveTo(this.x, this.y + Dropzone.size * 0.5)
+        .lineTo(this.x, this.y + Dropzone.size * 0.75);
+    }
+  }
+
+  unsnap(gate: Gate) {
+    // 関数にまとめる (constructor() でも使っている)
+    this.graphics
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.x, this.y - Dropzone.size * 0.75)
+      .lineTo(this.x, this.y + Dropzone.size * 0.75);
+  }
+
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+    };
   }
 
   private rectIntersect(

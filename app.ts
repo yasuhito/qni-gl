@@ -109,8 +109,14 @@ export class App {
     this.gatePalette.addGate(QFTGate, 2);
     this.gatePalette.addGate(QFTDaggerGate, 2);
 
-    this.circuit = new Circuit(10, 15, 150, 200);
+    this.circuit = new Circuit(
+      10,
+      5,
+      this.gatePalette.x + this.gatePalette.width,
+      200
+    );
     this.pixiApp.stage.addChild(this.circuit.graphics);
+    this.element.dataset.app = JSON.stringify(this);
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -126,7 +132,7 @@ export class App {
 
   newGate(gate: Gate) {
     this.pixiApp.stage.addChild(gate.graphics);
-    this.element.dataset.components = this.gatePalette.toJSON();
+    this.element.dataset.app = JSON.stringify(this);
   }
 
   enterGate(gate: Gate) {
@@ -178,6 +184,13 @@ export class App {
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
   }
 
+  toJSON() {
+    return {
+      gatePalette: this.gatePalette,
+      circuit: this.circuit || "",
+    };
+  }
+
   private maybeMoveGate(event: PIXI.FederatedPointerEvent) {
     if (this.grabbedGate === null) {
       return;
@@ -210,8 +223,9 @@ export class App {
       snapDropzone &&
       (gate.dropzone === null || gate.dropzone !== snapDropzone)
     ) {
-      gate.snap();
+      gate.snap(snapDropzone);
     }
+
     if (gate.dropzone && !snapDropzone) {
       gate.unsnap();
     }
