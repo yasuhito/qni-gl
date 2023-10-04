@@ -61,11 +61,14 @@ export class App {
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
       width: 800,
-      height: 800,
+      height: 600,
       backgroundColor: tailwindColors.zinc["50"],
       autoDensity: true,
       preserveDrawingBuffer: true,
     });
+
+    window.addEventListener("resize", this.resize.bind(this), false);
+    this.resize();
 
     el.appendChild(this.pixiApp.view);
 
@@ -128,6 +131,12 @@ export class App {
 
   get screenHeight(): number {
     return this.pixiApp.screen.height;
+  }
+
+  resize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.pixiApp.renderer.resize(width, height);
   }
 
   newGate(gate: Gate) {
