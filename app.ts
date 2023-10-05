@@ -62,8 +62,9 @@ export class App {
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
       width: 800,
       height: 600,
-      backgroundColor: tailwindColors.zinc["50"],
+      resolution: window.devicePixelRatio || 1,
       autoDensity: true,
+      backgroundColor: tailwindColors.zinc["50"],
       preserveDrawingBuffer: true,
     });
 
