@@ -1,82 +1,83 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
-import { Runner } from "@pixi/runner";
-import { SwapGate } from "./swap-gate";
-import { ControlGate } from "./control-gate";
-import { AntiControlGate } from "./anti-control-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { MeasurementGate } from "./measurement-gate";
 import * as tailwindColors from "tailwindcss/colors";
+import { BlochSphere } from "./bloch-sphere";
+import { Container } from "pixi.js";
+import { Gate } from "./gate";
+import { PhaseGate } from "./phase-gate";
+import { Runner } from "@pixi/runner";
+import { Signal } from "typed-signals";
+import { XGate } from "./x-gate";
 
-export class GateSource {
+export class GateSource extends Container {
   static size = Gate.size;
   static borderColor = tailwindColors.zinc["300"];
 
   gateClass: typeof Gate;
-  x: number; // 左上の x 座標
-  y: number; // 左上の y 座標
-  graphics: PIXI.Graphics;
 
-  newGateRunner: Runner;
+  // Container, that holds all inner elements.
+  view: Container;
+  protected border: PIXI.Graphics;
+
+  // Event that is fired when the button is down.
+  onNewGate: Signal<(gate: Gate) => void>;
+
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
   grabGateRunner: Runner;
 
-  constructor(gateClass: typeof Gate, x: number, y: number) {
-    this.gateClass = gateClass;
-    this.x = x;
-    this.y = y;
-    this.graphics = new PIXI.Graphics();
+  constructor(gateClass: typeof Gate) {
+    super();
 
-    this.newGateRunner = new Runner("newGate");
+    this.onNewGate = new Signal();
+
+    this.gateClass = gateClass;
+    this.view = new Container();
+    this.addChild(this.view);
+
+    this.border = new PIXI.Graphics();
+    this.border.width = GateSource.size;
+    this.border.height = GateSource.size;
+    this.view.addChild(this.border);
+
+    let radius = 4;
+    if (
+      this.gateClass === XGate ||
+      this.gateClass === PhaseGate ||
+      this.gateClass === BlochSphere
+    ) {
+      radius = 9999;
+    }
+    this.border.lineStyle(1, GateSource.borderColor, 1, 0);
+    this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
+
     this.enterGateRunner = new Runner("enterGate");
     this.leaveGateRunner = new Runner("leaveGate");
     this.grabGateRunner = new Runner("grabGate");
   }
 
   generateNewGate(): Gate {
-    const gate = new this.gateClass(
-      this.x + Gate.size / 2,
-      this.y + Gate.size / 2
-    );
-    this.newGateRunner.emit(gate);
+    const gate = new this.gateClass();
+    gate.x = this.x;
+    gate.y = this.y;
+
+    this.onNewGate.emit(gate);
 
     gate.enterGateRunner.add(this);
     gate.leaveGateRunner.add(this);
     gate.grabGateRunner.add(this);
 
-    // 枠線を入れる
-    if (
-      this.gateClass === SwapGate ||
-      this.gateClass === ControlGate ||
-      this.gateClass === AntiControlGate ||
-      this.gateClass === Write0Gate ||
-      this.gateClass === Write1Gate ||
-      this.gateClass === MeasurementGate
-    ) {
-      this.graphics.lineStyle(1, GateSource.borderColor, 1, 0);
-      this.graphics.drawRoundedRect(
-        this.x,
-        this.y,
-        gate.width,
-        gate.height,
-        gate.cornerRadius
-      );
-    }
-
     return gate;
   }
 
-  private enterGate(gate: Gate) {
+  protected enterGate(gate: Gate) {
     this.enterGateRunner.emit(gate);
   }
 
-  private leaveGate(gate: Gate) {
+  protected leaveGate(gate: Gate) {
     this.leaveGateRunner.emit(gate);
   }
 
-  private grabGate(gate: Gate, globalPosition: PIXI.Point) {
+  protected grabGate(gate: Gate, globalPosition: PIXI.Point) {
     this.generateNewGate();
     this.grabGateRunner.emit(gate, globalPosition);
   }

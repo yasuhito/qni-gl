@@ -22,11 +22,15 @@ import { MeasurementGate } from "./measurement-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { QFTGate } from "./qft-gate";
 import { QFTDaggerGate } from "./qft-dagger-gate";
-import { GatePalette } from "./gate-palette";
+import { OldGatePalette } from "./old-gate-palette";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { Logger } from "./logger";
+import { ScrollBox } from "@pixi/ui";
+import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import * as tailwindColors from "tailwindcss/colors";
+import { GateSource } from "./gate-source";
+import { GatePalette } from "./gate-palette";
 
 export class App {
   static elementId = "app";
@@ -36,7 +40,7 @@ export class App {
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  gatePalette: GatePalette;
+  oldGatePalette: OldGatePalette;
   circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
   logger: Logger;
@@ -82,41 +86,118 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    this.gatePalette = new GatePalette(150, 32);
-    this.pixiApp.stage.addChild(this.gatePalette.graphics);
+    this.oldGatePalette = new OldGatePalette(150, 32);
+    // this.pixiApp.stage.addChild(this.oldGatePalette.graphics);
 
-    this.gatePalette.newGateRunner.add(this);
-    this.gatePalette.enterGateRunner.add(this);
-    this.gatePalette.leaveGateRunner.add(this);
-    this.gatePalette.grabGateRunner.add(this);
+    // this.oldGatePalette.newGateRunner.add(this);
+    // this.oldGatePalette.enterGateRunner.add(this);
+    // this.oldGatePalette.leaveGateRunner.add(this);
+    // this.oldGatePalette.grabGateRunner.add(this);
 
-    this.gatePalette.addGate(HGate);
-    this.gatePalette.addGate(XGate);
-    this.gatePalette.addGate(YGate);
-    this.gatePalette.addGate(ZGate);
-    this.gatePalette.addGate(RnotGate);
-    this.gatePalette.addGate(SGate);
-    this.gatePalette.addGate(SDaggerGate);
-    this.gatePalette.addGate(TGate);
-    this.gatePalette.addGate(TDaggerGate);
-    this.gatePalette.addGate(PhaseGate);
-    this.gatePalette.addGate(RxGate);
-    this.gatePalette.addGate(RyGate);
-    this.gatePalette.addGate(RzGate);
-    this.gatePalette.addGate(SwapGate, 2);
-    this.gatePalette.addGate(ControlGate, 2);
-    this.gatePalette.addGate(AntiControlGate, 2);
-    this.gatePalette.addGate(Write0Gate, 2);
-    this.gatePalette.addGate(Write1Gate, 2);
-    this.gatePalette.addGate(MeasurementGate, 2);
-    this.gatePalette.addGate(BlochSphere, 2);
-    this.gatePalette.addGate(QFTGate, 2);
-    this.gatePalette.addGate(QFTDaggerGate, 2);
+    const gatePalette = new GatePalette();
+    gatePalette.onNewGate.connect((newGate) => {
+      newGate.zIndex = 20
+      this.pixiApp.stage.addChild(newGate);
+    })
+
+    this.pixiApp.stage.addChild(gatePalette.addGate(HGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(XGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(YGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(ZGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(RnotGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(SGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(SDaggerGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(TGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(TDaggerGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(PhaseGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(RxGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(RyGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(RzGate));
+
+    this.pixiApp.stage.addChild(gatePalette.addGate(SwapGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(ControlGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(AntiControlGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(Write0Gate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(Write1Gate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(MeasurementGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(BlochSphere));
+    this.pixiApp.stage.addChild(gatePalette.addGate(QFTGate));
+    this.pixiApp.stage.addChild(gatePalette.addGate(QFTDaggerGate));
+
+    this.pixiApp.stage.addChild(gatePalette);
+
+    const gatePaletteRow1 = new ScrollBox({
+      width: 32 * 13 + 8 * 13,
+      height: 32,
+      elementsMargin: 8,
+      items: [
+        new GateSource(HGate),
+        new GateSource(XGate),
+        new GateSource(YGate),
+        new GateSource(ZGate),
+        new GateSource(RnotGate),
+        new GateSource(SGate),
+        new GateSource(SDaggerGate),
+        new GateSource(TGate),
+        new GateSource(TDaggerGate),
+        new GateSource(PhaseGate),
+        new GateSource(RxGate),
+        new GateSource(RyGate),
+        new GateSource(RzGate),
+      ],
+    });
+
+    (gatePaletteRow1.items[0] as GateSource).generateNewGate();
+
+    const gatePaletteRow2 = new ScrollBox({
+      width: 32 * 9 + 8 * 9,
+      height: 32,
+      elementsMargin: 8,
+      items: [
+        new GateSource(SwapGate),
+        new GateSource(ControlGate),
+        new GateSource(AntiControlGate),
+        new GateSource(Write0Gate),
+        new GateSource(Write1Gate),
+        new GateSource(MeasurementGate),
+        new GateSource(BlochSphere),
+        new GateSource(QFTGate),
+        new GateSource(QFTDaggerGate),
+      ],
+    });
+    const gatePaletteRows = new ScrollBox({
+      background: tailwindColors.white,
+      width: 512 + 46,
+      height: 72 + 30,
+      elementsMargin: 8,
+      horPadding: 24,
+      vertPadding: 16,
+      radius: 12,
+      items: [gatePaletteRow1, gatePaletteRow2],
+    });
+    // this.pixiApp.stage.addChild(gatePaletteRows);
+
+    const gatePaletteBorder = new PIXI.Graphics();
+    gatePaletteBorder.lineStyle(1, tailwindColors.zinc["400"], 1, 0);
+    gatePaletteBorder.drawRoundedRect(0, 0, 512 + 48, 72 + 32, 12);
+    gatePaletteBorder.addChild(gatePaletteRows);
+    gatePaletteRows.x = 1;
+    gatePaletteRows.y = 1;
+    this.pixiApp.stage.addChild(gatePaletteBorder);
+
+    gatePaletteBorder.filters = [
+      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
+      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
+    ];
+
+    // gatePaletteBorder.zIndex = 10;
+    gatePaletteBorder.x = 150;
+    gatePaletteBorder.y = 180; //32 + 104 + 16;
 
     this.circuit = new Circuit(
       10,
       5,
-      this.gatePalette.x + this.gatePalette.width,
+      this.oldGatePalette.x + this.oldGatePalette.width,
       200
     );
     this.pixiApp.stage.addChild(this.circuit.graphics);
@@ -141,7 +222,7 @@ export class App {
   }
 
   newGate(gate: Gate) {
-    this.pixiApp.stage.addChild(gate.graphics);
+    this.pixiApp.stage.addChild(gate);
     this.element.dataset.app = JSON.stringify(this);
   }
 
@@ -196,7 +277,7 @@ export class App {
 
   toJSON() {
     return {
-      gatePalette: this.gatePalette,
+      gatePalette: this.oldGatePalette,
       circuit: this.circuit || "",
     };
   }

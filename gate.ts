@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Dropzone } from "./dropzone";
+import { Container } from "pixi.js";
 
 type ClickEvent = {
   type: "Click";
@@ -14,7 +15,7 @@ type DragEvent = {
   dropzone: Dropzone | null;
 };
 
-export class Gate {
+export class Gate extends Container {
   static gateType = "Gate";
   static size = 32;
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
@@ -129,23 +130,15 @@ export class Gate {
   );
   actor: ActorRefFrom<typeof this.stateMachine>;
 
-  get x(): number {
-    return this.graphics.x + Gate.size / 2;
-  }
+  // get width(): number {
+  //   const klass = this.constructor as typeof Gate;
+  //   return klass.size;
+  // }
 
-  get y(): number {
-    return this.graphics.y + Gate.size / 2;
-  }
-
-  get width(): number {
-    const klass = this.constructor as typeof Gate;
-    return klass.size;
-  }
-
-  get height(): number {
-    const klass = this.constructor as typeof Gate;
-    return klass.size;
-  }
+  // get height(): number {
+  //   const klass = this.constructor as typeof Gate;
+  //   return klass.size;
+  // }
 
   get cornerRadius(): number {
     return 4;
@@ -160,7 +153,9 @@ export class Gate {
     return this._dropzone;
   }
 
-  constructor(xCenter: number, yCenter: number) {
+  constructor() {
+    super();
+
     const klass = this.constructor as typeof Gate;
 
     this.enterGateRunner = new Runner("enterGate");
@@ -169,8 +164,9 @@ export class Gate {
     this.snapDropzoneRunner = new Runner("snapDropzone");
 
     this.graphics = new PIXI.Graphics();
-    this.graphics.x = xCenter - Gate.size / 2;
-    this.graphics.y = yCenter - Gate.size / 2;
+    // this.graphics.x = Gate.size / 2;
+    // this.graphics.y = Gate.size / 2;
+    this.addChild(this.graphics);
 
     // enable the hGate to be interactive...
     // this will allow it to respond to mouse and touch events
