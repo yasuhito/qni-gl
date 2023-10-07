@@ -1,3 +1,4 @@
+import { Graphics } from "pixi.js";
 import { Constructor } from "./constructor";
 import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
@@ -36,9 +37,9 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
     }
 
     applyIdleStyle() {
-      this.graphics.clear();
-      this.graphics.zIndex = 0;
-      this.graphics.cursor = "default";
+      this._shape.clear();
+      this._shape.zIndex = 0;
+      this._shape.cursor = "default";
 
       this.updateGraphics(
         this.style.idleBodyColor,
@@ -48,9 +49,9 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
     }
 
     applyHoverStyle() {
-      this.graphics.clear();
-      this.graphics.zIndex = 0;
-      this.graphics.cursor = "grab";
+      this._shape.clear();
+      this._shape.zIndex = 0;
+      this._shape.cursor = "grab";
 
       this.updateGraphics(
         this.style.hoverBodyColor,
@@ -60,9 +61,9 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
     }
 
     applyGrabbedStyle() {
-      this.graphics.clear();
-      this.graphics.zIndex = 10;
-      this.graphics.cursor = "grabbing";
+      this._shape.clear();
+      this._shape.zIndex = 10;
+      this._shape.cursor = "grabbing";
 
       this.updateGraphics(
         this.style.grabbedBodyColor,
@@ -72,9 +73,9 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
     }
 
     applyActiveStyle() {
-      this.graphics.clear();
-      this.graphics.zIndex = 0;
-      this.graphics.cursor = "grab";
+      this._shape.clear();
+      this._shape.zIndex = 0;
+      this._shape.cursor = "grab";
 
       this.updateGraphics(
         this.style.activeBodyColor,
@@ -88,16 +89,16 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       borderColor: string,
       borderWidth: number
     ) {
-      this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
-      this.graphics.beginFill(bodyColor, 1);
-      this.graphics.drawRoundedRect(
+      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
+      this._shape.beginFill(bodyColor, 1);
+      this._shape.drawRoundedRect(
         0,
         0,
         Gate.size,
         Gate.size,
         this.style.cornerRadius
       );
-      this.graphics.endFill();
+      this._shape.endFill();
     }
   }
 

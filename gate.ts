@@ -21,7 +21,8 @@ export class Gate extends Container {
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   _dropzone: Dropzone | null = null;
-  graphics: PIXI.Graphics;
+  view: Container;
+  protected _shape: PIXI.Graphics;
   sprite: PIXI.Sprite;
   enterGateRunner: Runner;
   leaveGateRunner: Runner;
@@ -116,10 +117,10 @@ export class Gate extends Container {
             // snap した場合
             const x = event.dropzone.x;
             const y = event.dropzone.y;
-            this.graphics.position.set(x - Gate.size / 2, y - Gate.size / 2);
+            this.view.position.set(x - Gate.size / 2, y - Gate.size / 2);
           } else {
-            const newPoint = this.graphics.parent.toLocal(event.globalPosition);
-            this.graphics.position.set(
+            const newPoint = this.view.parent.toLocal(event.globalPosition);
+            this.view.position.set(
               newPoint.x - Gate.size / 2,
               newPoint.y - Gate.size / 2
             );
@@ -129,16 +130,6 @@ export class Gate extends Container {
     }
   );
   actor: ActorRefFrom<typeof this.stateMachine>;
-
-  // get width(): number {
-  //   const klass = this.constructor as typeof Gate;
-  //   return klass.size;
-  // }
-
-  // get height(): number {
-  //   const klass = this.constructor as typeof Gate;
-  //   return klass.size;
-  // }
 
   get cornerRadius(): number {
     return 4;
@@ -163,27 +154,30 @@ export class Gate extends Container {
     this.grabGateRunner = new Runner("grabGate");
     this.snapDropzoneRunner = new Runner("snapDropzone");
 
-    this.graphics = new PIXI.Graphics();
+    this.view = new Container();
     // this.graphics.x = Gate.size / 2;
     // this.graphics.y = Gate.size / 2;
-    this.addChild(this.graphics);
+    this.addChild(this.view);
+
+    this._shape = new PIXI.Graphics();
+    this.view.addChild(this._shape);
 
     // enable the hGate to be interactive...
     // this will allow it to respond to mouse and touch events
-    this.graphics.eventMode = "static";
+    this.view.eventMode = "static";
 
     // Scale mode for pixelation
     klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
     this.sprite = new PIXI.Sprite(klass.icon);
-    this.graphics.addChild(this.sprite);
+    this.view.addChild(this.sprite);
 
     // setup events for mouse + touch using
     // the pointer events
-    this.graphics
-      .on("pointerover", this.onPointerOver.bind(this), this.graphics)
-      .on("pointerout", this.onPointerOut.bind(this), this.graphics)
-      .on("pointerdown", this.onPointerDown.bind(this), this.graphics);
+    this.view
+      .on("pointerover", this.onPointerOver.bind(this), this.view)
+      .on("pointerout", this.onPointerOut.bind(this), this.view)
+      .on("pointerdown", this.onPointerDown.bind(this), this.view);
 
     this.actor = interpret(this.stateMachine).start();
 
@@ -265,8 +259,8 @@ export class Gate extends Container {
 
   toJSON() {
     return {
-      x: this.graphics.x,
-      y: this.graphics.y,
+      x: this.view.x,
+      y: this.view.y,
       width: this.width,
       height: this.height,
     };

@@ -6,7 +6,7 @@ import * as tailwindColors from "tailwindcss/colors";
 
 describe("HGate", () => {
   test("style", () => {
-    const hGate = new HGate(0, 0);
+    const hGate = new HGate();
 
     expect(hGate.style.idleBodyColor).toBe(tailwindColors.emerald["500"]);
     expect(hGate.style.idleBorderColor).toBe(tailwindColors.emerald["700"]);

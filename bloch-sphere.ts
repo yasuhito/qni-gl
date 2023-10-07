@@ -36,9 +36,9 @@ export class BlochSphere extends Gate {
   applyIdleStyle() {
     this.sprite.texture = BlochSphere.icon;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "default";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "default";
 
     this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
   }
@@ -46,9 +46,9 @@ export class BlochSphere extends Gate {
   applyHoverStyle() {
     this.sprite.texture = BlochSphere.iconHover;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.hoverBodyColor,
@@ -60,9 +60,9 @@ export class BlochSphere extends Gate {
   applyGrabbedStyle() {
     this.sprite.texture = BlochSphere.iconGrabbed;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 10;
-    this.graphics.cursor = "grabbing";
+    this._shape.clear();
+    this._shape.zIndex = 10;
+    this._shape.cursor = "grabbing";
 
     this.updateGraphics(
       this.style.grabbedBodyColor,
@@ -74,9 +74,9 @@ export class BlochSphere extends Gate {
   applyActiveStyle() {
     this.sprite.texture = BlochSphere.iconActive;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.activeBodyColor,
@@ -91,13 +91,13 @@ export class BlochSphere extends Gate {
     borderWidth: number | null = null
   ) {
     if (borderWidth !== null && borderColor !== null) {
-      this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
+      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
     }
     if (bodyColor !== null) {
-      this.graphics.beginFill(bodyColor, 1);
+      this._shape.beginFill(bodyColor, 1);
     }
     if (this.style.cornerRadius !== null) {
-      this.graphics.drawRoundedRect(
+      this._shape.drawRoundedRect(
         0,
         0,
         Gate.size,
@@ -105,6 +105,6 @@ export class BlochSphere extends Gate {
         this.style.cornerRadius
       );
     }
-    this.graphics.endFill();
+    this._shape.endFill();
   }
 }

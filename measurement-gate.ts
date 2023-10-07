@@ -60,9 +60,9 @@ export class MeasurementGate extends Gate {
       this.sprite.texture = MeasurementGate.icon;
     }
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "default";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "default";
 
     this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
   }
@@ -74,9 +74,9 @@ export class MeasurementGate extends Gate {
       this.sprite.texture = MeasurementGate.iconHover;
     }
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.hoverBodyColor,
@@ -92,9 +92,9 @@ export class MeasurementGate extends Gate {
       this.sprite.texture = MeasurementGate.iconGrabbed;
     }
 
-    this.graphics.clear();
-    this.graphics.zIndex = 10;
-    this.graphics.cursor = "grabbing";
+    this._shape.clear();
+    this._shape.zIndex = 10;
+    this._shape.cursor = "grabbing";
 
     this.updateGraphics(
       this.style.grabbedBodyColor,
@@ -106,9 +106,9 @@ export class MeasurementGate extends Gate {
   applyActiveStyle() {
     this.sprite.texture = MeasurementGate.iconActive;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.activeBodyColor,
@@ -123,18 +123,18 @@ export class MeasurementGate extends Gate {
     borderWidth: number | null = null
   ) {
     if (borderWidth !== null && borderColor !== null) {
-      this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
+      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
     }
     if (bodyColor !== null) {
-      this.graphics.beginFill(bodyColor, 1);
+      this._shape.beginFill(bodyColor, 1);
     }
-    this.graphics.drawRoundedRect(
+    this._shape.drawRoundedRect(
       0,
       0,
       MeasurementGate.size,
       MeasurementGate.size,
       this.style.cornerRadius
     );
-    this.graphics.endFill();
+    this._shape.endFill();
   }
 }

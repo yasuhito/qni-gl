@@ -35,9 +35,9 @@ export class SwapGate extends Gate {
   applyIdleStyle() {
     this.sprite.texture = SwapGate.icon;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "default";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "default";
 
     this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
   }
@@ -45,9 +45,9 @@ export class SwapGate extends Gate {
   applyHoverStyle() {
     this.sprite.texture = SwapGate.iconHover;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.hoverBodyColor,
@@ -59,9 +59,9 @@ export class SwapGate extends Gate {
   applyGrabbedStyle() {
     this.sprite.texture = SwapGate.iconGrabbed;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 10;
-    this.graphics.cursor = "grabbing";
+    this._shape.clear();
+    this._shape.zIndex = 10;
+    this._shape.cursor = "grabbing";
 
     this.updateGraphics(
       this.style.grabbedBodyColor,
@@ -73,9 +73,9 @@ export class SwapGate extends Gate {
   applyActiveStyle() {
     this.sprite.texture = SwapGate.iconActive;
 
-    this.graphics.clear();
-    this.graphics.zIndex = 0;
-    this.graphics.cursor = "grab";
+    this._shape.clear();
+    this._shape.zIndex = 0;
+    this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.activeBodyColor,
@@ -90,18 +90,18 @@ export class SwapGate extends Gate {
     borderWidth: number | null = null
   ) {
     if (borderWidth !== null && borderColor !== null) {
-      this.graphics.lineStyle(borderWidth, borderColor, 1, 0);
+      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
     }
     if (bodyColor !== null) {
-      this.graphics.beginFill(bodyColor, 1);
+      this._shape.beginFill(bodyColor, 1);
     }
-    this.graphics.drawRoundedRect(
+    this._shape.drawRoundedRect(
       0,
       0,
       Gate.size,
       Gate.size,
       this.style.cornerRadius
     );
-    this.graphics.endFill();
+    this._shape.endFill();
   }
 }
