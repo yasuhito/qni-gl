@@ -6,7 +6,7 @@ import { Gate } from "./src/gate";
 import { GateSource } from "./gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { spacingInPx } from "./util";
+import { spacingInPx } from "./src/util";
 
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。

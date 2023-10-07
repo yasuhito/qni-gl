@@ -4,7 +4,7 @@ import { Container } from "pixi.js";
 import { Dropzone } from "../dropzone";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
-import { spacingInPx } from "../util";
+import { spacingInPx } from "./util";
 
 type ClickEvent = {
   type: "Click";
@@ -24,6 +24,10 @@ export class Gate extends Container {
    * @todo サイズごと (xl, lg, base, sm, xs) に定義する
    */
   static size = spacingInPx(8);
+
+  /**
+   * ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする。
+   */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   _dropzone: Dropzone | null = null;
