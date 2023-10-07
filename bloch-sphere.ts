@@ -1,10 +1,8 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class BlochSphere extends Gate {
-  static gateType = "BlochSphere";
-
   static icon = PIXI.Texture.from("./assets/BlochSphere.svg");
   static iconHover = PIXI.Texture.from("./assets/BlochSphere_hover.svg");
   static iconGrabbed = PIXI.Texture.from("./assets/BlochSphere_grabbed.svg");

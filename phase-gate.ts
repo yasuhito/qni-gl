@@ -1,8 +1,7 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { CircularGateMixin } from "./circular-gate-mixin";
 
 export class PhaseGate extends CircularGateMixin(Gate) {
-  static gateType = "PhaseGate";
   static icon = PIXI.Texture.from("./assets/Phase.svg");
 }

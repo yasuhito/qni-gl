@@ -1,9 +1,8 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class SwapGate extends Gate {
-  static gateType = "SwapGate";
   static icon = PIXI.Texture.from("./assets/Swap.svg");
   static iconHover = PIXI.Texture.from("./assets/Swap_hover.svg");
   static iconGrabbed = PIXI.Texture.from("./assets/Swap_grabbed.svg");

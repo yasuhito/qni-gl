@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Dropzone } from "./dropzone";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 
 export class CircuitStep {
   qubitCount: number; // 量子ビットの数

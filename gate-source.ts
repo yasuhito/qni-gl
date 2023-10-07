@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { BlochSphere } from "./bloch-sphere";
 import { Container } from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
@@ -20,15 +20,17 @@ export class GateSource extends Container {
 
   // Event that is fired when the button is down.
   onNewGate: Signal<(gate: Gate) => void>;
+  onGrabGate: Signal<(gate: Gate, globalPosition: PIXI.Point) => void>;
+  onMouseLeaveGate: Signal<(gate: Gate) => void>;
 
   enterGateRunner: Runner;
-  leaveGateRunner: Runner;
-  grabGateRunner: Runner;
 
   constructor(gateClass: typeof Gate) {
     super();
 
     this.onNewGate = new Signal();
+    this.onGrabGate = new Signal();
+    this.onMouseLeaveGate = new Signal();
 
     this.gateClass = gateClass;
     this.view = new Container();
@@ -51,8 +53,6 @@ export class GateSource extends Container {
     this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
 
     this.enterGateRunner = new Runner("enterGate");
-    this.leaveGateRunner = new Runner("leaveGate");
-    this.grabGateRunner = new Runner("grabGate");
   }
 
   generateNewGate(): Gate {
@@ -62,9 +62,13 @@ export class GateSource extends Container {
 
     this.onNewGate.emit(gate);
 
-    gate.enterGateRunner.add(this);
-    gate.leaveGateRunner.add(this);
-    gate.grabGateRunner.add(this);
+    gate.onMouseLeave.connect((gate) => {
+      this.onMouseLeaveGate.emit(gate);
+    });
+
+    gate.onGrab.connect((gate, globalPosition) => {
+      this.grabGate(gate, globalPosition);
+    });
 
     return gate;
   }
@@ -73,12 +77,8 @@ export class GateSource extends Container {
     this.enterGateRunner.emit(gate);
   }
 
-  protected leaveGate(gate: Gate) {
-    this.leaveGateRunner.emit(gate);
-  }
-
   protected grabGate(gate: Gate, globalPosition: PIXI.Point) {
     this.generateNewGate();
-    this.grabGateRunner.emit(gate, globalPosition);
+    this.onGrabGate.emit(gate, globalPosition);
   }
 }

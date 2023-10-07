@@ -2,8 +2,6 @@ import * as PIXI from "pixi.js";
 import { WriteGate } from "./write-gate";
 
 export class Write1Gate extends WriteGate {
-  static gateType = "Write1Gate";
-
   static icon = PIXI.Texture.from("./assets/Write1.svg");
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Write1_idle_dropzone.svg"

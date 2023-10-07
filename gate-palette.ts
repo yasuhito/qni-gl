@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { GateSource } from "./gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
@@ -25,29 +25,28 @@ export class GatePalette extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
-  protected graphics: PIXI.Graphics;
-  protected gateClasses: (typeof Gate)[][] = [];
-  // protected list: List;
-  protected gateRows: List;
-
   /**
    * 新しいゲートが生成された時に発生するイベント
    *
    * @param newGate 新しく生成されたゲート
    */
   onNewGate: Signal<(newGate: Gate) => void>;
+  onGrabGate: Signal<(gate: Gate, globalPosition: PIXI.Point) => void>;
+  onMouseLeaveGate: Signal<(gate: Gate) => void>;
+
+  protected graphics: PIXI.Graphics;
+  protected gateClasses: (typeof Gate)[][] = [];
+  protected gateRows: List;
 
   constructor() {
     super();
 
     this.onNewGate = new Signal();
+    this.onGrabGate = new Signal();
+    this.onMouseLeaveGate = new Signal();
 
     this.graphics = new PIXI.Graphics();
     this.addChild(this.graphics);
-
-    // this.enterGateRunner = new Runner("enterGate");
-    // this.leaveGateRunner = new Runner("leaveGate");
-    // this.grabGateRunner = new Runner("grabGate");
 
     this.gateRows = new List({
       type: "vertical",
@@ -80,11 +79,15 @@ export class GatePalette extends Container {
     });
 
     const gate = gateSource.generateNewGate();
+    gateSource.onGrabGate.connect((gate, globalPosition) => {
+      this.onGrabGate.emit(gate, globalPosition);
+    });
+
+    gateSource.onMouseLeaveGate.connect((gate) => {
+      this.onMouseLeaveGate.emit(gate);
+    });
 
     // gateSource.enterGateRunner.add(this);
-    // gateSource.leaveGateRunner.add(this);
-    // gateSource.grabGateRunner.add(this);
-    // const gate = gateSource.generateNewGate();
 
     this.redraw();
 

@@ -1,8 +1,7 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { SquareGateMixin } from "./square-gate-mixin";
 
 export class SGate extends SquareGateMixin(Gate) {
-  static gateType = "SGate";
   static icon = PIXI.Texture.from("./assets/S.svg");
 }

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { Runner } from "@pixi/runner";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import { Dropzone } from "./dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 

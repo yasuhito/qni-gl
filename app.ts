@@ -1,32 +1,32 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import * as tailwindColors from "tailwindcss/colors";
+import { AntiControlGate } from "./anti-control-gate";
+import { BlochSphere } from "./bloch-sphere";
+import { Circuit } from "./circuit";
+import { CircuitStep } from "./circuit-step";
+import { ControlGate } from "./control-gate";
+import { Gate } from "./src/gate";
+import { GatePalette } from "./gate-palette";
 import { HGate } from "./h-gate";
-import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
-import { RnotGate } from "./rnot-gate";
-import { SGate } from "./s-gate";
-import { TGate } from "./t-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { SDaggerGate } from "./s-dagger-gate";
+import { Logger } from "./logger";
+import { MeasurementGate } from "./measurement-gate";
 import { PhaseGate } from "./phase-gate";
+import { QFTDaggerGate } from "./qft-dagger-gate";
+import { QFTGate } from "./qft-gate";
+import { RnotGate } from "./rnot-gate";
 import { RxGate } from "./rx-gate";
 import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { SGate } from "./s-gate";
 import { SwapGate } from "./swap-gate";
-import { ControlGate } from "./control-gate";
-import { AntiControlGate } from "./anti-control-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { TGate } from "./t-gate";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
-import { MeasurementGate } from "./measurement-gate";
-import { BlochSphere } from "./bloch-sphere";
-import { QFTGate } from "./qft-gate";
-import { QFTDaggerGate } from "./qft-dagger-gate";
-import { Circuit } from "./circuit";
-import { CircuitStep } from "./circuit-step";
-import { Logger } from "./logger";
-import * as tailwindColors from "tailwindcss/colors";
-import { GatePalette } from "./gate-palette";
+import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
 
 export class App {
   static elementId = "app";
@@ -82,21 +82,23 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    // this.oldGatePalette = new OldGatePalette(150, 32);
-    // this.pixiApp.stage.addChild(this.oldGatePalette.graphics);
-
     // this.oldGatePalette.newGateRunner.add(this);
-    // this.oldGatePalette.enterGateRunner.add(this);
     // this.oldGatePalette.leaveGateRunner.add(this);
-    // this.oldGatePalette.grabGateRunner.add(this);
 
     this.gatePalette = new GatePalette();
+    this.pixiApp.stage.addChild(this.gatePalette);
+    this.gatePalette.onGrabGate.connect((gate, globalPosition) => {
+      this.grabGate(gate, globalPosition);
+    });
     this.gatePalette.x = 40;
     this.gatePalette.y = 64;
 
     this.gatePalette.onNewGate.connect((newGate) => {
       newGate.zIndex = 20;
       this.pixiApp.stage.addChild(newGate);
+    });
+    this.gatePalette.onMouseLeaveGate.connect((gate) => {
+      this.leaveGate(gate);
     });
 
     this.pixiApp.stage.addChild(this.gatePalette.addGate(HGate));
@@ -123,8 +125,6 @@ export class App {
     this.pixiApp.stage.addChild(this.gatePalette.addGate(BlochSphere));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTDaggerGate));
-
-    this.pixiApp.stage.addChild(this.gatePalette);
 
     this.circuit = new Circuit(
       10,
@@ -158,12 +158,7 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
   }
 
-  enterGate(gate: Gate) {
-    gate.mouseEnter();
-  }
-
   leaveGate(gate: Gate) {
-    gate.mouseLeave();
     this.pixiApp.stage.cursor = "default";
   }
 
@@ -171,6 +166,8 @@ export class App {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
+
+    gate.zIndex = 30;
 
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
@@ -266,6 +263,7 @@ export class App {
 
     this.pixiApp.stage.cursor = "grab";
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
+    this.grabbedGate.zIndex = 20;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
   }

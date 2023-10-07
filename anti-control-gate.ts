@@ -1,10 +1,8 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class AntiControlGate extends Gate {
-  static gateType = "AntiControlGate";
-
   static icon = PIXI.Texture.from("./assets/AntiControl.svg");
   static iconHover = PIXI.Texture.from("./assets/AntiControl_hover.svg");
   static iconGrabbed = PIXI.Texture.from("./assets/AntiControl_grabbed.svg");

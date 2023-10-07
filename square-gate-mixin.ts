@@ -1,6 +1,6 @@
 import { Graphics } from "pixi.js";
 import { Constructor } from "./constructor";
-import { Gate } from "./gate";
+import { Gate } from "./src/gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export declare class SquareGate {

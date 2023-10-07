@@ -1,8 +1,10 @@
 import * as PIXI from "pixi.js";
-import { Runner } from "@pixi/runner";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
-import { Dropzone } from "./dropzone";
 import { Container } from "pixi.js";
+import { Dropzone } from "../dropzone";
+import { Runner } from "@pixi/runner";
+import { Signal } from "typed-signals";
+import { spacingInPx } from "../util";
 
 type ClickEvent = {
   type: "Click";
@@ -16,17 +18,22 @@ type DragEvent = {
 };
 
 export class Gate extends Container {
-  static gateType = "Gate";
-  static size = 32;
+  /**
+   * ゲートの幅と高さ (ピクセル)
+   *
+   * @todo サイズごと (xl, lg, base, sm, xs) に定義する
+   */
+  static size = spacingInPx(8);
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   _dropzone: Dropzone | null = null;
   view: Container;
   protected _shape: PIXI.Graphics;
   sprite: PIXI.Sprite;
-  enterGateRunner: Runner;
-  leaveGateRunner: Runner;
-  grabGateRunner: Runner;
+
+  onGrab: Signal<(newGate: Gate, globalPosition: PIXI.Point) => void>;
+  onMouseLeave: Signal<(gate: Gate) => void>;
+
   snapDropzoneRunner: Runner;
 
   stateMachine = createMachine(
@@ -147,11 +154,11 @@ export class Gate extends Container {
   constructor() {
     super();
 
+    this.onMouseLeave = new Signal();
+    this.onGrab = new Signal();
+
     const klass = this.constructor as typeof Gate;
 
-    this.enterGateRunner = new Runner("enterGate");
-    this.leaveGateRunner = new Runner("leaveGate");
-    this.grabGateRunner = new Runner("grabGate");
     this.snapDropzoneRunner = new Runner("snapDropzone");
 
     this.view = new Container();
@@ -236,11 +243,7 @@ export class Gate extends Container {
     this.dropzone.unsnap(this);
   }
 
-  mouseEnter() {
-    this.actor.send("Mouse enter");
-  }
-
-  mouseLeave() {
+  protected mouseLeave() {
     this.actor.send("Mouse leave");
   }
 
@@ -252,11 +255,6 @@ export class Gate extends Container {
 
   applyActiveStyle() {}
 
-  gateType(): string {
-    const klass = this.constructor as typeof Gate;
-    return klass.gateType;
-  }
-
   toJSON() {
     return {
       x: this.view.x,
@@ -267,14 +265,16 @@ export class Gate extends Container {
   }
 
   private onPointerOver(_event: PIXI.FederatedEvent) {
-    this.enterGateRunner.emit(this);
+    this.actor.send("Mouse enter");
+    this.view.cursor = "grab";
   }
 
   private onPointerOut() {
-    this.leaveGateRunner.emit(this);
+    this.mouseLeave();
+    this.onMouseLeave.emit(this);
   }
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {
-    this.grabGateRunner.emit(this, event.global);
+    this.onGrab.emit(this, event.global);
   }
 }
