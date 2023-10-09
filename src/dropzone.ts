@@ -1,37 +1,39 @@
 import * as PIXI from "pixi.js";
+import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { Gate } from "./gate";
+import { MeasurementGate } from "../measurement-gate";
 import { Runner } from "@pixi/runner";
 import { Write0Gate } from "../write0-gate";
 import { Write1Gate } from "../write1-gate";
-import { MeasurementGate } from "../measurement-gate";
-import * as tailwindColors from "tailwindcss/colors";
 
 export class Dropzone extends Container {
   static size = Gate.size;
-
   static wireWidth = 2;
   static quantumWireColor = tailwindColors.zinc["900"];
 
-  view: PIXI.Graphics;
-  wire: PIXI.Graphics;
+  view: Container;
   snapRunner: Runner;
+  protected wire: PIXI.Graphics;
 
   get size(): number {
-    const klass = this.constructor as typeof Gate;
-    return klass.size;
+    return Dropzone.size;
   }
 
-  // x, y は Dropzone の中心座標
-  constructor(x: number, y: number) {
-    super();
+  get height(): number {
+    return Dropzone.size;
+  }
 
-    this.x = x;
-    this.y = y;
+  get width(): number {
+    return Dropzone.size * 1.5;
+  }
+
+  constructor() {
+    super();
 
     this.snapRunner = new Runner("snap");
 
-    this.view = new PIXI.Graphics();
+    this.view = new Container();
     this.addChild(this.view);
 
     this.wire = new PIXI.Graphics();
@@ -39,8 +41,8 @@ export class Dropzone extends Container {
 
     this.wire
       .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-      .moveTo(-Dropzone.size * 0.75, 0)
-      .lineTo(Dropzone.size * 0.75, 0);
+      .moveTo(0, Dropzone.size / 2)
+      .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
   }
 
   isSnappable(x: number, y: number, width: number, height: number) {
@@ -82,7 +84,7 @@ export class Dropzone extends Container {
 
   unsnap(gate: Gate) {
     // 関数にまとめる (constructor() でも使っている)
-    this.view
+    this.wire
       .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
       .moveTo(this.x, this.y - Dropzone.size * 0.75)
       .lineTo(this.x, this.y + Dropzone.size * 0.75);

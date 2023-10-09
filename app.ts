@@ -6,7 +6,7 @@ import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { ControlGate } from "./control-gate";
 import { Gate } from "./src/gate";
-import { GatePalette } from "./gate-palette";
+import { GatePalette } from "./src/gate-palette";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
@@ -126,13 +126,10 @@ export class App {
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTDaggerGate));
 
-    this.circuit = new Circuit(
-      10,
-      5,
-      this.gatePalette.x + this.gatePalette.width,
-      200
-    );
-    this.pixiApp.stage.addChild(this.circuit.graphics);
+    this.circuit = new Circuit(10, 5);
+    this.circuit.x = this.gatePalette.x;
+    this.circuit.y = 64 + this.gatePalette.height + 64;
+    this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
     this.logger = new Logger(this.pixiApp);

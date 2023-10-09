@@ -2,11 +2,11 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { Gate } from "./src/gate";
-import { GateSource } from "./gate-source";
+import { Gate } from "./gate";
+import { GateSource } from "../gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { spacingInPx } from "./src/util";
+import { spacingInPx } from "./util";
 
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。

@@ -1,13 +1,14 @@
 import * as PIXI from "pixi.js";
 import { Dropzone } from "./src/dropzone";
 import { Gate } from "./src/gate";
+import { Container } from "pixi.js";
+import { List } from "@pixi/ui";
 
-export class CircuitStep {
+export class CircuitStep extends Container {
   qubitCount: number; // 量子ビットの数
-  x: number; // 左上の x 座標
-  y: number; // 左上の y 座標
-  graphics: PIXI.Graphics;
+  view: Container;
   dropzones: Dropzone[] = [];
+  protected list: List;
 
   static get height(): number {
     return Dropzone.size + this.paddingY * 2;
@@ -26,50 +27,38 @@ export class CircuitStep {
   }
 
   // x, y はステップの右上の座標 (モバイルの場合)
-  constructor(qubitCount: number, x: number, y: number) {
+  constructor(qubitCount: number) {
+    super();
+
     this.qubitCount = qubitCount;
-    this.x = x;
-    this.y = y;
-    this.graphics = new PIXI.Graphics();
+    this.view = new PIXI.Container();
+    this.addChild(this.view);
+
+    this.list = new List({
+      type: "vertical",
+      elementsMargin: 16,
+    });
+    this.view.addChild(this.list);
 
     for (let i = 0; i < this.qubitCount; i++) {
-      const dropzoneX = this.x - this.paddingX - (32 + 16) * i - 16;
-      const dropzoneY = this.y + this.paddingY + Dropzone.size / 2;
-      const dropzone = new Dropzone(dropzoneX, dropzoneY);
-      this.dropzones.push(dropzone);
-      this.graphics.addChild(dropzone);
+      const dropzone = new Dropzone();
+      this.list.addChild(dropzone);
     }
 
-    this.graphics.lineStyle(1, 0xeeeeee, 1, 0);
-    this.graphics.drawRect(
-      this.x - this.width,
-      this.y,
-      this.width,
-      this.height
-    );
+    // this.view.lineStyle(1, 0xeeeeee, 1, 0);
+    // this.view.drawRect(this.x - this.width, this.y, this.width, this.height);
   }
 
   get width(): number {
-    return (
-      this.qubitCount * Gate.size +
-      (this.qubitCount - 1) * CircuitStep.gapBetweenGates +
-      this.paddingX * 2
-    );
+    return Gate.size * 1.5;
   }
 
   get height(): number {
-    const klass = this.constructor as typeof CircuitStep;
-    return klass.height;
-  }
-
-  get paddingX(): number {
-    const klass = this.constructor as typeof CircuitStep;
-    return klass.paddingX;
-  }
-
-  get paddingY(): number {
-    const klass = this.constructor as typeof CircuitStep;
-    return klass.paddingY;
+    return (
+      Gate.size * this.list.children.length + this.list.children.length * 16
+    );
+    // const klass = this.constructor as typeof CircuitStep;
+    // return klass.height;
   }
 
   toJSON() {
