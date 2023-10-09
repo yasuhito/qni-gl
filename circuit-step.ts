@@ -7,8 +7,7 @@ import { List } from "@pixi/ui";
 export class CircuitStep extends Container {
   qubitCount: number; // 量子ビットの数
   view: Container;
-  dropzones: Dropzone[] = [];
-  protected list: List;
+  _dropzones: List;
 
   static get height(): number {
     return Dropzone.size + this.paddingY * 2;
@@ -26,6 +25,10 @@ export class CircuitStep extends Container {
     return Dropzone.size / 4;
   }
 
+  get dropzones(): Dropzone[] {
+    return this._dropzones.children as Dropzone[];
+  }
+
   // x, y はステップの右上の座標 (モバイルの場合)
   constructor(qubitCount: number) {
     super();
@@ -34,19 +37,16 @@ export class CircuitStep extends Container {
     this.view = new PIXI.Container();
     this.addChild(this.view);
 
-    this.list = new List({
+    this._dropzones = new List({
       type: "vertical",
       elementsMargin: 16,
     });
-    this.view.addChild(this.list);
+    this.view.addChild(this._dropzones);
 
     for (let i = 0; i < this.qubitCount; i++) {
       const dropzone = new Dropzone();
-      this.list.addChild(dropzone);
+      this._dropzones.addChild(dropzone);
     }
-
-    // this.view.lineStyle(1, 0xeeeeee, 1, 0);
-    // this.view.drawRect(this.x - this.width, this.y, this.width, this.height);
   }
 
   get width(): number {
@@ -55,10 +55,9 @@ export class CircuitStep extends Container {
 
   get height(): number {
     return (
-      Gate.size * this.list.children.length + this.list.children.length * 16
+      Gate.size * this._dropzones.children.length +
+      this._dropzones.children.length * 16
     );
-    // const klass = this.constructor as typeof CircuitStep;
-    // return klass.height;
   }
 
   toJSON() {

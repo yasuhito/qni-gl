@@ -136,9 +136,11 @@ export class Gate extends Container {
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
             // snap した場合
-            const x = event.dropzone.x;
-            const y = event.dropzone.y;
-            this.view.position.set(x - Gate.size / 2, y - Gate.size / 2);
+            const pos = event.dropzone.getGlobalPosition();
+            this.view.position.set(
+              pos.x - Gate.size / 2,
+              pos.y - Gate.size / 2
+            );
           } else {
             const newPoint = this.view.parent.toLocal(event.globalPosition);
             this.view.position.set(

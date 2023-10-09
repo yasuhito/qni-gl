@@ -3,7 +3,6 @@ import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { Gate } from "./gate";
 import { MeasurementGate } from "../measurement-gate";
-import { Runner } from "@pixi/runner";
 import { Write0Gate } from "../write0-gate";
 import { Write1Gate } from "../write1-gate";
 
@@ -13,7 +12,6 @@ export class Dropzone extends Container {
   static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
-  snapRunner: Runner;
   protected wire: PIXI.Graphics;
 
   get size(): number {
@@ -31,8 +29,6 @@ export class Dropzone extends Container {
   constructor() {
     super();
 
-    this.snapRunner = new Runner("snap");
-
     this.view = new Container();
     this.addChild(this.view);
 
@@ -47,16 +43,21 @@ export class Dropzone extends Container {
 
   isSnappable(x: number, y: number, width: number, height: number) {
     const snapRatio = 0.5;
+    const pos = this.getGlobalPosition();
 
     return this.rectIntersect(
       x - width / 2,
       y - height / 2,
       width,
       height,
-      this.x - (this.size * snapRatio) / 2,
-      this.y - (this.size * snapRatio) / 2,
-      this.size * snapRatio,
-      this.size * snapRatio
+      pos.x,
+      pos.y,
+      pos.x + this.size,
+      pos.y + this.size
+      // this.x - (this.size * snapRatio) / 2,
+      // this.y - (this.size * snapRatio) / 2,
+      // this.size * snapRatio,
+      // this.size * snapRatio
     );
   }
 
@@ -68,17 +69,22 @@ export class Dropzone extends Container {
     ) {
       this.wire.clear();
 
+      this.wire.lineStyle(
+        Dropzone.wireWidth,
+        Dropzone.quantumWireColor,
+        1,
+        0.5
+      );
+
       // インプットワイヤを描く
       this.wire
-        .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-        .moveTo(this.x, this.y - Dropzone.size * 0.75)
-        .lineTo(this.x, this.y - Dropzone.size * 0.5);
+        .moveTo(Dropzone.size * 0.75, -Dropzone.size / 4)
+        .lineTo(Dropzone.size * 0.75, Dropzone.size / 2);
 
       // アウトプットワイヤを描く
-      this.wire
-        .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-        .moveTo(this.x, this.y + Dropzone.size * 0.5)
-        .lineTo(this.x, this.y + Dropzone.size * 0.75);
+      // this.wire
+      //   .moveTo(Dropzone.size * 0.75, Dropzone.size / 2)
+      //   .lineTo(Dropzone.size * 0.75, Dropzone.size);
     }
   }
 
@@ -91,9 +97,11 @@ export class Dropzone extends Container {
   }
 
   toJSON() {
+    const pos = this.getGlobalPosition();
+
     return {
-      x: this.x,
-      y: this.y,
+      x: pos.x,
+      y: pos.y,
     };
   }
 

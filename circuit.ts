@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
@@ -6,47 +5,39 @@ import { List } from "@pixi/ui";
 export class Circuit extends Container {
   qubitCount: number; // 量子ビットの数
   stepCount: number; // ステップ数
-  view: PIXI.Graphics;
-  circuitSteps: CircuitStep[] = [];
-  list: List;
+  view: Container;
+  protected _circuitSteps: List;
 
   get width(): number {
-    return this.circuitSteps[0].width;
+    return this._circuitSteps[0].width;
   }
 
   get height(): number {
-    return this.circuitSteps.length * this.circuitSteps[0].height;
+    return this._circuitSteps[0].height * this._circuitSteps.children.length;
   }
 
-  // x, y は回路の右上の座標 (モバイルの場合)
+  get circuitSteps(): CircuitStep[] {
+    return this._circuitSteps.children as CircuitStep[];
+  }
+
   constructor(qubitCount: number, stepCount: number) {
     super();
 
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
 
-    this.view = new PIXI.Graphics();
+    this.view = new Container();
     this.addChild(this.view);
 
-    this.list = new List({
+    this._circuitSteps = new List({
       type: "horizontal",
     });
-    this.view.addChild(this.list);
+    this.view.addChild(this._circuitSteps);
 
     for (let i = 0; i < this.stepCount; i++) {
       const circuitStep = new CircuitStep(this.qubitCount);
-      this.list.addChild(circuitStep);
+      this._circuitSteps.addChild(circuitStep);
     }
-
-    // for (let i = 0; i < this.stepCount; i++) {
-    //   const circuitStep = new CircuitStep(
-    //     this.qubitCount,
-    //     this.x,
-    //     this.y + i * CircuitStep.height
-    //   );
-    //   this.circuitSteps.push(circuitStep);
-    //   this.view.addChild(circuitStep);
-    // }
   }
 
   toJSON() {
