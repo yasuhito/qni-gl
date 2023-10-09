@@ -1,20 +1,20 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
+import { Container } from "pixi.js";
+import { Gate } from "./gate";
 import { Runner } from "@pixi/runner";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { MeasurementGate } from "./measurement-gate";
+import { Write0Gate } from "../write0-gate";
+import { Write1Gate } from "../write1-gate";
+import { MeasurementGate } from "../measurement-gate";
 import * as tailwindColors from "tailwindcss/colors";
 
-export class Dropzone {
+export class Dropzone extends Container {
   static size = Gate.size;
 
   static wireWidth = 2;
   static quantumWireColor = tailwindColors.zinc["900"];
 
-  x: number; // 中心の x 座標
-  y: number; // 中心の y 座標
-  graphics: PIXI.Graphics;
+  view: PIXI.Graphics;
+  wire: PIXI.Graphics;
   snapRunner: Runner;
 
   get size(): number {
@@ -24,16 +24,23 @@ export class Dropzone {
 
   // x, y は Dropzone の中心座標
   constructor(x: number, y: number) {
+    super();
+
     this.x = x;
     this.y = y;
 
     this.snapRunner = new Runner("snap");
 
-    this.graphics = new PIXI.Graphics();
-    this.graphics
+    this.view = new PIXI.Graphics();
+    this.addChild(this.view);
+
+    this.wire = new PIXI.Graphics();
+    this.view.addChild(this.wire);
+
+    this.wire
       .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-      .moveTo(this.x, this.y - Dropzone.size * 0.75)
-      .lineTo(this.x, this.y + Dropzone.size * 0.75);
+      .moveTo(-Dropzone.size * 0.75, 0)
+      .lineTo(Dropzone.size * 0.75, 0);
   }
 
   isSnappable(x: number, y: number, width: number, height: number) {
@@ -57,16 +64,16 @@ export class Dropzone {
       gate instanceof Write1Gate ||
       gate instanceof MeasurementGate
     ) {
-      this.graphics.clear();
+      this.wire.clear();
 
       // インプットワイヤを描く
-      this.graphics
+      this.wire
         .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
         .moveTo(this.x, this.y - Dropzone.size * 0.75)
         .lineTo(this.x, this.y - Dropzone.size * 0.5);
 
       // アウトプットワイヤを描く
-      this.graphics
+      this.wire
         .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
         .moveTo(this.x, this.y + Dropzone.size * 0.5)
         .lineTo(this.x, this.y + Dropzone.size * 0.75);
@@ -75,7 +82,7 @@ export class Dropzone {
 
   unsnap(gate: Gate) {
     // 関数にまとめる (constructor() でも使っている)
-    this.graphics
+    this.view
       .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
       .moveTo(this.x, this.y - Dropzone.size * 0.75)
       .lineTo(this.x, this.y + Dropzone.size * 0.75);

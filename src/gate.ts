@@ -1,17 +1,24 @@
 import * as PIXI from "pixi.js";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Container } from "pixi.js";
-import { Dropzone } from "../dropzone";
+import { Dropzone } from "./dropzone";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
 
-type ClickEvent = {
+/**
+ * ゲートのクリックイベント
+ */
+export type ClickEvent = {
   type: "Click";
   globalPosition: PIXI.Point;
   dropzone: Dropzone | null;
 };
-type DragEvent = {
+
+/**
+ * ゲートのドラッグイベント
+ */
+export type DragEvent = {
   type: "Drag";
   globalPosition: PIXI.Point;
   dropzone: Dropzone | null;
@@ -25,22 +32,25 @@ export class Gate extends Container {
    */
   static size = spacingInPx(8);
 
-  /**
-   * ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする。
-   */
+  /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
-  _dropzone: Dropzone | null = null;
+  /** すべての内部要素を保持するコンテナ */
   view: Container;
-  protected _shape: PIXI.Graphics;
-  sprite: PIXI.Sprite;
 
+  /** ゲートが捕まれた時に飛ぶシグナル */
   onGrab: Signal<(newGate: Gate, globalPosition: PIXI.Point) => void>;
+  /** ゲートからマウスポインタが離れた時に飛ぶシグナル */
   onMouseLeave: Signal<(gate: Gate) => void>;
 
+  protected _shape: PIXI.Graphics;
+  protected _dropzone: Dropzone | null = null;
+  protected _sprite: PIXI.Sprite;
+
+  /** @todo 消す */
   snapDropzoneRunner: Runner;
 
-  stateMachine = createMachine(
+  protected stateMachine = createMachine(
     {
       id: "draggable",
       predictableActionArguments: true,
@@ -142,10 +152,6 @@ export class Gate extends Container {
   );
   actor: ActorRefFrom<typeof this.stateMachine>;
 
-  get cornerRadius(): number {
-    return 4;
-  }
-
   set dropzone(value: Dropzone | null) {
     this._dropzone = value;
     this.snapDropzoneRunner.emit(this);
@@ -180,8 +186,8 @@ export class Gate extends Container {
     // Scale mode for pixelation
     klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-    this.sprite = new PIXI.Sprite(klass.icon);
-    this.view.addChild(this.sprite);
+    this._sprite = new PIXI.Sprite(klass.icon);
+    this.view.addChild(this._sprite);
 
     // setup events for mouse + touch using
     // the pointer events

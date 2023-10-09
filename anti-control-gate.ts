@@ -32,7 +32,7 @@ export class AntiControlGate extends Gate {
   }
 
   applyIdleStyle() {
-    this.sprite.texture = AntiControlGate.icon;
+    this._sprite.texture = AntiControlGate.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class AntiControlGate extends Gate {
   }
 
   applyHoverStyle() {
-    this.sprite.texture = AntiControlGate.iconHover;
+    this._sprite.texture = AntiControlGate.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class AntiControlGate extends Gate {
   }
 
   applyGrabbedStyle() {
-    this.sprite.texture = AntiControlGate.iconGrabbed;
+    this._sprite.texture = AntiControlGate.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class AntiControlGate extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = AntiControlGate.iconActive;
+    this._sprite.texture = AntiControlGate.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

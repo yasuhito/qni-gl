@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./src/gate";
-import { Dropzone } from "./dropzone";
+import { Dropzone } from "./src/dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class WriteGate extends Gate {
@@ -37,22 +37,22 @@ export class WriteGate extends Gate {
   snap(dropzone: Dropzone) {
     super.snap(dropzone);
     const klass = this.constructor as typeof WriteGate;
-    this.sprite.texture = klass.iconGrabbedDropzone;
+    this._sprite.texture = klass.iconGrabbedDropzone;
   }
 
   unsnap() {
     super.unsnap();
     const klass = this.constructor as typeof WriteGate;
-    this.sprite.texture = klass.iconGrabbed;
+    this._sprite.texture = klass.iconGrabbed;
   }
 
   applyIdleStyle() {
     const klass = this.constructor as typeof WriteGate;
 
     if (this.dropzone) {
-      this.sprite.texture = klass.iconIdleDropzone;
+      this._sprite.texture = klass.iconIdleDropzone;
     } else {
-      this.sprite.texture = klass.icon;
+      this._sprite.texture = klass.icon;
     }
 
     this._shape.clear();
@@ -66,9 +66,9 @@ export class WriteGate extends Gate {
     const klass = this.constructor as typeof WriteGate;
 
     if (this.dropzone) {
-      this.sprite.texture = klass.iconHoverDropzone;
+      this._sprite.texture = klass.iconHoverDropzone;
     } else {
-      this.sprite.texture = klass.iconHover;
+      this._sprite.texture = klass.iconHover;
     }
 
     this._shape.clear();
@@ -86,9 +86,9 @@ export class WriteGate extends Gate {
     const klass = this.constructor as typeof WriteGate;
 
     if (this.dropzone) {
-      this.sprite.texture = klass.iconGrabbedDropzone;
+      this._sprite.texture = klass.iconGrabbedDropzone;
     } else {
-      this.sprite.texture = klass.iconGrabbed;
+      this._sprite.texture = klass.iconGrabbed;
     }
 
     this._shape.clear();
@@ -105,7 +105,7 @@ export class WriteGate extends Gate {
   applyActiveStyle() {
     const klass = this.constructor as typeof WriteGate;
 
-    this.sprite.texture = klass.iconActive;
+    this._sprite.texture = klass.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

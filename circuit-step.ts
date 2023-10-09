@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Dropzone } from "./dropzone";
+import { Dropzone } from "./src/dropzone";
 import { Gate } from "./src/gate";
 
 export class CircuitStep {
@@ -37,7 +37,7 @@ export class CircuitStep {
       const dropzoneY = this.y + this.paddingY + Dropzone.size / 2;
       const dropzone = new Dropzone(dropzoneX, dropzoneY);
       this.dropzones.push(dropzone);
-      this.graphics.addChild(dropzone.graphics);
+      this.graphics.addChild(dropzone);
     }
 
     this.graphics.lineStyle(1, 0xeeeeee, 1, 0);

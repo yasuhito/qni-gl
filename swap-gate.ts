@@ -32,7 +32,7 @@ export class SwapGate extends Gate {
   }
 
   applyIdleStyle() {
-    this.sprite.texture = SwapGate.icon;
+    this._sprite.texture = SwapGate.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class SwapGate extends Gate {
   }
 
   applyHoverStyle() {
-    this.sprite.texture = SwapGate.iconHover;
+    this._sprite.texture = SwapGate.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class SwapGate extends Gate {
   }
 
   applyGrabbedStyle() {
-    this.sprite.texture = SwapGate.iconGrabbed;
+    this._sprite.texture = SwapGate.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class SwapGate extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = SwapGate.iconActive;
+    this._sprite.texture = SwapGate.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

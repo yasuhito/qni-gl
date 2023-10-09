@@ -32,7 +32,7 @@ export class BlochSphere extends Gate {
   }
 
   applyIdleStyle() {
-    this.sprite.texture = BlochSphere.icon;
+    this._sprite.texture = BlochSphere.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class BlochSphere extends Gate {
   }
 
   applyHoverStyle() {
-    this.sprite.texture = BlochSphere.iconHover;
+    this._sprite.texture = BlochSphere.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class BlochSphere extends Gate {
   }
 
   applyGrabbedStyle() {
-    this.sprite.texture = BlochSphere.iconGrabbed;
+    this._sprite.texture = BlochSphere.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class BlochSphere extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = BlochSphere.iconActive;
+    this._sprite.texture = BlochSphere.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

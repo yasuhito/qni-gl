@@ -32,7 +32,7 @@ export class ControlGate extends Gate {
   }
 
   applyIdleStyle() {
-    this.sprite.texture = ControlGate.icon;
+    this._sprite.texture = ControlGate.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class ControlGate extends Gate {
   }
 
   applyHoverStyle() {
-    this.sprite.texture = ControlGate.iconHover;
+    this._sprite.texture = ControlGate.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class ControlGate extends Gate {
   }
 
   applyGrabbedStyle() {
-    this.sprite.texture = ControlGate.iconGrabbed;
+    this._sprite.texture = ControlGate.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class ControlGate extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = ControlGate.iconActive;
+    this._sprite.texture = ControlGate.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

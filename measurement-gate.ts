@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./src/gate";
-import { Dropzone } from "./dropzone";
+import { Dropzone } from "./src/dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class MeasurementGate extends Gate {
@@ -43,19 +43,19 @@ export class MeasurementGate extends Gate {
 
   snap(dropzone: Dropzone) {
     super.snap(dropzone);
-    this.sprite.texture = MeasurementGate.iconGrabbedDropzone;
+    this._sprite.texture = MeasurementGate.iconGrabbedDropzone;
   }
 
   unsnap() {
     super.unsnap();
-    this.sprite.texture = MeasurementGate.iconGrabbed;
+    this._sprite.texture = MeasurementGate.iconGrabbed;
   }
 
   applyIdleStyle() {
     if (this.dropzone) {
-      this.sprite.texture = MeasurementGate.iconIdleDropzone;
+      this._sprite.texture = MeasurementGate.iconIdleDropzone;
     } else {
-      this.sprite.texture = MeasurementGate.icon;
+      this._sprite.texture = MeasurementGate.icon;
     }
 
     this._shape.clear();
@@ -67,9 +67,9 @@ export class MeasurementGate extends Gate {
 
   applyHoverStyle() {
     if (this.dropzone) {
-      this.sprite.texture = MeasurementGate.iconHoverDropzone;
+      this._sprite.texture = MeasurementGate.iconHoverDropzone;
     } else {
-      this.sprite.texture = MeasurementGate.iconHover;
+      this._sprite.texture = MeasurementGate.iconHover;
     }
 
     this._shape.clear();
@@ -85,9 +85,9 @@ export class MeasurementGate extends Gate {
 
   applyGrabbedStyle() {
     if (this.dropzone) {
-      this.sprite.texture = MeasurementGate.iconGrabbedDropzone;
+      this._sprite.texture = MeasurementGate.iconGrabbedDropzone;
     } else {
-      this.sprite.texture = MeasurementGate.iconGrabbed;
+      this._sprite.texture = MeasurementGate.iconGrabbed;
     }
 
     this._shape.clear();
@@ -102,7 +102,7 @@ export class MeasurementGate extends Gate {
   }
 
   applyActiveStyle() {
-    this.sprite.texture = MeasurementGate.iconActive;
+    this._sprite.texture = MeasurementGate.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;
