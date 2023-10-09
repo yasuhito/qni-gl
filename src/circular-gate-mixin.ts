@@ -1,5 +1,5 @@
 import { Constructor } from "./constructor";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export declare class CircularGate {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, test } from "vitest";
-import { HGate } from "../h-gate";
+import { HGate } from "../src/h-gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 describe("HGate", () => {

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
 export class AntiControlGate extends Gate {

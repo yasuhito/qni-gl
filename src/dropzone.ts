@@ -2,9 +2,9 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { Gate } from "./gate";
-import { MeasurementGate } from "../measurement-gate";
-import { Write0Gate } from "../write0-gate";
-import { Write1Gate } from "../write1-gate";
+import { MeasurementGate } from "./measurement-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
 
 export class Dropzone extends Container {
   static size = Gate.size;

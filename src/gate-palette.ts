@@ -3,7 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { Gate } from "./gate";
-import { GateSource } from "../gate-source";
+import { GateSource } from "./gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";

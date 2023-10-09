@@ -1,38 +1,38 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
-export class ControlGate extends Gate {
-  static icon = PIXI.Texture.from("./assets/Control.svg");
-  static iconHover = PIXI.Texture.from("./assets/Control_hover.svg");
-  static iconGrabbed = PIXI.Texture.from("./assets/Control_grabbed.svg");
-  static iconActive = PIXI.Texture.from("./assets/Control_active.svg");
+export class BlochSphere extends Gate {
+  static icon = PIXI.Texture.from("./assets/BlochSphere.svg");
+  static iconHover = PIXI.Texture.from("./assets/BlochSphere_hover.svg");
+  static iconGrabbed = PIXI.Texture.from("./assets/BlochSphere_grabbed.svg");
+  static iconActive = PIXI.Texture.from("./assets/BlochSphere_active.svg");
 
   static style = {
     idleBodyColor: null,
     idleBorderColor: null,
 
     hoverBodyColor: null,
-    hoverBorderColor: tailwindColors.purple["500"],
-    hoverBorderWidth: 2,
+    hoverBorderColor: null,
+    hoverBorderWidth: null,
 
-    grabbedBodyColor: tailwindColors.purple["500"],
-    grabbedBorderColor: tailwindColors.purple["700"],
-    grabbedBorderWidth: 1,
+    grabbedBodyColor: null,
+    grabbedBorderColor: null,
+    grabbedBorderWidth: null,
 
     activeBodyColor: null,
-    activeBorderColor: tailwindColors.teal["300"],
-    activeBorderWidth: 2,
+    activeBorderColor: null,
+    activeBorderWidth: null,
 
-    cornerRadius: 4,
+    cornerRadius: null,
   };
 
-  get style(): typeof ControlGate.style {
-    return ControlGate.style;
+  get style(): typeof BlochSphere.style {
+    return BlochSphere.style;
   }
 
   applyIdleStyle() {
-    this._sprite.texture = ControlGate.icon;
+    this._sprite.texture = BlochSphere.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class ControlGate extends Gate {
   }
 
   applyHoverStyle() {
-    this._sprite.texture = ControlGate.iconHover;
+    this._sprite.texture = BlochSphere.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class ControlGate extends Gate {
   }
 
   applyGrabbedStyle() {
-    this._sprite.texture = ControlGate.iconGrabbed;
+    this._sprite.texture = BlochSphere.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class ControlGate extends Gate {
   }
 
   applyActiveStyle() {
-    this._sprite.texture = ControlGate.iconActive;
+    this._sprite.texture = BlochSphere.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -94,13 +94,15 @@ export class ControlGate extends Gate {
     if (bodyColor !== null) {
       this._shape.beginFill(bodyColor, 1);
     }
-    this._shape.drawRoundedRect(
-      0,
-      0,
-      Gate.size,
-      Gate.size,
-      this.style.cornerRadius
-    );
+    if (this.style.cornerRadius !== null) {
+      this._shape.drawRoundedRect(
+        0,
+        0,
+        Gate.size,
+        Gate.size,
+        this.style.cornerRadius
+      );
+    }
     this._shape.endFill();
   }
 }

@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { BlochSphere } from "./bloch-sphere";
 import { Container } from "pixi.js";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";

@@ -1,22 +1,15 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
-import { Dropzone } from "./src/dropzone";
+import { Gate } from "./gate";
+import { Dropzone } from "./dropzone";
 import * as tailwindColors from "tailwindcss/colors";
 
-export class MeasurementGate extends Gate {
-  static icon = PIXI.Texture.from("./assets/Measurement.svg");
-  static iconIdleDropzone = PIXI.Texture.from(
-    "./assets/Measurement_idle_dropzone.svg"
-  );
-  static iconHover = PIXI.Texture.from("./assets/Measurement_hover.svg");
-  static iconHoverDropzone = PIXI.Texture.from(
-    "./assets/Measurement_hover_dropzone.svg"
-  );
-  static iconGrabbed = PIXI.Texture.from("./assets/Measurement_grabbed.svg");
-  static iconGrabbedDropzone = PIXI.Texture.from(
-    "./assets/Measurement_grabbed_dropzone.svg"
-  );
-  static iconActive = PIXI.Texture.from("./assets/Measurement_active.svg");
+export class WriteGate extends Gate {
+  static iconIdleDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconHover = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconHoverDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconGrabbed = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconGrabbedDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconActive = PIXI.Texture.from("./assets/Placeholder.svg");
 
   static style = {
     idleBodyColor: null,
@@ -37,44 +30,50 @@ export class MeasurementGate extends Gate {
     cornerRadius: 4,
   };
 
-  get style(): typeof MeasurementGate.style {
-    return MeasurementGate.style;
+  get style(): typeof WriteGate.style {
+    return WriteGate.style;
   }
 
   snap(dropzone: Dropzone) {
     super.snap(dropzone);
-    this._sprite.texture = MeasurementGate.iconGrabbedDropzone;
+    const klass = this.constructor as typeof WriteGate;
+    this._sprite.texture = klass.iconGrabbedDropzone;
   }
 
   unsnap() {
     super.unsnap();
-    this._sprite.texture = MeasurementGate.iconGrabbed;
+    const klass = this.constructor as typeof WriteGate;
+    this._sprite.texture = klass.iconGrabbed;
   }
 
   applyIdleStyle() {
+    const klass = this.constructor as typeof WriteGate;
+
     if (this.dropzone) {
-      this._sprite.texture = MeasurementGate.iconIdleDropzone;
+      this._sprite.texture = klass.iconIdleDropzone;
     } else {
-      this._sprite.texture = MeasurementGate.icon;
+      this._sprite.texture = klass.icon;
     }
 
     this._shape.clear();
     this._shape.zIndex = 0;
-    this._shape.cursor = "default";
+    // this._shape.cursor = "default";
 
     this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
   }
 
   applyHoverStyle() {
+    const klass = this.constructor as typeof WriteGate;
+
     if (this.dropzone) {
-      this._sprite.texture = MeasurementGate.iconHoverDropzone;
+      this._sprite.texture = klass.iconHoverDropzone;
     } else {
-      this._sprite.texture = MeasurementGate.iconHover;
+      this._sprite.texture = klass.iconHover;
     }
 
     this._shape.clear();
     this._shape.zIndex = 0;
-    this._shape.cursor = "grab";
+    // this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.hoverBodyColor,
@@ -84,15 +83,17 @@ export class MeasurementGate extends Gate {
   }
 
   applyGrabbedStyle() {
+    const klass = this.constructor as typeof WriteGate;
+
     if (this.dropzone) {
-      this._sprite.texture = MeasurementGate.iconGrabbedDropzone;
+      this._sprite.texture = klass.iconGrabbedDropzone;
     } else {
-      this._sprite.texture = MeasurementGate.iconGrabbed;
+      this._sprite.texture = klass.iconGrabbed;
     }
 
     this._shape.clear();
     this._shape.zIndex = 10;
-    this._shape.cursor = "grabbing";
+    // this._shape.cursor = "grabbing";
 
     this.updateGraphics(
       this.style.grabbedBodyColor,
@@ -102,11 +103,13 @@ export class MeasurementGate extends Gate {
   }
 
   applyActiveStyle() {
-    this._sprite.texture = MeasurementGate.iconActive;
+    const klass = this.constructor as typeof WriteGate;
+
+    this._sprite.texture = klass.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;
-    this._shape.cursor = "grab";
+    // this._shape.cursor = "grab";
 
     this.updateGraphics(
       this.style.activeBodyColor,
@@ -129,8 +132,8 @@ export class MeasurementGate extends Gate {
     this._shape.drawRoundedRect(
       0,
       0,
-      MeasurementGate.size,
-      MeasurementGate.size,
+      WriteGate.size,
+      WriteGate.size,
       this.style.cornerRadius
     );
     this._shape.endFill();

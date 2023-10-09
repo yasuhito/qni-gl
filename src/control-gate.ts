@@ -1,12 +1,12 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import * as tailwindColors from "tailwindcss/colors";
 
-export class SwapGate extends Gate {
-  static icon = PIXI.Texture.from("./assets/Swap.svg");
-  static iconHover = PIXI.Texture.from("./assets/Swap_hover.svg");
-  static iconGrabbed = PIXI.Texture.from("./assets/Swap_grabbed.svg");
-  static iconActive = PIXI.Texture.from("./assets/Swap_active.svg");
+export class ControlGate extends Gate {
+  static icon = PIXI.Texture.from("./assets/Control.svg");
+  static iconHover = PIXI.Texture.from("./assets/Control_hover.svg");
+  static iconGrabbed = PIXI.Texture.from("./assets/Control_grabbed.svg");
+  static iconActive = PIXI.Texture.from("./assets/Control_active.svg");
 
   static style = {
     idleBodyColor: null,
@@ -27,12 +27,12 @@ export class SwapGate extends Gate {
     cornerRadius: 4,
   };
 
-  get style(): typeof SwapGate.style {
-    return SwapGate.style;
+  get style(): typeof ControlGate.style {
+    return ControlGate.style;
   }
 
   applyIdleStyle() {
-    this._sprite.texture = SwapGate.icon;
+    this._sprite.texture = ControlGate.icon;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -42,7 +42,7 @@ export class SwapGate extends Gate {
   }
 
   applyHoverStyle() {
-    this._sprite.texture = SwapGate.iconHover;
+    this._sprite.texture = ControlGate.iconHover;
 
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -56,7 +56,7 @@ export class SwapGate extends Gate {
   }
 
   applyGrabbedStyle() {
-    this._sprite.texture = SwapGate.iconGrabbed;
+    this._sprite.texture = ControlGate.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
@@ -70,7 +70,7 @@ export class SwapGate extends Gate {
   }
 
   applyActiveStyle() {
-    this._sprite.texture = SwapGate.iconActive;
+    this._sprite.texture = ControlGate.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;

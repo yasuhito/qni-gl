@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./src/gate";
+import { Gate } from "./gate";
 import { CircularGateMixin } from "./circular-gate-mixin";
 
 export class XGate extends CircularGateMixin(Gate) {

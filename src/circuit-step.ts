@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
-import { Dropzone } from "./src/dropzone";
-import { Gate } from "./src/gate";
+import { Dropzone } from "./dropzone";
+import { Gate } from "./gate";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 
