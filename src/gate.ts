@@ -25,6 +25,8 @@ export type DragEvent = {
 };
 
 export class Gate extends Container {
+  static gateType: string;
+
   /**
    * ゲートの幅と高さ (ピクセル)
    *
@@ -202,6 +204,16 @@ export class Gate extends Container {
     });
   }
 
+  gateType(): string | null {
+    const klass = this.constructor as typeof Gate;
+
+    if (typeof klass.gateType === "string") {
+      return klass.gateType;
+    } else {
+      return null;
+    }
+  }
+
   click(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
     this.actor.send({
       type: "Click",
@@ -263,9 +275,11 @@ export class Gate extends Container {
   applyActiveStyle() {}
 
   toJSON() {
+    const pos = this.getGlobalPosition();
+
     return {
-      x: this.view.x,
-      y: this.view.y,
+      x: pos.x,
+      y: pos.y,
       width: this.width,
       height: this.height,
     };

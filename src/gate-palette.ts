@@ -37,6 +37,7 @@ export class GatePalette extends Container {
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof Gate)[][] = [];
   protected gateRows: List;
+  protected gates = {};
 
   constructor() {
     super();
@@ -89,6 +90,8 @@ export class GatePalette extends Container {
 
     // gateSource.enterGateRunner.add(this);
 
+    this.gates[gate.gateType()] = gate;
+
     this.redraw();
 
     return gate;
@@ -133,5 +136,13 @@ export class GatePalette extends Container {
       new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
       new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
     ];
+  }
+
+  toJSON() {
+    return {
+      x: this.x,
+      y: this.y,
+      gates: this.gates,
+    };
   }
 }
