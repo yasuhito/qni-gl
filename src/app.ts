@@ -131,7 +131,6 @@ export class App {
     this.circuit.y = 64 + this.gatePalette.height + 64;
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
-    console.log(this.element.dataset.app);
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
