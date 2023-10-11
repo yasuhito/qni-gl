@@ -136,16 +136,13 @@ export class Gate extends Container {
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
             // snap した場合
-            const pos = event.dropzone.getGlobalPosition();
-            this.view.position.set(
-              pos.x - Gate.size / 2,
-              pos.y - Gate.size / 2
-            );
+            const pos = this.parent.toLocal(event.dropzone.getGlobalPosition());
+            this.position.set(pos.x + Gate.size / 4, pos.y);
           } else {
-            const newPoint = this.view.parent.toLocal(event.globalPosition);
-            this.view.position.set(
-              newPoint.x - Gate.size / 2,
-              newPoint.y - Gate.size / 2
+            const newPos = this.parent.toLocal(event.globalPosition);
+            this.position.set(
+              newPos.x - Gate.size / 2,
+              newPos.y - Gate.size / 2
             );
           }
         },
@@ -174,8 +171,6 @@ export class Gate extends Container {
     this.snapDropzoneRunner = new Runner("snapDropzone");
 
     this.view = new Container();
-    // this.graphics.x = Gate.size / 2;
-    // this.graphics.y = Gate.size / 2;
     this.addChild(this.view);
 
     this._shape = new PIXI.Graphics();

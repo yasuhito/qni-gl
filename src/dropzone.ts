@@ -50,14 +50,10 @@ export class Dropzone extends Container {
       y - height / 2,
       width,
       height,
-      pos.x,
-      pos.y,
-      pos.x + this.size,
-      pos.y + this.size
-      // this.x - (this.size * snapRatio) / 2,
-      // this.y - (this.size * snapRatio) / 2,
-      // this.size * snapRatio,
-      // this.size * snapRatio
+      pos.x + this.size * 0.25 + (this.size / 2 - this.size * snapRatio),
+      pos.y + (this.size / 2 - this.size * snapRatio),
+      this.size * snapRatio,
+      this.size * snapRatio
     );
   }
 
@@ -78,22 +74,22 @@ export class Dropzone extends Container {
 
       // インプットワイヤを描く
       this.wire
-        .moveTo(Dropzone.size * 0.75, -Dropzone.size / 4)
-        .lineTo(Dropzone.size * 0.75, Dropzone.size / 2);
+        .moveTo(0, Dropzone.size * 0.5)
+        .lineTo(Dropzone.size / 4, Dropzone.size * 0.5);
 
       // アウトプットワイヤを描く
-      // this.wire
-      //   .moveTo(Dropzone.size * 0.75, Dropzone.size / 2)
-      //   .lineTo(Dropzone.size * 0.75, Dropzone.size);
+      this.wire
+        .moveTo((Dropzone.size * 5) / 4, Dropzone.size * 0.5)
+        .lineTo((Dropzone.size * 6) / 4, Dropzone.size * 0.5);
     }
   }
 
   unsnap(gate: Gate) {
-    // 関数にまとめる (constructor() でも使っている)
+    // TODO: 関数にまとめる (constructor() でも使っている)
     this.wire
       .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-      .moveTo(this.x, this.y - Dropzone.size * 0.75)
-      .lineTo(this.x, this.y + Dropzone.size * 0.75);
+      .moveTo(0, Dropzone.size / 2)
+      .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
   }
 
   toJSON() {
