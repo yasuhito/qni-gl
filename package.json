@@ -7,9 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "yarn playwright",
+    "test": "playwright test",
     "vitest": "vitest --dir test",
-    "playwright": "playwright test",
     "doc": "typedoc src/index.ts"
   },
   "devDependencies": {
