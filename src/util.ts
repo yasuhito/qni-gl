@@ -1,4 +1,4 @@
-import defaultTheme from "tailwindcss/defaultTheme";
+import * as defaultTheme from "tailwindcss/defaultTheme";
 
 export const spacingInPx = function (value: number): number {
   const remValue = parseFloat(defaultTheme.spacing[value]);
