@@ -5,6 +5,7 @@ import { Gate } from "./gate";
 import { MeasurementGate } from "./measurement-gate";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
+import { rectIntersect } from "./util";
 
 /**
  * @noInheritDoc
@@ -44,19 +45,63 @@ export class Dropzone extends Container {
       .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
   }
 
-  isSnappable(x: number, y: number, width: number, height: number) {
+  /**
+   * 指定したゲートがこのドロップゾーンにスナップできるかどうかを返す。
+   *
+   *        x+size/4+((1-snapRatio)*size)/2,
+   *        y+size/4+((1-snapRatio)*size)/2
+   *                  │
+   *        x+size/4  │
+   *              │   │
+   *     x,y      ▼   │
+   *       ┌──────┬───┼──────────────────────────┬──────┐  ┬
+   *       │      │   ▼                          │      │  │
+   *       │      │   ┏━━━━━━━━━━━━━━━━━━━━━━━┓  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃       snapzone        ┃  │      │  │  size
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┗━━━━━━━━━━━━━━━━━━━━━━━┛  │      │  │
+   *       │      │                              │      │  │
+   *       └──────┴──────────────────────────────┴──────┘  ┴
+   *
+   *              ├──────────────────────────────┤
+   *                            size
+   *
+   * @param gateCenterX ゲート中心の x 座標
+   * @param gateCenterY ゲート中心の y 座標
+   * @param gateWidth ゲートの幅
+   * @param gateHeight ゲートの高さ
+   */
+  isSnappable(
+    gateCenterX: number,
+    gateCenterY: number,
+    gateWidth: number,
+    gateHeight: number
+  ) {
     const snapRatio = 0.5;
-    const pos = this.getGlobalPosition();
+    const gateX = gateCenterX - gateWidth / 2;
+    const gateY = gateCenterY - gateHeight / 2;
+    const dropboxPosition = this.getGlobalPosition();
+    const snapzoneX =
+      dropboxPosition.x + this.size / 4 + ((1 - snapRatio) * this.size) / 2;
+    const snapzoneY = dropboxPosition.y + ((1 - snapRatio) * this.size) / 2;
+    const snapzoneWidth = this.size * snapRatio;
+    const snapzoneHeight = this.size * snapRatio;
 
-    return this.rectIntersect(
-      x - width / 2,
-      y - height / 2,
-      width,
-      height,
-      pos.x + this.size * 0.25 + (this.size / 2 - this.size * snapRatio),
-      pos.y + (this.size / 2 - this.size * snapRatio),
-      this.size * snapRatio,
-      this.size * snapRatio
+    return rectIntersect(
+      gateX,
+      gateY,
+      gateWidth,
+      gateHeight,
+      snapzoneX,
+      snapzoneY,
+      snapzoneWidth,
+      snapzoneHeight
     );
   }
 
@@ -102,22 +147,5 @@ export class Dropzone extends Container {
       x: pos.x,
       y: pos.y,
     };
-  }
-
-  private rectIntersect(
-    x1: number,
-    y1: number,
-    w1: number,
-    h1: number,
-    x2: number,
-    y2: number,
-    w2: number,
-    h2: number
-  ) {
-    // Check x and y for overlap
-    if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2) {
-      return false;
-    }
-    return true;
   }
 }
