@@ -180,6 +180,7 @@ export class App {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
+            gate,
             pointerPosition.x,
             pointerPosition.y,
             gate.width,
@@ -230,6 +231,7 @@ export class App {
       for (const dropzone of circuitStep.dropzones) {
         if (
           dropzone.isSnappable(
+            gate,
             pointerPosition.x,
             pointerPosition.y,
             gate.width,
@@ -249,7 +251,7 @@ export class App {
       gate.snap(snapDropzone);
     }
 
-    if (gate.dropzone && snapDropzone !== null) {
+    if (gate.dropzone && !snapDropzone) {
       gate.unsnap();
     }
 

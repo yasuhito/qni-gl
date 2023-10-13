@@ -16,6 +16,7 @@ export class Dropzone extends Container {
   static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
+  gate: Gate | null = null;
   protected wire: PIXI.Graphics;
 
   get size(): number {
@@ -39,10 +40,8 @@ export class Dropzone extends Container {
     this.wire = new PIXI.Graphics();
     this.view.addChild(this.wire);
 
-    this.wire
-      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-      .moveTo(0, Dropzone.size / 2)
-      .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
+    this.drawInputWire();
+    this.drawOutputWire();
   }
 
   /**
@@ -78,11 +77,16 @@ export class Dropzone extends Container {
    * @param gateHeight ゲートの高さ
    */
   isSnappable(
+    gate: Gate,
     gateCenterX: number,
     gateCenterY: number,
     gateWidth: number,
     gateHeight: number
   ) {
+    if (this.gate !== null && this.gate !== gate) {
+      return false;
+    }
+
     const snapRatio = 0.5;
     const gateX = gateCenterX - gateWidth / 2;
     const gateY = gateCenterY - gateHeight / 2;
@@ -106,38 +110,21 @@ export class Dropzone extends Container {
   }
 
   snap(gate: Gate) {
-    if (
-      gate instanceof Write0Gate ||
-      gate instanceof Write1Gate ||
-      gate instanceof MeasurementGate
-    ) {
-      this.wire.clear();
+    this.gate = gate;
 
-      this.wire.lineStyle(
-        Dropzone.wireWidth,
-        Dropzone.quantumWireColor,
-        1,
-        0.5
-      );
+    this.wire.clear();
 
-      // インプットワイヤを描く
-      this.wire
-        .moveTo(0, Dropzone.size * 0.5)
-        .lineTo(Dropzone.size / 4, Dropzone.size * 0.5);
+    this.wire.lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5);
 
-      // アウトプットワイヤを描く
-      this.wire
-        .moveTo((Dropzone.size * 5) / 4, Dropzone.size * 0.5)
-        .lineTo((Dropzone.size * 6) / 4, Dropzone.size * 0.5);
-    }
+    this.drawInputWire();
+    this.drawOutputWire();
   }
 
   unsnap(gate: Gate) {
-    // TODO: 関数にまとめる (constructor() でも使っている)
-    this.wire
-      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
-      .moveTo(0, Dropzone.size / 2)
-      .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
+    this.gate = null;
+
+    this.drawInputWire();
+    this.drawOutputWire();
   }
 
   toJSON() {
@@ -147,5 +134,51 @@ export class Dropzone extends Container {
       x: pos.x,
       y: pos.y,
     };
+  }
+
+  protected drawInputWire() {
+    this.wire
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.inputWireStartX, Dropzone.size / 2)
+      .lineTo(this.inputWireEndX, Dropzone.size / 2);
+  }
+
+  protected drawOutputWire() {
+    this.wire
+      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .moveTo(this.outputWireStartX, Dropzone.size / 2)
+      .lineTo(this.outputWireEndX, Dropzone.size / 2);
+  }
+
+  protected get inputWireStartX() {
+    return 0;
+  }
+
+  protected get inputWireEndX() {
+    if (this.isIconGate(this.gate)) {
+      return Dropzone.size / 4;
+    }
+    return Dropzone.size * 0.75;
+  }
+
+  protected get outputWireStartX() {
+    if (this.isIconGate(this.gate)) {
+      return (Dropzone.size * 5) / 4;
+    }
+    return Dropzone.size * 0.75;
+  }
+
+  protected get outputWireEndX() {
+    return Dropzone.size * 1.5;
+  }
+
+  protected isIconGate(gate: Gate | null) {
+    if (gate === null) {
+      return false;
+    }
+
+    return [Write0Gate, Write1Gate, MeasurementGate].some(
+      (type) => gate instanceof type
+    );
   }
 }
