@@ -8,6 +8,9 @@ import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
 import { XGate } from "./x-gate";
 
+/**
+ * @noInheritDoc
+ */
 export class GateSource extends Container {
   static size = Gate.size;
   static borderColor = tailwindColors.zinc["300"];

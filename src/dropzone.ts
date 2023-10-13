@@ -6,6 +6,9 @@ import { MeasurementGate } from "./measurement-gate";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 
+/**
+ * @noInheritDoc
+ */
 export class Dropzone extends Container {
   static size = Gate.size;
   static wireWidth = 2;

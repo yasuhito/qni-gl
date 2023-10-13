@@ -2,6 +2,9 @@ import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 
+/**
+ * @noInheritDoc
+ */
 export class Circuit extends Container {
   qubitCount: number; // 量子ビットの数
   stepCount: number; // ステップ数

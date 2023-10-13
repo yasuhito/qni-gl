@@ -24,6 +24,9 @@ export type DragEvent = {
   dropzone: Dropzone | null;
 };
 
+/**
+ * @noInheritDoc
+ */
 export class Gate extends Container {
   static gateType: string;
 

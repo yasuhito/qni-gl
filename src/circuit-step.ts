@@ -4,6 +4,9 @@ import { Gate } from "./gate";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 
+/**
+ * @noInheritDoc
+ */
 export class CircuitStep extends Container {
   qubitCount: number; // 量子ビットの数
   view: Container;

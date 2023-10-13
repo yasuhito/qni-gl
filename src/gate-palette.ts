@@ -10,6 +10,7 @@ import { spacingInPx } from "./util";
 
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。
+ * @noInheritDoc
  */
 export class GatePalette extends Container {
   /** @ignore 水平方向のパディング */
