@@ -46,7 +46,32 @@ export class Dropzone extends Container {
 
   /**
    * 指定したゲートがこのドロップゾーンにスナップできるかどうかを返す。
-   * @todo アスキーアートで rectIntersect の座標計算を説明
+   *
+   *        x+size/4+((1-snapRatio)*size)/2,
+   *        y+size/4+((1-snapRatio)*size)/2
+   *                  │
+   *        x+size/4  │
+   *              │   │
+   *     x,y      ▼   │
+   *       ┌──────┬───┼──────────────────────────┬──────┐  ┬
+   *       │      │   ▼                          │      │  │
+   *       │      │   ┏━━━━━━━━━━━━━━━━━━━━━━━┓  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │  size
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┗━━━━━━━━━━━━━━━━━━━━━━━┛  │      │  │
+   *       │      │                              │      │  │
+   *       └──────┴──────────────────────────────┴──────┘  ┴
+   *
+   *              ┼──────────────────────────────┼
+   *                            size
+   *
+   * @todo x → gateCenterX に変更
    *
    * @param x マウス/タッチの x 座標
    * @param y マウス/タッチの y 座標
@@ -62,7 +87,7 @@ export class Dropzone extends Container {
       y - gateHeight / 2,
       gateWidth,
       gateHeight,
-      pos.x + this.size * 0.25 + ((1 - snapRatio) * this.size) / 2,
+      pos.x + this.size / 4 + ((1 - snapRatio) * this.size) / 2,
       pos.y + ((1 - snapRatio) * this.size) / 2,
       this.size * snapRatio,
       this.size * snapRatio
