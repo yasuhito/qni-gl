@@ -27,6 +27,7 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { Dropzone } from "./dropzone";
 
 export class App {
   static elementId = "app";
@@ -159,7 +160,7 @@ export class App {
     this.pixiApp.stage.cursor = "default";
   }
 
-  grabGate(gate: Gate, globalPosition: PIXI.Point) {
+  grabGate(gate: Gate, pointerPosition: PIXI.Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
@@ -179,21 +180,21 @@ export class App {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
-            globalPosition.x,
-            globalPosition.y,
+            pointerPosition.x,
+            pointerPosition.y,
             gate.width,
             gate.height
           )
         ) {
           dropzone = each;
-          this.grabbedGate.click(globalPosition, each);
+          this.grabbedGate.click(pointerPosition, each);
         }
       }
     }
 
     gate.dropzone = dropzone;
     if (!gate.dropzone) {
-      this.grabbedGate.click(globalPosition, null);
+      this.grabbedGate.click(pointerPosition, null);
     }
 
     this.pixiApp.stage.cursor = "grabbing";
@@ -216,22 +217,27 @@ export class App {
     this.moveGate(this.grabbedGate, event.global);
   }
 
-  // globalPosition is the global position of the mouse/touch
-  private moveGate(gate: Gate, globalPosition: PIXI.Point) {
-    let snapDropzone = null;
+  /**
+   * globalPosition is the global position of the mouse/touch
+   *
+   * @param gate ゲート
+   * @param pointerPosition マウス/タッチの位置
+   */
+  private moveGate(gate: Gate, pointerPosition: PIXI.Point) {
+    let snapDropzone: Dropzone | null = null;
 
     for (const circuitStep of this.circuit.circuitSteps) {
-      for (const each of circuitStep.dropzones) {
+      for (const dropzone of circuitStep.dropzones) {
         if (
-          each.isSnappable(
-            globalPosition.x,
-            globalPosition.y,
+          dropzone.isSnappable(
+            pointerPosition.x,
+            pointerPosition.y,
             gate.width,
             gate.height
           )
         ) {
-          snapDropzone = each;
-          gate.snapToDropzone(each, globalPosition);
+          snapDropzone = dropzone;
+          gate.snapToDropzone(dropzone, pointerPosition);
         }
       }
     }
@@ -243,13 +249,13 @@ export class App {
       gate.snap(snapDropzone);
     }
 
-    if (gate.dropzone && !snapDropzone) {
+    if (gate.dropzone && snapDropzone !== null) {
       gate.unsnap();
     }
 
     gate.dropzone = snapDropzone;
     if (!gate.dropzone) {
-      gate.move(globalPosition);
+      gate.move(pointerPosition);
     }
   }
 
