@@ -113,9 +113,6 @@ export class Dropzone extends Container {
     this.gate = gate;
 
     this.wire.clear();
-
-    this.wire.lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5);
-
     this.drawInputWire();
     this.drawOutputWire();
   }
