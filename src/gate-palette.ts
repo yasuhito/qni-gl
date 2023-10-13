@@ -6,6 +6,7 @@ import { Gate } from "./gate";
 import { GateSource } from "./gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
+import { SignalGate, SignalGateWithPosition } from "./gate";
 import { spacingInPx } from "./util";
 
 /**
@@ -26,14 +27,12 @@ export class GatePalette extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
-  /**
-   * 新しいゲートが生成された時に発生するイベント
-   *
-   * @param newGate 新しく生成されたゲート
-   */
-  onNewGate: Signal<(newGate: Gate) => void>;
-  onGrabGate: Signal<(gate: Gate, globalPosition: PIXI.Point) => void>;
-  onMouseLeaveGate: Signal<(gate: Gate) => void>;
+  /** ゲートをクリックした時に発生するシグナル */
+  onGrabGate: SignalGateWithPosition;
+  /** 新しいゲートを生成した時に発生するシグナル */
+  onNewGate: SignalGate;
+  /** ゲートからマウスポインタが離れた時に発生するシグナル */
+  onMouseLeaveGate: SignalGate;
 
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof Gate)[][] = [];

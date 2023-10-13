@@ -218,7 +218,7 @@ export class App {
 
   // globalPosition is the global position of the mouse/touch
   private moveGate(gate: Gate, globalPosition: PIXI.Point) {
-    let snapDropzone;
+    let snapDropzone = null;
 
     for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
@@ -240,10 +240,6 @@ export class App {
       snapDropzone &&
       (gate.dropzone === null || gate.dropzone !== snapDropzone)
     ) {
-      const circuitStep = snapDropzone.parent.parent.parent;
-      const circuitStepIndex = circuitStep.parent.children.indexOf(circuitStep);
-      const dropzoneIndex = snapDropzone.parent.children.indexOf(snapDropzone);
-
       gate.snap(snapDropzone);
     }
 

@@ -7,6 +7,18 @@ import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
 
 /**
+ * ゲートのシグナル
+ */
+export type SignalGate = Signal<(gate: Gate) => void>;
+
+/**
+ * ゲートのシグナル (シグナル発生源の位置情報つき)
+ */
+export type SignalGateWithPosition = Signal<
+  (gate: Gate, eventGlobalPosition: PIXI.Point) => void
+>;
+
+/**
  * ゲートのクリックイベント
  */
 export type ClickEvent = {
@@ -43,10 +55,10 @@ export class Gate extends Container {
   /** すべての内部要素を保持するコンテナ */
   view: Container;
 
-  /** ゲートが捕まれた時に飛ぶシグナル */
-  onGrab: Signal<(newGate: Gate, globalPosition: PIXI.Point) => void>;
+  /** ゲートをクリックした時に発生するシグナル */
+  onGrab: SignalGateWithPosition;
   /** ゲートからマウスポインタが離れた時に飛ぶシグナル */
-  onMouseLeave: Signal<(gate: Gate) => void>;
+  onMouseLeave: SignalGate;
 
   protected _shape: PIXI.Graphics;
   protected _dropzone: Dropzone | null = null;

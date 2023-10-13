@@ -44,17 +44,26 @@ export class Dropzone extends Container {
       .lineTo(Dropzone.size * 1.5, Dropzone.size / 2);
   }
 
-  isSnappable(x: number, y: number, width: number, height: number) {
+  /**
+   * 指定したゲートがこのドロップゾーンにスナップできるかどうかを返す。
+   * @todo アスキーアートで rectIntersect の座標計算を説明
+   *
+   * @param x マウス/タッチの x 座標
+   * @param y マウス/タッチの y 座標
+   * @param gateWidth ゲートの幅
+   * @param gateHeight ゲートの高さ
+   */
+  isSnappable(x: number, y: number, gateWidth: number, gateHeight: number) {
     const snapRatio = 0.5;
     const pos = this.getGlobalPosition();
 
     return this.rectIntersect(
-      x - width / 2,
-      y - height / 2,
-      width,
-      height,
-      pos.x + this.size * 0.25 + (this.size / 2 - this.size * snapRatio),
-      pos.y + (this.size / 2 - this.size * snapRatio),
+      x - gateWidth / 2,
+      y - gateHeight / 2,
+      gateWidth,
+      gateHeight,
+      pos.x + this.size * 0.25 + ((1 - snapRatio) * this.size) / 2,
+      pos.y + ((1 - snapRatio) * this.size) / 2,
       this.size * snapRatio,
       this.size * snapRatio
     );

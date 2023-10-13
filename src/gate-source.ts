@@ -6,6 +6,7 @@ import { Gate } from "./gate";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
+import { SignalGate, SignalGateWithPosition } from "./gate";
 import { XGate } from "./x-gate";
 
 /**
@@ -21,10 +22,12 @@ export class GateSource extends Container {
   view: Container;
   protected border: PIXI.Graphics;
 
-  // Event that is fired when the button is down.
-  onNewGate: Signal<(gate: Gate) => void>;
-  onGrabGate: Signal<(gate: Gate, globalPosition: PIXI.Point) => void>;
-  onMouseLeaveGate: Signal<(gate: Gate) => void>;
+  /** ゲートをクリックした時に発生するシグナル */
+  onGrabGate: SignalGateWithPosition;
+  /** 新しいゲートを生成した時に発生するシグナル */
+  onNewGate: SignalGate;
+  /** ゲートからマウスポインタが離れた時に発生するシグナル */
+  onMouseLeaveGate: SignalGate;
 
   enterGateRunner: Runner;
 
