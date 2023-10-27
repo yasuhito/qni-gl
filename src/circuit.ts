@@ -40,6 +40,8 @@ export class Circuit extends Container {
     for (let i = 0; i < this.stepCount; i++) {
       const circuitStep = new CircuitStep(this.qubitCount);
       this._circuitSteps.addChild(circuitStep);
+
+      circuitStep.onClick.connect(this.onCircuitStepClick.bind(this));
     }
   }
 
@@ -47,5 +49,13 @@ export class Circuit extends Container {
     return {
       steps: this.circuitSteps,
     };
+  }
+
+  protected onCircuitStepClick(circuitStep: CircuitStep) {
+    this._circuitSteps.children.forEach((each: CircuitStep) => {
+      if (each.isActive() && each !== circuitStep) {
+        each.deactivate();
+      }
+    });
   }
 }

@@ -193,7 +193,7 @@ export class Gate extends Container {
     this._shape = new PIXI.Graphics();
     this.view.addChild(this._shape);
 
-    // enable the hGate to be interactive...
+    // enable the gate to be interactive...
     // this will allow it to respond to mouse and touch events
     this.view.eventMode = "static";
 
