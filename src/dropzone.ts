@@ -23,12 +23,12 @@ export class Dropzone extends Container {
     return Dropzone.size;
   }
 
-  get height(): number {
-    return Dropzone.size;
-  }
-
   get width(): number {
     return Dropzone.size * 1.5;
+  }
+
+  get height(): number {
+    return Dropzone.size;
   }
 
   constructor() {
