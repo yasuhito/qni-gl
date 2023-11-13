@@ -55,7 +55,7 @@ export class GateSource extends Container {
     ) {
       radius = 9999;
     }
-    this.border.lineStyle(1, GateSource.borderColor, 1, 0);
+    this.border.lineStyle(2, GateSource.borderColor, 1, 0);
     this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
 
     this.enterGateRunner = new Runner("enterGate");
