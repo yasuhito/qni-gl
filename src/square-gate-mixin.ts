@@ -1,7 +1,8 @@
-import { Graphics } from "pixi.js";
+import * as tailwindColors from "tailwindcss/colors";
+import { Colors } from "./colors";
 import { Constructor } from "./constructor";
 import { Gate } from "./gate";
-import * as tailwindColors from "tailwindcss/colors";
+import { Graphics } from "pixi.js";
 
 export declare class SquareGate {
   static style: { [key: string]: number | string };
@@ -17,16 +18,16 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
 ): Constructor<SquareGate> & TBase {
   class SquareGateMixinClass extends Base {
     static style = {
-      idleBodyColor: tailwindColors.emerald["500"],
-      idleBorderColor: tailwindColors.emerald["700"],
+      idleBodyColor: Colors.bg.brand.default,
+      idleBorderColor: Colors.border.gate.idle,
       idleBorderWidth: 2,
-      hoverBodyColor: tailwindColors.emerald["500"],
+      hoverBodyColor: Colors.bg.brand.hover,
       hoverBorderColor: tailwindColors.purple["500"],
       hoverBorderWidth: 2,
-      grabbedBodyColor: tailwindColors.purple["500"],
+      grabbedBodyColor: Colors.bg.brand.grabbed,
       grabbedBorderColor: tailwindColors.purple["700"],
       grabbedBorderWidth: 2,
-      activeBodyColor: tailwindColors.emerald["500"],
+      activeBodyColor: Colors.bg.brand.active,
       activeBorderColor: tailwindColors.teal["300"],
       activeBorderWidth: 2,
       cornerRadius: 4,
