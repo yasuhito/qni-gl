@@ -17,10 +17,12 @@
     "@types/node": "^20.6.3",
     "@vitest/browser": "^0.34.5",
     "start-server-and-test": "^2.0.1",
+    "strip-ansi": "^5.0.0",
     "typedoc": "^0.25.1",
     "typedoc-plugin-no-inherit": "^1.4.0",
     "vitest": "^0.34.5",
-    "webdriverio": "^8.16.12"
+    "webdriverio": "^8.16.12",
+    "wrap-ansi": "^6.0.0"
   },
   "dependencies": {
     "@pixi/events": "^7.3.1",
