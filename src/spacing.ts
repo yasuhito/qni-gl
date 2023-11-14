@@ -6,5 +6,6 @@ export const Spacing = {
   },
   cornerRadius: {
     gate: spacingInPx(1),
+    full: 9999,
   },
 };
