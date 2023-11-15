@@ -23,7 +23,7 @@ export class StateVector extends Container {
     this.qubitCircles = new List({
       type: "horizontal",
       elementsMargin: 2,
-      children: [new QubitCircle(), new QubitCircle()],
+      children: [new QubitCircle(100, 90), new QubitCircle(50, 45)],
       vertPadding: 20,
       horPadding: 16,
     });
@@ -33,6 +33,5 @@ export class StateVector extends Container {
       new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
       new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
     ];
-
   }
 }
