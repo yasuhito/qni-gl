@@ -5,6 +5,7 @@ import { BlochSphere } from "./bloch-sphere";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { ControlGate } from "./control-gate";
+import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { GatePalette } from "./gate-palette";
 import { HGate } from "./h-gate";
@@ -13,6 +14,7 @@ import { MeasurementGate } from "./measurement-gate";
 import { PhaseGate } from "./phase-gate";
 import { QFTDaggerGate } from "./qft-dagger-gate";
 import { QFTGate } from "./qft-gate";
+import { QubitCircle } from "./qubit-circle"
 import { RnotGate } from "./rnot-gate";
 import { RxGate } from "./rx-gate";
 import { RyGate } from "./ry-gate";
@@ -27,7 +29,6 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { Dropzone } from "./dropzone";
 
 export class App {
   static elementId = "app";
@@ -132,6 +133,11 @@ export class App {
     this.circuit.y = 64 + this.gatePalette.height + 64;
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
+
+    const qubitCircle = new QubitCircle();
+    this.pixiApp.stage.addChild(qubitCircle);
+    qubitCircle.x = 100;
+    qubitCircle.y = 400;
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
