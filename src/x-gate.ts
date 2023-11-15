@@ -7,5 +7,10 @@ import { CircularGateMixin } from "./circular-gate-mixin";
  */
 export class XGate extends CircularGateMixin(Gate) {
   static gateType = "XGate";
-  static icon = PIXI.Texture.from("./assets/X.svg");
+  static icon = PIXI.Texture.from("./assets/X.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 }

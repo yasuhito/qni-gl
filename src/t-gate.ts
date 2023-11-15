@@ -7,5 +7,10 @@ import { SquareGateMixin } from "./square-gate-mixin";
  */
 export class TGate extends SquareGateMixin(Gate) {
   static gateType = "TGate";
-  static icon = PIXI.Texture.from("./assets/T.svg");
+  static icon = PIXI.Texture.from("./assets/T.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 }

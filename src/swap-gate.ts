@@ -5,7 +5,12 @@ import { Spacing } from "./spacing";
 
 export class SwapGate extends Gate {
   static gateType = "SwapGate";
-  static icon = PIXI.Texture.from("./assets/Swap.svg");
+  static icon = PIXI.Texture.from("./assets/Swap.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 
   applyIdleStyle() {
     this._shape.clear();

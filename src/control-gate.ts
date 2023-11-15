@@ -5,7 +5,12 @@ import { Spacing } from "./spacing";
 
 export class ControlGate extends Gate {
   static gateType = "ControlGate";
-  static icon = PIXI.Texture.from("./assets/Control.svg");
+  static icon = PIXI.Texture.from("./assets/Control.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 
   applyIdleStyle() {
     this._shape.clear();

@@ -5,7 +5,12 @@ import { Spacing } from "./spacing";
 
 export class AntiControlGate extends Gate {
   static gateType = "AntiControlGate";
-  static icon = PIXI.Texture.from("./assets/AntiControl.svg");
+  static icon = PIXI.Texture.from("./assets/AntiControl.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 
   applyIdleStyle() {
     this._shape.clear();

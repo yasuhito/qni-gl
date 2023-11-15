@@ -7,5 +7,10 @@ import { SquareGateMixin } from "./square-gate-mixin";
  */
 export class RnotGate extends SquareGateMixin(Gate) {
   static gateType = "RnotGate";
-  static icon = PIXI.Texture.from("./assets/Rnot.svg");
+  static icon = PIXI.Texture.from("./assets/Rnot.svg", {
+    resolution: window.devicePixelRatio,
+    resourceOptions: {
+      scale: window.devicePixelRatio,
+    },
+  });
 }
