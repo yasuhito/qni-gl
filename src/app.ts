@@ -14,13 +14,13 @@ import { MeasurementGate } from "./measurement-gate";
 import { PhaseGate } from "./phase-gate";
 import { QFTDaggerGate } from "./qft-dagger-gate";
 import { QFTGate } from "./qft-gate";
-import { QubitCircle } from "./qubit-circle"
 import { RnotGate } from "./rnot-gate";
 import { RxGate } from "./rx-gate";
 import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
+import { StateVector } from "./state-vector"
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -134,10 +134,10 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    const qubitCircle = new QubitCircle();
-    this.pixiApp.stage.addChild(qubitCircle);
-    qubitCircle.x = 100;
-    qubitCircle.y = 400;
+    const stateVector = new StateVector()
+    this.pixiApp.stage.addChild(stateVector);
+    stateVector.x = (this.screenWidth - stateVector.width) / 2;
+    stateVector.y = this.screenHeight - 32 - stateVector.height;
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
