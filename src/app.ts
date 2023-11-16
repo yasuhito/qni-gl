@@ -142,7 +142,7 @@ export class App {
       }
     });
 
-    this.stateVector = new StateVector();
+    this.stateVector = new StateVector(this.circuit.qubitCount);
     this.pixiApp.stage.addChild(this.stateVector);
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
