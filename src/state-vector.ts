@@ -23,7 +23,7 @@ export class StateVector extends Container {
     this.qubitCircles = new List({
       type: "horizontal",
       elementsMargin: 2,
-      children: [new QubitCircle(100, 90), new QubitCircle(50, 45)],
+      children: [new QubitCircle(1, 90), new QubitCircle(0, 0)],
       vertPadding: 20,
       horPadding: 16,
     });

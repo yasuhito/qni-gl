@@ -1,83 +1,100 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { Spacing } from "./spacing";
-import { spacingInPx } from "./util";
 
+/**
+ * @noInheritDoc
+ */
 export class QubitCircle extends Container {
-  probability = 0;
-  protected _probability: PIXI.Graphics;
+  protected _probabilityValue = 0;
+  protected _probabilityCircle: PIXI.Graphics;
   protected _border: PIXI.Graphics;
-  protected _phase: PIXI.Container;
+  protected _phase: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
+  protected _phaseHand: PIXI.Graphics; /* 位相の針 */
 
+  /**
+   * 確率をセットする
+   */
+  set probability(value: number) {
+    this._probabilityValue = value;
+
+    if (this.probability > 0) {
+      this._probabilityCircle.beginFill(Colors.bg.brand.default, 1);
+    }
+
+    const radius =
+      (Spacing.size.qubitCircle / 2 - Spacing.borderWidth.gate) *
+      Math.sqrt(this.probability * 0.01);
+    this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
+    this._probabilityCircle.endFill();
+  }
+
+  get probability() {
+    return this._probabilityValue;
+  }
+
+  /**
+   * 位相をセットする
+   */
   set phase(value: number) {
+    if (this._probabilityValue > 0) {
+      this._phaseHand
+        .beginFill(Colors.icon.default, 1)
+        .drawRect(0, 0, Spacing.width.phaseHand, this.handLength)
+        .endFill();
+    }
     this._phase.rotation = Math.PI - (value / 180) * Math.PI;
   }
 
   constructor(probability: number, phase: number) {
     super();
 
-    this.probability = probability;
-    this._probability = new PIXI.Graphics();
-    this._probability.pivot = new PIXI.Point(spacingInPx(8), spacingInPx(8));
-    this.addChild(this._probability);
+    this._probabilityCircle = new PIXI.Graphics();
+    this.addChild(this._probabilityCircle);
+
     this._border = new PIXI.Graphics();
     this.addChild(this._border);
 
     this._phase = new PIXI.Container();
-    this._phase.position.set(spacingInPx(8), spacingInPx(8));
-    this._phase.pivot = new PIXI.Point(1, 0);
-    const phaseHand = new PIXI.Graphics();
-    this._phase.addChild(phaseHand);
+    this._phase.pivot = new PIXI.Point(Spacing.width.phaseHand / 2, 0);
+    this._phase.position.set(this.center.x, this.center.y);
+    this._phaseHand = new PIXI.Graphics();
+    this._phase.addChild(this._phaseHand);
     this.addChild(this._phase);
 
-    // 確率の円を描画
-    if (probability > 0) {
-      this._probability.beginFill(Colors.bg.brand.default, 1);
-    }
-    // r * r * 3.14 = 16sp * 16sp * 3.14
-    // r * r * 3.14 = 16sp * 16sp * 3.14 * probability
-    // r^2 = 16sp*16sp*probability
-    const radius = Math.sqrt(
-      spacingInPx(8) * spacingInPx(8) * this.probability * 0.01
-    );
-    this._probability.x = spacingInPx(8) - radius;
-    this._probability.y = spacingInPx(8) - radius;
-    this._probability.drawRoundedRect(
-      spacingInPx(8),
-      spacingInPx(8),
-      radius * 2,
-      radius * 2,
-      Spacing.cornerRadius.full
-    );
-    this._probability.endFill();
-
+    this.probability = probability;
     // 枠線を描画
-    this._border.lineStyle(Spacing.borderWidth.gate, this.borderColor, 1, 0);
-    this._border.drawRoundedRect(
-      0,
-      0,
-      spacingInPx(16),
-      spacingInPx(16),
-      Spacing.cornerRadius.full
+    this._border.lineStyle(
+      Spacing.borderWidth.gate,
+      this.borderColor(probability),
+      1,
+      0
     );
-
-    // 位相の針を描画
-    if (probability > 0) {
-      phaseHand.beginFill(tailwindColors.zinc["900"], 1);
-      phaseHand.drawRect(-1, 0, 2, this.height / 2);
-      phaseHand.endFill();
-
-      this.phase = phase
-    }
+    this._border.drawCircle(
+      this.center.x,
+      this.center.y,
+      Spacing.size.qubitCircle / 2
+    );
+    this.phase = phase;
   }
 
-  protected get borderColor() {
-    if (this.probability === 0) {
-      return tailwindColors.zinc["200"];
+  protected get center() {
+    return new PIXI.Point(
+      Spacing.size.qubitCircle / 2,
+      Spacing.size.qubitCircle / 2
+    );
+  }
+
+  protected get handLength() {
+    return this.height / 2;
+  }
+
+  protected borderColor(probability: number) {
+    if (probability === 0) {
+      return Colors.border.qubitCircle.disabled;
     }
 
-    return tailwindColors.zinc["500"];
+    return Colors.border.qubitCircle.default;
   }
 }
