@@ -2,6 +2,9 @@ import * as tailwindColors from "tailwindcss/colors";
 
 export const Colors = {
   bg: {
+    default: {
+      default: tailwindColors.white
+    },
     brand: {
       default: tailwindColors.sky["500"],
       hover: tailwindColors.sky["600"],
@@ -19,6 +22,9 @@ export const Colors = {
     qubitCircle: {
       default: tailwindColors.zinc["500"],
       disabled: tailwindColors.zinc["200"]
+    },
+    stateVector: {
+      default: tailwindColors.zinc["400"],
     }
   },
   icon: {
