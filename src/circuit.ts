@@ -11,7 +11,7 @@ export class Circuit extends Container {
   stepCount: number; // ステップ数
   view: Container;
 
-  onStepHover: Signal<(circuitStep: CircuitStep) => void>;
+  onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
 
   protected _circuitSteps: List;
 
@@ -52,6 +52,17 @@ export class Circuit extends Container {
     }
   }
 
+  stepIndex(step: CircuitStep) {
+    for (let i = 0; i < this._circuitSteps.children.length; i++) {
+      const each = this._circuitSteps.children[i];
+      if (step === each) {
+        return i;
+      }
+    }
+
+    return;
+  }
+
   toJSON() {
     return {
       steps: this.circuitSteps,
@@ -59,7 +70,7 @@ export class Circuit extends Container {
   }
 
   protected onCircuitStepHover(circuitStep: CircuitStep) {
-    this.onStepHover.emit(circuitStep);
+    this.onStepHover.emit(this, circuitStep);
   }
 
   protected onCircuitStepClick(circuitStep: CircuitStep) {

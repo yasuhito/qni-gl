@@ -135,12 +135,7 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    this.circuit.onStepHover.connect((_circuitStep) => {
-      for (const each of this.stateVector.amplitudes) {
-        each.probability = Math.floor(Math.random() * 101);
-        each.phase = Math.floor(Math.random() * 361) - 180;
-      }
-    });
+    this.circuit.onStepHover.connect(this.showCurrentStateVector.bind(this));
 
     this.stateVector = new StateVector(this.circuit.qubitCount);
     this.pixiApp.stage.addChild(this.stateVector);
@@ -290,6 +285,21 @@ export class App {
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
     if (event.target === this.pixiApp.stage) {
       this.activeGate?.deactivate();
+    }
+  }
+
+  // 現在の状態ベクトルを表示する
+  protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
+    // TODO: Simulator クラスを追加し、そこで計算した状態ベクトルをセットする
+    //
+    // const simulator = new Simulator(circuit)
+    // const stepIndex = circuit.stepIndex(circuitStep)
+    // const stateVector = simulator.stateVectorAt(stepIndex)
+    console.log(circuit.stepIndex(circuitStep));
+
+    for (const each of this.stateVector.amplitudes) {
+      each.probability = Math.floor(Math.random() * 101);
+      each.phase = Math.floor(Math.random() * 361) - 180;
     }
   }
 }
