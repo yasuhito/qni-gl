@@ -20,7 +20,7 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
-import { StateVector } from "./state-vector"
+import { StateVector } from "./state-vector";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -41,6 +41,7 @@ export class App {
   gatePalette: GatePalette;
   circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
+  stateVector: StateVector;
   logger: Logger;
   nameMap = new Map();
 
@@ -134,10 +135,17 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    const stateVector = new StateVector()
-    this.pixiApp.stage.addChild(stateVector);
-    stateVector.x = (this.screenWidth - stateVector.width) / 2;
-    stateVector.y = this.screenHeight - 32 - stateVector.height;
+    this.circuit.onStepHover.connect((_circuitStep) => {
+      for (const each of this.stateVector.amplitudes) {
+        each.probability = Math.floor(Math.random() * 101);
+        each.phase = Math.floor(Math.random() * 361) - 180;
+      }
+    });
+
+    this.stateVector = new StateVector();
+    this.pixiApp.stage.addChild(this.stateVector);
+    this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
+    this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");

@@ -9,6 +9,10 @@ export class StateVector extends Container {
   protected graphics: PIXI.Graphics;
   protected qubitCircles: List;
 
+  get amplitudes() {
+    return this.qubitCircles.children as Array<QubitCircle>;
+  }
+
   constructor() {
     super();
 
@@ -23,7 +27,7 @@ export class StateVector extends Container {
     this.qubitCircles = new List({
       type: "horizontal",
       elementsMargin: 2,
-      children: [new QubitCircle(1, 90), new QubitCircle(0, 0)],
+      children: [new QubitCircle(1, 90), new QubitCircle(0, -90)],
       vertPadding: 20,
       horPadding: 16,
     });

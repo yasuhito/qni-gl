@@ -10,6 +10,7 @@ export class QubitCircle extends Container {
   protected _probabilityValue = 0;
   protected _probabilityCircle: PIXI.Graphics;
   protected _border: PIXI.Graphics;
+  protected _phaseValue = 0;
   protected _phase: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
   protected _phaseHand: PIXI.Graphics; /* 位相の針 */
 
@@ -18,6 +19,8 @@ export class QubitCircle extends Container {
    */
   set probability(value: number) {
     this._probabilityValue = value;
+
+    this._probabilityCircle.clear()
 
     if (this.probability > 0) {
       this._probabilityCircle.beginFill(Colors.bg.brand.default, 1);
@@ -28,6 +31,9 @@ export class QubitCircle extends Container {
       Math.sqrt(this.probability * 0.01);
     this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
     this._probabilityCircle.endFill();
+
+    this.drawPhaseHand(this.probability, this._phaseValue)
+    this.drawBorder(this.probability);
   }
 
   get probability() {
@@ -38,13 +44,8 @@ export class QubitCircle extends Container {
    * 位相をセットする
    */
   set phase(value: number) {
-    if (this._probabilityValue > 0) {
-      this._phaseHand
-        .beginFill(Colors.icon.default, 1)
-        .drawRect(0, 0, Spacing.width.phaseHand, this.handLength)
-        .endFill();
-    }
-    this._phase.rotation = Math.PI - (value / 180) * Math.PI;
+    this._phaseValue = value
+    this.drawPhaseHand(this.probability, value)
   }
 
   constructor(probability: number, phase: number) {
@@ -64,18 +65,7 @@ export class QubitCircle extends Container {
     this.addChild(this._phase);
 
     this.probability = probability;
-    // 枠線を描画
-    this._border.lineStyle(
-      Spacing.borderWidth.gate,
-      this.borderColor(probability),
-      1,
-      0
-    );
-    this._border.drawCircle(
-      this.center.x,
-      this.center.y,
-      Spacing.size.qubitCircle / 2
-    );
+    this.drawBorder(probability);
     this.phase = phase;
   }
 
@@ -88,6 +78,33 @@ export class QubitCircle extends Container {
 
   protected get handLength() {
     return this.height / 2;
+  }
+
+  protected drawBorder(probability: number) {
+    this._border.lineStyle(
+      Spacing.borderWidth.gate,
+      this.borderColor(probability),
+      1,
+      0
+    );
+    this._border.drawCircle(
+      this.center.x,
+      this.center.y,
+      Spacing.size.qubitCircle / 2
+    );
+  }
+
+  protected drawPhaseHand(probability: number, phase: number) {
+    this._phaseHand.clear()
+
+    if (probability > 0) {
+      this._phaseHand
+        .beginFill(Colors.icon.default, 1)
+        .drawRect(0, 0, Spacing.width.phaseHand, this.handLength)
+        .endFill();
+    }
+
+    this._phase.rotation = Math.PI - (phase / 180) * Math.PI;
   }
 
   protected borderColor(probability: number) {

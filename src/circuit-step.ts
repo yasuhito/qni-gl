@@ -17,6 +17,7 @@ export class CircuitStep extends Container {
 
   qubitCount: number; // 量子ビットの数
 
+  onHover: Signal<(circuitStep: CircuitStep) => void>;
   onClick: Signal<(circuitStep: CircuitStep) => void>;
 
   protected _view: Container;
@@ -43,6 +44,7 @@ export class CircuitStep extends Container {
   constructor(qubitCount: number) {
     super();
 
+    this.onHover = new Signal();
     this.onClick = new Signal();
 
     this.qubitCount = qubitCount;
@@ -115,8 +117,9 @@ export class CircuitStep extends Container {
 
   protected onPointerOver(_event: PIXI.FederatedEvent) {
     if (this.isIdle()) {
-      this._state = "hover";
+      this.onHover.emit(this);
 
+      this._state = "hover";
       this.drawLine(CircuitStep.hoverLineColor);
     }
   }

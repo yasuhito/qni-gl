@@ -1,6 +1,7 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
+import { Signal } from "typed-signals";
 
 /**
  * @noInheritDoc
@@ -9,6 +10,9 @@ export class Circuit extends Container {
   qubitCount: number; // 量子ビットの数
   stepCount: number; // ステップ数
   view: Container;
+
+  onStepHover: Signal<(circuitStep: CircuitStep) => void>;
+
   protected _circuitSteps: List;
 
   get width(): number {
@@ -26,6 +30,8 @@ export class Circuit extends Container {
   constructor(qubitCount: number, stepCount: number) {
     super();
 
+    this.onStepHover = new Signal();
+
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
 
@@ -41,6 +47,7 @@ export class Circuit extends Container {
       const circuitStep = new CircuitStep(this.qubitCount);
       this._circuitSteps.addChild(circuitStep);
 
+      circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
       circuitStep.onClick.connect(this.onCircuitStepClick.bind(this));
     }
   }
@@ -49,6 +56,10 @@ export class Circuit extends Container {
     return {
       steps: this.circuitSteps,
     };
+  }
+
+  protected onCircuitStepHover(circuitStep: CircuitStep) {
+    this.onStepHover.emit(circuitStep);
   }
 
   protected onCircuitStepClick(circuitStep: CircuitStep) {
