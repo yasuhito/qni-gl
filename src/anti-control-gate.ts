@@ -94,6 +94,10 @@ export class AntiControlGate extends Gate {
     this._sprite.tint = Colors.icon.gate.secondary;
   }
 
+  toCircuitJSON() {
+    return '"◦"'
+  }
+
   // static iconHover = PIXI.Texture.from("./assets/AntiControl_hover.svg");
   // static iconGrabbed = PIXI.Texture.from("./assets/AntiControl_grabbed.svg");
   // static iconActive = PIXI.Texture.from("./assets/AntiControl_active.svg");

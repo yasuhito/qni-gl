@@ -13,4 +13,8 @@ export class RnotGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"X^½"'
+  }
 }

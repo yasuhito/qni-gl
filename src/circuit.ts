@@ -12,6 +12,7 @@ export class Circuit extends Container {
   view: Container;
 
   onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
+  onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
 
   protected _circuitSteps: List;
 
@@ -31,6 +32,7 @@ export class Circuit extends Container {
     super();
 
     this.onStepHover = new Signal();
+    this.onStepActivated = new Signal();
 
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
@@ -48,6 +50,9 @@ export class Circuit extends Container {
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
+      circuitStep.onHover.connect((_step) => {
+        console.dir(this.serialize())
+      });
       circuitStep.onActivate.connect(
         this.deactivateAllOtherCircuitSteps.bind(this)
       );
@@ -65,22 +70,38 @@ export class Circuit extends Container {
     return;
   }
 
+  serialize() {
+    return this.circuitSteps.map(each => each.serialize())
+  }
+
   toJSON() {
     return {
       steps: this.circuitSteps,
     };
   }
 
+  toCircuitJSON() {
+    const cols = [];
+    for (const each of this.circuitSteps) {
+      cols.push(each.toCircuitJSON());
+    }
+    return `{"cols":[${cols.join(",")}]}`;
+  }
+
+
   protected onCircuitStepHover(circuitStep: CircuitStep) {
     this.onStepHover.emit(this, circuitStep);
   }
 
-  // 他のすべてのステップを非アクティブにする
   protected deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
+    // 他のすべてのステップを非アクティブにする
     this._circuitSteps.children.forEach((each: CircuitStep) => {
       if (each.isActive() && each !== circuitStep) {
         each.deactivate();
       }
     });
+
+    // シグナルを飛ばす
+    this.onStepActivated.emit(this, circuitStep);
   }
 }

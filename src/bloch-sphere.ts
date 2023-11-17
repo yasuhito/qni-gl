@@ -115,4 +115,8 @@ export class BlochSphere extends Gate {
     }
     this._shape.endFill();
   }
+
+  toCircuitJSON() {
+    return '"Bloch"'
+  }
 }

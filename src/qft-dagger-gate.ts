@@ -13,4 +13,8 @@ export class QFTDaggerGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"QFT†"'
+  }
 }

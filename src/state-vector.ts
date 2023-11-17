@@ -7,6 +7,9 @@ import { spacingInPx } from "./util";
 import { Colors } from "./colors";
 import { Spacing } from "./spacing";
 
+/**
+ * @noInheritDoc
+ */
 export class StateVector extends Container {
   protected _qubitCount = 1;
   protected body: PIXI.Graphics;

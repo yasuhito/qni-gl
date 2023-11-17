@@ -13,4 +13,8 @@ export class XGate extends CircularGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"X"'
+  }
 }

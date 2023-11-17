@@ -137,14 +137,18 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
 
     this.circuit.onStepHover.connect(this.showCurrentStateVector.bind(this));
+    this.circuit.onStepActivated.connect(
+      this.showCurrentStateVector.bind(this)
+    );
 
     this.stateVector = new StateVector(this.circuit.qubitCount);
     this.pixiApp.stage.addChild(this.stateVector);
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
 
-    this.circuit.circuitSteps[0].activate()
-    this.showCurrentStateVector(this.circuit, this.circuit.circuitSteps[0]);
+    // 回路の最初のステップをアクティブにする
+    // これによって、最初のステップの状態ベクトルが表示される
+    this.circuit.circuitSteps[0].activate();
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");

@@ -13,4 +13,8 @@ export class HGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"H"'
+  }
 }

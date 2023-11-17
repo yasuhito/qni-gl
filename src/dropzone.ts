@@ -6,6 +6,49 @@ import { MeasurementGate } from "./measurement-gate";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { rectIntersect } from "./util";
+import { HGate } from "./h-gate";
+import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
+import { RnotGate } from "./rnot-gate";
+import { SGate } from "./s-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { TGate } from "./t-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { PhaseGate } from "./phase-gate";
+import { RxGate } from "./rx-gate";
+import { RyGate } from "./ry-gate";
+import { RzGate } from "./rz-gate";
+import { SwapGate } from "./swap-gate";
+import { ControlGate } from "./control-gate";
+import { AntiControlGate } from "./anti-control-gate";
+import { BlochSphere } from "./bloch-sphere";
+import { QFTGate } from "./qft-gate";
+import { QFTDaggerGate } from "./qft-dagger-gate";
+
+export type Operation =
+  | HGate
+  | XGate
+  | YGate
+  | ZGate
+  | RnotGate
+  | SGate
+  | SDaggerGate
+  | TGate
+  | TDaggerGate
+  | PhaseGate
+  | RxGate
+  | RyGate
+  | RzGate
+  | SwapGate
+  | ControlGate
+  | AntiControlGate
+  | Write0Gate
+  | Write1Gate
+  | MeasurementGate
+  | BlochSphere
+  | QFTGate
+  | QFTDaggerGate;
 
 /**
  * @noInheritDoc
@@ -16,7 +59,7 @@ export class Dropzone extends Container {
   static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
-  gate: Gate | null = null;
+  operation: Operation | null = null;
   protected wire: PIXI.Graphics;
 
   get size(): number {
@@ -29,6 +72,10 @@ export class Dropzone extends Container {
 
   get height(): number {
     return Dropzone.size;
+  }
+
+  isOccupied() {
+    return this.operation !== null;
   }
 
   constructor() {
@@ -83,7 +130,7 @@ export class Dropzone extends Container {
     gateWidth: number,
     gateHeight: number
   ) {
-    if (this.gate !== null && this.gate !== gate) {
+    if (this.operation !== null && this.operation !== gate) {
       return false;
     }
 
@@ -110,15 +157,37 @@ export class Dropzone extends Container {
   }
 
   snap(gate: Gate) {
-    this.gate = gate;
+    this.operation = gate as
+      | HGate
+      | XGate
+      | YGate
+      | ZGate
+      | RnotGate
+      | SGate
+      | SDaggerGate
+      | TGate
+      | TDaggerGate
+      | PhaseGate
+      | RxGate
+      | RyGate
+      | RzGate
+      | SwapGate
+      | ControlGate
+      | AntiControlGate
+      | Write0Gate
+      | Write1Gate
+      | MeasurementGate
+      | BlochSphere
+      | QFTGate
+      | QFTDaggerGate;
 
     this.wire.clear();
     this.drawInputWire();
     this.drawOutputWire();
   }
 
-  unsnap(gate: Gate) {
-    this.gate = null;
+  unsnap(_gate: Gate) {
+    this.operation = null;
 
     this.drawInputWire();
     this.drawOutputWire();
@@ -131,6 +200,14 @@ export class Dropzone extends Container {
       x: pos.x,
       y: pos.y,
     };
+  }
+
+  toCircuitJSON() {
+    if (this.operation === null) {
+      return "1";
+    }
+
+    return this.operation.toCircuitJSON();
   }
 
   protected drawInputWire() {
@@ -152,14 +229,14 @@ export class Dropzone extends Container {
   }
 
   protected get inputWireEndX() {
-    if (this.isIconGate(this.gate)) {
+    if (this.isIconGate(this.operation)) {
       return Dropzone.size / 4;
     }
     return Dropzone.size * 0.75;
   }
 
   protected get outputWireStartX() {
-    if (this.isIconGate(this.gate)) {
+    if (this.isIconGate(this.operation)) {
       return (Dropzone.size * 5) / 4;
     }
     return Dropzone.size * 0.75;
