@@ -20,7 +20,7 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
-import { Simulator } from "./simulator"
+import { Simulator } from "./simulator";
 import { StateVector } from "./state-vector";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
@@ -142,6 +142,8 @@ export class App {
     this.pixiApp.stage.addChild(this.stateVector);
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
+
+    this.showCurrentStateVector(this.circuit, this.circuit.circuitSteps[0]);
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -291,16 +293,16 @@ export class App {
 
   // 現在の状態ベクトルを表示する
   protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
-    const simulator = new Simulator(circuit)
-    const stepIndex = circuit.stepIndex(circuitStep)
-    const stateVector = simulator.stateVectorAt(stepIndex)
+    const simulator = new Simulator(circuit);
+    const stepIndex = circuit.stepIndex(circuitStep);
+    const stateVector = simulator.stateVectorAt(stepIndex);
 
     for (let i = 0; i < stateVector.size; i++) {
-      const amplifier = stateVector.amplifier(i)
-      const qubitCircle = this.stateVector.amplitudes[i]
+      const amplifier = stateVector.amplifier(i);
+      const qubitCircle = this.stateVector.amplitudes[i];
 
-      qubitCircle.probability = amplifier.abs() * 100
-      qubitCircle.phase = amplifier.phase()
+      qubitCircle.probability = amplifier.abs() * 100;
+      qubitCircle.phase = amplifier.phase();
     }
   }
 }

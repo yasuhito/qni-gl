@@ -41,9 +41,7 @@ export class StateVector extends Container {
     this.addChild(this.qubitCircles);
 
     for (let i = 0; i < Math.pow(2, this._qubitCount); i++) {
-      this.qubitCircles.addChild(
-        new QubitCircle(this.randomProbability, this.randomPhase)
-      );
+      this.qubitCircles.addChild(new QubitCircle(0, 0));
     }
 
     this.body.lineStyle(1, Colors.border.stateVector.default, 1, 0);
@@ -69,13 +67,5 @@ export class StateVector extends Container {
 
   protected get bodyHeight() {
     return this.qubitCircles.height + this.qubitCircles.vertPadding * 2;
-  }
-
-  protected get randomProbability() {
-    return Math.floor(Math.random() * 101);
-  }
-
-  protected get randomPhase() {
-    return Math.floor(Math.random() * 361) - 180;
   }
 }
