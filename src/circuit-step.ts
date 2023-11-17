@@ -18,7 +18,7 @@ export class CircuitStep extends Container {
   qubitCount: number; // 量子ビットの数
 
   onHover: Signal<(circuitStep: CircuitStep) => void>;
-  onClick: Signal<(circuitStep: CircuitStep) => void>;
+  onActivate: Signal<(circuitStep: CircuitStep) => void>;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -45,7 +45,7 @@ export class CircuitStep extends Container {
     super();
 
     this.onHover = new Signal();
-    this.onClick = new Signal();
+    this.onActivate = new Signal();
 
     this.qubitCount = qubitCount;
     this._view = new PIXI.Container();
@@ -110,6 +110,12 @@ export class CircuitStep extends Container {
     };
   }
 
+  activate() {
+    this._state = "active"
+    this.drawLine(CircuitStep.activeLineColor);
+    this.onActivate.emit(this);
+  }
+
   deactivate() {
     this._state = "idle";
     this._line.clear();
@@ -134,10 +140,7 @@ export class CircuitStep extends Container {
 
   protected onPointerDown(_event: PIXI.FederatedEvent) {
     if (!this.isActive()) {
-      this.onClick.emit(this);
-
-      this._state = "active";
-      this.drawLine(CircuitStep.activeLineColor);
+      this.activate()
     }
   }
 

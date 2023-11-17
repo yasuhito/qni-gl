@@ -48,7 +48,9 @@ export class Circuit extends Container {
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
-      circuitStep.onClick.connect(this.onCircuitStepClick.bind(this));
+      circuitStep.onActivate.connect(
+        this.deactivateAllOtherCircuitSteps.bind(this)
+      );
     }
   }
 
@@ -73,7 +75,8 @@ export class Circuit extends Container {
     this.onStepHover.emit(this, circuitStep);
   }
 
-  protected onCircuitStepClick(circuitStep: CircuitStep) {
+  // 他のすべてのステップを非アクティブにする
+  protected deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
     this._circuitSteps.children.forEach((each: CircuitStep) => {
       if (each.isActive() && each !== circuitStep) {
         each.deactivate();

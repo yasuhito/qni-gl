@@ -143,6 +143,7 @@ export class App {
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
 
+    this.circuit.circuitSteps[0].activate()
     this.showCurrentStateVector(this.circuit, this.circuit.circuitSteps[0]);
 
     this.logger = new Logger(this.pixiApp);
