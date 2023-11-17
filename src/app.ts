@@ -20,6 +20,7 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
+import { Simulator } from "./simulator"
 import { StateVector } from "./state-vector";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
@@ -290,16 +291,16 @@ export class App {
 
   // 現在の状態ベクトルを表示する
   protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
-    // TODO: Simulator クラスを追加し、そこで計算した状態ベクトルをセットする
-    //
-    // const simulator = new Simulator(circuit)
-    // const stepIndex = circuit.stepIndex(circuitStep)
-    // const stateVector = simulator.stateVectorAt(stepIndex)
-    console.log(circuit.stepIndex(circuitStep));
+    const simulator = new Simulator(circuit)
+    const stepIndex = circuit.stepIndex(circuitStep)
+    const stateVector = simulator.stateVectorAt(stepIndex)
 
-    for (const each of this.stateVector.amplitudes) {
-      each.probability = Math.floor(Math.random() * 101);
-      each.phase = Math.floor(Math.random() * 361) - 180;
+    for (let i = 0; i < stateVector.size; i++) {
+      const amplifier = stateVector.amplifier(i)
+      const qubitCircle = this.stateVector.amplitudes[i]
+
+      qubitCircle.probability = amplifier.abs() * 100
+      qubitCircle.phase = amplifier.phase()
     }
   }
 }
