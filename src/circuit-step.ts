@@ -10,20 +10,20 @@ import { HGate } from "./h-gate";
 
 const groupBy = <K, V>(
   array: readonly V[],
-  getKey: (current: V, index: number, orig: readonly V[]) => K,
+  getKey: (current: V, index: number, orig: readonly V[]) => K
 ): Array<[K, V[]]> =>
   Array.from(
     array.reduce((map, current, index, orig) => {
-      const key = getKey(current, index, orig)
-      const list = map.get(key)
+      const key = getKey(current, index, orig);
+      const list = map.get(key);
       if (list) {
-        list.push(current)
+        list.push(current);
       } else {
-        map.set(key, [current])
+        map.set(key, [current]);
       }
-      return map
-    }, new Map<K, V[]>()),
-  )
+      return map;
+    }, new Map<K, V[]>())
+  );
 
 /**
  * @noInheritDoc
@@ -33,7 +33,7 @@ export class CircuitStep extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  qubitCount: number; // 量子ビットの数
+  _qubitCount: number; // 量子ビットの数
 
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
@@ -77,13 +77,31 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  maybeIncrementQubitCount() {
+    // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
+    // TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
+    // TODO: 新しい量子ビット数を返す
+    this._qubitCount++;
+    this.addDropzone();
+    if (this.isHover()) {
+      this.drawLine(CircuitStep.hoverLineColor);
+    } else if (this.isActive()) {
+      this.drawLine(CircuitStep.activeLineColor);
+    }
+  }
+
+  addDropzone() {
+    const dropzone = new Dropzone();
+    this._dropzones.addChild(dropzone);
+  }
+
   constructor(qubitCount: number) {
     super();
 
     this.onHover = new Signal();
     this.onActivate = new Signal();
 
-    this.qubitCount = qubitCount;
+    this._qubitCount = qubitCount;
     this._view = new PIXI.Container();
     this.addChild(this._view);
 
@@ -95,9 +113,10 @@ export class CircuitStep extends Container {
     this._view.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
-    for (let i = 0; i < this.qubitCount; i++) {
-      const dropzone = new Dropzone();
-      this._dropzones.addChild(dropzone);
+    for (let i = 0; i < this._qubitCount; i++) {
+      // const dropzone = new Dropzone();
+      // this._dropzones.addChild(dropzone);
+      this.addDropzone();
     }
 
     // setup events for mouse + touch using
@@ -141,35 +160,38 @@ export class CircuitStep extends Container {
   }
 
   serialize() {
-    const result = []
+    const result = [];
 
-    for (const [klass, sameOps] of groupBy(this.operations, op => op.constructor)) {
+    for (const [klass, sameOps] of groupBy(
+      this.operations,
+      (op) => op.constructor
+    )) {
       switch (klass) {
         case HGate: {
-          const hGates = sameOps as HGate[]
+          const hGates = sameOps as HGate[];
 
-          const targetBits = hGates.map(each => this.indexOf(each))
-          const serializedGate = {type: 'H', targets: targetBits}
+          const targetBits = hGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "H", targets: targetBits };
 
-          result.push(serializedGate)
-          break
+          result.push(serializedGate);
+          break;
         }
       }
     }
 
-    return result
+    return result;
   }
 
   indexOf(operation: Operation) {
     for (let i = 0; i < this.dropzones.length; i++) {
-      const dropzone = this.dropzones[i]
+      const dropzone = this.dropzones[i];
       if (dropzone.operation === operation) {
-        return i
+        return i;
       }
     }
 
     // ???: -1 ではなく例外を投げる?
-    return -1
+    return -1;
   }
 
   toJSON() {

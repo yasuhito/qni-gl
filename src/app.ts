@@ -194,6 +194,8 @@ export class App {
     let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
+      circuitStep.maybeIncrementQubitCount();
+
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
