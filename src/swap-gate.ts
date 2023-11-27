@@ -93,4 +93,8 @@ export class SwapGate extends Gate {
 
     this._sprite.tint = Colors.icon.gate.secondary;
   }
+
+  toCircuitJSON() {
+    return '"Swap"'
+  }
 }

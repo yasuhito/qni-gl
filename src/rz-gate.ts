@@ -13,4 +13,8 @@ export class RzGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"Rz"'
+  }
 }

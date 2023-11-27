@@ -13,4 +13,8 @@ export class ZGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"Z"'
+  }
 }

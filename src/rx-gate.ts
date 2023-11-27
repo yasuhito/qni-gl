@@ -13,4 +13,8 @@ export class RxGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"Rx"'
+  }
 }

@@ -13,4 +13,8 @@ export class YGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"Y"'
+  }
 }

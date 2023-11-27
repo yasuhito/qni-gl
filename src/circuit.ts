@@ -1,6 +1,7 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
+import { Signal } from "typed-signals";
 
 /**
  * @noInheritDoc
@@ -9,6 +10,10 @@ export class Circuit extends Container {
   qubitCount: number; // 量子ビットの数
   stepCount: number; // ステップ数
   view: Container;
+
+  onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
+  onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
+
   protected _circuitSteps: List;
 
   get width(): number {
@@ -26,6 +31,9 @@ export class Circuit extends Container {
   constructor(qubitCount: number, stepCount: number) {
     super();
 
+    this.onStepHover = new Signal();
+    this.onStepActivated = new Signal();
+
     this.qubitCount = qubitCount;
     this.stepCount = stepCount;
 
@@ -41,8 +49,29 @@ export class Circuit extends Container {
       const circuitStep = new CircuitStep(this.qubitCount);
       this._circuitSteps.addChild(circuitStep);
 
-      circuitStep.onClick.connect(this.onCircuitStepClick.bind(this));
+      circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
+      circuitStep.onHover.connect((_step) => {
+        console.dir(this.serialize())
+      });
+      circuitStep.onActivate.connect(
+        this.deactivateAllOtherCircuitSteps.bind(this)
+      );
     }
+  }
+
+  stepIndex(step: CircuitStep) {
+    for (let i = 0; i < this._circuitSteps.children.length; i++) {
+      const each = this._circuitSteps.children[i];
+      if (step === each) {
+        return i;
+      }
+    }
+
+    return;
+  }
+
+  serialize() {
+    return this.circuitSteps.map(each => each.serialize())
   }
 
   toJSON() {
@@ -51,11 +80,28 @@ export class Circuit extends Container {
     };
   }
 
-  protected onCircuitStepClick(circuitStep: CircuitStep) {
+  toCircuitJSON() {
+    const cols = [];
+    for (const each of this.circuitSteps) {
+      cols.push(each.toCircuitJSON());
+    }
+    return `{"cols":[${cols.join(",")}]}`;
+  }
+
+
+  protected onCircuitStepHover(circuitStep: CircuitStep) {
+    this.onStepHover.emit(this, circuitStep);
+  }
+
+  protected deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
+    // 他のすべてのステップを非アクティブにする
     this._circuitSteps.children.forEach((each: CircuitStep) => {
       if (each.isActive() && each !== circuitStep) {
         each.deactivate();
       }
     });
+
+    // シグナルを飛ばす
+    this.onStepActivated.emit(this, circuitStep);
   }
 }

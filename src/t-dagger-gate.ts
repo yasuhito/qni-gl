@@ -13,4 +13,9 @@ export class TDaggerGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+
+  toCircuitJSON() {
+    return '"T†"'
+  }
 }

@@ -13,4 +13,8 @@ export class PhaseGate extends CircularGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"P"'
+  }
 }

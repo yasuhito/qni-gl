@@ -21,4 +21,8 @@ export class Write1Gate extends WriteGate {
     "./assets/Write1_grabbed_dropzone.svg"
   );
   static iconActive = PIXI.Texture.from("./assets/Write1_active.svg");
+
+  toCircuitJSON() {
+    return '"|1>"'
+  }
 }

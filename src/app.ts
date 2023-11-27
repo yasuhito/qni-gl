@@ -5,6 +5,7 @@ import { BlochSphere } from "./bloch-sphere";
 import { Circuit } from "./circuit";
 import { CircuitStep } from "./circuit-step";
 import { ControlGate } from "./control-gate";
+import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { GatePalette } from "./gate-palette";
 import { HGate } from "./h-gate";
@@ -19,6 +20,8 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
+import { Simulator } from "./simulator";
+import { StateVector } from "./state-vector";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -27,7 +30,6 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { Dropzone } from "./dropzone";
 
 export class App {
   static elementId = "app";
@@ -40,6 +42,7 @@ export class App {
   gatePalette: GatePalette;
   circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
+  stateVector: StateVector;
   logger: Logger;
   nameMap = new Map();
 
@@ -132,6 +135,20 @@ export class App {
     this.circuit.y = 64 + this.gatePalette.height + 64;
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
+
+    this.circuit.onStepHover.connect(this.showCurrentStateVector.bind(this));
+    this.circuit.onStepActivated.connect(
+      this.showCurrentStateVector.bind(this)
+    );
+
+    this.stateVector = new StateVector(this.circuit.qubitCount);
+    this.pixiApp.stage.addChild(this.stateVector);
+    this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
+    this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
+
+    // 回路の最初のステップをアクティブにする
+    // これによって、最初のステップの状態ベクトルが表示される
+    this.circuit.circuitSteps[0].activate();
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -276,6 +293,21 @@ export class App {
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
     if (event.target === this.pixiApp.stage) {
       this.activeGate?.deactivate();
+    }
+  }
+
+  // 現在の状態ベクトルを表示する
+  protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
+    const simulator = new Simulator(circuit);
+    const stepIndex = circuit.stepIndex(circuitStep);
+    const stateVector = simulator.stateVectorAt(stepIndex);
+
+    for (let i = 0; i < stateVector.size; i++) {
+      const amplifier = stateVector.amplifier(i);
+      const qubitCircle = this.stateVector.amplitudes[i];
+
+      qubitCircle.probability = amplifier.abs() * 100;
+      qubitCircle.phase = amplifier.phase();
     }
   }
 }

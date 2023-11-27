@@ -1,11 +1,29 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
-import { Dropzone } from "./dropzone";
+import { Dropzone, Operation } from "./dropzone";
 import { Gate } from "./gate";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
+import { HGate } from "./h-gate";
+
+const groupBy = <K, V>(
+  array: readonly V[],
+  getKey: (current: V, index: number, orig: readonly V[]) => K,
+): Array<[K, V[]]> =>
+  Array.from(
+    array.reduce((map, current, index, orig) => {
+      const key = getKey(current, index, orig)
+      const list = map.get(key)
+      if (list) {
+        list.push(current)
+      } else {
+        map.set(key, [current])
+      }
+      return map
+    }, new Map<K, V[]>()),
+  )
 
 /**
  * @noInheritDoc
@@ -17,7 +35,8 @@ export class CircuitStep extends Container {
 
   qubitCount: number; // 量子ビットの数
 
-  onClick: Signal<(circuitStep: CircuitStep) => void>;
+  onHover: Signal<(circuitStep: CircuitStep) => void>;
+  onActivate: Signal<(circuitStep: CircuitStep) => void>;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -36,14 +55,33 @@ export class CircuitStep extends Container {
     return Dropzone.size;
   }
 
+  /**
+   * ステップ内のすべての {@link Dropzone} を返す
+   */
   get dropzones(): Dropzone[] {
     return this._dropzones.children as Dropzone[];
+  }
+
+  /**
+   * ステップ内のすべての {@link Dropzone} のうち、ゲートが置かれたものを返す
+   */
+  get occupiedDropzones() {
+    return this.dropzones.filter((each) => {
+      return each.isOccupied();
+    });
+  }
+
+  private get operations(): Operation[] {
+    return this.occupiedDropzones
+      .map((each) => each.operation)
+      .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
   constructor(qubitCount: number) {
     super();
 
-    this.onClick = new Signal();
+    this.onHover = new Signal();
+    this.onActivate = new Signal();
 
     this.qubitCount = qubitCount;
     this._view = new PIXI.Container();
@@ -102,10 +140,53 @@ export class CircuitStep extends Container {
     return this._state === "active";
   }
 
+  serialize() {
+    const result = []
+
+    for (const [klass, sameOps] of groupBy(this.operations, op => op.constructor)) {
+      switch (klass) {
+        case HGate: {
+          const hGates = sameOps as HGate[]
+
+          const targetBits = hGates.map(each => this.indexOf(each))
+          const serializedGate = {type: 'H', targets: targetBits}
+
+          result.push(serializedGate)
+          break
+        }
+      }
+    }
+
+    return result
+  }
+
+  indexOf(operation: Operation) {
+    for (let i = 0; i < this.dropzones.length; i++) {
+      const dropzone = this.dropzones[i]
+      if (dropzone.operation === operation) {
+        return i
+      }
+    }
+
+    // ???: -1 ではなく例外を投げる?
+    return -1
+  }
+
   toJSON() {
     return {
       dropzones: this.dropzones,
     };
+  }
+
+  toCircuitJSON() {
+    const jsons = this.dropzones.map((each) => each.toCircuitJSON());
+    return `[${jsons.join(",")}]`;
+  }
+
+  activate() {
+    this._state = "active";
+    this.drawLine(CircuitStep.activeLineColor);
+    this.onActivate.emit(this);
   }
 
   deactivate() {
@@ -115,8 +196,9 @@ export class CircuitStep extends Container {
 
   protected onPointerOver(_event: PIXI.FederatedEvent) {
     if (this.isIdle()) {
-      this._state = "hover";
+      this.onHover.emit(this);
 
+      this._state = "hover";
       this.drawLine(CircuitStep.hoverLineColor);
     }
   }
@@ -131,10 +213,7 @@ export class CircuitStep extends Container {
 
   protected onPointerDown(_event: PIXI.FederatedEvent) {
     if (!this.isActive()) {
-      this.onClick.emit(this);
-
-      this._state = "active";
-      this.drawLine(CircuitStep.activeLineColor);
+      this.activate();
     }
   }
 

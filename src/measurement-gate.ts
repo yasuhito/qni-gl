@@ -141,4 +141,8 @@ export class MeasurementGate extends Gate {
     );
     this._shape.endFill();
   }
+
+  toCircuitJSON() {
+    return '"Measure"'
+  }
 }

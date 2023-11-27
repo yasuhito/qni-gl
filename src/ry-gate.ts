@@ -13,4 +13,8 @@ export class RyGate extends SquareGateMixin(Gate) {
       scale: window.devicePixelRatio,
     },
   });
+
+  toCircuitJSON() {
+    return '"Ry"'
+  }
 }
