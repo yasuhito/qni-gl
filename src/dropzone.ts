@@ -81,11 +81,8 @@ export class Dropzone extends Container {
   constructor() {
     super();
 
-    this.view = new Container();
-    this.addChild(this.view);
-
     this.wire = new PIXI.Graphics();
-    this.view.addChild(this.wire);
+    this.addChild(this.wire);
 
     this.drawInputWire();
     this.drawOutputWire();
