@@ -8,6 +8,7 @@ import { Signal } from "typed-signals";
  */
 export class Circuit extends Container {
   minQubitCount: number; // 最小の量子ビット数
+  maxQubitCount = 32;
   stepCount: number; // ステップ数
   view: Container;
 
@@ -87,7 +88,7 @@ export class Circuit extends Container {
       this.maxQubitCountForAllSteps > this.minQubitCount
     ) {
       this.circuitSteps.forEach((each) => {
-        each.decrementQubitCount();
+        each.deleteLastDropzone();
       });
     }
   }

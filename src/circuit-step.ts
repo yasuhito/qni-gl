@@ -79,24 +79,33 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  /**
+   * 指定した量子ビットにゲートが置かれているかどうかを返す
+   */
   hasGateAt(qubitIndex: number) {
     return this.dropzones[qubitIndex].isOccupied();
   }
 
-  maybeIncrementQubitCount(): number {
-    // TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
-    this.addDropzone();
+  /**
+   * Dropzone を末尾に追加する
+   *
+   * TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
+   */
+  appendDropzone() {
+    const dropzone = new Dropzone();
+    this._dropzones.addChild(dropzone);
 
     if (this.isHover()) {
       this.drawHoverLine();
     } else if (this.isActive()) {
       this.drawActiveLine();
     }
-
-    return this.qubitCount;
   }
 
-  decrementQubitCount() {
+  /**
+   * 末尾の Dropzone を削除する
+   */
+  deleteLastDropzone() {
     const dropzone = this._dropzones.getChildAt(
       this._dropzones.children.length - 1
     ) as Dropzone;
@@ -109,11 +118,6 @@ export class CircuitStep extends Container {
     } else if (this.isActive()) {
       this.drawActiveLine();
     }
-  }
-
-  addDropzone() {
-    const dropzone = new Dropzone();
-    this._dropzones.addChild(dropzone);
   }
 
   constructor(qubitCount: number) {
@@ -134,7 +138,7 @@ export class CircuitStep extends Container {
     this._dropzones.eventMode = "static";
 
     for (let i = 0; i < qubitCount; i++) {
-      this.addDropzone();
+      this.appendDropzone();
     }
 
     // setup events for mouse + touch using
