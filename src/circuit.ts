@@ -2,7 +2,10 @@ import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { Dropzone } from "./dropzone";
+import { Dropzone, WireType } from "./dropzone";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
 
 /**
  * @noInheritDoc
@@ -64,13 +67,31 @@ export class Circuit extends Container {
   }
 
   onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
-    // TODO: すべてのワイヤの入力と出力について、古典/量子の区別をつける
-    // それぞれのワイヤについて、先頭の Dropzone から順番に input と output をセットする
-    //   dropzone.input = :quantum
-    //   dropzone.output = :classical
-    //
-    // Ruby のシンボルのように :quantum / :classical というシングルトンぽいものを TypeScript でどう実現する?
-    console.log("onSnap");
+    for (let wireIndex = 0; wireIndex < this.qubitCount; wireIndex++) {
+      let wireType = WireType.Classical;
+
+      for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
+        const dropzone = this.circuitSteps[stepIndex].dropzones[wireIndex];
+        if (dropzone.isOccupied()) {
+          if (
+            dropzone.operation instanceof Write0Gate ||
+            dropzone.operation instanceof Write1Gate
+          ) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Quantum;
+            dropzone.outputWireType = wireType;
+          } else if (dropzone.operation instanceof MeasurementGate) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Classical;
+            dropzone.outputWireType = wireType;
+          }
+        } else {
+          dropzone.inputWireType = wireType;
+          dropzone.outputWireType = wireType;
+        }
+        dropzone.redrawWires();
+      }
+    }
   }
 
   stepIndex(step: CircuitStep) {

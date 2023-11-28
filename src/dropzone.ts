@@ -51,7 +51,7 @@ export type Operation =
   | QFTGate
   | QFTDaggerGate;
 
-enum WireType {
+export enum WireType {
   Quantum = "quantum",
   Classical = "classical",
 }
@@ -202,6 +202,13 @@ export class Dropzone extends Container {
   unsnap(_gate: Gate) {
     this.operation = null;
 
+    this.drawInputWire();
+    this.drawOutputWire();
+  }
+
+  // TODO: 使える場所ではこのメソッドを使う
+  redrawWires() {
+    this.wire.clear();
     this.drawInputWire();
     this.drawOutputWire();
   }
