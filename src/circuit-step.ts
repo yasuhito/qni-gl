@@ -88,8 +88,6 @@ export class CircuitStep extends Container {
 
   /**
    * Dropzone を末尾に追加する
-   *
-   * TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
    */
   appendDropzone() {
     const dropzone = new Dropzone();
