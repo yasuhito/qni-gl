@@ -33,8 +33,6 @@ export class CircuitStep extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  _qubitCount: number; // 量子ビットの数
-
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
 
@@ -56,7 +54,7 @@ export class CircuitStep extends Container {
   }
 
   get qubitCount() {
-    return this._qubitCount;
+    return this.dropzones.length;
   }
 
   /**
@@ -86,18 +84,16 @@ export class CircuitStep extends Container {
   }
 
   maybeIncrementQubitCount(): number {
-    // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
     // TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
-    // TODO: 新しい量子ビット数を返す
-    this._qubitCount++;
     this.addDropzone();
+
     if (this.isHover()) {
       this.drawHoverLine();
     } else if (this.isActive()) {
       this.drawActiveLine();
     }
 
-    return this._qubitCount;
+    return this.qubitCount;
   }
 
   decrementQubitCount() {
@@ -107,7 +103,6 @@ export class CircuitStep extends Container {
     this._dropzones.removeChildAt(this._dropzones.children.length - 1);
     dropzone.destroy();
 
-    this._qubitCount--;
     this._line.clear();
     if (this.isHover()) {
       this.drawHoverLine();
@@ -127,7 +122,6 @@ export class CircuitStep extends Container {
     this.onHover = new Signal();
     this.onActivate = new Signal();
 
-    this._qubitCount = qubitCount;
     this._view = new PIXI.Container();
     this.addChild(this._view);
 
@@ -139,9 +133,7 @@ export class CircuitStep extends Container {
     this._view.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
-    for (let i = 0; i < this._qubitCount; i++) {
-      // const dropzone = new Dropzone();
-      // this._dropzones.addChild(dropzone);
+    for (let i = 0; i < qubitCount; i++) {
       this.addDropzone();
     }
 
