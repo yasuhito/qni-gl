@@ -194,7 +194,7 @@ export class App {
     let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
-      circuitStep.maybeIncrementQubitCount();
+      const newQubitCount = circuitStep.maybeIncrementQubitCount();
 
       for (const each of circuitStep.dropzones) {
         if (
@@ -210,6 +210,7 @@ export class App {
           this.grabbedGate.click(pointerPosition, each);
         }
       }
+      this.circuit.qubitCount = newQubitCount;
     }
 
     gate.dropzone = dropzone;
@@ -291,15 +292,12 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
-    // TODO: 全ステップについて、最上位ビットの Dropzone にオペレーションがなければ、すべてのステップの qubitCount を 1 減らす
-    if (
-      this.circuit.circuitSteps.every(
-        (each) => !each.hasGateAt(each._qubitCount - 1)
-      )
+    // Circuit クラスに未使用の量子ビットを複数削除するメソッドを追加する
+    while (
+      this.circuit.isLastQubitUnused() &&
+      this.circuit.qubitCount > this.circuit.minQubitCount
     ) {
-      this.circuit.circuitSteps.forEach((step) => {
-        step.decrementQubitCount();
-      });
+      this.circuit.removeLastUnusedQubit();
     }
   }
 
@@ -319,8 +317,11 @@ export class App {
       const amplifier = stateVector.amplifier(i);
       const qubitCircle = this.stateVector.amplitudes[i];
 
-      qubitCircle.probability = amplifier.abs() * 100;
-      qubitCircle.phase = amplifier.phase();
+      // FIXME: qubitCircle が undefined になることがある
+      if (qubitCircle) {
+        qubitCircle.probability = amplifier.abs() * 100;
+        qubitCircle.phase = amplifier.phase();
+      }
     }
   }
 }

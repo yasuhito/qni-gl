@@ -81,7 +81,7 @@ export class CircuitStep extends Container {
     return this.dropzones[qubitIndex].isOccupied();
   }
 
-  maybeIncrementQubitCount() {
+  maybeIncrementQubitCount(): number {
     // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
     // TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
     // TODO: 新しい量子ビット数を返す
@@ -92,6 +92,8 @@ export class CircuitStep extends Container {
     } else if (this.isActive()) {
       this.drawActiveLine();
     }
+
+    return this._qubitCount;
   }
 
   decrementQubitCount() {
