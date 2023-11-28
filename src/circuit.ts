@@ -2,6 +2,7 @@ import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
+import { Dropzone } from "./dropzone";
 
 /**
  * @noInheritDoc
@@ -52,6 +53,7 @@ export class Circuit extends Container {
 
     for (let i = 0; i < this.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minQubitCount);
+      circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
@@ -59,6 +61,16 @@ export class Circuit extends Container {
         this.deactivateAllOtherCircuitSteps.bind(this)
       );
     }
+  }
+
+  onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
+    // TODO: すべてのワイヤの入力と出力について、古典/量子の区別をつける
+    // それぞれのワイヤについて、先頭の Dropzone から順番に input と output をセットする
+    //   dropzone.input = :quantum
+    //   dropzone.output = :classical
+    //
+    // Ruby のシンボルのように :quantum / :classical というシングルトンぽいものを TypeScript でどう実現する?
+    console.log("onSnap");
   }
 
   stepIndex(step: CircuitStep) {
