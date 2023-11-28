@@ -7,7 +7,8 @@ import { Signal } from "typed-signals";
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  qubitCount: number; // 量子ビットの数
+  minQubitCount: number; // 最小の量子ビット数
+  maxQubitCount = 32;
   stepCount: number; // ステップ数
   view: Container;
 
@@ -15,6 +16,10 @@ export class Circuit extends Container {
   onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
 
   protected _circuitSteps: List;
+
+  get qubitCount() {
+    return this.circuitSteps[0].qubitCount;
+  }
 
   get width(): number {
     return this._circuitSteps[0].width;
@@ -28,13 +33,13 @@ export class Circuit extends Container {
     return this._circuitSteps.children as CircuitStep[];
   }
 
-  constructor(qubitCount: number, stepCount: number) {
+  constructor(minQubitCount: number, stepCount: number) {
     super();
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
 
-    this.qubitCount = qubitCount;
+    this.minQubitCount = minQubitCount;
     this.stepCount = stepCount;
 
     this.view = new Container();
@@ -46,13 +51,10 @@ export class Circuit extends Container {
     this.view.addChild(this._circuitSteps);
 
     for (let i = 0; i < this.stepCount; i++) {
-      const circuitStep = new CircuitStep(this.qubitCount);
+      const circuitStep = new CircuitStep(this.minQubitCount);
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
-      circuitStep.onHover.connect((_step) => {
-        console.dir(this.serialize())
-      });
       circuitStep.onActivate.connect(
         this.deactivateAllOtherCircuitSteps.bind(this)
       );
@@ -70,8 +72,33 @@ export class Circuit extends Container {
     return;
   }
 
+  // 最後のビットが使われていなければ true を返す
+  isLastQubitUnused() {
+    return this.circuitSteps.every(
+      (each) => !each.hasGateAt(each.qubitCount - 1)
+    );
+  }
+
+  /**
+   * 使われていない上位ビットをまとめて削除する
+   */
+  removeUnusedUpperQubits() {
+    while (
+      this.isLastQubitUnused() &&
+      this.maxQubitCountForAllSteps > this.minQubitCount
+    ) {
+      this.circuitSteps.forEach((each) => {
+        each.deleteLastDropzone();
+      });
+    }
+  }
+
+  protected get maxQubitCountForAllSteps() {
+    return Math.max(...this.circuitSteps.map((each) => each.qubitCount));
+  }
+
   serialize() {
-    return this.circuitSteps.map(each => each.serialize())
+    return this.circuitSteps.map((each) => each.serialize());
   }
 
   toJSON() {
@@ -87,7 +114,6 @@ export class Circuit extends Container {
     }
     return `{"cols":[${cols.join(",")}]}`;
   }
-
 
   protected onCircuitStepHover(circuitStep: CircuitStep) {
     this.onStepHover.emit(this, circuitStep);

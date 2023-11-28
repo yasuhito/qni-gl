@@ -194,6 +194,10 @@ export class App {
     let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
+      if (circuitStep.qubitCount < this.circuit.maxQubitCount) {
+        circuitStep.appendNewDropzone();
+      }
+
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
@@ -288,6 +292,8 @@ export class App {
     this.grabbedGate.zIndex = 20;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
+
+    this.circuit.removeUnusedUpperQubits();
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
@@ -306,8 +312,11 @@ export class App {
       const amplifier = stateVector.amplifier(i);
       const qubitCircle = this.stateVector.amplitudes[i];
 
-      qubitCircle.probability = amplifier.abs() * 100;
-      qubitCircle.phase = amplifier.phase();
+      // FIXME: qubitCircle が undefined になることがある
+      if (qubitCircle) {
+        qubitCircle.probability = amplifier.abs() * 100;
+        qubitCircle.phase = amplifier.phase();
+      }
     }
   }
 }

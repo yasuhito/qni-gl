@@ -10,20 +10,20 @@ import { HGate } from "./h-gate";
 
 const groupBy = <K, V>(
   array: readonly V[],
-  getKey: (current: V, index: number, orig: readonly V[]) => K,
+  getKey: (current: V, index: number, orig: readonly V[]) => K
 ): Array<[K, V[]]> =>
   Array.from(
     array.reduce((map, current, index, orig) => {
-      const key = getKey(current, index, orig)
-      const list = map.get(key)
+      const key = getKey(current, index, orig);
+      const list = map.get(key);
       if (list) {
-        list.push(current)
+        list.push(current);
       } else {
-        map.set(key, [current])
+        map.set(key, [current]);
       }
-      return map
-    }, new Map<K, V[]>()),
-  )
+      return map;
+    }, new Map<K, V[]>())
+  );
 
 /**
  * @noInheritDoc
@@ -32,8 +32,6 @@ export class CircuitStep extends Container {
   static lineWidth = spacingInPx(1);
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
-
-  qubitCount: number; // 量子ビットの数
 
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
@@ -53,6 +51,10 @@ export class CircuitStep extends Container {
 
   static get paddingY(): number {
     return Dropzone.size;
+  }
+
+  get qubitCount() {
+    return this.dropzones.length;
   }
 
   /**
@@ -77,13 +79,44 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  /**
+   * 指定した量子ビットにゲートが置かれているかどうかを返す
+   */
+  hasGateAt(qubitIndex: number) {
+    return this.dropzones[qubitIndex].isOccupied();
+  }
+
+  /**
+   * Dropzone を末尾に追加する
+   */
+  appendNewDropzone() {
+    const dropzone = new Dropzone();
+    this._dropzones.addChild(dropzone);
+
+    if (this._line) {
+      this.redrawLine();
+    }
+  }
+
+  /**
+   * 末尾の Dropzone を削除する
+   */
+  deleteLastDropzone() {
+    const dropzone = this._dropzones.getChildAt(
+      this._dropzones.children.length - 1
+    ) as Dropzone;
+    this._dropzones.removeChildAt(this._dropzones.children.length - 1);
+    dropzone.destroy();
+
+    this.redrawLine();
+  }
+
   constructor(qubitCount: number) {
     super();
 
     this.onHover = new Signal();
     this.onActivate = new Signal();
 
-    this.qubitCount = qubitCount;
     this._view = new PIXI.Container();
     this.addChild(this._view);
 
@@ -95,9 +128,8 @@ export class CircuitStep extends Container {
     this._view.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
-    for (let i = 0; i < this.qubitCount; i++) {
-      const dropzone = new Dropzone();
-      this._dropzones.addChild(dropzone);
+    for (let i = 0; i < qubitCount; i++) {
+      this.appendNewDropzone();
     }
 
     // setup events for mouse + touch using
@@ -141,35 +173,38 @@ export class CircuitStep extends Container {
   }
 
   serialize() {
-    const result = []
+    const result = [];
 
-    for (const [klass, sameOps] of groupBy(this.operations, op => op.constructor)) {
+    for (const [klass, sameOps] of groupBy(
+      this.operations,
+      (op) => op.constructor
+    )) {
       switch (klass) {
         case HGate: {
-          const hGates = sameOps as HGate[]
+          const hGates = sameOps as HGate[];
 
-          const targetBits = hGates.map(each => this.indexOf(each))
-          const serializedGate = {type: 'H', targets: targetBits}
+          const targetBits = hGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "H", targets: targetBits };
 
-          result.push(serializedGate)
-          break
+          result.push(serializedGate);
+          break;
         }
       }
     }
 
-    return result
+    return result;
   }
 
   indexOf(operation: Operation) {
     for (let i = 0; i < this.dropzones.length; i++) {
-      const dropzone = this.dropzones[i]
+      const dropzone = this.dropzones[i];
       if (dropzone.operation === operation) {
-        return i
+        return i;
       }
     }
 
     // ???: -1 ではなく例外を投げる?
-    return -1
+    return -1;
   }
 
   toJSON() {
@@ -185,7 +220,7 @@ export class CircuitStep extends Container {
 
   activate() {
     this._state = "active";
-    this.drawLine(CircuitStep.activeLineColor);
+    this.redrawLine();
     this.onActivate.emit(this);
   }
 
@@ -199,7 +234,7 @@ export class CircuitStep extends Container {
       this.onHover.emit(this);
 
       this._state = "hover";
-      this.drawLine(CircuitStep.hoverLineColor);
+      this.redrawLine();
     }
   }
 
@@ -215,6 +250,24 @@ export class CircuitStep extends Container {
     if (!this.isActive()) {
       this.activate();
     }
+  }
+
+  protected redrawLine() {
+    this._line.clear();
+
+    if (this.isHover()) {
+      this.drawHoverLine();
+    } else if (this.isActive()) {
+      this.drawActiveLine();
+    }
+  }
+
+  protected drawHoverLine() {
+    this.drawLine(CircuitStep.hoverLineColor);
+  }
+
+  protected drawActiveLine() {
+    this.drawLine(CircuitStep.activeLineColor);
   }
 
   protected drawLine(color: PIXI.ColorSource) {
