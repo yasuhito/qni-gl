@@ -89,14 +89,12 @@ export class CircuitStep extends Container {
   /**
    * Dropzone を末尾に追加する
    */
-  appendDropzone() {
+  appendNewDropzone() {
     const dropzone = new Dropzone();
     this._dropzones.addChild(dropzone);
 
-    if (this.isHover()) {
-      this.drawHoverLine();
-    } else if (this.isActive()) {
-      this.drawActiveLine();
+    if (this._line) {
+      this.redrawLine();
     }
   }
 
@@ -110,12 +108,7 @@ export class CircuitStep extends Container {
     this._dropzones.removeChildAt(this._dropzones.children.length - 1);
     dropzone.destroy();
 
-    this._line.clear();
-    if (this.isHover()) {
-      this.drawHoverLine();
-    } else if (this.isActive()) {
-      this.drawActiveLine();
-    }
+    this.redrawLine();
   }
 
   constructor(qubitCount: number) {
@@ -136,7 +129,7 @@ export class CircuitStep extends Container {
     this._dropzones.eventMode = "static";
 
     for (let i = 0; i < qubitCount; i++) {
-      this.appendDropzone();
+      this.appendNewDropzone();
     }
 
     // setup events for mouse + touch using
@@ -227,7 +220,7 @@ export class CircuitStep extends Container {
 
   activate() {
     this._state = "active";
-    this.drawActiveLine();
+    this.redrawLine();
     this.onActivate.emit(this);
   }
 
@@ -241,7 +234,7 @@ export class CircuitStep extends Container {
       this.onHover.emit(this);
 
       this._state = "hover";
-      this.drawHoverLine();
+      this.redrawLine();
     }
   }
 
@@ -256,6 +249,16 @@ export class CircuitStep extends Container {
   protected onPointerDown(_event: PIXI.FederatedEvent) {
     if (!this.isActive()) {
       this.activate();
+    }
+  }
+
+  protected redrawLine() {
+    this._line.clear();
+
+    if (this.isHover()) {
+      this.drawHoverLine();
+    } else if (this.isActive()) {
+      this.drawActiveLine();
     }
   }
 

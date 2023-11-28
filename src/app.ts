@@ -195,7 +195,7 @@ export class App {
 
     for (const circuitStep of this.circuit.circuitSteps) {
       if (circuitStep.qubitCount < this.circuit.maxQubitCount) {
-        circuitStep.appendDropzone();
+        circuitStep.appendNewDropzone();
       }
 
       for (const each of circuitStep.dropzones) {
