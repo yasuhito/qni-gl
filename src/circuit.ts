@@ -7,7 +7,6 @@ import { Signal } from "typed-signals";
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  qubitCount: number; // 量子ビットの数
   minQubitCount: number; // 最小の量子ビット数
   stepCount: number; // ステップ数
   view: Container;
@@ -16,6 +15,10 @@ export class Circuit extends Container {
   onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
 
   protected _circuitSteps: List;
+
+  get qubitCount() {
+    return this.circuitSteps[0].qubitCount;
+  }
 
   get width(): number {
     return this._circuitSteps[0].width;
@@ -35,7 +38,6 @@ export class Circuit extends Container {
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
 
-    this.qubitCount = minQubitCount;
     this.minQubitCount = minQubitCount;
     this.stepCount = stepCount;
 
@@ -48,7 +50,7 @@ export class Circuit extends Container {
     this.view.addChild(this._circuitSteps);
 
     for (let i = 0; i < this.stepCount; i++) {
-      const circuitStep = new CircuitStep(this.qubitCount);
+      const circuitStep = new CircuitStep(this.minQubitCount);
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
@@ -87,10 +89,6 @@ export class Circuit extends Container {
       this.circuitSteps.forEach((each) => {
         each.decrementQubitCount();
       });
-      // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
-      // ただし、ここでの処理のように CircuitStep を更新中はそれぞれのステップで Dropzone の数が異なるので、
-      // 最大値を取る必要がある
-      this.qubitCount--;
     }
   }
 

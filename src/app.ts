@@ -210,7 +210,6 @@ export class App {
           this.grabbedGate.click(pointerPosition, each);
         }
       }
-      this.circuit.qubitCount = newQubitCount;
     }
 
     gate.dropzone = dropzone;
