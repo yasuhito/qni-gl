@@ -72,16 +72,30 @@ export class Circuit extends Container {
   // 最後のビットが使われていなければ true を返す
   isLastQubitUnused() {
     return this.circuitSteps.every(
-      (each) => !each.hasGateAt(each._qubitCount - 1)
+      (each) => !each.hasGateAt(each.qubitCount - 1)
     );
   }
 
-  // 最後の使われていないビットを消す
-  removeLastUnusedQubit() {
-    this.circuitSteps.forEach((each) => {
-      each.decrementQubitCount();
-    });
-    this.qubitCount--;
+  /**
+   * 使われていない上位ビットをまとめて削除する
+   */
+  removeUnusedUpperQubits() {
+    while (
+      this.isLastQubitUnused() &&
+      this.maxQubitCountForAllSteps > this.minQubitCount
+    ) {
+      this.circuitSteps.forEach((each) => {
+        each.decrementQubitCount();
+      });
+      // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
+      // ただし、ここでの処理のように CircuitStep を更新中はそれぞれのステップで Dropzone の数が異なるので、
+      // 最大値を取る必要がある
+      this.qubitCount--;
+    }
+  }
+
+  protected get maxQubitCountForAllSteps() {
+    return Math.max(...this.circuitSteps.map((each) => each.qubitCount));
   }
 
   serialize() {

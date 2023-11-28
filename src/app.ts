@@ -292,13 +292,7 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
-    // Circuit クラスに未使用の量子ビットを複数削除するメソッドを追加する
-    while (
-      this.circuit.isLastQubitUnused() &&
-      this.circuit.qubitCount > this.circuit.minQubitCount
-    ) {
-      this.circuit.removeLastUnusedQubit();
-    }
+    this.circuit.removeUnusedUpperQubits();
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {

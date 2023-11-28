@@ -55,6 +55,10 @@ export class CircuitStep extends Container {
     return Dropzone.size;
   }
 
+  get qubitCount() {
+    return this._qubitCount;
+  }
+
   /**
    * ステップ内のすべての {@link Dropzone} を返す
    */
