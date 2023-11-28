@@ -290,6 +290,17 @@ export class App {
     this.grabbedGate.zIndex = 20;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
+
+    // TODO: 全ステップについて、最上位ビットの Dropzone にオペレーションがなければ、すべてのステップの qubitCount を 1 減らす
+    if (
+      this.circuit.circuitSteps.every(
+        (each) => !each.hasGateAt(each._qubitCount - 1)
+      )
+    ) {
+      this.circuit.circuitSteps.forEach((step) => {
+        step.decrementQubitCount();
+      });
+    }
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {

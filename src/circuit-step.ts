@@ -77,6 +77,10 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  hasGateAt(qubitIndex: number) {
+    return this.dropzones[qubitIndex].isOccupied();
+  }
+
   maybeIncrementQubitCount() {
     // TODO: qubitCount は Dropzone の数と同じなので、変数を用意するのでなく Dropzone の数をそのつど数える
     // TODO: もし量子ビット数が上限に達していれば Dropzone を追加しない
@@ -84,9 +88,25 @@ export class CircuitStep extends Container {
     this._qubitCount++;
     this.addDropzone();
     if (this.isHover()) {
-      this.drawLine(CircuitStep.hoverLineColor);
+      this.drawHoverLine();
     } else if (this.isActive()) {
-      this.drawLine(CircuitStep.activeLineColor);
+      this.drawActiveLine();
+    }
+  }
+
+  decrementQubitCount() {
+    const dropzone = this._dropzones.getChildAt(
+      this._dropzones.children.length - 1
+    ) as Dropzone;
+    this._dropzones.removeChildAt(this._dropzones.children.length - 1);
+    dropzone.destroy();
+
+    this._qubitCount--;
+    this._line.clear();
+    if (this.isHover()) {
+      this.drawHoverLine();
+    } else if (this.isActive()) {
+      this.drawActiveLine();
     }
   }
 
@@ -207,7 +227,7 @@ export class CircuitStep extends Container {
 
   activate() {
     this._state = "active";
-    this.drawLine(CircuitStep.activeLineColor);
+    this.drawActiveLine();
     this.onActivate.emit(this);
   }
 
@@ -221,7 +241,7 @@ export class CircuitStep extends Container {
       this.onHover.emit(this);
 
       this._state = "hover";
-      this.drawLine(CircuitStep.hoverLineColor);
+      this.drawHoverLine();
     }
   }
 
@@ -237,6 +257,14 @@ export class CircuitStep extends Container {
     if (!this.isActive()) {
       this.activate();
     }
+  }
+
+  protected drawHoverLine() {
+    this.drawLine(CircuitStep.hoverLineColor);
+  }
+
+  protected drawActiveLine() {
+    this.drawLine(CircuitStep.activeLineColor);
   }
 
   protected drawLine(color: PIXI.ColorSource) {
