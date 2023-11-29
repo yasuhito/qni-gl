@@ -22,7 +22,7 @@ export class Circuit extends Container {
   protected _circuitSteps: List;
 
   get qubitCount() {
-    return this.circuitSteps[0].qubitCount;
+    return this.circuitStepAt(0).qubitCount;
   }
 
   get width(): number {
@@ -71,7 +71,8 @@ export class Circuit extends Container {
       let wireType = WireType.Classical;
 
       for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
-        const dropzone = this.circuitSteps[stepIndex].dropzones[wireIndex];
+        const dropzone = this.circuitStepAt(stepIndex).dropzones[wireIndex];
+
         if (dropzone.isOccupied()) {
           if (
             dropzone.operation instanceof Write0Gate ||
@@ -92,6 +93,10 @@ export class Circuit extends Container {
         dropzone.redrawWires();
       }
     }
+  }
+
+  circuitStepAt(stepIndex: number) {
+    return this.circuitSteps[stepIndex];
   }
 
   stepIndex(step: CircuitStep) {
