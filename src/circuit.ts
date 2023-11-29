@@ -71,7 +71,7 @@ export class Circuit extends Container {
       let wireType = WireType.Classical;
 
       for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
-        const dropzone = this.circuitStepAt(stepIndex).dropzones[wireIndex];
+        const dropzone = this.circuitStepAt(stepIndex).dropzoneAt(wireIndex);
 
         if (dropzone.isOccupied()) {
           if (

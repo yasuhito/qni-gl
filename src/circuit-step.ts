@@ -80,11 +80,15 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  dropzoneAt(index: number) {
+    return this.dropzones[index];
+  }
+
   /**
    * 指定した量子ビットにゲートが置かれているかどうかを返す
    */
   hasGateAt(qubitIndex: number) {
-    return this.dropzones[qubitIndex].isOccupied();
+    return this.dropzoneAt(qubitIndex).isOccupied();
   }
 
   /**
@@ -204,8 +208,7 @@ export class CircuitStep extends Container {
 
   indexOf(operation: Operation) {
     for (let i = 0; i < this.dropzones.length; i++) {
-      const dropzone = this.dropzones[i];
-      if (dropzone.operation === operation) {
+      if (this.dropzoneAt(i).operation === operation) {
         return i;
       }
     }
