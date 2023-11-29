@@ -1,8 +1,7 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
-import { Colors  } from "./colors"
+import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Gate } from "./gate";
@@ -97,8 +96,7 @@ export class Dropzone extends Container {
     this.wire = new PIXI.Graphics();
     this.addChild(this.wire);
 
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
   }
 
   /**
@@ -191,18 +189,14 @@ export class Dropzone extends Container {
       | QFTGate
       | QFTDaggerGate;
 
-    this.wire.clear();
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
 
     this.onSnap.emit(this);
   }
 
   unsnap(_gate: Gate) {
     this.operation = null;
-
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
   }
 
   // TODO: 使える場所ではこのメソッドを使う
@@ -230,31 +224,29 @@ export class Dropzone extends Container {
   }
 
   protected drawInputWire() {
+    // TODO: 型を classical | quantum にする
+    let inputWireColor: string = Colors.bg.wire.classical;
+    if (this.inputWireType === WireType.Quantum) {
+      inputWireColor = Colors.bg.wire.quantum;
+    }
+
     this.wire
-      .lineStyle(Dropzone.wireWidth, this.inputWireColor, 1, 0.5)
+      .lineStyle(Dropzone.wireWidth, inputWireColor, 1, 0.5)
       .moveTo(this.inputWireStartX, Dropzone.size / 2)
       .lineTo(this.inputWireEndX, Dropzone.size / 2);
   }
 
   protected drawOutputWire() {
+    // TODO: 型を classical | quantum にする
+    let outputWireColor: string = Colors.bg.wire.classical;
+    if (this.outputWireType === WireType.Quantum) {
+      outputWireColor = Colors.bg.wire.quantum;
+    }
+
     this.wire
-      .lineStyle(Dropzone.wireWidth, this.outputWireColor, 1, 0.5)
+      .lineStyle(Dropzone.wireWidth, outputWireColor, 1, 0.5)
       .moveTo(this.outputWireStartX, Dropzone.size / 2)
       .lineTo(this.outputWireEndX, Dropzone.size / 2);
-  }
-
-  protected get inputWireColor() {
-    if (this.inputWireType === WireType.Classical) {
-      return Colors.bg.wire.classical
-    }
-    return Colors.bg.wire.quantum
-  }
-
-  protected get outputWireColor() {
-    if (this.outputWireType === WireType.Classical) {
-      return Colors.bg.wire.classical
-    }
-    return Colors.bg.wire.quantum
   }
 
   protected get inputWireStartX() {
