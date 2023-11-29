@@ -11,6 +11,10 @@ export const Colors = {
       grabbed: tailwindColors.purple["500"],
       active: tailwindColors.sky["500"],
     },
+    wire: {
+      classical: tailwindColors.zinc["300"],
+      quantum: tailwindColors.zinc["900"]
+    }
   },
   border: {
     gate: {

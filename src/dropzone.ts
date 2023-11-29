@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
+import { Colors  } from "./colors"
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Gate } from "./gate";
@@ -62,8 +63,6 @@ export enum WireType {
 export class Dropzone extends Container {
   static size = Gate.size;
   static wireWidth = 2;
-  static classicalWireColor = tailwindColors.zinc["300"];
-  static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
   operation: Operation | null = null;
@@ -237,13 +236,6 @@ export class Dropzone extends Container {
       .lineTo(this.inputWireEndX, Dropzone.size / 2);
   }
 
-  protected get inputWireColor() {
-    if (this.inputWireType === WireType.Classical) {
-      return Dropzone.classicalWireColor;
-    }
-    return Dropzone.quantumWireColor;
-  }
-
   protected drawOutputWire() {
     this.wire
       .lineStyle(Dropzone.wireWidth, this.outputWireColor, 1, 0.5)
@@ -251,11 +243,18 @@ export class Dropzone extends Container {
       .lineTo(this.outputWireEndX, Dropzone.size / 2);
   }
 
+  protected get inputWireColor() {
+    if (this.inputWireType === WireType.Classical) {
+      return Colors.bg.wire.classical
+    }
+    return Colors.bg.wire.quantum
+  }
+
   protected get outputWireColor() {
     if (this.outputWireType === WireType.Classical) {
-      return Dropzone.classicalWireColor;
+      return Colors.bg.wire.classical
     }
-    return Dropzone.quantumWireColor;
+    return Colors.bg.wire.quantum
   }
 
   protected get inputWireStartX() {
