@@ -1,30 +1,31 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
+import { AntiControlGate } from "./anti-control-gate";
+import { BlochSphere } from "./bloch-sphere";
 import { Container } from "pixi.js";
+import { ControlGate } from "./control-gate";
 import { Gate } from "./gate";
-import { MeasurementGate } from "./measurement-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { rectIntersect } from "./util";
 import { HGate } from "./h-gate";
-import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
-import { RnotGate } from "./rnot-gate";
-import { SGate } from "./s-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { TGate } from "./t-gate";
-import { TDaggerGate } from "./t-dagger-gate";
+import { MeasurementGate } from "./measurement-gate";
 import { PhaseGate } from "./phase-gate";
+import { QFTDaggerGate } from "./qft-dagger-gate";
+import { QFTGate } from "./qft-gate";
+import { RnotGate } from "./rnot-gate";
 import { RxGate } from "./rx-gate";
 import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { SGate } from "./s-gate";
+import { Signal } from "typed-signals";
 import { SwapGate } from "./swap-gate";
-import { ControlGate } from "./control-gate";
-import { AntiControlGate } from "./anti-control-gate";
-import { BlochSphere } from "./bloch-sphere";
-import { QFTGate } from "./qft-gate";
-import { QFTDaggerGate } from "./qft-dagger-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { TGate } from "./t-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
+import { rectIntersect } from "./util";
 
 export type Operation =
   | HGate
@@ -50,16 +51,27 @@ export type Operation =
   | QFTGate
   | QFTDaggerGate;
 
+export enum WireType {
+  Quantum = "quantum",
+  Classical = "classical",
+}
+
 /**
  * @noInheritDoc
  */
 export class Dropzone extends Container {
   static size = Gate.size;
   static wireWidth = 2;
+  static classicalWireColor = tailwindColors.zinc["300"];
   static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
   operation: Operation | null = null;
+  inputWireType: WireType = WireType.Classical;
+  outputWireType: WireType = WireType.Classical;
+
+  onSnap: Signal<(dropzone: Dropzone) => void>;
+
   protected wire: PIXI.Graphics;
 
   get size(): number {
@@ -80,6 +92,8 @@ export class Dropzone extends Container {
 
   constructor() {
     super();
+
+    this.onSnap = new Signal();
 
     this.wire = new PIXI.Graphics();
     this.addChild(this.wire);
@@ -181,11 +195,20 @@ export class Dropzone extends Container {
     this.wire.clear();
     this.drawInputWire();
     this.drawOutputWire();
+
+    this.onSnap.emit(this);
   }
 
   unsnap(_gate: Gate) {
     this.operation = null;
 
+    this.drawInputWire();
+    this.drawOutputWire();
+  }
+
+  // TODO: 使える場所ではこのメソッドを使う
+  redrawWires() {
+    this.wire.clear();
     this.drawInputWire();
     this.drawOutputWire();
   }
@@ -209,16 +232,30 @@ export class Dropzone extends Container {
 
   protected drawInputWire() {
     this.wire
-      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .lineStyle(Dropzone.wireWidth, this.inputWireColor, 1, 0.5)
       .moveTo(this.inputWireStartX, Dropzone.size / 2)
       .lineTo(this.inputWireEndX, Dropzone.size / 2);
   }
 
+  protected get inputWireColor() {
+    if (this.inputWireType === WireType.Classical) {
+      return Dropzone.classicalWireColor;
+    }
+    return Dropzone.quantumWireColor;
+  }
+
   protected drawOutputWire() {
     this.wire
-      .lineStyle(Dropzone.wireWidth, Dropzone.quantumWireColor, 1, 0.5)
+      .lineStyle(Dropzone.wireWidth, this.outputWireColor, 1, 0.5)
       .moveTo(this.outputWireStartX, Dropzone.size / 2)
       .lineTo(this.outputWireEndX, Dropzone.size / 2);
+  }
+
+  protected get outputWireColor() {
+    if (this.outputWireType === WireType.Classical) {
+      return Dropzone.classicalWireColor;
+    }
+    return Dropzone.quantumWireColor;
   }
 
   protected get inputWireStartX() {

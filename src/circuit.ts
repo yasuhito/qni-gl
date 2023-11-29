@@ -2,6 +2,10 @@ import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
+import { Dropzone, WireType } from "./dropzone";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
 
 /**
  * @noInheritDoc
@@ -18,7 +22,7 @@ export class Circuit extends Container {
   protected _circuitSteps: List;
 
   get qubitCount() {
-    return this.circuitSteps[0].qubitCount;
+    return this.circuitStepAt(0).qubitCount;
   }
 
   get width(): number {
@@ -52,6 +56,7 @@ export class Circuit extends Container {
 
     for (let i = 0; i < this.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minQubitCount);
+      circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
@@ -59,6 +64,39 @@ export class Circuit extends Container {
         this.deactivateAllOtherCircuitSteps.bind(this)
       );
     }
+  }
+
+  onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
+    for (let wireIndex = 0; wireIndex < this.qubitCount; wireIndex++) {
+      let wireType = WireType.Classical;
+
+      for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
+        const dropzone = this.circuitStepAt(stepIndex).dropzoneAt(wireIndex);
+
+        if (dropzone.isOccupied()) {
+          if (
+            dropzone.operation instanceof Write0Gate ||
+            dropzone.operation instanceof Write1Gate
+          ) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Quantum;
+            dropzone.outputWireType = wireType;
+          } else if (dropzone.operation instanceof MeasurementGate) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Classical;
+            dropzone.outputWireType = wireType;
+          }
+        } else {
+          dropzone.inputWireType = wireType;
+          dropzone.outputWireType = wireType;
+        }
+        dropzone.redrawWires();
+      }
+    }
+  }
+
+  circuitStepAt(stepIndex: number) {
+    return this.circuitSteps[stepIndex];
   }
 
   stepIndex(step: CircuitStep) {

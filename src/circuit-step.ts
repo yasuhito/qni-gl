@@ -35,6 +35,7 @@ export class CircuitStep extends Container {
 
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
+  onSnap: Signal<(circuitStep: CircuitStep, dropzone: Dropzone) => void>;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -79,11 +80,15 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
+  dropzoneAt(index: number) {
+    return this.dropzones[index];
+  }
+
   /**
    * 指定した量子ビットにゲートが置かれているかどうかを返す
    */
   hasGateAt(qubitIndex: number) {
-    return this.dropzones[qubitIndex].isOccupied();
+    return this.dropzoneAt(qubitIndex).isOccupied();
   }
 
   /**
@@ -91,11 +96,16 @@ export class CircuitStep extends Container {
    */
   appendNewDropzone() {
     const dropzone = new Dropzone();
+    dropzone.onSnap.connect(this.onDropzoneSnap.bind(this));
     this._dropzones.addChild(dropzone);
 
     if (this._line) {
       this.redrawLine();
     }
+  }
+
+  protected onDropzoneSnap(dropzone: Dropzone) {
+    this.onSnap.emit(this, dropzone);
   }
 
   /**
@@ -116,6 +126,7 @@ export class CircuitStep extends Container {
 
     this.onHover = new Signal();
     this.onActivate = new Signal();
+    this.onSnap = new Signal();
 
     this._view = new PIXI.Container();
     this.addChild(this._view);
@@ -197,8 +208,7 @@ export class CircuitStep extends Container {
 
   indexOf(operation: Operation) {
     for (let i = 0; i < this.dropzones.length; i++) {
-      const dropzone = this.dropzones[i];
-      if (dropzone.operation === operation) {
+      if (this.dropzoneAt(i).operation === operation) {
         return i;
       }
     }
