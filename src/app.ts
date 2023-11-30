@@ -64,7 +64,7 @@ export class App {
     this.element = el;
 
     this.worker = new Worker("/serviceWorker.js");
-    this.worker.addEventListener('message', this.handleServiceWorkerMessage)
+    this.worker.addEventListener("message", this.handleServiceWorkerMessage);
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -140,10 +140,11 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    this.circuit.onStepHover.connect(this.showCurrentStateVector.bind(this));
+    this.circuit.onStepHover.connect(this.runSimulator.bind(this));
     this.circuit.onStepActivated.connect(
       this.showCurrentStateVector.bind(this)
     );
+    this.circuit.onGateSnap.connect(this.runSimulator.bind(this));
 
     this.stateVector = new StateVector(this.circuit.qubitCount);
     this.pixiApp.stage.addChild(this.stateVector);
@@ -159,7 +160,7 @@ export class App {
   }
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
-    console.dir(event)
+    console.dir(event);
   }
 
   get screenWidth(): number {
@@ -310,9 +311,14 @@ export class App {
     }
   }
 
-  // 現在の状態ベクトルを表示する
-  protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
+  protected runSimulator(circuit: Circuit) {
     this.worker.postMessage({ qubitCount: circuit.qubitCount });
+  }
+
+  // 現在の状態ベクトルを表示する
+  // FIXME: サービスワーカからのイベントを受けてからこのメソッドを呼ぶ
+  protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
+    // this.worker.postMessage({ qubitCount: circuit.qubitCount });
 
     const simulator = new Simulator(circuit);
     const stepIndex = circuit.stepIndex(circuitStep);

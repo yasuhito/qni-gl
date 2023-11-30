@@ -18,6 +18,9 @@ export class Circuit extends Container {
 
   onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
   onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
+  onGateSnap: Signal<
+    (circuit: Circuit, circuitStep: CircuitStep, dropzone: Dropzone) => void
+  >;
 
   protected _circuitSteps: List;
 
@@ -42,6 +45,7 @@ export class Circuit extends Container {
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
+    this.onGateSnap = new Signal();
 
     this.minQubitCount = minQubitCount;
     this.stepCount = stepCount;
@@ -93,6 +97,8 @@ export class Circuit extends Container {
         dropzone.redrawWires();
       }
     }
+
+    this.onGateSnap.emit(this, circuitStep, dropzone);
   }
 
   circuitStepAt(stepIndex: number) {
