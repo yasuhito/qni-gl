@@ -226,37 +226,47 @@ export class Dropzone extends Container {
   }
 
   protected drawInputWire() {
-    let inputWireColor: WireColor = Colors.bg.wire.classical;
-    if (this.inputWireType === WireType.Quantum) {
-      inputWireColor = Colors.bg.wire.quantum;
-    }
-
     this.wire
       .lineStyle(
-        Dropzone.wireWidth,
-        inputWireColor,
+        this.wireWidth,
+        this.inputWireColor,
         FULL_OPACITY,
         LINE_ALIGNMENT_MIDDLE
       )
-      .moveTo(this.inputWireStartX, Dropzone.size / 2)
-      .lineTo(this.inputWireEndX, Dropzone.size / 2);
+      .moveTo(this.inputWireStartX, this.wireY)
+      .lineTo(this.inputWireEndX, this.wireY);
   }
 
   protected drawOutputWire() {
-    let outputWireColor: WireColor = Colors.bg.wire.classical;
-    if (this.outputWireType === WireType.Quantum) {
-      outputWireColor = Colors.bg.wire.quantum;
-    }
-
     this.wire
       .lineStyle(
-        Dropzone.wireWidth,
-        outputWireColor,
+        this.wireWidth,
+        this.outputWireColor,
         FULL_OPACITY,
         LINE_ALIGNMENT_MIDDLE
       )
-      .moveTo(this.outputWireStartX, Dropzone.size / 2)
-      .lineTo(this.outputWireEndX, Dropzone.size / 2);
+      .moveTo(this.outputWireStartX, this.wireY)
+      .lineTo(this.outputWireEndX, this.wireY);
+  }
+
+  protected get wireWidth() {
+    return Dropzone.wireWidth;
+  }
+
+  protected get inputWireColor() {
+    if (this.inputWireType === WireType.Quantum) {
+      return Colors.bg.wire.quantum;
+    }
+
+    return Colors.bg.wire.classical;
+  }
+
+  protected get outputWireColor() {
+    if (this.outputWireType === WireType.Quantum) {
+      return Colors.bg.wire.quantum;
+    }
+
+    return Colors.bg.wire.classical;
   }
 
   protected get inputWireStartX() {
@@ -279,6 +289,11 @@ export class Dropzone extends Container {
 
   protected get outputWireEndX() {
     return Dropzone.size * 1.5;
+  }
+
+  protected get wireY() {
+    const center = new PIXI.Point(Dropzone.size / 2, Dropzone.size / 2);
+    return center.y;
   }
 
   protected isIconGate(gate: Gate | null) {
