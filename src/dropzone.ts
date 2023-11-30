@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
+import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Gate } from "./gate";
@@ -56,14 +56,14 @@ export enum WireType {
   Classical = "classical",
 }
 
+const LINE_ALIGNMENT_MIDDLE = 0.5;
+
 /**
  * @noInheritDoc
  */
 export class Dropzone extends Container {
   static size = Gate.size;
   static wireWidth = 2;
-  static classicalWireColor = tailwindColors.zinc["300"];
-  static quantumWireColor = tailwindColors.zinc["900"];
 
   view: Container;
   operation: Operation | null = null;
@@ -98,8 +98,7 @@ export class Dropzone extends Container {
     this.wire = new PIXI.Graphics();
     this.addChild(this.wire);
 
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
   }
 
   /**
@@ -192,25 +191,29 @@ export class Dropzone extends Container {
       | QFTGate
       | QFTDaggerGate;
 
-    this.wire.clear();
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
 
     this.onSnap.emit(this);
   }
 
   unsnap(_gate: Gate) {
     this.operation = null;
-
-    this.drawInputWire();
-    this.drawOutputWire();
+    this.redrawWires();
   }
 
-  // TODO: 使える場所ではこのメソッドを使う
   redrawWires() {
     this.wire.clear();
-    this.drawInputWire();
-    this.drawOutputWire();
+
+    this.drawWire(
+      this.inputWireStartX,
+      this.inputWireEndX,
+      this.inputWireColor
+    );
+    this.drawWire(
+      this.outputWireStartX,
+      this.outputWireEndX,
+      this.outputWireColor
+    );
   }
 
   toJSON() {
@@ -230,32 +233,31 @@ export class Dropzone extends Container {
     return this.operation.toCircuitJSON();
   }
 
-  protected drawInputWire() {
+  protected drawWire(startX: number, endX: number, color: WireColor) {
     this.wire
-      .lineStyle(Dropzone.wireWidth, this.inputWireColor, 1, 0.5)
-      .moveTo(this.inputWireStartX, Dropzone.size / 2)
-      .lineTo(this.inputWireEndX, Dropzone.size / 2);
+      .lineStyle(this.wireWidth, color, this.wireAlpha, this.wireAlignment)
+      .moveTo(startX, this.wireY)
+      .lineTo(endX, this.wireY);
+  }
+
+  protected get wireWidth() {
+    return Dropzone.wireWidth;
   }
 
   protected get inputWireColor() {
-    if (this.inputWireType === WireType.Classical) {
-      return Dropzone.classicalWireColor;
+    if (this.inputWireType === WireType.Quantum) {
+      return Colors.bg.wire.quantum;
     }
-    return Dropzone.quantumWireColor;
-  }
 
-  protected drawOutputWire() {
-    this.wire
-      .lineStyle(Dropzone.wireWidth, this.outputWireColor, 1, 0.5)
-      .moveTo(this.outputWireStartX, Dropzone.size / 2)
-      .lineTo(this.outputWireEndX, Dropzone.size / 2);
+    return Colors.bg.wire.classical;
   }
 
   protected get outputWireColor() {
-    if (this.outputWireType === WireType.Classical) {
-      return Dropzone.classicalWireColor;
+    if (this.outputWireType === WireType.Quantum) {
+      return Colors.bg.wire.quantum;
     }
-    return Dropzone.quantumWireColor;
+
+    return Colors.bg.wire.classical;
   }
 
   protected get inputWireStartX() {
@@ -278,6 +280,19 @@ export class Dropzone extends Container {
 
   protected get outputWireEndX() {
     return Dropzone.size * 1.5;
+  }
+
+  protected get wireY() {
+    const center = new PIXI.Point(Dropzone.size / 2, Dropzone.size / 2);
+    return center.y;
+  }
+
+  protected get wireAlpha() {
+    return FULL_OPACITY;
+  }
+
+  protected get wireAlignment() {
+    return LINE_ALIGNMENT_MIDDLE;
   }
 
   protected isIconGate(gate: Gate | null) {
