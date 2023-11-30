@@ -64,6 +64,7 @@ export class App {
     this.element = el;
 
     this.worker = new Worker("/serviceWorker.js");
+    this.worker.addEventListener('message', this.handleServiceWorkerMessage)
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -155,6 +156,10 @@ export class App {
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
+  }
+
+  protected handleServiceWorkerMessage(event: MessageEvent): void {
+    console.dir(event)
   }
 
   get screenWidth(): number {

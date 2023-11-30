@@ -14,7 +14,9 @@ self.addEventListener("install", (event) => {
 
 // TODO: Qni の runSimulator にあたるハンドラを実行
 self.addEventListener('message', (event) => {
-  console.dir(event.data)
+  console.log(`qubitCount = ${event.data.qubitCount}`)
+
+  self.postMessage({type: 'finished'})
 })
 
 // Listen for requests
