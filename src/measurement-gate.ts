@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
-import { Dropzone } from "./dropzone";
 import * as tailwindColors from "tailwindcss/colors";
+import { Dropzone } from "./dropzone";
+import { Gate } from "./gate";
+import { JsonableMixin } from "./jsonable-mixin";
 
-export class MeasurementGate extends Gate {
+export class MeasurementGate extends JsonableMixin(Gate) {
   static gateType = "MeasurementGate";
   static icon = PIXI.Texture.from("./assets/Measurement.svg", {
     resolution: window.devicePixelRatio,
@@ -143,6 +144,6 @@ export class MeasurementGate extends Gate {
   }
 
   toCircuitJSON() {
-    return '"Measure"'
+    return '"Measure"';
   }
 }

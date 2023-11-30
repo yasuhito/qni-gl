@@ -1,11 +1,12 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
 import { CircularGateMixin } from "./circular-gate-mixin";
+import { Gate } from "./gate";
+import { JsonableMixin } from "./jsonable-mixin";
 
 /**
  * @noInheritDoc
  */
-export class PhaseGate extends CircularGateMixin(Gate) {
+export class PhaseGate extends JsonableMixin(CircularGateMixin(Gate)) {
   static gateType = "PhaseGate";
   static icon = PIXI.Texture.from("./assets/Phase.svg", {
     resolution: window.devicePixelRatio,
@@ -15,6 +16,6 @@ export class PhaseGate extends CircularGateMixin(Gate) {
   });
 
   toCircuitJSON() {
-    return '"P"'
+    return '"P"';
   }
 }

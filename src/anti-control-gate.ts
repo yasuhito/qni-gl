@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 import { Gate } from "./gate";
+import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
 
-export class AntiControlGate extends Gate {
+export class AntiControlGate extends JsonableMixin(Gate) {
   static gateType = "AntiControlGate";
   static icon = PIXI.Texture.from("./assets/AntiControl.svg", {
     resolution: window.devicePixelRatio,
@@ -95,7 +96,7 @@ export class AntiControlGate extends Gate {
   }
 
   toCircuitJSON() {
-    return '"◦"'
+    return '"◦"';
   }
 
   // static iconHover = PIXI.Texture.from("./assets/AntiControl_hover.svg");

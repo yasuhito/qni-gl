@@ -1,7 +1,8 @@
 import * as PIXI from "pixi.js";
 import { Gate } from "./gate";
+import { JsonableMixin } from "./jsonable-mixin";
 
-export class BlochSphere extends Gate {
+export class BlochSphere extends JsonableMixin(Gate) {
   static gateType = "BlochSphere";
   static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
     resolution: window.devicePixelRatio,
@@ -117,6 +118,6 @@ export class BlochSphere extends Gate {
   }
 
   toCircuitJSON() {
-    return '"Bloch"'
+    return '"Bloch"';
   }
 }
