@@ -201,11 +201,19 @@ export class Dropzone extends Container {
     this.redrawWires();
   }
 
-  // TODO: 使える場所ではこのメソッドを使う
   redrawWires() {
     this.wire.clear();
-    this.drawInputWire();
-    this.drawOutputWire();
+
+    this.drawWire(
+      this.inputWireStartX,
+      this.inputWireEndX,
+      this.inputWireColor
+    );
+    this.drawWire(
+      this.outputWireStartX,
+      this.outputWireEndX,
+      this.outputWireColor
+    );
   }
 
   toJSON() {
@@ -225,28 +233,11 @@ export class Dropzone extends Container {
     return this.operation.toCircuitJSON();
   }
 
-  protected drawInputWire() {
+  protected drawWire(startX: number, endX: number, color: WireColor) {
     this.wire
-      .lineStyle(
-        this.wireWidth,
-        this.inputWireColor,
-        FULL_OPACITY,
-        LINE_ALIGNMENT_MIDDLE
-      )
-      .moveTo(this.inputWireStartX, this.wireY)
-      .lineTo(this.inputWireEndX, this.wireY);
-  }
-
-  protected drawOutputWire() {
-    this.wire
-      .lineStyle(
-        this.wireWidth,
-        this.outputWireColor,
-        FULL_OPACITY,
-        LINE_ALIGNMENT_MIDDLE
-      )
-      .moveTo(this.outputWireStartX, this.wireY)
-      .lineTo(this.outputWireEndX, this.wireY);
+      .lineStyle(this.wireWidth, color, this.wireAlpha, this.wireAlignment)
+      .moveTo(startX, this.wireY)
+      .lineTo(endX, this.wireY);
   }
 
   protected get wireWidth() {
@@ -294,6 +285,14 @@ export class Dropzone extends Container {
   protected get wireY() {
     const center = new PIXI.Point(Dropzone.size / 2, Dropzone.size / 2);
     return center.y;
+  }
+
+  protected get wireAlpha() {
+    return FULL_OPACITY;
+  }
+
+  protected get wireAlignment() {
+    return LINE_ALIGNMENT_MIDDLE;
   }
 
   protected isIconGate(gate: Gate | null) {
