@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
-import { Dropzone, Operation } from "./dropzone";
+import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
+import { Operation } from "./operation";
 
 const groupBy = <K, V>(
   array: readonly V[],

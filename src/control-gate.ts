@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 import { Gate } from "./gate";
+import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
 
-export class ControlGate extends Gate {
+export class ControlGate extends JsonableMixin(Gate) {
   static gateType = "ControlGate";
   static icon = PIXI.Texture.from("./assets/Control.svg", {
     resolution: window.devicePixelRatio,
@@ -95,6 +96,6 @@ export class ControlGate extends Gate {
   }
 
   toCircuitJSON() {
-    return '"•"'
+    return '"•"';
   }
 }
