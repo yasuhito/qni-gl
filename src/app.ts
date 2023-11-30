@@ -35,6 +35,7 @@ export class App {
   static elementId = "app";
   private static _instance: App;
 
+  declare worker: Worker;
   element: HTMLElement;
   activeGate: Gate | null = null;
   grabbedGate: Gate | null = null;
@@ -61,6 +62,8 @@ export class App {
       throw new Error("Could not find #app");
     }
     this.element = el;
+
+    this.worker = new Worker("/serviceWorker.js");
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -304,6 +307,8 @@ export class App {
 
   // 現在の状態ベクトルを表示する
   protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
+    this.worker.postMessage({ qubitCount: circuit.qubitCount });
+
     const simulator = new Simulator(circuit);
     const stepIndex = circuit.stepIndex(circuitStep);
     const stateVector = simulator.stateVectorAt(stepIndex);

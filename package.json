@@ -20,6 +20,7 @@
     "strip-ansi": "^5.0.0",
     "typedoc": "^0.25.1",
     "typedoc-plugin-no-inherit": "^1.4.0",
+    "vite-plugin-pwa": "^0.17.2",
     "vitest": "^0.34.5",
     "webdriverio": "^8.16.12",
     "wrap-ansi": "^6.0.0"
