@@ -3,7 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 export const Colors = {
   bg: {
     default: {
-      default: tailwindColors.white
+      default: tailwindColors.white,
     },
     brand: {
       default: tailwindColors.sky["500"],
@@ -13,8 +13,8 @@ export const Colors = {
     },
     wire: {
       classical: tailwindColors.zinc["300"],
-      quantum: tailwindColors.zinc["900"]
-    }
+      quantum: tailwindColors.zinc["900"],
+    },
   },
   border: {
     gate: {
@@ -25,11 +25,11 @@ export const Colors = {
     },
     qubitCircle: {
       default: tailwindColors.zinc["500"],
-      disabled: tailwindColors.zinc["200"]
+      disabled: tailwindColors.zinc["200"],
     },
     stateVector: {
       default: tailwindColors.zinc["400"],
-    }
+    },
   },
   icon: {
     default: tailwindColors.zinc["900"],
@@ -39,3 +39,9 @@ export const Colors = {
     },
   },
 };
+
+export type WireColor =
+  | typeof Colors.bg.wire.classical
+  | typeof Colors.bg.wire.quantum;
+
+export const FULL_OPACITY = 1;

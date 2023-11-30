@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
-import { Colors } from "./colors";
+import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Gate } from "./gate";
@@ -55,6 +55,8 @@ export enum WireType {
   Quantum = "quantum",
   Classical = "classical",
 }
+
+const LINE_ALIGNMENT_MIDDLE = 0.5;
 
 /**
  * @noInheritDoc
@@ -224,27 +226,35 @@ export class Dropzone extends Container {
   }
 
   protected drawInputWire() {
-    // TODO: 型を classical | quantum にする
-    let inputWireColor: string = Colors.bg.wire.classical;
+    let inputWireColor: WireColor = Colors.bg.wire.classical;
     if (this.inputWireType === WireType.Quantum) {
       inputWireColor = Colors.bg.wire.quantum;
     }
 
     this.wire
-      .lineStyle(Dropzone.wireWidth, inputWireColor, 1, 0.5)
+      .lineStyle(
+        Dropzone.wireWidth,
+        inputWireColor,
+        FULL_OPACITY,
+        LINE_ALIGNMENT_MIDDLE
+      )
       .moveTo(this.inputWireStartX, Dropzone.size / 2)
       .lineTo(this.inputWireEndX, Dropzone.size / 2);
   }
 
   protected drawOutputWire() {
-    // TODO: 型を classical | quantum にする
-    let outputWireColor: string = Colors.bg.wire.classical;
+    let outputWireColor: WireColor = Colors.bg.wire.classical;
     if (this.outputWireType === WireType.Quantum) {
       outputWireColor = Colors.bg.wire.quantum;
     }
 
     this.wire
-      .lineStyle(Dropzone.wireWidth, outputWireColor, 1, 0.5)
+      .lineStyle(
+        Dropzone.wireWidth,
+        outputWireColor,
+        FULL_OPACITY,
+        LINE_ALIGNMENT_MIDDLE
+      )
       .moveTo(this.outputWireStartX, Dropzone.size / 2)
       .lineTo(this.outputWireEndX, Dropzone.size / 2);
   }
