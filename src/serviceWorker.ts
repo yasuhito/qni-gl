@@ -7,10 +7,12 @@ self.addEventListener("install", (event) => {
 
 // TODO: Qni の runSimulator にあたるハンドラを実行
 self.addEventListener("message", (event) => {
-  console.log(`qubitCount = ${event.data.qubitCount}`);
+  const qubitCount = event.data.qubitCount;
+
+  console.log(`qubitCount = ${qubitCount}`);
 
   const simulator = new Simulator("0");
   console.dir(simulator);
 
-  self.postMessage({ type: "finished" });
+  self.postMessage({ type: "finished", qubitCount: qubitCount });
 });

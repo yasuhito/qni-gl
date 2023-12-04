@@ -21,7 +21,8 @@ import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
 import { Simulator } from "./simulator";
-import { StateVector } from "./state-vector";
+import { StateVector as StateVectorComponent } from "./state-vector";
+import { StateVector } from "@qni/simulator";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -43,7 +44,7 @@ export class App {
   gatePalette: GatePalette;
   circuit: Circuit;
   circuitSteps: CircuitStep[] = [];
-  stateVector: StateVector;
+  stateVector: StateVectorComponent;
   logger: Logger;
   nameMap = new Map();
 
@@ -64,7 +65,10 @@ export class App {
     this.element = el;
 
     this.worker = new Worker("/serviceWorker.js");
-    this.worker.addEventListener("message", this.handleServiceWorkerMessage);
+    this.worker.addEventListener(
+      "message",
+      this.handleServiceWorkerMessage.bind(this)
+    );
 
     // view, stage などをまとめた application を作成
     this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
@@ -144,7 +148,7 @@ export class App {
     this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
     this.circuit.onGateSnap.connect(this.runSimulator.bind(this));
 
-    this.stateVector = new StateVector(this.circuit.qubitCount);
+    this.stateVector = new StateVectorComponent(this.circuit.qubitCount);
     this.pixiApp.stage.addChild(this.stateVector);
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
@@ -158,7 +162,23 @@ export class App {
   }
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
-    console.dir(event);
+    if (!this.stateVector) {
+      return;
+    }
+
+    const qubitCount = event.data.qubitCount;
+    const stateVector = new StateVector("".padStart(qubitCount, "0"));
+
+    for (let i = 0; i < stateVector.size; i++) {
+      const amplifier = stateVector.amplifier(i);
+      const qubitCircle = this.stateVector.amplitudes[i];
+
+      // FIXME: qubitCircle が undefined になることがある
+      if (qubitCircle) {
+        qubitCircle.probability = amplifier.abs() * 100;
+        qubitCircle.phase = amplifier.phase();
+      }
+    }
   }
 
   get screenWidth(): number {
@@ -311,26 +331,5 @@ export class App {
 
   protected runSimulator(circuit: Circuit) {
     this.worker.postMessage({ qubitCount: circuit.qubitCount });
-  }
-
-  // 現在の状態ベクトルを表示する
-  // FIXME: サービスワーカからのイベントを受けてからこのメソッドを呼ぶ
-  protected showCurrentStateVector(circuit: Circuit, circuitStep: CircuitStep) {
-    // this.worker.postMessage({ qubitCount: circuit.qubitCount });
-
-    const simulator = new Simulator(circuit);
-    const stepIndex = circuit.stepIndex(circuitStep);
-    const stateVector = simulator.stateVectorAt(stepIndex);
-
-    for (let i = 0; i < stateVector.size; i++) {
-      const amplifier = stateVector.amplifier(i);
-      const qubitCircle = this.stateVector.amplitudes[i];
-
-      // FIXME: qubitCircle が undefined になることがある
-      if (qubitCircle) {
-        qubitCircle.probability = amplifier.abs() * 100;
-        qubitCircle.phase = amplifier.phase();
-      }
-    }
   }
 }

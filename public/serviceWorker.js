@@ -9936,10 +9936,11 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
     });
     // TODO: Qni の runSimulator にあたるハンドラを実行
     self.addEventListener("message", function (event) {
-        console.log("qubitCount = ".concat(event.data.qubitCount));
+        var qubitCount = event.data.qubitCount;
+        console.log("qubitCount = ".concat(qubitCount));
         var simulator = new yc("0");
         console.dir(simulator);
-        self.postMessage({ type: "finished" });
+        self.postMessage({ type: "finished", qubitCount: qubitCount });
     });
 
 })();
