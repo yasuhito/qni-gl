@@ -9937,10 +9937,14 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
     // TODO: Qni の runSimulator にあたるハンドラを実行
     self.addEventListener("message", function (event) {
         var qubitCount = event.data.qubitCount;
-        console.log("qubitCount = ".concat(qubitCount));
-        var simulator = new yc("0");
-        console.dir(simulator);
-        self.postMessage({ type: "finished", qubitCount: qubitCount });
+        var simulator = new yc('0'.repeat(qubitCount));
+        var vector = simulator.state.matrix.clone();
+        var amplitudes = [];
+        for (var i = 0; i < vector.height; i++) {
+            var c = vector.cell(0, i);
+            amplitudes.push([c.real, c.imag]);
+        }
+        self.postMessage({ type: "finished", qubitCount: qubitCount, amplitudes: amplitudes });
     });
 
 })();

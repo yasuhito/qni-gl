@@ -30,6 +30,7 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { Complex } from "@qni/common";
 
 export class App {
   static elementId = "app";
@@ -165,12 +166,12 @@ export class App {
       return;
     }
 
-    const qubitCount = event.data.qubitCount;
-    const stateVector = new StateVector("".padStart(qubitCount, "0"));
+    const amplitudes = event.data.amplitudes;
 
-    for (let i = 0; i < stateVector.size; i++) {
-      const amplifier = stateVector.amplifier(i);
-      const qubitCircle = this.stateVector.amplitudes[i];
+    for (const ket in amplitudes) {
+      const c = amplitudes[ket];
+      const amplifier = new Complex(c[0], c[1]);
+      const qubitCircle = this.stateVector.amplitudes[ket];
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {

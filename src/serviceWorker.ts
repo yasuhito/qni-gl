@@ -8,11 +8,14 @@ self.addEventListener("install", (event) => {
 // TODO: Qni の runSimulator にあたるハンドラを実行
 self.addEventListener("message", (event) => {
   const qubitCount = event.data.qubitCount;
+  const simulator = new Simulator('0'.repeat(qubitCount));
+  const vector = simulator.state.matrix.clone()
+  const amplitudes = []
 
-  console.log(`qubitCount = ${qubitCount}`);
+  for (let i = 0; i < vector.height; i++) {
+    const c = vector.cell(0, i)
+    amplitudes.push([c.real, c.imag])
+  }
 
-  const simulator = new Simulator("0");
-  console.dir(simulator);
-
-  self.postMessage({ type: "finished", qubitCount: qubitCount });
+  self.postMessage({ type: "finished", qubitCount: qubitCount, amplitudes: amplitudes });
 });
