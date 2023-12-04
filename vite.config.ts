@@ -8,6 +8,9 @@ export default defineConfig({
       srcDir: "src",
       filename: "serviceWorker.ts",
       injectRegister: "auto",
+      injectManifest: {
+        injectionPoint: undefined,
+      },
     }),
   ],
   test: {

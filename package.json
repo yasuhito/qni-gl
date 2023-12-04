@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
+    "prebuild": "yarn build:sw",
     "build": "vite build",
     "build:sw": "rollup -c",
     "preview": "vite preview",
