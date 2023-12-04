@@ -20,7 +20,6 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
-import { Simulator } from "./simulator";
 import { StateVector as StateVectorComponent } from "./state-vector";
 import { StateVector } from "@qni/simulator";
 import { SwapGate } from "./swap-gate";
