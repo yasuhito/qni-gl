@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, test } from "vitest";
-import { HGate } from "../src/h-gate";
+import { HGate } from "../../src/h-gate";
 
 describe("HGate", () => {
   test("gateType", () => {
