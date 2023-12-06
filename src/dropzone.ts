@@ -130,7 +130,7 @@ export class Dropzone extends Container {
     this.onSnap.emit(this);
   }
 
-  unsnap(_gate: Gate) {
+  unsnap() {
     this.operation = null;
     this.redrawWires();
   }

@@ -21,7 +21,6 @@ import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
 import { StateVector as StateVectorComponent } from "./state-vector";
-import { StateVector } from "@qni/simulator";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -109,8 +108,8 @@ export class App {
       newGate.zIndex = 20;
       this.pixiApp.stage.addChild(newGate);
     });
-    this.gatePalette.onMouseLeaveGate.connect((gate) => {
-      this.leaveGate(gate);
+    this.gatePalette.onMouseLeaveGate.connect(() => {
+      this.mouseLeaveGate();
     });
 
     this.pixiApp.stage.addChild(this.gatePalette.addGate(HGate));
@@ -200,7 +199,7 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
   }
 
-  leaveGate(gate: Gate) {
+  mouseLeaveGate() {
     this.pixiApp.stage.cursor = "default";
   }
 

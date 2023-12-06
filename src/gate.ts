@@ -211,12 +211,6 @@ export class Gate extends Container {
       .on("pointerdown", this.onPointerDown.bind(this), this.view);
 
     this.actor = interpret(this.stateMachine).start();
-
-    // Fires whenever the state changes
-    const { unsubscribe } = this.actor.subscribe((state) => {
-      // console.log(`🌟 ${state.event.type}`);
-      // console.log(state.value);
-    });
   }
 
   gateType(): string | null {
@@ -274,7 +268,7 @@ export class Gate extends Container {
       throw new Error("Cannot unsnap a gate that is not snapped");
     }
 
-    this.dropzone.unsnap(this);
+    this.dropzone.unsnap();
   }
 
   protected mouseLeave() {
@@ -300,7 +294,7 @@ export class Gate extends Container {
     };
   }
 
-  private onPointerOver(_event: PIXI.FederatedEvent) {
+  private onPointerOver() {
     this.actor.send("Mouse enter");
     this.view.cursor = "grab";
   }
