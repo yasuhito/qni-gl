@@ -268,7 +268,7 @@ export class Gate extends Container {
       throw new Error("Cannot unsnap a gate that is not snapped");
     }
 
-    this.dropzone.unsnap(this);
+    this.dropzone.unsnap();
   }
 
   protected mouseLeave() {
