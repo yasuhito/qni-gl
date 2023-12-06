@@ -240,7 +240,7 @@ export class CircuitStep extends Container {
     this._line.clear();
   }
 
-  protected onPointerOver(_event: PIXI.FederatedEvent) {
+  protected onPointerOver() {
     if (this.isIdle()) {
       this.onHover.emit(this);
 
@@ -249,7 +249,7 @@ export class CircuitStep extends Container {
     }
   }
 
-  protected onPointerOut(_event: PIXI.FederatedEvent) {
+  protected onPointerOut() {
     if (this.isHover()) {
       this._state = "idle";
 
@@ -257,7 +257,7 @@ export class CircuitStep extends Container {
     }
   }
 
-  protected onPointerDown(_event: PIXI.FederatedEvent) {
+  protected onPointerDown() {
     if (!this.isActive()) {
       this.activate();
     }
