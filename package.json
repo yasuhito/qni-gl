@@ -10,7 +10,7 @@
     "build": "vite build",
     "build:sw": "rollup -c",
     "preview": "vite preview",
-    "test": "playwright test",
+    "test": "yarn lint && playwright test",
     "vitest": "vitest --dir test",
     "lint": "eslint . --ext .js,.ts",
     "doc": "typedoc"
