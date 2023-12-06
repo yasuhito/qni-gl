@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "test": "playwright test",
     "vitest": "vitest --dir test",
+    "lint": "eslint . --ext .js,.ts",
     "doc": "typedoc"
   },
   "devDependencies": {
@@ -20,7 +21,10 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/node": "^20.6.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
     "@vitest/browser": "^0.34.5",
+    "eslint": "^8.55.0",
     "start-server-and-test": "^2.0.1",
     "strip-ansi": "^5.0.0",
     "typedoc": "^0.25.1",
