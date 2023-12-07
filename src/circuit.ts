@@ -25,7 +25,7 @@ export class Circuit extends Container {
   protected _circuitSteps: List;
 
   get qubitCount() {
-    return this.circuitStepAt(0).qubitCount;
+    return this.circuitStepAt(0).wireCount;
   }
 
   get width(): number {
@@ -119,7 +119,7 @@ export class Circuit extends Container {
   // 最後のビットが使われていなければ true を返す
   isLastQubitUnused() {
     return this.circuitSteps.every(
-      (each) => !each.hasGateAt(each.qubitCount - 1)
+      (each) => !each.hasGateAt(each.wireCount - 1)
     );
   }
 
@@ -138,7 +138,7 @@ export class Circuit extends Container {
   }
 
   protected get maxQubitCountForAllSteps() {
-    return Math.max(...this.circuitSteps.map((each) => each.qubitCount));
+    return Math.max(...this.circuitSteps.map((each) => each.wireCount));
   }
 
   serialize() {

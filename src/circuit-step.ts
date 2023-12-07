@@ -55,7 +55,10 @@ export class CircuitStep extends Container {
     return Dropzone.size;
   }
 
-  get qubitCount() {
+  /**
+   * ステップ内のワイヤ数 (ビット数) を返す
+   */
+  get wireCount() {
     return this.dropzones.length;
   }
 

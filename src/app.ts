@@ -220,7 +220,7 @@ export class App {
     let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
-      if (circuitStep.qubitCount < this.circuit.maxQubitCount) {
+      if (circuitStep.wireCount < this.circuit.maxQubitCount) {
         circuitStep.appendNewDropzone();
       }
 
