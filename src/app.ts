@@ -137,7 +137,7 @@ export class App {
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTDaggerGate));
 
-    this.circuit = new Circuit(2, 5);
+    this.circuit = new Circuit({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
     this.circuit.y = 64 + this.gatePalette.height + 64;
     this.pixiApp.stage.addChild(this.circuit);
@@ -319,7 +319,7 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
-    this.circuit.removeUnusedUpperQubits();
+    this.circuit.removeUnusedUpperWires();
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {

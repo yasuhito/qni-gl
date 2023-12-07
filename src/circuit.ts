@@ -7,11 +7,17 @@ import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { MeasurementGate } from "./measurement-gate";
 
+export interface CircuitOptions {
+  minWireCount: number;
+  stepCount: number;
+}
+
 /**
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  minQubitCount: number; // 最小の量子ビット数
+  /** 最小のワイヤ数 (ビット数) */
+  minWireCount = 1;
   maxQubitCount = 32;
   stepCount: number; // ステップ数
   view: Container;
@@ -51,15 +57,15 @@ export class Circuit extends Container {
     return this._circuitSteps.children as CircuitStep[];
   }
 
-  constructor(minQubitCount: number, stepCount: number) {
+  constructor(options: CircuitOptions) {
     super();
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
     this.onGateSnap = new Signal();
 
-    this.minQubitCount = minQubitCount;
-    this.stepCount = stepCount;
+    this.minWireCount = options.minWireCount;
+    this.stepCount = options.stepCount;
 
     this.view = new Container();
     this.addChild(this.view);
@@ -70,7 +76,7 @@ export class Circuit extends Container {
     this.view.addChild(this._circuitSteps);
 
     for (let i = 0; i < this.stepCount; i++) {
-      const circuitStep = new CircuitStep(this.minQubitCount);
+      const circuitStep = new CircuitStep(this.minWireCount);
       circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
 
@@ -135,12 +141,12 @@ export class Circuit extends Container {
   }
 
   /**
-   * 使われていない上位ビットをまとめて削除する
+   * Delete unused upper wires.
    */
-  removeUnusedUpperQubits() {
+  removeUnusedUpperWires() {
     while (
       this.isLastQubitUnused() &&
-      this.maxQubitCountForAllSteps > this.minQubitCount
+      this.maxQubitCountForAllSteps > this.minWireCount
     ) {
       this.circuitSteps.forEach((each) => {
         each.deleteLastDropzone();
