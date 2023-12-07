@@ -52,14 +52,15 @@ export class Circuit extends Container {
     return this._circuitSteps.children as CircuitStep[];
   }
 
-  constructor(minQubitCount: number, stepCount: number) {
+  // TODO: new Circuit({minWireCount: 1, stepCount: 1}}) のように書けるようにする
+  constructor(minWireCount: number, stepCount: number) {
     super();
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
     this.onGateSnap = new Signal();
 
-    this.minWireCount = minQubitCount;
+    this.minWireCount = minWireCount;
     this.stepCount = stepCount;
 
     this.view = new Container();
