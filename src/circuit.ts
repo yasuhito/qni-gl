@@ -11,7 +11,8 @@ import { MeasurementGate } from "./measurement-gate";
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  minQubitCount: number; // 最小の量子ビット数
+  /** 最小のワイヤ数 (ビット数) */
+  minWireCount = 1;
   maxQubitCount = 32;
   stepCount: number; // ステップ数
   view: Container;
@@ -58,7 +59,7 @@ export class Circuit extends Container {
     this.onStepActivated = new Signal();
     this.onGateSnap = new Signal();
 
-    this.minQubitCount = minQubitCount;
+    this.minWireCount = minQubitCount;
     this.stepCount = stepCount;
 
     this.view = new Container();
@@ -70,7 +71,7 @@ export class Circuit extends Container {
     this.view.addChild(this._circuitSteps);
 
     for (let i = 0; i < this.stepCount; i++) {
-      const circuitStep = new CircuitStep(this.minQubitCount);
+      const circuitStep = new CircuitStep(this.minWireCount);
       circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
 
@@ -140,7 +141,7 @@ export class Circuit extends Container {
   removeUnusedUpperQubits() {
     while (
       this.isLastQubitUnused() &&
-      this.maxQubitCountForAllSteps > this.minQubitCount
+      this.maxQubitCountForAllSteps > this.minWireCount
     ) {
       this.circuitSteps.forEach((each) => {
         each.deleteLastDropzone();
