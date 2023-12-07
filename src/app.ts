@@ -319,7 +319,7 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
-    this.circuit.removeUnusedUpperQubits();
+    this.circuit.removeUnusedUpperWires();
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {

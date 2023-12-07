@@ -136,9 +136,9 @@ export class Circuit extends Container {
   }
 
   /**
-   * 使われていない上位ビットをまとめて削除する
+   * 使われていない上位ワイヤをまとめて削除する
    */
-  removeUnusedUpperQubits() {
+  removeUnusedUpperWires() {
     while (
       this.isLastQubitUnused() &&
       this.maxQubitCountForAllSteps > this.minWireCount
