@@ -53,12 +53,12 @@ export class Circuit extends Container {
     return this._circuitSteps[0].height * this._circuitSteps.children.length;
   }
 
-  get circuitSteps(): CircuitStep[] {
+  get steps(): CircuitStep[] {
     return this._circuitSteps.children as CircuitStep[];
   }
 
   protected get stepCount() {
-    return this.circuitSteps.length;
+    return this.steps.length;
   }
 
   constructor(options: CircuitOptions) {
@@ -122,7 +122,7 @@ export class Circuit extends Container {
   }
 
   circuitStepAt(stepIndex: number) {
-    return this.circuitSteps[stepIndex];
+    return this.steps[stepIndex];
   }
 
   stepIndex(step: CircuitStep) {
@@ -138,9 +138,7 @@ export class Circuit extends Container {
 
   // 最後のビットが使われていなければ true を返す
   isLastQubitUnused() {
-    return this.circuitSteps.every(
-      (each) => !each.hasGateAt(each.wireCount - 1)
-    );
+    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
   }
 
   /**
@@ -151,29 +149,29 @@ export class Circuit extends Container {
       this.isLastQubitUnused() &&
       this.maxQubitCountForAllSteps > this.minWireCount
     ) {
-      this.circuitSteps.forEach((each) => {
+      this.steps.forEach((each) => {
         each.deleteLastDropzone();
       });
     }
   }
 
   protected get maxQubitCountForAllSteps() {
-    return Math.max(...this.circuitSteps.map((each) => each.wireCount));
+    return Math.max(...this.steps.map((each) => each.wireCount));
   }
 
   serialize() {
-    return this.circuitSteps.map((each) => each.serialize());
+    return this.steps.map((each) => each.serialize());
   }
 
   toJSON() {
     return {
-      steps: this.circuitSteps,
+      steps: this.steps,
     };
   }
 
   toCircuitJSON() {
     const cols = [];
-    for (const each of this.circuitSteps) {
+    for (const each of this.steps) {
       cols.push(each.toCircuitJSON());
     }
     return `{"cols":[${cols.join(",")}]}`;
