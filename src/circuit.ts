@@ -20,7 +20,6 @@ export class Circuit extends Container {
   minWireCount = 1;
   /** 最大のワイヤ数 (ビット数) */
   maxWireCount = 32;
-  stepCount: number; // ステップ数
   view: Container;
 
   onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
@@ -58,6 +57,10 @@ export class Circuit extends Container {
     return this._circuitSteps.children as CircuitStep[];
   }
 
+  protected get stepCount() {
+    return this.circuitSteps.length;
+  }
+
   constructor(options: CircuitOptions) {
     super();
 
@@ -66,7 +69,6 @@ export class Circuit extends Container {
     this.onGateSnap = new Signal();
 
     this.minWireCount = options.minWireCount;
-    this.stepCount = options.stepCount;
 
     this.view = new Container();
     this.addChild(this.view);
@@ -76,7 +78,7 @@ export class Circuit extends Container {
     });
     this.view.addChild(this._circuitSteps);
 
-    for (let i = 0; i < this.stepCount; i++) {
+    for (let i = 0; i < options.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minWireCount);
       circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
