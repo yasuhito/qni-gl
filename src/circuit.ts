@@ -7,6 +7,11 @@ import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { MeasurementGate } from "./measurement-gate";
 
+export interface CircuitOptions {
+  minWireCount: number;
+  stepCount: number;
+}
+
 /**
  * @noInheritDoc
  */
@@ -52,16 +57,15 @@ export class Circuit extends Container {
     return this._circuitSteps.children as CircuitStep[];
   }
 
-  // TODO: new Circuit({minWireCount: 1, stepCount: 1}}) のように書けるようにする
-  constructor(minWireCount: number, stepCount: number) {
+  constructor(options: CircuitOptions) {
     super();
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
     this.onGateSnap = new Signal();
 
-    this.minWireCount = minWireCount;
-    this.stepCount = stepCount;
+    this.minWireCount = options.minWireCount;
+    this.stepCount = options.stepCount;
 
     this.view = new Container();
     this.addChild(this.view);
