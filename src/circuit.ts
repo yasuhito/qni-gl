@@ -32,8 +32,7 @@ export class Circuit extends Container {
 
     for (let i = 1; i < this.stepCount; i++) {
       if (this.circuitStepAt(i).wireCount !== wireCount) {
-        // TODO: エラーメッセージを英語にする
-        throw new Error("すべてのステップでワイヤ数が同じである必要があります");
+        throw new Error("All steps must have the same number of wires");
       }
     }
 
