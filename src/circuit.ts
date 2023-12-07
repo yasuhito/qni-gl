@@ -18,7 +18,8 @@ export interface CircuitOptions {
 export class Circuit extends Container {
   /** 最小のワイヤ数 (ビット数) */
   minWireCount = 1;
-  maxQubitCount = 32;
+  /** 最大のワイヤ数 (ビット数) */
+  maxWireCount = 32;
   stepCount: number; // ステップ数
   view: Container;
 

@@ -219,11 +219,9 @@ export class App {
     // その中で、dropzone が snappable かどうかを判定する
     let dropzone;
 
-    for (const circuitStep of this.circuit.circuitSteps) {
-      if (circuitStep.wireCount < this.circuit.maxQubitCount) {
-        circuitStep.appendNewDropzone();
-      }
+    this.maybeAppendCircuitWire();
 
+    for (const circuitStep of this.circuit.circuitSteps) {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
@@ -248,6 +246,20 @@ export class App {
     this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
+  }
+
+  protected maybeAppendCircuitWire() {
+    const firstStepWireCount = this.circuit.circuitSteps[0].wireCount;
+
+    for (const each of this.circuit.circuitSteps) {
+      if (each.wireCount !== firstStepWireCount) {
+        throw new Error("All steps must have the same number of wires");
+      }
+
+      if (each.wireCount < this.circuit.maxWireCount) {
+        each.appendNewDropzone();
+      }
+    }
   }
 
   toJSON() {
