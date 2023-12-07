@@ -4,6 +4,9 @@ import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { JsonableMixin } from "./jsonable-mixin";
 
+/**
+ * @noInheritDoc
+ */
 export class WriteGate extends JsonableMixin(Gate) {
   static iconIdleDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconHover = PIXI.Texture.from("./assets/Placeholder.svg");

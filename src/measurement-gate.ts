@@ -4,6 +4,9 @@ import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
 import { JsonableMixin } from "./jsonable-mixin";
 
+/**
+ * @noInheritDoc
+ */
 export class MeasurementGate extends JsonableMixin(Gate) {
   static gateType = "MeasurementGate";
   static icon = PIXI.Texture.from("./assets/Measurement.svg", {

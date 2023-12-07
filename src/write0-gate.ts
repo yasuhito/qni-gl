@@ -1,6 +1,9 @@
 import * as PIXI from "pixi.js";
 import { WriteGate } from "./write-gate";
 
+/**
+ * @noInheritDoc
+ */
 export class Write0Gate extends WriteGate {
   static gateType = "Write0Gate";
   static icon = PIXI.Texture.from("./assets/Write0.svg", {
@@ -23,6 +26,6 @@ export class Write0Gate extends WriteGate {
   static iconActive = PIXI.Texture.from("./assets/Write0_active.svg");
 
   toCircuitJSON() {
-    return '"|0>"'
+    return '"|0>"';
   }
 }
