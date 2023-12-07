@@ -53,6 +53,9 @@ export class Circuit extends Container {
     return this._circuitSteps[0].height * this._circuitSteps.children.length;
   }
 
+  /**
+   * Returns an array of {@link CircuitStep}s in a quantum circuit.
+   */
   get steps(): CircuitStep[] {
     return this._circuitSteps.children as CircuitStep[];
   }
