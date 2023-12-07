@@ -20,7 +20,6 @@ export class Circuit extends Container {
   minWireCount = 1;
   /** 最大のワイヤ数 (ビット数) */
   maxWireCount = 32;
-  stepCount: number; // ステップ数
   view: Container;
 
   onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
@@ -54,8 +53,15 @@ export class Circuit extends Container {
     return this._circuitSteps[0].height * this._circuitSteps.children.length;
   }
 
-  get circuitSteps(): CircuitStep[] {
+  /**
+   * Returns an array of {@link CircuitStep}s in a quantum circuit.
+   */
+  get steps(): CircuitStep[] {
     return this._circuitSteps.children as CircuitStep[];
+  }
+
+  protected get stepCount() {
+    return this.steps.length;
   }
 
   constructor(options: CircuitOptions) {
@@ -66,7 +72,6 @@ export class Circuit extends Container {
     this.onGateSnap = new Signal();
 
     this.minWireCount = options.minWireCount;
-    this.stepCount = options.stepCount;
 
     this.view = new Container();
     this.addChild(this.view);
@@ -76,7 +81,7 @@ export class Circuit extends Container {
     });
     this.view.addChild(this._circuitSteps);
 
-    for (let i = 0; i < this.stepCount; i++) {
+    for (let i = 0; i < options.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minWireCount);
       circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
@@ -120,7 +125,7 @@ export class Circuit extends Container {
   }
 
   circuitStepAt(stepIndex: number) {
-    return this.circuitSteps[stepIndex];
+    return this.steps[stepIndex];
   }
 
   stepIndex(step: CircuitStep) {
@@ -136,9 +141,7 @@ export class Circuit extends Container {
 
   // 最後のビットが使われていなければ true を返す
   isLastQubitUnused() {
-    return this.circuitSteps.every(
-      (each) => !each.hasGateAt(each.wireCount - 1)
-    );
+    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
   }
 
   /**
@@ -149,29 +152,29 @@ export class Circuit extends Container {
       this.isLastQubitUnused() &&
       this.maxQubitCountForAllSteps > this.minWireCount
     ) {
-      this.circuitSteps.forEach((each) => {
+      this.steps.forEach((each) => {
         each.deleteLastDropzone();
       });
     }
   }
 
   protected get maxQubitCountForAllSteps() {
-    return Math.max(...this.circuitSteps.map((each) => each.wireCount));
+    return Math.max(...this.steps.map((each) => each.wireCount));
   }
 
   serialize() {
-    return this.circuitSteps.map((each) => each.serialize());
+    return this.steps.map((each) => each.serialize());
   }
 
   toJSON() {
     return {
-      steps: this.circuitSteps,
+      steps: this.steps,
     };
   }
 
   toCircuitJSON() {
     const cols = [];
-    for (const each of this.circuitSteps) {
+    for (const each of this.steps) {
       cols.push(each.toCircuitJSON());
     }
     return `{"cols":[${cols.join(",")}]}`;

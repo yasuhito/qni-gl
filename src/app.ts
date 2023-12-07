@@ -154,7 +154,7 @@ export class App {
 
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
-    this.circuit.circuitSteps[0].activate();
+    this.circuit.steps[0].activate();
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -221,7 +221,7 @@ export class App {
 
     this.maybeAppendCircuitWire();
 
-    for (const circuitStep of this.circuit.circuitSteps) {
+    for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
         if (
           each.isSnappable(
@@ -249,9 +249,9 @@ export class App {
   }
 
   protected maybeAppendCircuitWire() {
-    const firstStepWireCount = this.circuit.circuitSteps[0].wireCount;
+    const firstStepWireCount = this.circuit.steps[0].wireCount;
 
-    for (const each of this.circuit.circuitSteps) {
+    for (const each of this.circuit.steps) {
       if (each.wireCount !== firstStepWireCount) {
         throw new Error("All steps must have the same number of wires");
       }
@@ -286,7 +286,7 @@ export class App {
   private moveGate(gate: Gate, pointerPosition: PIXI.Point) {
     let snapDropzone: Dropzone | null = null;
 
-    for (const circuitStep of this.circuit.circuitSteps) {
+    for (const circuitStep of this.circuit.steps) {
       for (const dropzone of circuitStep.dropzones) {
         if (
           dropzone.isSnappable(
