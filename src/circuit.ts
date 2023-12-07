@@ -24,8 +24,20 @@ export class Circuit extends Container {
 
   protected _circuitSteps: List;
 
-  get qubitCount() {
-    return this.circuitStepAt(0).wireCount;
+  /**
+   * 量子回路内のワイヤ数 (ビット数) を返す
+   */
+  get wireCount() {
+    const wireCount = this.circuitStepAt(0).wireCount;
+
+    for (let i = 1; i < this.stepCount; i++) {
+      if (this.circuitStepAt(i).wireCount !== wireCount) {
+        // TODO: エラーメッセージを英語にする
+        throw new Error("すべてのステップでワイヤ数が同じである必要があります");
+      }
+    }
+
+    return wireCount;
   }
 
   get width(): number {
@@ -71,7 +83,7 @@ export class Circuit extends Container {
   }
 
   onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
-    for (let wireIndex = 0; wireIndex < this.qubitCount; wireIndex++) {
+    for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
       for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
