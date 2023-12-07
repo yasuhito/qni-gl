@@ -16,11 +16,11 @@ export interface CircuitOptions {
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  /** 最小のワイヤ数 (ビット数) */
+  /** Minimum number of wires (bits) */
   minWireCount = 1;
-  /** 最大のワイヤ数 (ビット数) */
+  /** Maximum number of wires (bits) */
   maxWireCount = 32;
-
+  /** Signal emitted when mouse hovers over a step  */
   onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
   onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
   onGateSnap: Signal<
@@ -74,7 +74,7 @@ export class Circuit extends Container {
       circuitStep.onSnap.connect(this.onSnap.bind(this));
       this._circuitSteps.addChild(circuitStep);
 
-      circuitStep.onHover.connect(this.onCircuitStepHover.bind(this));
+      circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
       circuitStep.onActivate.connect(
         this.deactivateAllOtherCircuitSteps.bind(this)
       );
@@ -168,7 +168,7 @@ export class Circuit extends Container {
     return `{"cols":[${cols.join(",")}]}`;
   }
 
-  protected onCircuitStepHover(circuitStep: CircuitStep) {
+  protected emitOnStepHoverSignal(circuitStep: CircuitStep) {
     this.onStepHover.emit(this, circuitStep);
   }
 
