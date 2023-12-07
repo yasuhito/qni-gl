@@ -147,7 +147,7 @@ export class App {
     this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
     this.circuit.onGateSnap.connect(this.runSimulator.bind(this));
 
-    this.stateVector = new StateVectorComponent(this.circuit.qubitCount);
+    this.stateVector = new StateVectorComponent(this.circuit.wireCount);
     this.pixiApp.stage.addChild(this.stateVector);
     this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
     this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
@@ -220,7 +220,7 @@ export class App {
     let dropzone;
 
     for (const circuitStep of this.circuit.circuitSteps) {
-      if (circuitStep.qubitCount < this.circuit.maxQubitCount) {
+      if (circuitStep.wireCount < this.circuit.maxQubitCount) {
         circuitStep.appendNewDropzone();
       }
 
@@ -329,6 +329,6 @@ export class App {
   }
 
   protected runSimulator(circuit: Circuit) {
-    this.worker.postMessage({ qubitCount: circuit.qubitCount });
+    this.worker.postMessage({ qubitCount: circuit.wireCount });
   }
 }

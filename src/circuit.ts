@@ -24,8 +24,19 @@ export class Circuit extends Container {
 
   protected _circuitSteps: List;
 
-  get qubitCount() {
-    return this.circuitStepAt(0).qubitCount;
+  /**
+   * 量子回路内のワイヤ数 (ビット数) を返す
+   */
+  get wireCount() {
+    const wireCount = this.circuitStepAt(0).wireCount;
+
+    for (let i = 1; i < this.stepCount; i++) {
+      if (this.circuitStepAt(i).wireCount !== wireCount) {
+        throw new Error("All steps must have the same number of wires");
+      }
+    }
+
+    return wireCount;
   }
 
   get width(): number {
@@ -71,7 +82,7 @@ export class Circuit extends Container {
   }
 
   onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
-    for (let wireIndex = 0; wireIndex < this.qubitCount; wireIndex++) {
+    for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
       for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
@@ -119,7 +130,7 @@ export class Circuit extends Container {
   // 最後のビットが使われていなければ true を返す
   isLastQubitUnused() {
     return this.circuitSteps.every(
-      (each) => !each.hasGateAt(each.qubitCount - 1)
+      (each) => !each.hasGateAt(each.wireCount - 1)
     );
   }
 
@@ -138,7 +149,7 @@ export class Circuit extends Container {
   }
 
   protected get maxQubitCountForAllSteps() {
-    return Math.max(...this.circuitSteps.map((each) => each.qubitCount));
+    return Math.max(...this.circuitSteps.map((each) => each.wireCount));
   }
 
   serialize() {

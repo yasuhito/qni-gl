@@ -4,6 +4,9 @@ import { Gate } from "./gate";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
 
+/**
+ * @noInheritDoc
+ */
 export class ControlGate extends JsonableMixin(Gate) {
   static gateType = "ControlGate";
   static icon = PIXI.Texture.from("./assets/Control.svg", {
