@@ -136,7 +136,7 @@ export class Circuit extends Container {
   }
 
   /**
-   * 使われていない上位ワイヤをまとめて削除する
+   * Delete unused upper wires.
    */
   removeUnusedUpperWires() {
     while (
