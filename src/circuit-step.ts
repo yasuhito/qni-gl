@@ -36,7 +36,9 @@ export class CircuitStep extends Container {
 
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
-  onSnap: Signal<(circuitStep: CircuitStep, dropzone: Dropzone) => void>;
+  onGateSnapToDropzone: Signal<
+    (circuitStep: CircuitStep, dropzone: Dropzone) => void
+  >;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -109,7 +111,7 @@ export class CircuitStep extends Container {
   }
 
   protected onDropzoneSnap(dropzone: Dropzone) {
-    this.onSnap.emit(this, dropzone);
+    this.onGateSnapToDropzone.emit(this, dropzone);
   }
 
   /**
@@ -130,7 +132,7 @@ export class CircuitStep extends Container {
 
     this.onHover = new Signal();
     this.onActivate = new Signal();
-    this.onSnap = new Signal();
+    this.onGateSnapToDropzone = new Signal();
 
     this._view = new PIXI.Container();
     this.addChild(this._view);

@@ -1,11 +1,8 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
+import { Dropzone, WireType } from "./dropzone";
 import { List as ListContainer } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { Dropzone, WireType } from "./dropzone";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { MeasurementGate } from "./measurement-gate";
 
 /**
  * Represents the options for a {@link Circuit}.
@@ -42,7 +39,7 @@ export class Circuit extends Container {
   /** Signal emitted when a {@link CircuitStep} is activated. */
   onStepActivated: CircuitStepSignalToCircuitHandler;
   /** Signal emitted when a {@link Gate} snaps to a {@link Dropzone}. */
-  onGateSnap: DropzoneSignalToCircuitHandler;
+  onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
 
   /** Layout container for arranging {@link CircuitStep}s in a row. */
   private circuitStepsContainer: ListContainer;
@@ -53,7 +50,7 @@ export class Circuit extends Container {
   get wireCount() {
     const wireCount = this.stepAt(0).wireCount;
 
-    this.steps.forEach((each: CircuitStep) => {
+    this.steps.forEach((each) => {
       if (each.wireCount !== wireCount) {
         throw new Error("All steps must have the same number of wires");
       }
@@ -69,10 +66,6 @@ export class Circuit extends Container {
     return this.circuitStepsContainer.children as CircuitStep[];
   }
 
-  private get stepCount() {
-    return this.steps.length;
-  }
-
   /**
    * Returns a new {@link Circuit} instance.
    *
@@ -85,7 +78,7 @@ export class Circuit extends Container {
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
-    this.onGateSnap = new Signal();
+    this.onGateSnapToDropzone = new Signal();
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
@@ -97,7 +90,9 @@ export class Circuit extends Container {
       const circuitStep = new CircuitStep(this.minWireCount);
       this.circuitStepsContainer.addChild(circuitStep);
 
-      circuitStep.onSnap.connect(this.onSnap.bind(this));
+      circuitStep.onGateSnapToDropzone.connect(
+        this.redrawDropzoneInputAndOutputWires.bind(this)
+      );
       circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
       circuitStep.onActivate.connect(
         this.deactivateAllOtherCircuitSteps.bind(this)
@@ -105,22 +100,22 @@ export class Circuit extends Container {
     }
   }
 
-  onSnap(circuitStep: CircuitStep, dropzone: Dropzone) {
+  private redrawDropzoneInputAndOutputWires(
+    circuitStep: CircuitStep,
+    dropzone: Dropzone
+  ) {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
-      for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
-        const dropzone = this.stepAt(stepIndex).dropzoneAt(wireIndex);
+      this.steps.forEach((each) => {
+        const dropzone = each.dropzoneAt(wireIndex);
 
         if (dropzone.isOccupied()) {
-          if (
-            dropzone.operation instanceof Write0Gate ||
-            dropzone.operation instanceof Write1Gate
-          ) {
+          if (dropzone.hasWriteGate()) {
             dropzone.inputWireType = wireType;
             wireType = WireType.Quantum;
             dropzone.outputWireType = wireType;
-          } else if (dropzone.operation instanceof MeasurementGate) {
+          } else if (dropzone.hasMeasurementGate()) {
             dropzone.inputWireType = wireType;
             wireType = WireType.Classical;
             dropzone.outputWireType = wireType;
@@ -130,10 +125,10 @@ export class Circuit extends Container {
           dropzone.outputWireType = wireType;
         }
         dropzone.redrawWires();
-      }
+      });
     }
 
-    this.onGateSnap.emit(this, circuitStep, dropzone);
+    this.onGateSnapToDropzone.emit(this, circuitStep, dropzone);
   }
 
   stepAt(stepIndex: number) {
@@ -144,8 +139,8 @@ export class Circuit extends Container {
    * Returns the index of the given {@link CircuitStep} within the {@link Circuit}.
    */
   stepIndex(step: CircuitStep) {
-    for (let i = 0; i < this.circuitStepsContainer.children.length; i++) {
-      const each = this.circuitStepsContainer.children[i];
+    for (let i = 0; i < this.steps.length; i++) {
+      const each = this.steps[i];
       if (step === each) {
         return i;
       }

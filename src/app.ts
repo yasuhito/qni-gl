@@ -145,7 +145,7 @@ export class App {
 
     this.circuit.onStepHover.connect(this.runSimulator.bind(this));
     this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
-    this.circuit.onGateSnap.connect(this.runSimulator.bind(this));
+    this.circuit.onGateSnapToDropzone.connect(this.runSimulator.bind(this));
 
     this.stateVector = new StateVectorComponent(this.circuit.wireCount);
     this.pixiApp.stage.addChild(this.stateVector);

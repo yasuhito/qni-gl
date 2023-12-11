@@ -167,6 +167,16 @@ export class Dropzone extends Container {
     return this.operation.toCircuitJSON();
   }
 
+  hasWriteGate() {
+    return [Write0Gate, Write1Gate].some(
+      (each) => this.operation instanceof each
+    );
+  }
+
+  hasMeasurementGate() {
+    return this.operation instanceof MeasurementGate;
+  }
+
   protected drawWire(startX: number, endX: number, color: WireColor) {
     this.wire
       .lineStyle(this.wireWidth, color, this.wireAlpha, this.wireAlignment)
