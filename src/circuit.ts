@@ -12,6 +12,10 @@ export interface CircuitOptions {
   stepCount: number;
 }
 
+export type CircuitCircuitStepSignalHandler = Signal<
+  (circuit: Circuit, circuitStep: CircuitStep) => void
+>;
+
 /**
  * @noInheritDoc
  */
@@ -20,9 +24,10 @@ export class Circuit extends Container {
   minWireCount = 1;
   /** Maximum number of wires (bits) */
   maxWireCount = 32;
-  /** Signal emitted when mouse hovers over a step  */
-  onStepHover: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
-  onStepActivated: Signal<(circuit: Circuit, circuitStep: CircuitStep) => void>;
+  /** Signal emitted when mouse hovers over a step */
+  onStepHover: CircuitCircuitStepSignalHandler;
+  /** Signal emitted when a step is activated */
+  onStepActivated: CircuitCircuitStepSignalHandler;
   onGateSnap: Signal<
     (circuit: Circuit, circuitStep: CircuitStep, dropzone: Dropzone) => void
   >;
@@ -180,7 +185,6 @@ export class Circuit extends Container {
       }
     });
 
-    // シグナルを飛ばす
     this.onStepActivated.emit(this, circuitStep);
   }
 }
