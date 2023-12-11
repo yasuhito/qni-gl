@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
-import { Circuit } from "./circuit";
+import { CircuitComponent } from "./circuit-component";
 import { CircuitStep } from "./circuit-step";
 import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
@@ -41,7 +41,7 @@ export class App {
   grabbedGate: Gate | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   gatePalette: GatePalette;
-  circuit: Circuit;
+  circuit: CircuitComponent;
   circuitSteps: CircuitStep[] = [];
   stateVector: StateVectorComponent;
   logger: Logger;
@@ -137,7 +137,7 @@ export class App {
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTDaggerGate));
 
-    this.circuit = new Circuit({ minWireCount: 2, stepCount: 5 });
+    this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
     this.circuit.y = 64 + this.gatePalette.height + 64;
     this.pixiApp.stage.addChild(this.circuit);
@@ -340,7 +340,7 @@ export class App {
     }
   }
 
-  protected runSimulator(circuit: Circuit) {
+  protected runSimulator(circuit: CircuitComponent) {
     this.worker.postMessage({ qubitCount: circuit.wireCount });
   }
 }

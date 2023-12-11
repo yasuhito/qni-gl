@@ -5,7 +5,7 @@ import { List as ListContainer } from "@pixi/ui";
 import { Signal } from "typed-signals";
 
 /**
- * Represents the options for a {@link Circuit}.
+ * Represents the options for a {@link CircuitComponent}.
  */
 export interface CircuitOptions {
   minWireCount: number;
@@ -13,23 +13,29 @@ export interface CircuitOptions {
 }
 
 /**
- * Signals that fire in a {@link CircuitStep} and propagate to the {@link Circuit}.
+ * Signals that fire in a {@link CircuitStep} and propagate to the {@link CircuitComponent}.
  */
 export type CircuitStepSignalToCircuitHandler = Signal<
-  (circuit: Circuit, circuitStep: CircuitStep) => void
+  (circuit: CircuitComponent, circuitStep: CircuitStep) => void
 >;
 
 /**
- * Signals that fire in a {@link Dropzone} and propagate to the {@link Circuit}.
+ * Signals that fire in a {@link Dropzone} and propagate to the {@link CircuitComponent}.
  */
 export type DropzoneSignalToCircuitHandler = Signal<
-  (circuit: Circuit, circuitStep: CircuitStep, dropzone: Dropzone) => void
+  (
+    circuit: CircuitComponent,
+    circuitStep: CircuitStep,
+    dropzone: Dropzone
+  ) => void
 >;
 
 /**
+ * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
+ *
  * @noInheritDoc
  */
-export class Circuit extends Container {
+export class CircuitComponent extends Container {
   /** Minimum number of wires (bits). */
   minWireCount = 1;
   /** Maximum number of wires (bits). */
@@ -45,7 +51,7 @@ export class Circuit extends Container {
   private circuitStepsContainer: ListContainer;
 
   /**
-   * Returns the number of wires (bits) in the {@link Circuit}.
+   * Returns the number of wires (bits) in the {@link CircuitComponent}.
    */
   get wireCount() {
     const wireCount = this.stepAt(0).wireCount;
@@ -60,14 +66,14 @@ export class Circuit extends Container {
   }
 
   /**
-   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
+   * Returns an array of {@link CircuitStep}s in the {@link CircuitComponent}.
    */
   get steps(): CircuitStep[] {
     return this.circuitStepsContainer.children as CircuitStep[];
   }
 
   /**
-   * Returns a new {@link Circuit} instance.
+   * Returns a new {@link CircuitComponent} instance.
    *
    * @param {CircuitOptions} options - The options for the Circuit.
    */

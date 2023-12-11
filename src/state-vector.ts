@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
+import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { List } from "@pixi/ui";
+import { List as ListContainer } from "@pixi/ui";
 import { QubitCircle } from "./qubit-circle";
-import { spacingInPx } from "./util";
-import { Colors } from "./colors";
 import { Spacing } from "./spacing";
+import { spacingInPx } from "./util";
 
 /**
  * @noInheritDoc
@@ -13,7 +13,7 @@ import { Spacing } from "./spacing";
 export class StateVector extends Container {
   protected _qubitCount = 1;
   protected body: PIXI.Graphics;
-  protected qubitCircles: List;
+  protected qubitCircles: ListContainer;
 
   set qubitCount(value: number) {
     this._qubitCount = value;
@@ -35,7 +35,7 @@ export class StateVector extends Container {
     this.body = new PIXI.Graphics();
     this.addChild(this.body);
 
-    this.qubitCircles = new List({
+    this.qubitCircles = new ListContainer({
       type: "horizontal",
       elementsMargin: spacingInPx(0.5),
       vertPadding: spacingInPx(5),
