@@ -45,16 +45,16 @@ export class Circuit extends Container {
   private circuitStepsContainer: ListContainer;
 
   /**
-   * 量子回路内のワイヤ数 (ビット数) を返す
+   * Returns the number of wires (bits) in the {@link Circuit}.
    */
   get wireCount() {
-    const wireCount = this.circuitStepAt(0).wireCount;
+    const wireCount = this.stepAt(0).wireCount;
 
-    for (let i = 1; i < this.stepCount; i++) {
-      if (this.circuitStepAt(i).wireCount !== wireCount) {
+    this.steps.forEach((each: CircuitStep) => {
+      if (each.wireCount !== wireCount) {
         throw new Error("All steps must have the same number of wires");
       }
-    }
+    });
 
     return wireCount;
   }
@@ -102,7 +102,7 @@ export class Circuit extends Container {
       let wireType = WireType.Classical;
 
       for (let stepIndex = 0; stepIndex < this.stepCount; stepIndex++) {
-        const dropzone = this.circuitStepAt(stepIndex).dropzoneAt(wireIndex);
+        const dropzone = this.stepAt(stepIndex).dropzoneAt(wireIndex);
 
         if (dropzone.isOccupied()) {
           if (
@@ -128,7 +128,7 @@ export class Circuit extends Container {
     this.onGateSnap.emit(this, circuitStep, dropzone);
   }
 
-  circuitStepAt(stepIndex: number) {
+  stepAt(stepIndex: number) {
     return this.steps[stepIndex];
   }
 
