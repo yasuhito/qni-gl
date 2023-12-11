@@ -12,25 +12,34 @@ export interface CircuitOptions {
   stepCount: number;
 }
 
-export type CircuitCircuitStepSignalHandler = Signal<
+/**
+ * Signals that fire in a {@link CircuitStep} and propagate to the {@link Circuit}.
+ */
+export type CircuitStepSignalToCircuitHandler = Signal<
   (circuit: Circuit, circuitStep: CircuitStep) => void
+>;
+
+/**
+ * Signals that fire in a {@link Dropzone} and propagate to the {@link Circuit}.
+ */
+export type DropzoneSignalToCircuitHandler = Signal<
+  (circuit: Circuit, circuitStep: CircuitStep, dropzone: Dropzone) => void
 >;
 
 /**
  * @noInheritDoc
  */
 export class Circuit extends Container {
-  /** Minimum number of wires (bits) */
+  /** Minimum number of wires (bits). */
   minWireCount = 1;
-  /** Maximum number of wires (bits) */
+  /** Maximum number of wires (bits). */
   maxWireCount = 32;
-  /** Signal emitted when mouse hovers over a step */
-  onStepHover: CircuitCircuitStepSignalHandler;
-  /** Signal emitted when a step is activated */
-  onStepActivated: CircuitCircuitStepSignalHandler;
-  onGateSnap: Signal<
-    (circuit: Circuit, circuitStep: CircuitStep, dropzone: Dropzone) => void
-  >;
+  /** Signal emitted when mouse hovers over a {@link CircuitStep}. */
+  onStepHover: CircuitStepSignalToCircuitHandler;
+  /** Signal emitted when a {@link CircuitStep} is activated. */
+  onStepActivated: CircuitStepSignalToCircuitHandler;
+  /** Signal emitted when a {@link Gate} snaps to a {@link Dropzone}. */
+  onGateSnap: DropzoneSignalToCircuitHandler;
 
   protected _circuitSteps: List;
 
