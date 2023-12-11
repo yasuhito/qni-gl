@@ -1,6 +1,6 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
-import { List } from "@pixi/ui";
+import { List as ListContainer } from "@pixi/ui";
 import { Signal } from "typed-signals";
 import { Dropzone, WireType } from "./dropzone";
 import { Write0Gate } from "./write0-gate";
@@ -41,7 +41,8 @@ export class Circuit extends Container {
   /** Signal emitted when a {@link Gate} snaps to a {@link Dropzone}. */
   onGateSnap: DropzoneSignalToCircuitHandler;
 
-  protected _circuitSteps: List;
+  /** Layout container for arranging {@link CircuitStep}s in a row. */
+  private circuitStepsContainer: ListContainer;
 
   /**
    * 量子回路内のワイヤ数 (ビット数) を返す
@@ -59,10 +60,10 @@ export class Circuit extends Container {
   }
 
   /**
-   * Returns an array of {@link CircuitStep}s in a quantum circuit.
+   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
    */
   get steps(): CircuitStep[] {
-    return this._circuitSteps.children as CircuitStep[];
+    return this.circuitStepsContainer.children as CircuitStep[];
   }
 
   protected get stepCount() {
@@ -78,15 +79,16 @@ export class Circuit extends Container {
 
     this.minWireCount = options.minWireCount;
 
-    this._circuitSteps = new List({
+    // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
+    this.circuitStepsContainer = new ListContainer({
       type: "horizontal",
     });
-    this.addChild(this._circuitSteps);
+    this.addChild(this.circuitStepsContainer);
 
     for (let i = 0; i < options.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minWireCount);
       circuitStep.onSnap.connect(this.onSnap.bind(this));
-      this._circuitSteps.addChild(circuitStep);
+      this.circuitStepsContainer.addChild(circuitStep);
 
       circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
       circuitStep.onActivate.connect(
@@ -130,15 +132,18 @@ export class Circuit extends Container {
     return this.steps[stepIndex];
   }
 
+  /**
+   * Returns the index of the given {@link CircuitStep} within the {@link Circuit}.
+   */
   stepIndex(step: CircuitStep) {
-    for (let i = 0; i < this._circuitSteps.children.length; i++) {
-      const each = this._circuitSteps.children[i];
+    for (let i = 0; i < this.circuitStepsContainer.children.length; i++) {
+      const each = this.circuitStepsContainer.children[i];
       if (step === each) {
         return i;
       }
     }
 
-    return;
+    throw new Error("Step not found");
   }
 
   // 最後のビットが使われていなければ true を返す
@@ -186,10 +191,12 @@ export class Circuit extends Container {
     this.onStepHover.emit(this, circuitStep);
   }
 
-  protected deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
-    // 他のすべてのステップを非アクティブにする
-    this._circuitSteps.children.forEach((each: CircuitStep) => {
-      if (each.isActive() && each !== circuitStep) {
+  /**
+   * Deactivates all other {@link CircuitStep}s except for the specified {@link CircuitStep}.
+   */
+  private deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
+    this.circuitStepsContainer.children.forEach((each: CircuitStep) => {
+      if (each !== circuitStep && each.isActive()) {
         each.deactivate();
       }
     });
