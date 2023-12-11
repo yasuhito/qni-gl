@@ -7,6 +7,9 @@ import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { MeasurementGate } from "./measurement-gate";
 
+/**
+ * Represents the options for a {@link Circuit}.
+ */
 export interface CircuitOptions {
   minWireCount: number;
   stepCount: number;
@@ -66,18 +69,23 @@ export class Circuit extends Container {
     return this.circuitStepsContainer.children as CircuitStep[];
   }
 
-  protected get stepCount() {
+  private get stepCount() {
     return this.steps.length;
   }
 
+  /**
+   * Returns a new {@link Circuit} instance.
+   *
+   * @param {CircuitOptions} options - The options for the Circuit.
+   */
   constructor(options: CircuitOptions) {
     super();
+
+    this.minWireCount = options.minWireCount;
 
     this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
     this.onGateSnap = new Signal();
-
-    this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
@@ -87,9 +95,9 @@ export class Circuit extends Container {
 
     for (let i = 0; i < options.stepCount; i++) {
       const circuitStep = new CircuitStep(this.minWireCount);
-      circuitStep.onSnap.connect(this.onSnap.bind(this));
       this.circuitStepsContainer.addChild(circuitStep);
 
+      circuitStep.onSnap.connect(this.onSnap.bind(this));
       circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
       circuitStep.onActivate.connect(
         this.deactivateAllOtherCircuitSteps.bind(this)
