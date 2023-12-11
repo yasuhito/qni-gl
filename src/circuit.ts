@@ -94,9 +94,7 @@ export class Circuit extends Container {
         this.redrawDropzoneInputAndOutputWires.bind(this)
       );
       circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
-      circuitStep.onActivate.connect(
-        this.deactivateAllOtherCircuitSteps.bind(this)
-      );
+      circuitStep.onActivate.connect(this.deactivateAllOtherSteps.bind(this));
     }
   }
 
@@ -131,27 +129,15 @@ export class Circuit extends Container {
     this.onGateSnapToDropzone.emit(this, circuitStep, dropzone);
   }
 
-  stepAt(stepIndex: number) {
-    return this.steps[stepIndex];
-  }
-
   /**
-   * Returns the index of the given {@link CircuitStep} within the {@link Circuit}.
+   * Retrieves the {@link CircuitStep} at the specified index.
    */
-  stepIndex(step: CircuitStep) {
-    for (let i = 0; i < this.steps.length; i++) {
-      const each = this.steps[i];
-      if (step === each) {
-        return i;
-      }
+  stepAt(stepIndex: number) {
+    if (stepIndex < 0 || stepIndex >= this.steps.length) {
+      throw new Error("Step index out of bounds");
     }
 
-    throw new Error("Step not found");
-  }
-
-  // 最後のビットが使われていなければ true を返す
-  isLastQubitUnused() {
-    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
+    return this.steps[stepIndex];
   }
 
   /**
@@ -159,8 +145,8 @@ export class Circuit extends Container {
    */
   removeUnusedUpperWires() {
     while (
-      this.isLastQubitUnused() &&
-      this.maxQubitCountForAllSteps > this.minWireCount
+      this.isLastWireUnused() &&
+      this.maxWireCountForAllSteps > this.minWireCount
     ) {
       this.steps.forEach((each) => {
         each.deleteLastDropzone();
@@ -168,7 +154,11 @@ export class Circuit extends Container {
     }
   }
 
-  protected get maxQubitCountForAllSteps() {
+  private isLastWireUnused() {
+    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
+  }
+
+  protected get maxWireCountForAllSteps() {
     return Math.max(...this.steps.map((each) => each.wireCount));
   }
 
@@ -190,15 +180,15 @@ export class Circuit extends Container {
     return `{"cols":[${cols.join(",")}]}`;
   }
 
-  protected emitOnStepHoverSignal(circuitStep: CircuitStep) {
+  private emitOnStepHoverSignal(circuitStep: CircuitStep) {
     this.onStepHover.emit(this, circuitStep);
   }
 
   /**
    * Deactivates all other {@link CircuitStep}s except for the specified {@link CircuitStep}.
    */
-  private deactivateAllOtherCircuitSteps(circuitStep: CircuitStep) {
-    this.circuitStepsContainer.children.forEach((each: CircuitStep) => {
+  private deactivateAllOtherSteps(circuitStep: CircuitStep) {
+    this.steps.forEach((each: CircuitStep) => {
       if (each !== circuitStep && each.isActive()) {
         each.deactivate();
       }
