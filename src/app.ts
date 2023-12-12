@@ -4,6 +4,7 @@ import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStep } from "./circuit-step";
+import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
@@ -29,7 +30,6 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { Complex } from "@qni/common";
 
 export class App {
   static elementId = "app";
