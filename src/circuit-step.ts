@@ -64,20 +64,20 @@ export class CircuitStep extends Container {
     return this.dropzones.length;
   }
 
-  get maxQubitInUse() {
-    let bit = 0;
+  /**
+   * Gets the qubit count in use.
+   * If no gate is placed in any {@link Dropzone}, returns 0.
+   */
+  get qubitCountInUse() {
+    let count = 0;
 
-    for (const [dropzoneIndex, each] of Object.entries(this.dropzones)) {
-      if (!each.isOccupied()) continue;
+    this.dropzones.forEach((each, dropzoneIndex) => {
+      if (each.isOccupied()) {
+        count = dropzoneIndex + 1;
+      }
+    });
 
-      const dropzoneBit = parseInt(dropzoneIndex, 10) + 1;
-
-      if (dropzoneBit > bit) bit = dropzoneBit;
-    }
-
-    // Util.need(0 <= bit && bit <= Config.MAX_QUBIT_COUNT, 'invalid number of qubits in use')
-
-    return bit;
+    return count;
   }
 
   /**

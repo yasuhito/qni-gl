@@ -36,9 +36,11 @@ export type DropzoneSignalToCircuitHandler = Signal<
  * @noInheritDoc
  */
 export class CircuitComponent extends Container {
-  /** Minimum number of wires (bits). */
+  /** Minimum number of qubits. */
+  minQubitCount = 1;
+  /** Minimum number of wires. */
   minWireCount = 1;
-  /** Maximum number of wires (bits). */
+  /** Maximum number of wires. */
   maxWireCount = 32;
   /** Signal emitted when mouse hovers over a {@link CircuitStep}. */
   onStepHover: CircuitStepSignalToCircuitHandler;
@@ -68,12 +70,12 @@ export class CircuitComponent extends Container {
   get qubitCountInUse() {
     const qubitCount = Math.max(
       ...this.steps.map((each) => {
-        return each.maxQubitInUse;
+        return each.qubitCountInUse;
       })
     );
 
     if (qubitCount == 0) {
-      return this.minWireCount;
+      return this.minQubitCount;
     }
 
     return qubitCount;
