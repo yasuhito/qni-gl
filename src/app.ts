@@ -74,6 +74,7 @@ export class App {
       width: 800,
       height: 600,
       resolution: window.devicePixelRatio || 1,
+      antialias: true,
       autoDensity: true,
       backgroundColor: tailwindColors.zinc["50"],
       preserveDrawingBuffer: true,
