@@ -229,7 +229,7 @@ export class App {
     let dropzone;
 
     this.maybeAppendCircuitWire();
-    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
+    this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
     this.runSimulator();
 
@@ -320,6 +320,9 @@ export class App {
       (gate.dropzone === null || gate.dropzone !== snapDropzone)
     ) {
       gate.snap(snapDropzone);
+      this.updateStateVectorComponentQubitCount();
+      this.updateStateVectorComponentPosition();
+      this.runSimulator();
     }
 
     if (gate.dropzone && !snapDropzone) {
@@ -345,9 +348,14 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.removeUnusedUpperWires();
-    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
+
+    this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
     this.runSimulator();
+  }
+
+  private updateStateVectorComponentQubitCount() {
+    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
