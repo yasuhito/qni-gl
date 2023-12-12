@@ -65,6 +65,22 @@ export class CircuitStep extends Container {
   }
 
   /**
+   * Gets the qubit count in use.
+   * If no gate is placed in any {@link Dropzone}, returns 0.
+   */
+  get qubitCountInUse() {
+    let count = 0;
+
+    this.dropzones.forEach((each, dropzoneIndex) => {
+      if (each.isOccupied()) {
+        count = dropzoneIndex + 1;
+      }
+    });
+
+    return count;
+  }
+
+  /**
    * ステップ内のすべての {@link Dropzone} を返す
    */
   get dropzones(): Dropzone[] {

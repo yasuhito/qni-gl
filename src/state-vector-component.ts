@@ -10,13 +10,14 @@ import { spacingInPx } from "./util";
 /**
  * @noInheritDoc
  */
-export class StateVector extends Container {
-  protected _qubitCount = 1;
+export class StateVectorComponent extends Container {
+  private _qubitCount = 1;
   protected body: PIXI.Graphics;
   protected qubitCircles: ListContainer;
 
   set qubitCount(value: number) {
     this._qubitCount = value;
+    this.redraw();
   }
 
   get qubitCircleCount() {
@@ -30,8 +31,6 @@ export class StateVector extends Container {
   constructor(qubitCount: number) {
     super();
 
-    this.qubitCount = qubitCount;
-
     this.body = new PIXI.Graphics();
     this.addChild(this.body);
 
@@ -42,6 +41,17 @@ export class StateVector extends Container {
       horPadding: spacingInPx(4),
     });
     this.addChild(this.qubitCircles);
+
+    this.qubitCount = qubitCount;
+  }
+
+  private redraw() {
+    this.body.clear();
+
+    this.qubitCircles.children.forEach((child) => {
+      child.destroy();
+    });
+    this.qubitCircles.removeChildren();
 
     for (let i = 0; i < Math.pow(2, this._qubitCount); i++) {
       this.qubitCircles.addChild(new QubitCircle(0, 0));

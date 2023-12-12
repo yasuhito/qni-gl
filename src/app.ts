@@ -4,6 +4,7 @@ import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStep } from "./circuit-step";
+import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Gate } from "./gate";
@@ -20,7 +21,7 @@ import { RyGate } from "./ry-gate";
 import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
-import { StateVector as StateVectorComponent } from "./state-vector";
+import { StateVectorComponent } from "./state-vector-component";
 import { SwapGate } from "./swap-gate";
 import { TDaggerGate } from "./t-dagger-gate";
 import { TGate } from "./t-gate";
@@ -29,7 +30,6 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { Complex } from "@qni/common";
 
 export class App {
   static elementId = "app";
@@ -43,7 +43,7 @@ export class App {
   gatePalette: GatePalette;
   circuit: CircuitComponent;
   circuitSteps: CircuitStep[] = [];
-  stateVector: StateVectorComponent;
+  stateVectorComponent: StateVectorComponent;
   logger: Logger;
   nameMap = new Map();
 
@@ -147,10 +147,12 @@ export class App {
     this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
     this.circuit.onGateSnapToDropzone.connect(this.runSimulator.bind(this));
 
-    this.stateVector = new StateVectorComponent(this.circuit.wireCount);
-    this.pixiApp.stage.addChild(this.stateVector);
-    this.stateVector.x = (this.screenWidth - this.stateVector.width) / 2;
-    this.stateVector.y = this.screenHeight - 32 - this.stateVector.height;
+    this.stateVectorComponent = new StateVectorComponent(
+      this.circuit.qubitCountInUse
+    );
+    this.pixiApp.stage.addChild(this.stateVectorComponent);
+
+    this.updateStateVectorComponentPosition();
 
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
@@ -160,8 +162,15 @@ export class App {
     this.nameMap.set(this.pixiApp.stage, "stage");
   }
 
+  private updateStateVectorComponentPosition() {
+    this.stateVectorComponent.x =
+      (this.screenWidth - this.stateVectorComponent.width) / 2;
+    this.stateVectorComponent.y =
+      this.screenHeight - 32 - this.stateVectorComponent.height;
+  }
+
   protected handleServiceWorkerMessage(event: MessageEvent): void {
-    if (!this.stateVector) {
+    if (!this.stateVectorComponent) {
       return;
     }
 
@@ -170,7 +179,7 @@ export class App {
     for (const ket in amplitudes) {
       const c = amplitudes[ket];
       const amplifier = new Complex(c[0], c[1]);
-      const qubitCircle = this.stateVector.amplitudes[ket];
+      const qubitCircle = this.stateVectorComponent.amplitudes[ket];
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {
@@ -220,6 +229,9 @@ export class App {
     let dropzone;
 
     this.maybeAppendCircuitWire();
+    this.updateStateVectorComponentQubitCount();
+    this.updateStateVectorComponentPosition();
+    this.runSimulator();
 
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
@@ -308,6 +320,9 @@ export class App {
       (gate.dropzone === null || gate.dropzone !== snapDropzone)
     ) {
       gate.snap(snapDropzone);
+      this.updateStateVectorComponentQubitCount();
+      this.updateStateVectorComponentPosition();
+      this.runSimulator();
     }
 
     if (gate.dropzone && !snapDropzone) {
@@ -325,6 +340,7 @@ export class App {
       return;
     }
 
+    // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
     this.pixiApp.stage.cursor = "grab";
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
     this.grabbedGate.zIndex = 20;
@@ -332,6 +348,14 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.removeUnusedUpperWires();
+
+    this.updateStateVectorComponentQubitCount();
+    this.updateStateVectorComponentPosition();
+    this.runSimulator();
+  }
+
+  private updateStateVectorComponentQubitCount() {
+    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
@@ -340,7 +364,7 @@ export class App {
     }
   }
 
-  protected runSimulator(circuit: CircuitComponent) {
-    this.worker.postMessage({ qubitCount: circuit.wireCount });
+  protected runSimulator() {
+    this.worker.postMessage({ qubitCount: this.circuit.qubitCountInUse });
   }
 }
