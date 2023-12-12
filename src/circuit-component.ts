@@ -3,7 +3,6 @@ import { Container } from "pixi.js";
 import { Dropzone, WireType } from "./dropzone";
 import { List as ListContainer } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { t } from "xstate";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
