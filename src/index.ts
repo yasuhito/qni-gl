@@ -26,7 +26,7 @@ export * from "./rz-gate";
 export * from "./s-dagger-gate";
 export * from "./s-gate";
 export * from "./square-gate-mixin";
-export * from "./state-vector";
+export * from "./state-vector-component";
 export * from "./swap-gate";
 export * from "./t-dagger-gate";
 export * from "./t-gate";
