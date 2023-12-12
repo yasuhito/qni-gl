@@ -64,6 +64,22 @@ export class CircuitStep extends Container {
     return this.dropzones.length;
   }
 
+  get maxQubitInUse() {
+    let bit = 0;
+
+    for (const [dropzoneIndex, each] of Object.entries(this.dropzones)) {
+      if (!each.isOccupied()) continue;
+
+      const dropzoneBit = parseInt(dropzoneIndex, 10) + 1;
+
+      if (dropzoneBit > bit) bit = dropzoneBit;
+    }
+
+    // Util.need(0 <= bit && bit <= Config.MAX_QUBIT_COUNT, 'invalid number of qubits in use')
+
+    return bit;
+  }
+
   /**
    * ステップ内のすべての {@link Dropzone} を返す
    */

@@ -148,7 +148,7 @@ export class App {
     this.circuit.onGateSnapToDropzone.connect(this.runSimulator.bind(this));
 
     this.stateVectorComponent = new StateVectorComponent(
-      this.circuit.wireCount
+      this.circuit.qubitCountInUse
     );
     this.pixiApp.stage.addChild(this.stateVectorComponent);
 
@@ -229,7 +229,7 @@ export class App {
     let dropzone;
 
     this.maybeAppendCircuitWire();
-    this.stateVectorComponent.qubitCount = this.circuit.wireCount;
+    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
     this.updateStateVectorComponentPosition();
     this.runSimulator();
 
@@ -345,7 +345,7 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.removeUnusedUpperWires();
-    this.stateVectorComponent.qubitCount = this.circuit.wireCount;
+    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
     this.updateStateVectorComponentPosition();
     this.runSimulator();
   }
@@ -357,6 +357,6 @@ export class App {
   }
 
   protected runSimulator() {
-    this.worker.postMessage({ qubitCount: this.circuit.wireCount });
+    this.worker.postMessage({ qubitCount: this.circuit.qubitCountInUse });
   }
 }

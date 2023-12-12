@@ -65,6 +65,20 @@ export class CircuitComponent extends Container {
     return wireCount;
   }
 
+  get qubitCountInUse() {
+    const qubitCount = Math.max(
+      ...this.steps.map((each) => {
+        return each.maxQubitInUse;
+      })
+    );
+
+    if (qubitCount == 0) {
+      return 1;
+    }
+
+    return qubitCount;
+  }
+
   /**
    * Returns an array of {@link CircuitStep}s in the {@link CircuitComponent}.
    */

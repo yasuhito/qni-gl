@@ -18,7 +18,6 @@ export class StateVectorComponent extends Container {
   set qubitCount(value: number) {
     this._qubitCount = value;
     this.redraw();
-    console.log(`qubitCount = ${this._qubitCount}`);
   }
 
   get qubitCircleCount() {
