@@ -179,7 +179,7 @@ export class App {
     for (const ket in amplitudes) {
       const c = amplitudes[ket];
       const amplifier = new Complex(c[0], c[1]);
-      const qubitCircle = this.stateVectorComponent.amplitudes[ket];
+      const qubitCircle = this.stateVectorComponent.qubitCircles[ket];
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {

@@ -8,24 +8,40 @@ import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
 
 /**
+ * Represents a component that visualizes the state vector.
  * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
   private _qubitCount = 1;
-  protected body: PIXI.Graphics;
-  protected qubitCircles: ListContainer;
+  private body: PIXI.Graphics;
+  private qubitCirclesListContainer: ListContainer;
 
   set qubitCount(value: number) {
     this._qubitCount = value;
-    this.redraw();
+    this.clear();
+    this.draw();
   }
 
   get qubitCircleCount() {
     return Math.pow(2, this._qubitCount);
   }
 
-  get amplitudes() {
-    return this.qubitCircles.children as Array<QubitCircle>;
+  get qubitCircles() {
+    return this.qubitCirclesListContainer.children as Array<QubitCircle>;
+  }
+
+  private get bodyWidth() {
+    return (
+      this.qubitCirclesListContainer.width +
+      this.qubitCirclesListContainer.horPadding * 2
+    );
+  }
+
+  private get bodyHeight() {
+    return (
+      this.qubitCirclesListContainer.height +
+      this.qubitCirclesListContainer.vertPadding * 2
+    );
   }
 
   constructor(qubitCount: number) {
@@ -34,29 +50,32 @@ export class StateVectorComponent extends Container {
     this.body = new PIXI.Graphics();
     this.addChild(this.body);
 
-    this.qubitCircles = new ListContainer({
+    this.qubitCirclesListContainer = new ListContainer({
       type: "horizontal",
       elementsMargin: spacingInPx(0.5),
       vertPadding: spacingInPx(5),
       horPadding: spacingInPx(4),
     });
-    this.addChild(this.qubitCircles);
+    this.addChild(this.qubitCirclesListContainer);
 
     this.qubitCount = qubitCount;
   }
 
-  private redraw() {
+  private draw() {
+    this.drawQubitCircles();
+    this.drawBody();
+  }
+
+  private clear() {
     this.body.clear();
 
-    this.qubitCircles.children.forEach((child) => {
+    this.qubitCircles.forEach((child) => {
       child.destroy();
     });
-    this.qubitCircles.removeChildren();
+    this.qubitCirclesListContainer.removeChildren();
+  }
 
-    for (let i = 0; i < Math.pow(2, this._qubitCount); i++) {
-      this.qubitCircles.addChild(new QubitCircle(0, 0));
-    }
-
+  private drawBody() {
     this.body.lineStyle(1, Colors.border.stateVector.default, 1, 0);
     this.body.beginFill(Colors.bg.default.default);
     this.body.drawRoundedRect(
@@ -74,11 +93,9 @@ export class StateVectorComponent extends Container {
     ];
   }
 
-  protected get bodyWidth() {
-    return this.qubitCircles.width + this.qubitCircles.horPadding * 2;
-  }
-
-  protected get bodyHeight() {
-    return this.qubitCircles.height + this.qubitCircles.vertPadding * 2;
+  private drawQubitCircles() {
+    for (let i = 0; i < this.qubitCircleCount; i++) {
+      this.qubitCirclesListContainer.addChild(new QubitCircle(0, 0));
+    }
   }
 }
