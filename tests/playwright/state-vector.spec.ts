@@ -3,14 +3,53 @@ import { fail } from "assert";
 import * as PIXI from "pixi.js";
 
 test.describe("Dropzone", () => {
-  let app;
-  let gatePalette;
-  let firstDropzone;
-
   test.beforeEach(async ({ page }) => {
-    // TODO: ポート番号を設定から取得する
-    await page.goto("http://localhost:5173/");
+    await page.goto("/");
+  });
 
+  test("1 qubit", async ({ page }) => {
+    const app = await appData(page);
+    const hGate = app.gatePalette.gates.HGate;
+    const dropzone = app.circuit.steps[0].dropzones[0];
+
+    await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
+    await page.mouse.down();
+    await page.mouse.move(dropzone.x, dropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("state-vector-1qubit.png");
+  });
+
+  test("2 qubit", async ({ page }) => {
+    const app = await appData(page);
+    const hGate = app.gatePalette.gates.HGate;
+    const dropzone = app.circuit.steps[0].dropzones[1];
+
+    await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
+    await page.mouse.down();
+    await page.mouse.move(dropzone.x, dropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("state-vector-2qubit.png");
+  });
+
+  test("3 qubit", async ({ page }) => {
+    let app = await appData(page);
+    const hGate = app.gatePalette.gates.HGate;
+
+    await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
+    await page.mouse.down();
+
+    app = await appData(page);
+    const dropzone = app.circuit.steps[0].dropzones[2];
+
+    await page.mouse.move(dropzone.x, dropzone.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("state-vector-3qubit.png");
+  });
+
+  async function appData(page) {
     const appEl = await page.locator("#app");
     const dataApp = await appEl.getAttribute("data-app");
 
@@ -18,33 +57,8 @@ test.describe("Dropzone", () => {
       fail("data-app is null");
     }
 
-    app = JSON.parse(dataApp);
-    gatePalette = app.gatePalette;
-    firstDropzone = app.circuit.steps[0].dropzones[0];
-  });
-
-  test("1 qubit", async ({ page }) => {
-    const gate = gatePalette.gates.HGate;
-
-    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-    await page.mouse.down();
-    await page.mouse.move(firstDropzone.x, firstDropzone.y);
-    await page.mouse.up();
-
-    await expect(page).toHaveScreenshot("state-vector-1qubit.png");
-  });
-
-  test("2 qubit", async ({ page }) => {
-    const gate = gatePalette.gates.HGate;
-    const dropzone = app.circuit.steps[0].dropzones[1];
-
-    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-    await page.mouse.down();
-    await page.mouse.move(dropzone.x, dropzone.y);
-    await page.mouse.up();
-
-    await expect(page).toHaveScreenshot("state-vector-2qubit.png");
-  });
+    return JSON.parse(dataApp);
+  }
 
   function centerPosition(gate) {
     return new PIXI.Point(gate.x + gate.width / 2, gate.y + gate.height / 2);
