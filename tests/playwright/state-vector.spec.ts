@@ -2,12 +2,14 @@ import { appData, centerPosition } from "./test-helpers";
 import { test, expect } from "@playwright/test";
 
 test.describe("Dropzone", () => {
+  let app;
+
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    app = await appData(page);
   });
 
   test("1 qubit", async ({ page }) => {
-    const app = await appData(page);
     const hGate = app.gatePalette.gates.HGate;
     const dropzone = app.circuit.steps[0].dropzones[0];
 
@@ -20,7 +22,6 @@ test.describe("Dropzone", () => {
   });
 
   test("2 qubit", async ({ page }) => {
-    const app = await appData(page);
     const hGate = app.gatePalette.gates.HGate;
     const dropzone = app.circuit.steps[0].dropzones[1];
 
@@ -33,7 +34,6 @@ test.describe("Dropzone", () => {
   });
 
   test("3 qubit", async ({ page }) => {
-    let app = await appData(page);
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
