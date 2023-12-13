@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { List as ListContainer } from "@pixi/ui";
+import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
 import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
@@ -14,7 +14,7 @@ import { spacingInPx } from "./util";
 export class StateVectorComponent extends Container {
   private _qubitCount = 1;
   private body: PIXI.Graphics;
-  private qubitCirclesListContainer: ListContainer;
+  private qubitCirclesGridContainer: GridLayout;
 
   set qubitCount(value: number) {
     this._qubitCount = value;
@@ -27,20 +27,20 @@ export class StateVectorComponent extends Container {
   }
 
   get qubitCircles() {
-    return this.qubitCirclesListContainer.children as Array<QubitCircle>;
+    return this.qubitCirclesGridContainer.children as Array<QubitCircle>;
   }
 
   private get bodyWidth() {
     return (
-      this.qubitCirclesListContainer.width +
-      this.qubitCirclesListContainer.horPadding * 2
+      this.qubitCirclesGridContainer.width +
+      this.qubitCirclesGridContainer.horPadding * 2
     );
   }
 
   private get bodyHeight() {
     return (
-      this.qubitCirclesListContainer.height +
-      this.qubitCirclesListContainer.vertPadding * 2
+      this.qubitCirclesGridContainer.height +
+      this.qubitCirclesGridContainer.vertPadding * 2
     );
   }
 
@@ -50,13 +50,13 @@ export class StateVectorComponent extends Container {
     this.body = new PIXI.Graphics();
     this.addChild(this.body);
 
-    this.qubitCirclesListContainer = new ListContainer({
-      type: "horizontal",
+    this.qubitCirclesGridContainer = new GridLayout({
+      cols: 2,
       elementsMargin: spacingInPx(0.5),
       vertPadding: spacingInPx(5),
       horPadding: spacingInPx(4),
     });
-    this.addChild(this.qubitCirclesListContainer);
+    this.addChild(this.qubitCirclesGridContainer);
 
     this.qubitCount = qubitCount;
   }
@@ -72,7 +72,7 @@ export class StateVectorComponent extends Container {
     this.qubitCircles.forEach((child) => {
       child.destroy();
     });
-    this.qubitCirclesListContainer.removeChildren();
+    this.qubitCirclesGridContainer.removeChildren();
   }
 
   private drawBody() {
@@ -95,7 +95,7 @@ export class StateVectorComponent extends Container {
 
   private drawQubitCircles() {
     for (let i = 0; i < this.qubitCircleCount; i++) {
-      this.qubitCirclesListContainer.addChild(new QubitCircle(0, 0));
+      this.qubitCirclesGridContainer.addChild(new QubitCircle(0, 0));
     }
   }
 }
