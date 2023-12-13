@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { fail } from "assert";
 import * as PIXI from "pixi.js";
+import { fail } from "assert";
+import { test, expect } from "@playwright/test";
 
 test.describe("Dropzone", () => {
   test.beforeEach(async ({ page }) => {

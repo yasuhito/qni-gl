@@ -5,8 +5,7 @@ test.describe("Gate Palette", () => {
   let gatePalette;
 
   test.beforeEach(async ({ page }) => {
-    // TODO: ポート番号を設定から取得する
-    await page.goto("http://localhost:5173/");
+    await page.goto("/");
 
     const appEl = await page.locator("#app");
     const dataApp = await appEl.getAttribute("data-app");
