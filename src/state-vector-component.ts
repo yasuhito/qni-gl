@@ -18,8 +18,18 @@ export class StateVectorComponent extends Container {
 
   set qubitCount(value: number) {
     this._qubitCount = value;
+    if (this.qubitCount == 2) {
+      this.qubitCirclesGridContainer.cols = 4;
+    } else if (this.qubitCount == 3) {
+      this.qubitCirclesGridContainer.cols = 4;
+    }
+
     this.clear();
     this.draw();
+  }
+
+  get qubitCount() {
+    return this._qubitCount;
   }
 
   get qubitCircleCount() {
