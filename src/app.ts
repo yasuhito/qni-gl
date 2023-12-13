@@ -230,6 +230,8 @@ export class App {
     let dropzone;
 
     this.maybeAppendCircuitWire();
+    // TODO: メソッドに切り出す
+    this.element.dataset.app = JSON.stringify(this);
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
     this.runSimulator();
