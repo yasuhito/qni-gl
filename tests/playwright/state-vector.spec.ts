@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { fail } from "assert";
+import * as PIXI from "pixi.js";
 
 test.describe("Dropzone", () => {
   let app;
@@ -25,7 +26,7 @@ test.describe("Dropzone", () => {
   test("1 qubit", async ({ page }) => {
     const gate = gatePalette.gates.HGate;
 
-    await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
@@ -37,11 +38,15 @@ test.describe("Dropzone", () => {
     const gate = gatePalette.gates.HGate;
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(gate.x + gate.width / 2, gate.y + gate.height / 2);
+    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
 
     await expect(page).toHaveScreenshot("state-vector-2qubit.png");
   });
+
+  function centerPosition(gate) {
+    return new PIXI.Point(gate.x + gate.width / 2, gate.y + gate.height / 2);
+  }
 });
