@@ -47,4 +47,28 @@ test.describe("Dropzone", () => {
 
     await expect(page).toHaveScreenshot("state-vector-3qubit.png");
   });
+
+  test("4 qubit", async ({ page }) => {
+    const hGate = app.gatePalette.gates.HGate;
+
+    await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
+    await page.mouse.down();
+
+    // 3 ビットめに H ゲートを配置
+    app = await appData(page);
+    const dropzoneBit3 = app.circuit.steps[0].dropzones[2];
+
+    await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
+    await page.mouse.up();
+
+    // 4 ビットめに H ゲートを配置
+    await page.mouse.down();
+
+    app = await appData(page);
+    const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
+    await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
+    await page.mouse.up();
+
+    await expect(page).toHaveScreenshot("state-vector-4qubit.png");
+  });
 });

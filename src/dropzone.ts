@@ -154,8 +154,8 @@ export class Dropzone extends Container {
     const pos = this.getGlobalPosition();
 
     return {
-      x: pos.x,
-      y: pos.y,
+      x: pos.x + this.width / 2,
+      y: pos.y + this.height / 2,
     };
   }
 
