@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { DropzoneComponent } from "./dropzone-component";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 
 /**
  * @noInheritDoc
  */
-export class WriteGate extends JsonableMixin(Gate) {
+export class WriteGate extends JsonableMixin(GateComponent) {
   static iconIdleDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconHover = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconHoverDropzone = PIXI.Texture.from("./assets/Placeholder.svg");

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
 import { describe, expect, test } from "vitest";
-import { Gate } from "../../src/gate";
+import { GateComponent } from "../../src/gate-component";
 
 describe("Gate", () => {
   test("size", () => {
-    expect(Gate.size).toBe(32);
+    expect(GateComponent.size).toBe(32);
   });
 });

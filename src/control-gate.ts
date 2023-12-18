@@ -1,13 +1,13 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
 
 /**
  * @noInheritDoc
  */
-export class ControlGate extends JsonableMixin(Gate) {
+export class ControlGate extends JsonableMixin(GateComponent) {
   static gateType = "ControlGate";
   static icon = PIXI.Texture.from("./assets/Control.svg", {
     resolution: window.devicePixelRatio,
@@ -40,8 +40,8 @@ export class ControlGate extends JsonableMixin(Gate) {
     this._shape.drawRoundedRect(
       0,
       0,
-      Gate.size,
-      Gate.size,
+      GateComponent.size,
+      GateComponent.size,
       Spacing.cornerRadius.gate
     );
     this._shape.endFill();
@@ -65,8 +65,8 @@ export class ControlGate extends JsonableMixin(Gate) {
     this._shape.drawRoundedRect(
       0,
       0,
-      Gate.size,
-      Gate.size,
+      GateComponent.size,
+      GateComponent.size,
       Spacing.cornerRadius.gate
     );
     this._shape.endFill();
@@ -89,8 +89,8 @@ export class ControlGate extends JsonableMixin(Gate) {
     this._shape.drawRoundedRect(
       0,
       0,
-      Gate.size,
-      Gate.size,
+      GateComponent.size,
+      GateComponent.size,
       Spacing.cornerRadius.gate
     );
     this._shape.endFill();

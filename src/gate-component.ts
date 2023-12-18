@@ -9,13 +9,13 @@ import { spacingInPx } from "./util";
 /**
  * ゲートのシグナル
  */
-export type SignalGate = Signal<(gate: Gate) => void>;
+export type SignalGate = Signal<(gate: GateComponent) => void>;
 
 /**
  * ゲートのシグナル (シグナル発生源の位置情報つき)
  */
 export type SignalGateWithPosition = Signal<
-  (gate: Gate, eventGlobalPosition: PIXI.Point) => void
+  (gate: GateComponent, eventGlobalPosition: PIXI.Point) => void
 >;
 
 /**
@@ -39,7 +39,7 @@ export type DragEvent = {
 /**
  * @noInheritDoc
  */
-export class Gate extends Container {
+export class GateComponent extends Container {
   static gateType: string;
 
   /**
@@ -54,9 +54,6 @@ export class Gate extends Container {
 
   /** すべての内部要素を保持するコンテナ */
   view: Container;
-
-  /** ゲートからマウスポインタが離れた時に飛ぶシグナル */
-  onMouseLeave: SignalGate;
 
   protected _shape: PIXI.Graphics;
   protected _dropzone: DropzoneComponent | null = null;
@@ -152,12 +149,12 @@ export class Gate extends Container {
           if (event.dropzone) {
             // snap した場合
             const pos = this.parent.toLocal(event.dropzone.getGlobalPosition());
-            this.position.set(pos.x + Gate.size / 4, pos.y);
+            this.position.set(pos.x + GateComponent.size / 4, pos.y);
           } else {
             const newPos = this.parent.toLocal(event.globalPosition);
             this.position.set(
-              newPos.x - Gate.size / 2,
-              newPos.y - Gate.size / 2
+              newPos.x - GateComponent.size / 2,
+              newPos.y - GateComponent.size / 2
             );
           }
         },
@@ -178,9 +175,7 @@ export class Gate extends Container {
   constructor() {
     super();
 
-    this.onMouseLeave = new Signal();
-
-    const klass = this.constructor as typeof Gate;
+    const klass = this.constructor as typeof GateComponent;
 
     this.snapDropzoneRunner = new Runner("snapDropzone");
 
@@ -211,7 +206,7 @@ export class Gate extends Container {
   }
 
   gateType(): string | null {
-    const klass = this.constructor as typeof Gate;
+    const klass = this.constructor as typeof GateComponent;
 
     if (typeof klass.gateType === "string") {
       return klass.gateType;
@@ -298,7 +293,7 @@ export class Gate extends Container {
 
   private onPointerOut() {
     this.mouseLeave();
-    this.onMouseLeave.emit(this);
+    this.emit("mouseLeave", this);
   }
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {

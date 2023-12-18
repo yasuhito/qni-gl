@@ -2,21 +2,21 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { BlochSphere } from "./bloch-sphere";
 import { Container } from "pixi.js";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate";
+import { SignalGate, SignalGateWithPosition } from "./gate-component";
 import { XGate } from "./x-gate";
 
 /**
  * @noInheritDoc
  */
 export class GateSource extends Container {
-  static size = Gate.size;
+  static size = GateComponent.size;
   static borderColor = tailwindColors.zinc["300"];
 
-  gateClass: typeof Gate;
+  gateClass: typeof GateComponent;
 
   // Container, that holds all inner elements.
   view: Container;
@@ -31,7 +31,7 @@ export class GateSource extends Container {
 
   enterGateRunner: Runner;
 
-  constructor(gateClass: typeof Gate) {
+  constructor(gateClass: typeof GateComponent) {
     super();
 
     this.onNewGate = new Signal();
@@ -61,17 +61,16 @@ export class GateSource extends Container {
     this.enterGateRunner = new Runner("enterGate");
   }
 
-  generateNewGate(): Gate {
+  generateNewGate(): GateComponent {
     const gate = new this.gateClass();
     gate.x = this.x;
     gate.y = this.y;
 
     this.onNewGate.emit(gate);
 
-    gate.onMouseLeave.connect((gate) => {
+    gate.on("mouseLeave", (gate) => {
       this.onMouseLeaveGate.emit(gate);
     });
-
     gate.on("grab", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
     });
@@ -79,11 +78,11 @@ export class GateSource extends Container {
     return gate;
   }
 
-  protected enterGate(gate: Gate) {
+  protected enterGate(gate: GateComponent) {
     this.enterGateRunner.emit(gate);
   }
 
-  protected grabGate(gate: Gate, globalPosition: PIXI.Point) {
+  protected grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
     this.generateNewGate();
     this.onGrabGate.emit(gate, globalPosition);
   }

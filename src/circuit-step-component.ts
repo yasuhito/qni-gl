@@ -4,7 +4,6 @@ import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
-import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
 import { Operation } from "./operation";
@@ -29,16 +28,10 @@ const groupBy = <K, V>(
 /**
  * @noInheritDoc
  */
-export class CircuitStep extends Container {
+export class CircuitStepComponent extends Container {
   static lineWidth = spacingInPx(1);
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
-
-  onHover: Signal<(circuitStep: CircuitStep) => void>;
-  onActivate: Signal<(circuitStep: CircuitStep) => void>;
-  onGateSnapToDropzone: Signal<
-    (circuitStep: CircuitStep, dropzone: DropzoneComponent) => void
-  >;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -127,7 +120,7 @@ export class CircuitStep extends Container {
   }
 
   protected onDropzoneSnap(dropzone: DropzoneComponent) {
-    this.onGateSnapToDropzone.emit(this, dropzone);
+    this.emit("gateSnapToDropzone", this, dropzone);
   }
 
   /**
@@ -146,17 +139,13 @@ export class CircuitStep extends Container {
   constructor(qubitCount: number) {
     super();
 
-    this.onHover = new Signal();
-    this.onActivate = new Signal();
-    this.onGateSnapToDropzone = new Signal();
-
     this._view = new PIXI.Container();
     this.addChild(this._view);
 
     this._dropzones = new List({
       type: "vertical",
       elementsMargin: DropzoneComponent.size / 2,
-      vertPadding: CircuitStep.paddingY,
+      vertPadding: CircuitStepComponent.paddingY,
     });
     this._view.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
@@ -189,7 +178,7 @@ export class CircuitStep extends Container {
     return (
       GateComponent.size * this._dropzones.children.length +
       (this._dropzones.children.length - 1) * (GateComponent.size / 2) +
-      CircuitStep.paddingY * 2
+      CircuitStepComponent.paddingY * 2
     );
   }
 
@@ -253,7 +242,7 @@ export class CircuitStep extends Container {
   activate() {
     this._state = "active";
     this.redrawLine();
-    this.onActivate.emit(this);
+    this.emit("activate", this);
   }
 
   deactivate() {
@@ -263,8 +252,7 @@ export class CircuitStep extends Container {
 
   protected onPointerOver() {
     if (this.isIdle()) {
-      this.onHover.emit(this);
-
+      this.emit("hover", this);
       this._state = "hover";
       this.redrawLine();
     }
@@ -295,19 +283,19 @@ export class CircuitStep extends Container {
   }
 
   protected drawHoverLine() {
-    this.drawLine(CircuitStep.hoverLineColor);
+    this.drawLine(CircuitStepComponent.hoverLineColor);
   }
 
   protected drawActiveLine() {
-    this.drawLine(CircuitStep.activeLineColor);
+    this.drawLine(CircuitStepComponent.activeLineColor);
   }
 
   protected drawLine(color: PIXI.ColorSource) {
     this._line.beginFill(color, 1);
     this._line.drawRect(
-      this.width - CircuitStep.lineWidth,
+      this.width - CircuitStepComponent.lineWidth,
       0,
-      CircuitStep.lineWidth,
+      CircuitStepComponent.lineWidth,
       this.height
     );
     this._line.endFill();

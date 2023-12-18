@@ -2,11 +2,11 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { GateSource } from "./gate-source";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate";
+import { SignalGate, SignalGateWithPosition } from "./gate-component";
 import { spacingInPx } from "./util";
 
 /**
@@ -35,7 +35,7 @@ export class GatePalette extends Container {
   onMouseLeaveGate: SignalGate;
 
   protected graphics: PIXI.Graphics;
-  protected gateClasses: (typeof Gate)[][] = [];
+  protected gateClasses: (typeof GateComponent)[][] = [];
   protected gateRows: List;
   protected gates = {};
 
@@ -66,7 +66,7 @@ export class GatePalette extends Container {
    *
    * @param gateClass 追加するゲートのクラス
    */
-  addGate(gateClass: typeof Gate): Gate {
+  addGate(gateClass: typeof GateComponent): GateComponent {
     const currentRow =
       this.gateRows.children[this.gateRows.children.length - 1];
 
@@ -122,7 +122,7 @@ export class GatePalette extends Container {
     this.graphics.drawRoundedRect(
       0,
       0,
-      Gate.size * maxRowLength +
+      GateComponent.size * maxRowLength +
         GatePalette.gapBetweenGates * maxRowLength +
         GatePalette.horizontalPadding * 2 -
         GatePalette.gapBetweenGates,

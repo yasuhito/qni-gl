@@ -1,11 +1,11 @@
 import * as PIXI from "pixi.js";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 
 /**
  * @noInheritDoc
  */
-export class BlochSphere extends JsonableMixin(Gate) {
+export class BlochSphere extends JsonableMixin(GateComponent) {
   static gateType = "BlochSphere";
   static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
     resolution: window.devicePixelRatio,
@@ -112,8 +112,8 @@ export class BlochSphere extends JsonableMixin(Gate) {
       this._shape.drawRoundedRect(
         0,
         0,
-        Gate.size,
-        Gate.size,
+        GateComponent.size,
+        GateComponent.size,
         this.style.cornerRadius
       );
     }

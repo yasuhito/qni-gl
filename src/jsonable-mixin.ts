@@ -1,11 +1,11 @@
 import { Constructor } from "./constructor";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 
 export declare class Jsonable {
   toCircuitJSON(): string;
 }
 
-export function JsonableMixin<TBase extends Constructor<Gate>>(
+export function JsonableMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<Jsonable> & TBase {
   class JsonableMixinClass extends Base {
