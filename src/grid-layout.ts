@@ -9,6 +9,9 @@ export type GridLayoutOptions = {
   items?: Container[];
 };
 
+/**
+ * @noInheritDoc
+ */
 export class GridLayout extends Container {
   private options?: GridLayoutOptions;
 

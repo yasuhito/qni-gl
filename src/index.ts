@@ -11,6 +11,7 @@ export * from "./dropzone-component";
 export * from "./gate";
 export * from "./gate-palette";
 export * from "./gate-source";
+export * from "./grid-layout";
 export * from "./h-gate";
 export * from "./logger";
 export * from "./measurement-gate";
