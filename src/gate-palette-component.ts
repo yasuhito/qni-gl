@@ -28,7 +28,7 @@ export class GatePaletteComponent extends Container {
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof GateComponent)[][] = [];
   protected gateRows: List;
-  protected gates = {};
+  private gates = {};
 
   constructor() {
     super();
@@ -70,9 +70,12 @@ export class GatePaletteComponent extends Container {
     gateSource.on("grabGate", (gate, globalPosition) => {
       this.emit("grabGate", gate, globalPosition);
     });
-
     gateSource.on("mouseLeaveGate", (gate) => {
       this.emit("mouseLeaveGate", gate);
+    });
+    gateSource.on("gateDropped", (gate) => {
+      this.gates[gate.gateType()] = null;
+      this.emit("gateDropped", gate);
     });
 
     // gateSource.enterGateRunner.add(this);

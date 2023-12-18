@@ -113,6 +113,17 @@ export class App {
     this.gatePalette.on("mouseLeaveGate", () => {
       this.mouseLeaveGate();
     });
+    this.gatePalette.on("gateDropped", (gate) => {
+      this.activeGate = null;
+      this.grabbedGate = null;
+      this.pixiApp.stage.removeChild(gate);
+
+      this.circuit.removeUnusedUpperWires();
+
+      this.updateStateVectorComponentQubitCount();
+      this.updateStateVectorComponentPosition();
+      this.runSimulator();
+    });
 
     this.pixiApp.stage.addChild(this.gatePalette.addGate(HGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(XGate));
@@ -227,7 +238,6 @@ export class App {
     this.grabbedGate = gate;
 
     this.grabbedGate.on("dropped", (gate) => {
-      console.log(`ゲートを捨てる ${gate.gateType()}`);
       this.activeGate = null;
       this.grabbedGate = null;
       this.pixiApp.stage.removeChild(gate);
