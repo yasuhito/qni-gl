@@ -241,7 +241,6 @@ export class App {
       this.activeGate = null;
       this.grabbedGate = null;
       this.pixiApp.stage.removeChild(gate);
-      gate.destroy();
     });
 
     // this.dropzones についてループを回す
