@@ -119,7 +119,6 @@ export class CircuitStep extends Container {
   appendNewDropzone() {
     const dropzone = new DropzoneComponent();
     dropzone.on("snap", this.onDropzoneSnap, this);
-    // dropzone.onSnap.connect(this.onDropzoneSnap.bind(this));
     this._dropzones.addChild(dropzone);
 
     if (this._line) {
