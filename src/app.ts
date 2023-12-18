@@ -99,9 +99,10 @@ export class App {
 
     this.gatePalette = new GatePalette();
     this.pixiApp.stage.addChild(this.gatePalette);
-    this.gatePalette.onGrabGate.connect((gate, globalPosition) => {
+    this.gatePalette.on("grabGate", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
     });
+
     this.gatePalette.x = 40;
     this.gatePalette.y = 64;
 

@@ -6,7 +6,7 @@ import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate-component";
+import { SignalGate } from "./gate-component";
 import { spacingInPx } from "./util";
 
 /**
@@ -27,8 +27,6 @@ export class GatePalette extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
-  /** ゲートをクリックした時に発生するシグナル */
-  onGrabGate: SignalGateWithPosition;
   /** 新しいゲートを生成した時に発生するシグナル */
   onNewGate: SignalGate;
   /** ゲートからマウスポインタが離れた時に発生するシグナル */
@@ -43,7 +41,6 @@ export class GatePalette extends Container {
     super();
 
     this.onNewGate = new Signal();
-    this.onGrabGate = new Signal();
     this.onMouseLeaveGate = new Signal();
 
     this.graphics = new PIXI.Graphics();
@@ -81,7 +78,7 @@ export class GatePalette extends Container {
 
     const gate = gateSource.generateNewGate();
     gateSource.on("grabGate", (gate, globalPosition) => {
-      this.onGrabGate.emit(gate, globalPosition);
+      this.emit("grabGate", gate, globalPosition);
     });
 
     gateSource.on("mouseLeaveGate", (gate) => {
