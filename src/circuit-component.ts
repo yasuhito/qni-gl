@@ -42,8 +42,7 @@ export class CircuitComponent extends Container {
   minWireCount = 1;
   /** Maximum number of wires. */
   maxWireCount = 32;
-  /** Signal emitted when mouse hovers over a {@link CircuitStepComponent}. */
-  onStepHover: CircuitStepSignalToCircuitHandler;
+
   /** Signal emitted when a {@link CircuitStepComponent} is activated. */
   onStepActivated: CircuitStepSignalToCircuitHandler;
   /** Signal emitted when a {@link GateComponent} snaps to a {@link DropzoneComponent}. */
@@ -98,7 +97,6 @@ export class CircuitComponent extends Container {
 
     this.minWireCount = options.minWireCount;
 
-    this.onStepHover = new Signal();
     this.onStepActivated = new Signal();
     this.onGateSnapToDropzone = new Signal();
 
@@ -205,7 +203,7 @@ export class CircuitComponent extends Container {
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
-    this.onStepHover.emit(this, circuitStep);
+    this.emit("stepHover", this, circuitStep);
   }
 
   /**
