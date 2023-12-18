@@ -34,7 +34,6 @@ export class CircuitStep extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  onActivate: Signal<(circuitStep: CircuitStep) => void>;
   onGateSnapToDropzone: Signal<
     (circuitStep: CircuitStep, dropzone: DropzoneComponent) => void
   >;
@@ -145,7 +144,6 @@ export class CircuitStep extends Container {
   constructor(qubitCount: number) {
     super();
 
-    this.onActivate = new Signal();
     this.onGateSnapToDropzone = new Signal();
 
     this._view = new PIXI.Container();
@@ -251,7 +249,7 @@ export class CircuitStep extends Container {
   activate() {
     this._state = "active";
     this.redrawLine();
-    this.onActivate.emit(this);
+    this.emit("activate", this);
   }
 
   deactivate() {
