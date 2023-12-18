@@ -5,14 +5,12 @@ import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
-import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate-component";
 import { XGate } from "./x-gate";
 
 /**
  * @noInheritDoc
  */
-export class GateSource extends Container {
+export class GateSourceComponent extends Container {
   static size = GateComponent.size;
   static borderColor = tailwindColors.zinc["300"];
 
@@ -22,29 +20,18 @@ export class GateSource extends Container {
   view: Container;
   protected border: PIXI.Graphics;
 
-  /** ゲートをクリックした時に発生するシグナル */
-  onGrabGate: SignalGateWithPosition;
-  /** 新しいゲートを生成した時に発生するシグナル */
-  onNewGate: SignalGate;
-  /** ゲートからマウスポインタが離れた時に発生するシグナル */
-  onMouseLeaveGate: SignalGate;
-
   enterGateRunner: Runner;
 
   constructor(gateClass: typeof GateComponent) {
     super();
-
-    this.onNewGate = new Signal();
-    this.onGrabGate = new Signal();
-    this.onMouseLeaveGate = new Signal();
 
     this.gateClass = gateClass;
     this.view = new Container();
     this.addChild(this.view);
 
     this.border = new PIXI.Graphics();
-    this.border.width = GateSource.size;
-    this.border.height = GateSource.size;
+    this.border.width = GateSourceComponent.size;
+    this.border.height = GateSourceComponent.size;
     this.view.addChild(this.border);
 
     let radius = 4;
@@ -55,7 +42,7 @@ export class GateSource extends Container {
     ) {
       radius = 9999;
     }
-    this.border.lineStyle(2, GateSource.borderColor, 1, 0);
+    this.border.lineStyle(2, GateSourceComponent.borderColor, 1, 0);
     this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
 
     this.enterGateRunner = new Runner("enterGate");
@@ -66,10 +53,10 @@ export class GateSource extends Container {
     gate.x = this.x;
     gate.y = this.y;
 
-    this.onNewGate.emit(gate);
+    this.emit("newGate", gate);
 
     gate.on("mouseLeave", (gate) => {
-      this.onMouseLeaveGate.emit(gate);
+      this.emit("mouseLeaveGate", gate);
     });
     gate.on("grab", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
@@ -84,6 +71,6 @@ export class GateSource extends Container {
 
   protected grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
     this.generateNewGate();
-    this.onGrabGate.emit(gate, globalPosition);
+    this.emit("grabGate", gate, globalPosition);
   }
 }
