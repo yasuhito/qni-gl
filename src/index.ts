@@ -9,7 +9,7 @@ export * from "./constructor";
 export * from "./control-gate";
 export * from "./dropzone-component";
 export * from "./gate-component";
-export * from "./gate-palette";
+export * from "./gate-palette-component";
 export * from "./gate-source-component";
 export * from "./grid-layout";
 export * from "./h-gate";

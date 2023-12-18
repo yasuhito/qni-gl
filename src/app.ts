@@ -8,7 +8,7 @@ import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
-import { GatePalette } from "./gate-palette";
+import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
@@ -40,7 +40,7 @@ export class App {
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  gatePalette: GatePalette;
+  gatePalette: GatePaletteComponent;
   circuit: CircuitComponent;
   circuitSteps: CircuitStepComponent[] = [];
   stateVectorComponent: StateVectorComponent;
@@ -97,7 +97,7 @@ export class App {
     // this.oldGatePalette.newGateRunner.add(this);
     // this.oldGatePalette.leaveGateRunner.add(this);
 
-    this.gatePalette = new GatePalette();
+    this.gatePalette = new GatePaletteComponent();
     this.pixiApp.stage.addChild(this.gatePalette);
     this.gatePalette.on("grabGate", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
