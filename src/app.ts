@@ -6,7 +6,7 @@ import { CircuitComponent } from "./circuit-component";
 import { CircuitStep } from "./circuit-step";
 import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
-import { Dropzone } from "./dropzone";
+import { DropzoneComponent } from "./dropzone-component";
 import { Gate } from "./gate";
 import { GatePalette } from "./gate-palette";
 import { HGate } from "./h-gate";
@@ -299,7 +299,7 @@ export class App {
    * @param pointerPosition マウス/タッチの位置
    */
   private moveGate(gate: Gate, pointerPosition: PIXI.Point) {
-    let snapDropzone: Dropzone | null = null;
+    let snapDropzone: DropzoneComponent | null = null;
 
     for (const circuitStep of this.circuit.steps) {
       for (const dropzone of circuitStep.dropzones) {

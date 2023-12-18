@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
-import { Dropzone } from "./dropzone";
+import { DropzoneComponent } from "./dropzone-component";
 import { Gate } from "./gate";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
@@ -37,7 +37,7 @@ export class CircuitStep extends Container {
   onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
   onGateSnapToDropzone: Signal<
-    (circuitStep: CircuitStep, dropzone: Dropzone) => void
+    (circuitStep: CircuitStep, dropzone: DropzoneComponent) => void
   >;
 
   protected _view: Container;
@@ -46,15 +46,15 @@ export class CircuitStep extends Container {
   protected _line: PIXI.Graphics;
 
   static get gapBetweenGates(): number {
-    return Dropzone.size / 2;
+    return DropzoneComponent.size / 2;
   }
 
   static get paddingX(): number {
-    return Dropzone.size;
+    return DropzoneComponent.size;
   }
 
   static get paddingY(): number {
-    return Dropzone.size;
+    return DropzoneComponent.size;
   }
 
   /**
@@ -66,7 +66,7 @@ export class CircuitStep extends Container {
 
   /**
    * Gets the qubit count in use.
-   * If no gate is placed in any {@link Dropzone}, returns 0.
+   * If no gate is placed in any {@link DropzoneComponent}, returns 0.
    */
   get qubitCountInUse() {
     let count = 0;
@@ -81,14 +81,14 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * ステップ内のすべての {@link Dropzone} を返す
+   * ステップ内のすべての {@link DropzoneComponent} を返す
    */
-  get dropzones(): Dropzone[] {
-    return this._dropzones.children as Dropzone[];
+  get dropzones(): DropzoneComponent[] {
+    return this._dropzones.children as DropzoneComponent[];
   }
 
   /**
-   * ステップ内のすべての {@link Dropzone} のうち、ゲートが置かれたものを返す
+   * ステップ内のすべての {@link DropzoneComponent} のうち、ゲートが置かれたものを返す
    */
   get occupiedDropzones() {
     return this.dropzones.filter((each) => {
@@ -117,8 +117,8 @@ export class CircuitStep extends Container {
    * Dropzone を末尾に追加する
    */
   appendNewDropzone() {
-    const dropzone = new Dropzone();
-    dropzone.onSnap.connect(this.onDropzoneSnap.bind(this));
+    const dropzone = new DropzoneComponent();
+    dropzone.on("snap", this.onDropzoneSnap, this);
     this._dropzones.addChild(dropzone);
 
     if (this._line) {
@@ -126,7 +126,7 @@ export class CircuitStep extends Container {
     }
   }
 
-  protected onDropzoneSnap(dropzone: Dropzone) {
+  protected onDropzoneSnap(dropzone: DropzoneComponent) {
     this.onGateSnapToDropzone.emit(this, dropzone);
   }
 
@@ -136,7 +136,7 @@ export class CircuitStep extends Container {
   deleteLastDropzone() {
     const dropzone = this._dropzones.getChildAt(
       this._dropzones.children.length - 1
-    ) as Dropzone;
+    ) as DropzoneComponent;
     this._dropzones.removeChildAt(this._dropzones.children.length - 1);
     dropzone.destroy();
 
@@ -155,7 +155,7 @@ export class CircuitStep extends Container {
 
     this._dropzones = new List({
       type: "vertical",
-      elementsMargin: Dropzone.size / 2,
+      elementsMargin: DropzoneComponent.size / 2,
       vertPadding: CircuitStep.paddingY,
     });
     this._view.addChild(this._dropzones);

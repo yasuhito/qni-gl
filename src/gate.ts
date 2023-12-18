@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Container } from "pixi.js";
-import { Dropzone } from "./dropzone";
+import { DropzoneComponent } from "./dropzone-component";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
@@ -24,7 +24,7 @@ export type SignalGateWithPosition = Signal<
 export type ClickEvent = {
   type: "Click";
   globalPosition: PIXI.Point;
-  dropzone: Dropzone | null;
+  dropzone: DropzoneComponent | null;
 };
 
 /**
@@ -33,7 +33,7 @@ export type ClickEvent = {
 export type DragEvent = {
   type: "Drag";
   globalPosition: PIXI.Point;
-  dropzone: Dropzone | null;
+  dropzone: DropzoneComponent | null;
 };
 
 /**
@@ -61,7 +61,7 @@ export class Gate extends Container {
   onMouseLeave: SignalGate;
 
   protected _shape: PIXI.Graphics;
-  protected _dropzone: Dropzone | null = null;
+  protected _dropzone: DropzoneComponent | null = null;
   protected _sprite: PIXI.Sprite;
 
   /** @todo 消す */
@@ -168,12 +168,12 @@ export class Gate extends Container {
   );
   actor: ActorRefFrom<typeof this.stateMachine>;
 
-  set dropzone(value: Dropzone | null) {
+  set dropzone(value: DropzoneComponent | null) {
     this._dropzone = value;
     this.snapDropzoneRunner.emit(this);
   }
 
-  get dropzone(): Dropzone | null {
+  get dropzone(): DropzoneComponent | null {
     return this._dropzone;
   }
 
@@ -223,7 +223,7 @@ export class Gate extends Container {
     }
   }
 
-  click(globalPosition: PIXI.Point, dropzone: Dropzone | null) {
+  click(globalPosition: PIXI.Point, dropzone: DropzoneComponent | null) {
     this.actor.send({
       type: "Click",
       globalPosition: globalPosition,
@@ -247,7 +247,7 @@ export class Gate extends Container {
     });
   }
 
-  snapToDropzone(dropzone: Dropzone, globalPosition: PIXI.Point) {
+  snapToDropzone(dropzone: DropzoneComponent, globalPosition: PIXI.Point) {
     if (this.dropzone && this.dropzone !== dropzone) {
       this.unsnap();
     }
@@ -259,7 +259,7 @@ export class Gate extends Container {
     });
   }
 
-  snap(dropzone: Dropzone) {
+  snap(dropzone: DropzoneComponent) {
     dropzone.snap(this);
   }
 

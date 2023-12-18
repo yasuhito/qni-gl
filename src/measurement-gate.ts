@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
-import { Dropzone } from "./dropzone";
+import { DropzoneComponent } from "./dropzone-component";
 import { Gate } from "./gate";
 import { JsonableMixin } from "./jsonable-mixin";
 
@@ -51,7 +51,7 @@ export class MeasurementGate extends JsonableMixin(Gate) {
     return MeasurementGate.style;
   }
 
-  snap(dropzone: Dropzone) {
+  snap(dropzone: DropzoneComponent) {
     super.snap(dropzone);
     this._sprite.texture = MeasurementGate.iconGrabbedDropzone;
   }
