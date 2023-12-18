@@ -226,6 +226,14 @@ export class App {
     this.activeGate = gate;
     this.grabbedGate = gate;
 
+    this.grabbedGate.on("dropped", (gate) => {
+      console.log(`ゲートを捨てる ${gate.gateType()}`);
+      this.activeGate = null;
+      this.grabbedGate = null;
+      this.pixiApp.stage.removeChild(gate);
+      gate.destroy();
+    });
+
     // this.dropzones についてループを回す
     // その中で、dropzone が snappable かどうかを判定する
     let dropzone;
