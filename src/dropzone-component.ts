@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { MeasurementGate } from "./measurement-gate";
 import { Operation } from "./operation";
 import { Write0Gate } from "./write0-gate";
@@ -19,7 +19,7 @@ const LINE_ALIGNMENT_MIDDLE = 0.5;
  * @noInheritDoc
  */
 export class DropzoneComponent extends Container {
-  static size = Gate.size;
+  static size = GateComponent.size;
   static wireWidth = 2;
 
   view: Container;
@@ -87,7 +87,7 @@ export class DropzoneComponent extends Container {
    * @param gateHeight ゲートの高さ
    */
   isSnappable(
-    gate: Gate,
+    gate: GateComponent,
     gateCenterX: number,
     gateCenterY: number,
     gateWidth: number,
@@ -119,7 +119,7 @@ export class DropzoneComponent extends Container {
     );
   }
 
-  snap(gate: Gate) {
+  snap(gate: GateComponent) {
     this.operation = gate as Operation;
     this.redrawWires();
     this.emit("snap", this);
@@ -237,7 +237,7 @@ export class DropzoneComponent extends Container {
     return LINE_ALIGNMENT_MIDDLE;
   }
 
-  protected isIconGate(gate: Gate | null) {
+  protected isIconGate(gate: GateComponent | null) {
     if (gate === null) {
       return false;
     }

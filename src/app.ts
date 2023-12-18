@@ -7,7 +7,7 @@ import { CircuitStepComponent } from "./circuit-step-component";
 import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { GatePalette } from "./gate-palette";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
@@ -37,8 +37,8 @@ export class App {
 
   declare worker: Worker;
   element: HTMLElement;
-  activeGate: Gate | null = null;
-  grabbedGate: Gate | null = null;
+  activeGate: GateComponent | null = null;
+  grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   gatePalette: GatePalette;
   circuit: CircuitComponent;
@@ -204,7 +204,7 @@ export class App {
     this.pixiApp.renderer.resize(width, height);
   }
 
-  newGate(gate: Gate) {
+  newGate(gate: GateComponent) {
     this.pixiApp.stage.addChild(gate);
     this.element.dataset.app = JSON.stringify(this);
   }
@@ -213,7 +213,7 @@ export class App {
     this.pixiApp.stage.cursor = "default";
   }
 
-  grabGate(gate: Gate, pointerPosition: PIXI.Point) {
+  grabGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
@@ -298,7 +298,7 @@ export class App {
    * @param gate ゲート
    * @param pointerPosition マウス/タッチの位置
    */
-  private moveGate(gate: Gate, pointerPosition: PIXI.Point) {
+  private moveGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
     for (const circuitStep of this.circuit.steps) {

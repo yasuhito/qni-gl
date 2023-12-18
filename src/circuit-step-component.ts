@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
@@ -171,13 +171,13 @@ export class CircuitStepComponent extends Container {
   }
 
   get width(): number {
-    return Gate.size * 1.5;
+    return GateComponent.size * 1.5;
   }
 
   get height(): number {
     return (
-      Gate.size * this._dropzones.children.length +
-      (this._dropzones.children.length - 1) * (Gate.size / 2) +
+      GateComponent.size * this._dropzones.children.length +
+      (this._dropzones.children.length - 1) * (GateComponent.size / 2) +
       CircuitStepComponent.paddingY * 2
     );
   }

@@ -1,6 +1,6 @@
 import { Colors } from "./colors";
 import { Constructor } from "./constructor";
-import { Gate } from "./gate";
+import { GateComponent } from "./gate-component";
 import { Spacing } from "./spacing";
 
 export declare class SquareGate {
@@ -10,7 +10,7 @@ export declare class SquareGate {
   applyActiveStyle(): void;
 }
 
-export function SquareGateMixin<TBase extends Constructor<Gate>>(
+export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<SquareGate> & TBase {
   class SquareGateMixinClass extends Base {
@@ -30,8 +30,8 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        Gate.size,
-        Gate.size,
+        GateComponent.size,
+        GateComponent.size,
         Spacing.cornerRadius.gate
       );
       this._shape.endFill();
@@ -53,8 +53,8 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        Gate.size,
-        Gate.size,
+        GateComponent.size,
+        GateComponent.size,
         Spacing.cornerRadius.gate
       );
       this._shape.endFill();
@@ -76,8 +76,8 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        Gate.size,
-        Gate.size,
+        GateComponent.size,
+        GateComponent.size,
         Spacing.cornerRadius.gate
       );
       this._shape.endFill();
@@ -99,8 +99,8 @@ export function SquareGateMixin<TBase extends Constructor<Gate>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        Gate.size,
-        Gate.size,
+        GateComponent.size,
+        GateComponent.size,
         Spacing.cornerRadius.gate
       );
       this._shape.endFill();

@@ -8,7 +8,7 @@ export * from "./colors";
 export * from "./constructor";
 export * from "./control-gate";
 export * from "./dropzone-component";
-export * from "./gate";
+export * from "./gate-component";
 export * from "./gate-palette";
 export * from "./gate-source";
 export * from "./grid-layout";

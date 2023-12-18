@@ -46,7 +46,7 @@ export class CircuitComponent extends Container {
   onStepHover: CircuitStepSignalToCircuitHandler;
   /** Signal emitted when a {@link CircuitStepComponent} is activated. */
   onStepActivated: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link Gate} snaps to a {@link DropzoneComponent}. */
+  /** Signal emitted when a {@link GateComponent} snaps to a {@link DropzoneComponent}. */
   onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
 
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
