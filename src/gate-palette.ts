@@ -5,8 +5,6 @@ import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
-import { Signal } from "typed-signals";
-import { SignalGate } from "./gate-component";
 import { spacingInPx } from "./util";
 
 /**
@@ -28,7 +26,7 @@ export class GatePalette extends Container {
   static backgroundColor = tailwindColors.white;
 
   /** ゲートからマウスポインタが離れた時に発生するシグナル */
-  onMouseLeaveGate: SignalGate;
+  // onMouseLeaveGate: SignalGate;
 
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof GateComponent)[][] = [];
@@ -38,7 +36,7 @@ export class GatePalette extends Container {
   constructor() {
     super();
 
-    this.onMouseLeaveGate = new Signal();
+    // this.onMouseLeaveGate = new Signal();
 
     this.graphics = new PIXI.Graphics();
     this.addChild(this.graphics);
@@ -79,7 +77,8 @@ export class GatePalette extends Container {
     });
 
     gateSource.on("mouseLeaveGate", (gate) => {
-      this.onMouseLeaveGate.emit(gate);
+      this.emit("mouseLeaveGate", gate);
+      // this.onMouseLeaveGate.emit(gate);
     });
 
     // gateSource.enterGateRunner.add(this);

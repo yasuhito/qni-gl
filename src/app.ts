@@ -110,8 +110,7 @@ export class App {
       newGate.zIndex = 20;
       this.pixiApp.stage.addChild(newGate);
     });
-
-    this.gatePalette.onMouseLeaveGate.connect(() => {
+    this.gatePalette.on("mouseLeaveGate", () => {
       this.mouseLeaveGate();
     });
 
