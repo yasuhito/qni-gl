@@ -18,7 +18,7 @@ const LINE_ALIGNMENT_MIDDLE = 0.5;
 /**
  * @noInheritDoc
  */
-export class Dropzone extends Container {
+export class DropzoneComponent extends Container {
   static size = Gate.size;
   static wireWidth = 2;
 
@@ -30,15 +30,15 @@ export class Dropzone extends Container {
   protected wire: PIXI.Graphics;
 
   get size(): number {
-    return Dropzone.size;
+    return DropzoneComponent.size;
   }
 
   get width(): number {
-    return Dropzone.size * 1.5;
+    return DropzoneComponent.size * 1.5;
   }
 
   get height(): number {
-    return Dropzone.size;
+    return DropzoneComponent.size;
   }
 
   isOccupied() {
@@ -180,7 +180,7 @@ export class Dropzone extends Container {
   }
 
   protected get wireWidth() {
-    return Dropzone.wireWidth;
+    return DropzoneComponent.wireWidth;
   }
 
   protected get inputWireColor() {
@@ -205,24 +205,27 @@ export class Dropzone extends Container {
 
   protected get inputWireEndX() {
     if (this.isIconGate(this.operation)) {
-      return Dropzone.size / 4;
+      return DropzoneComponent.size / 4;
     }
-    return Dropzone.size * 0.75;
+    return DropzoneComponent.size * 0.75;
   }
 
   protected get outputWireStartX() {
     if (this.isIconGate(this.operation)) {
-      return (Dropzone.size * 5) / 4;
+      return (DropzoneComponent.size * 5) / 4;
     }
-    return Dropzone.size * 0.75;
+    return DropzoneComponent.size * 0.75;
   }
 
   protected get outputWireEndX() {
-    return Dropzone.size * 1.5;
+    return DropzoneComponent.size * 1.5;
   }
 
   protected get wireY() {
-    const center = new PIXI.Point(Dropzone.size / 2, Dropzone.size / 2);
+    const center = new PIXI.Point(
+      DropzoneComponent.size / 2,
+      DropzoneComponent.size / 2
+    );
     return center.y;
   }
 

@@ -1,6 +1,6 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
-import { Dropzone, WireType } from "./dropzone";
+import { DropzoneComponent, WireType } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
 import { Signal } from "typed-signals";
 
@@ -20,13 +20,13 @@ export type CircuitStepSignalToCircuitHandler = Signal<
 >;
 
 /**
- * Signals that fire in a {@link Dropzone} and propagate to the {@link CircuitComponent}.
+ * Signals that fire in a {@link DropzoneComponent} and propagate to the {@link CircuitComponent}.
  */
 export type DropzoneSignalToCircuitHandler = Signal<
   (
     circuit: CircuitComponent,
     circuitStep: CircuitStep,
-    dropzone: Dropzone
+    dropzone: DropzoneComponent
   ) => void
 >;
 
@@ -46,7 +46,7 @@ export class CircuitComponent extends Container {
   onStepHover: CircuitStepSignalToCircuitHandler;
   /** Signal emitted when a {@link CircuitStep} is activated. */
   onStepActivated: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link Gate} snaps to a {@link Dropzone}. */
+  /** Signal emitted when a {@link Gate} snaps to a {@link DropzoneComponent}. */
   onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
 
   /** Layout container for arranging {@link CircuitStep}s in a row. */
@@ -122,7 +122,7 @@ export class CircuitComponent extends Container {
 
   private redrawDropzoneInputAndOutputWires(
     circuitStep: CircuitStep,
-    dropzone: Dropzone
+    dropzone: DropzoneComponent
   ) {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;

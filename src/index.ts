@@ -7,7 +7,7 @@ export * from "./circular-gate-mixin";
 export * from "./colors";
 export * from "./constructor";
 export * from "./control-gate";
-export * from "./dropzone";
+export * from "./dropzone-component";
 export * from "./gate";
 export * from "./gate-palette";
 export * from "./gate-source";
