@@ -289,7 +289,7 @@ export class GateComponent extends Container {
   }
 
   private onPointerUp() {
-    if (this.dropzone !== null) {
+    if (this.dropzone) {
       return;
     }
 

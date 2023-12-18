@@ -113,7 +113,7 @@ export class App {
     this.gatePalette.on("mouseLeaveGate", () => {
       this.mouseLeaveGate();
     });
-    this.gatePalette.on("gateDropped", (gate) => {
+    this.gatePalette.on("gateDiscarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
       this.pixiApp.stage.removeChild(gate);

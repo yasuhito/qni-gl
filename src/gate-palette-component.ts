@@ -73,9 +73,9 @@ export class GatePaletteComponent extends Container {
     gateSource.on("mouseLeaveGate", (gate) => {
       this.emit("mouseLeaveGate", gate);
     });
-    gateSource.on("gateDropped", (gate) => {
+    gateSource.on("gateDiscarded", (gate) => {
       this.gates[gate.gateType()] = null;
-      this.emit("gateDropped", gate);
+      this.emit("gateDiscarded", gate);
     });
 
     // gateSource.enterGateRunner.add(this);
