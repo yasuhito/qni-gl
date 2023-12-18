@@ -73,7 +73,7 @@ export class GatePalette extends Container {
     const gateSource = new GateSource(gateClass);
     currentRow.addChild(gateSource);
 
-    gateSource.onNewGate.connect((newGate) => {
+    gateSource.on("newGate", (newGate) => {
       newGate.x = this.x + currentRow.x + gateSource.x;
       newGate.y = this.y + currentRow.y;
       this.onNewGate.emit(newGate);

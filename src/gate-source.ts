@@ -22,8 +22,6 @@ export class GateSource extends Container {
   view: Container;
   protected border: PIXI.Graphics;
 
-  /** 新しいゲートを生成した時に発生するシグナル */
-  onNewGate: SignalGate;
   /** ゲートからマウスポインタが離れた時に発生するシグナル */
   onMouseLeaveGate: SignalGate;
 
@@ -32,7 +30,6 @@ export class GateSource extends Container {
   constructor(gateClass: typeof GateComponent) {
     super();
 
-    this.onNewGate = new Signal();
     this.onMouseLeaveGate = new Signal();
 
     this.gateClass = gateClass;
@@ -63,7 +60,7 @@ export class GateSource extends Container {
     gate.x = this.x;
     gate.y = this.y;
 
-    this.onNewGate.emit(gate);
+    this.emit("newGate", gate);
 
     gate.on("mouseLeave", (gate) => {
       this.onMouseLeaveGate.emit(gate);
