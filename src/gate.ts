@@ -55,8 +55,6 @@ export class Gate extends Container {
   /** すべての内部要素を保持するコンテナ */
   view: Container;
 
-  /** ゲートをクリックした時に発生するシグナル */
-  onGrab: SignalGateWithPosition;
   /** ゲートからマウスポインタが離れた時に飛ぶシグナル */
   onMouseLeave: SignalGate;
 
@@ -181,7 +179,6 @@ export class Gate extends Container {
     super();
 
     this.onMouseLeave = new Signal();
-    this.onGrab = new Signal();
 
     const klass = this.constructor as typeof Gate;
 
@@ -305,6 +302,6 @@ export class Gate extends Container {
   }
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {
-    this.onGrab.emit(this, event.global);
+    this.emit("grab", this, event.global);
   }
 }

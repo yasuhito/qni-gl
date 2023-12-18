@@ -72,7 +72,7 @@ export class GateSource extends Container {
       this.onMouseLeaveGate.emit(gate);
     });
 
-    gate.onGrab.connect((gate, globalPosition) => {
+    gate.on("grab", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
     });
 
