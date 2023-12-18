@@ -3,20 +3,7 @@ import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { Runner } from "@pixi/runner";
-import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
-
-/**
- * ゲートのシグナル
- */
-export type SignalGate = Signal<(gate: GateComponent) => void>;
-
-/**
- * ゲートのシグナル (シグナル発生源の位置情報つき)
- */
-export type SignalGateWithPosition = Signal<
-  (gate: GateComponent, eventGlobalPosition: PIXI.Point) => void
->;
 
 /**
  * ゲートのクリックイベント

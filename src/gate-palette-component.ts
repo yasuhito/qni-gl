@@ -5,15 +5,13 @@ import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
-import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate-component";
 import { spacingInPx } from "./util";
 
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。
  * @noInheritDoc
  */
-export class GatePalette extends Container {
+export class GatePaletteComponent extends Container {
   /** @ignore 水平方向のパディング */
   static horizontalPadding = spacingInPx(6);
   /** @ignore 垂直方向のパディング */
@@ -27,13 +25,6 @@ export class GatePalette extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
-  /** ゲートをクリックした時に発生するシグナル */
-  onGrabGate: SignalGateWithPosition;
-  /** 新しいゲートを生成した時に発生するシグナル */
-  onNewGate: SignalGate;
-  /** ゲートからマウスポインタが離れた時に発生するシグナル */
-  onMouseLeaveGate: SignalGate;
-
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof GateComponent)[][] = [];
   protected gateRows: List;
@@ -42,18 +33,14 @@ export class GatePalette extends Container {
   constructor() {
     super();
 
-    this.onNewGate = new Signal();
-    this.onGrabGate = new Signal();
-    this.onMouseLeaveGate = new Signal();
-
     this.graphics = new PIXI.Graphics();
     this.addChild(this.graphics);
 
     this.gateRows = new List({
       type: "vertical",
       elementsMargin: 8,
-      vertPadding: GatePalette.verticalPadding,
-      horPadding: GatePalette.horizontalPadding,
+      vertPadding: GatePaletteComponent.verticalPadding,
+      horPadding: GatePaletteComponent.horizontalPadding,
     });
     this.graphics.addChild(this.gateRows);
 
@@ -76,16 +63,16 @@ export class GatePalette extends Container {
     gateSource.on("newGate", (newGate) => {
       newGate.x = this.x + currentRow.x + gateSource.x;
       newGate.y = this.y + currentRow.y;
-      this.onNewGate.emit(newGate);
+      this.emit("newGate", newGate);
     });
 
     const gate = gateSource.generateNewGate();
     gateSource.on("grabGate", (gate, globalPosition) => {
-      this.onGrabGate.emit(gate, globalPosition);
+      this.emit("grabGate", gate, globalPosition);
     });
 
     gateSource.on("mouseLeaveGate", (gate) => {
-      this.onMouseLeaveGate.emit(gate);
+      this.emit("mouseLeaveGate", gate);
     });
 
     // gateSource.enterGateRunner.add(this);
@@ -117,17 +104,17 @@ export class GatePalette extends Container {
       ...this.gateRows.children.map((row) => row.children.length)
     );
 
-    this.graphics.lineStyle(1, GatePalette.borderColor, 1, 0);
-    this.graphics.beginFill(GatePalette.backgroundColor);
+    this.graphics.lineStyle(1, GatePaletteComponent.borderColor, 1, 0);
+    this.graphics.beginFill(GatePaletteComponent.backgroundColor);
     this.graphics.drawRoundedRect(
       0,
       0,
       GateComponent.size * maxRowLength +
-        GatePalette.gapBetweenGates * maxRowLength +
-        GatePalette.horizontalPadding * 2 -
-        GatePalette.gapBetweenGates,
-      this.gateRows.height + GatePalette.verticalPadding * 2,
-      GatePalette.cornerRadius
+        GatePaletteComponent.gapBetweenGates * maxRowLength +
+        GatePaletteComponent.horizontalPadding * 2 -
+        GatePaletteComponent.gapBetweenGates,
+      this.gateRows.height + GatePaletteComponent.verticalPadding * 2,
+      GatePaletteComponent.cornerRadius
     );
     this.graphics.endFill();
 
