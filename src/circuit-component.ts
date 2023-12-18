@@ -2,7 +2,6 @@ import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
 import { DropzoneComponent, WireType } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
-import { Signal } from "typed-signals";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
@@ -11,24 +10,6 @@ export interface CircuitOptions {
   minWireCount: number;
   stepCount: number;
 }
-
-/**
- * Signals that fire in a {@link CircuitStepComponent} and propagate to the {@link CircuitComponent}.
- */
-export type CircuitStepSignalToCircuitHandler = Signal<
-  (circuit: CircuitComponent, circuitStep: CircuitStepComponent) => void
->;
-
-/**
- * Signals that fire in a {@link DropzoneComponent} and propagate to the {@link CircuitComponent}.
- */
-export type DropzoneSignalToCircuitHandler = Signal<
-  (
-    circuit: CircuitComponent,
-    circuitStep: CircuitStepComponent,
-    dropzone: DropzoneComponent
-  ) => void
->;
 
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
@@ -42,12 +23,6 @@ export class CircuitComponent extends Container {
   minWireCount = 1;
   /** Maximum number of wires. */
   maxWireCount = 32;
-  /** Signal emitted when mouse hovers over a {@link CircuitStepComponent}. */
-  onStepHover: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link CircuitStepComponent} is activated. */
-  onStepActivated: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link GateComponent} snaps to a {@link DropzoneComponent}. */
-  onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
 
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
   private circuitStepsContainer: ListContainer;
@@ -98,10 +73,6 @@ export class CircuitComponent extends Container {
 
     this.minWireCount = options.minWireCount;
 
-    this.onStepHover = new Signal();
-    this.onStepActivated = new Signal();
-    this.onGateSnapToDropzone = new Signal();
-
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
       type: "horizontal",
@@ -118,7 +89,7 @@ export class CircuitComponent extends Container {
         this
       );
       circuitStep.on("hover", this.emitOnStepHoverSignal, this);
-      circuitStep.on("activate", this.deactivateAllOtherSteps, this);
+      circuitStep.on("activated", this.deactivateAllOtherSteps, this);
     }
   }
 
@@ -150,7 +121,7 @@ export class CircuitComponent extends Container {
       });
     }
 
-    this.onGateSnapToDropzone.emit(this, circuitStep, dropzone);
+    this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
   }
 
   /**
@@ -205,7 +176,7 @@ export class CircuitComponent extends Container {
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
-    this.onStepHover.emit(this, circuitStep);
+    this.emit("stepHover", this, circuitStep);
   }
 
   /**
@@ -218,6 +189,6 @@ export class CircuitComponent extends Container {
       }
     });
 
-    this.onStepActivated.emit(this, circuitStep);
+    this.emit("stepActivated", this, circuitStep);
   }
 }

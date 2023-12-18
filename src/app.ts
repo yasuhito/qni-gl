@@ -144,9 +144,9 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    this.circuit.onStepHover.connect(this.runSimulator.bind(this));
-    this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
-    this.circuit.onGateSnapToDropzone.connect(this.runSimulator.bind(this));
+    this.circuit.on("stepHover", this.runSimulator, this);
+    this.circuit.on("stepActivated", this.runSimulator, this);
+    this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
 
     this.stateVectorComponent = new StateVectorComponent(
       this.circuit.qubitCountInUse
