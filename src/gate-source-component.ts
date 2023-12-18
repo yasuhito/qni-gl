@@ -10,7 +10,7 @@ import { XGate } from "./x-gate";
 /**
  * @noInheritDoc
  */
-export class GateSource extends Container {
+export class GateSourceComponent extends Container {
   static size = GateComponent.size;
   static borderColor = tailwindColors.zinc["300"];
 
@@ -30,8 +30,8 @@ export class GateSource extends Container {
     this.addChild(this.view);
 
     this.border = new PIXI.Graphics();
-    this.border.width = GateSource.size;
-    this.border.height = GateSource.size;
+    this.border.width = GateSourceComponent.size;
+    this.border.height = GateSourceComponent.size;
     this.view.addChild(this.border);
 
     let radius = 4;
@@ -42,7 +42,7 @@ export class GateSource extends Container {
     ) {
       radius = 9999;
     }
-    this.border.lineStyle(2, GateSource.borderColor, 1, 0);
+    this.border.lineStyle(2, GateSourceComponent.borderColor, 1, 0);
     this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
 
     this.enterGateRunner = new Runner("enterGate");

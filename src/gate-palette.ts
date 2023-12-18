@@ -3,7 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GateComponent } from "./gate-component";
-import { GateSource } from "./gate-source";
+import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
 import { Signal } from "typed-signals";
 import { SignalGate, SignalGateWithPosition } from "./gate-component";
@@ -70,7 +70,7 @@ export class GatePalette extends Container {
     const currentRow =
       this.gateRows.children[this.gateRows.children.length - 1];
 
-    const gateSource = new GateSource(gateClass);
+    const gateSource = new GateSourceComponent(gateClass);
     currentRow.addChild(gateSource);
 
     gateSource.on("newGate", (newGate) => {
