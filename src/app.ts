@@ -237,7 +237,7 @@ export class App {
     this.activeGate = gate;
     this.grabbedGate = gate;
 
-    this.grabbedGate.on("dropped", (gate) => {
+    this.grabbedGate.on("discarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
       this.pixiApp.stage.removeChild(gate);

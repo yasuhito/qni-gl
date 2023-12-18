@@ -289,9 +289,11 @@ export class GateComponent extends Container {
   }
 
   private onPointerUp() {
-    if (this.dropzone === null) {
-      this.emit("dropped", this);
-      this.destroy();
+    if (this.dropzone !== null) {
+      return;
     }
+
+    this.emit("discarded", this);
+    this.destroy();
   }
 }
