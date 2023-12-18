@@ -113,6 +113,17 @@ export class App {
     this.gatePalette.on("mouseLeaveGate", () => {
       this.mouseLeaveGate();
     });
+    this.gatePalette.on("gateDiscarded", (gate) => {
+      this.activeGate = null;
+      this.grabbedGate = null;
+      this.pixiApp.stage.removeChild(gate);
+
+      this.circuit.removeUnusedUpperWires();
+
+      this.updateStateVectorComponentQubitCount();
+      this.updateStateVectorComponentPosition();
+      this.runSimulator();
+    });
 
     this.pixiApp.stage.addChild(this.gatePalette.addGate(HGate));
     this.pixiApp.stage.addChild(this.gatePalette.addGate(XGate));
@@ -225,6 +236,12 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
+
+    this.grabbedGate.on("discarded", (gate) => {
+      this.activeGate = null;
+      this.grabbedGate = null;
+      this.pixiApp.stage.removeChild(gate);
+    });
 
     // this.dropzones についてループを回す
     // その中で、dropzone が snappable かどうかを判定する

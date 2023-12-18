@@ -187,7 +187,8 @@ export class GateComponent extends Container {
     this.view
       .on("pointerover", this.onPointerOver.bind(this), this.view)
       .on("pointerout", this.onPointerOut.bind(this), this.view)
-      .on("pointerdown", this.onPointerDown.bind(this), this.view);
+      .on("pointerdown", this.onPointerDown.bind(this), this.view)
+      .on("pointerup", this.onPointerUp.bind(this), this.view);
 
     this.actor = interpret(this.stateMachine).start();
   }
@@ -285,5 +286,14 @@ export class GateComponent extends Container {
 
   private onPointerDown(event: PIXI.FederatedPointerEvent) {
     this.emit("grab", this, event.global);
+  }
+
+  private onPointerUp() {
+    if (this.dropzone) {
+      return;
+    }
+
+    this.emit("discarded", this);
+    this.destroy();
   }
 }

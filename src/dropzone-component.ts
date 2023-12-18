@@ -121,6 +121,9 @@ export class DropzoneComponent extends Container {
 
   snap(gate: GateComponent) {
     this.operation = gate as Operation;
+    this.operation.on("discarded", () => {
+      this.operation = null;
+    });
     this.redrawWires();
     this.emit("snap", this);
   }

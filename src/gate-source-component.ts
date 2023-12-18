@@ -61,6 +61,9 @@ export class GateSourceComponent extends Container {
     gate.on("grab", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
     });
+    gate.on("discarded", (gate) => {
+      this.emit("gateDiscarded", gate);
+    });
 
     return gate;
   }
