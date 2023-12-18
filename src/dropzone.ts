@@ -4,7 +4,6 @@ import { Container } from "pixi.js";
 import { Gate } from "./gate";
 import { MeasurementGate } from "./measurement-gate";
 import { Operation } from "./operation";
-import { Signal } from "typed-signals";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { rectIntersect } from "./util";
@@ -28,8 +27,6 @@ export class Dropzone extends Container {
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
-  onSnap: Signal<(dropzone: Dropzone) => void>;
-
   protected wire: PIXI.Graphics;
 
   get size(): number {
@@ -50,8 +47,6 @@ export class Dropzone extends Container {
 
   constructor() {
     super();
-
-    this.onSnap = new Signal();
 
     this.wire = new PIXI.Graphics();
     this.addChild(this.wire);
@@ -127,7 +122,7 @@ export class Dropzone extends Container {
   snap(gate: Gate) {
     this.operation = gate as Operation;
     this.redrawWires();
-    this.onSnap.emit(this);
+    this.emit("snap", this);
   }
 
   unsnap() {
