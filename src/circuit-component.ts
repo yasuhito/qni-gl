@@ -2,7 +2,6 @@ import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
 import { DropzoneComponent, WireType } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
-import { Signal } from "typed-signals";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
@@ -11,17 +10,6 @@ export interface CircuitOptions {
   minWireCount: number;
   stepCount: number;
 }
-
-/**
- * Signals that fire in a {@link DropzoneComponent} and propagate to the {@link CircuitComponent}.
- */
-export type DropzoneSignalToCircuitHandler = Signal<
-  (
-    circuit: CircuitComponent,
-    circuitStep: CircuitStepComponent,
-    dropzone: DropzoneComponent
-  ) => void
->;
 
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
