@@ -112,8 +112,10 @@ export class CircuitComponent extends Container {
       const circuitStep = new CircuitStep(this.minWireCount);
       this.circuitStepsContainer.addChild(circuitStep);
 
-      circuitStep.onGateSnapToDropzone.connect(
-        this.redrawDropzoneInputAndOutputWires.bind(this)
+      circuitStep.on(
+        "gateSnapToDropzone",
+        this.redrawDropzoneInputAndOutputWires,
+        this
       );
       circuitStep.on("hover", this.emitOnStepHoverSignal, this);
       circuitStep.on("activate", this.deactivateAllOtherSteps, this);

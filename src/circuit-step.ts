@@ -4,7 +4,6 @@ import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { Gate } from "./gate";
 import { List } from "@pixi/ui";
-import { Signal } from "typed-signals";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
 import { Operation } from "./operation";
@@ -33,10 +32,6 @@ export class CircuitStep extends Container {
   static lineWidth = spacingInPx(1);
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
-
-  onGateSnapToDropzone: Signal<
-    (circuitStep: CircuitStep, dropzone: DropzoneComponent) => void
-  >;
 
   protected _view: Container;
   protected _dropzones: List;
@@ -125,7 +120,7 @@ export class CircuitStep extends Container {
   }
 
   protected onDropzoneSnap(dropzone: DropzoneComponent) {
-    this.onGateSnapToDropzone.emit(this, dropzone);
+    this.emit("gateSnapToDropzone", this, dropzone);
   }
 
   /**
@@ -143,8 +138,6 @@ export class CircuitStep extends Container {
 
   constructor(qubitCount: number) {
     super();
-
-    this.onGateSnapToDropzone = new Signal();
 
     this._view = new PIXI.Container();
     this.addChild(this._view);
