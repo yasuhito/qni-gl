@@ -28,7 +28,7 @@ const groupBy = <K, V>(
 /**
  * @noInheritDoc
  */
-export class CircuitStep extends Container {
+export class CircuitStepComponent extends Container {
   static lineWidth = spacingInPx(1);
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
@@ -145,7 +145,7 @@ export class CircuitStep extends Container {
     this._dropzones = new List({
       type: "vertical",
       elementsMargin: DropzoneComponent.size / 2,
-      vertPadding: CircuitStep.paddingY,
+      vertPadding: CircuitStepComponent.paddingY,
     });
     this._view.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
@@ -178,7 +178,7 @@ export class CircuitStep extends Container {
     return (
       Gate.size * this._dropzones.children.length +
       (this._dropzones.children.length - 1) * (Gate.size / 2) +
-      CircuitStep.paddingY * 2
+      CircuitStepComponent.paddingY * 2
     );
   }
 
@@ -283,19 +283,19 @@ export class CircuitStep extends Container {
   }
 
   protected drawHoverLine() {
-    this.drawLine(CircuitStep.hoverLineColor);
+    this.drawLine(CircuitStepComponent.hoverLineColor);
   }
 
   protected drawActiveLine() {
-    this.drawLine(CircuitStep.activeLineColor);
+    this.drawLine(CircuitStepComponent.activeLineColor);
   }
 
   protected drawLine(color: PIXI.ColorSource) {
     this._line.beginFill(color, 1);
     this._line.drawRect(
-      this.width - CircuitStep.lineWidth,
+      this.width - CircuitStepComponent.lineWidth,
       0,
-      CircuitStep.lineWidth,
+      CircuitStepComponent.lineWidth,
       this.height
     );
     this._line.endFill();
