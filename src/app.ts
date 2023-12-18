@@ -145,8 +145,8 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
 
     this.circuit.on("stepHover", this.runSimulator, this);
-    this.circuit.onStepActivated.connect(this.runSimulator.bind(this));
-    this.circuit.onGateSnapToDropzone.connect(this.runSimulator.bind(this));
+    this.circuit.on("stepActivated", this.runSimulator, this);
+    this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
 
     this.stateVectorComponent = new StateVectorComponent(
       this.circuit.qubitCountInUse

@@ -43,11 +43,6 @@ export class CircuitComponent extends Container {
   /** Maximum number of wires. */
   maxWireCount = 32;
 
-  /** Signal emitted when a {@link CircuitStepComponent} is activated. */
-  onStepActivated: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link GateComponent} snaps to a {@link DropzoneComponent}. */
-  onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
-
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
   private circuitStepsContainer: ListContainer;
 
@@ -97,9 +92,6 @@ export class CircuitComponent extends Container {
 
     this.minWireCount = options.minWireCount;
 
-    this.onStepActivated = new Signal();
-    this.onGateSnapToDropzone = new Signal();
-
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
       type: "horizontal",
@@ -116,7 +108,7 @@ export class CircuitComponent extends Container {
         this
       );
       circuitStep.on("hover", this.emitOnStepHoverSignal, this);
-      circuitStep.on("activate", this.deactivateAllOtherSteps, this);
+      circuitStep.on("activated", this.deactivateAllOtherSteps, this);
     }
   }
 
@@ -148,7 +140,7 @@ export class CircuitComponent extends Container {
       });
     }
 
-    this.onGateSnapToDropzone.emit(this, circuitStep, dropzone);
+    this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
   }
 
   /**
@@ -216,6 +208,6 @@ export class CircuitComponent extends Container {
       }
     });
 
-    this.onStepActivated.emit(this, circuitStep);
+    this.emit("stepActivated", this, circuitStep);
   }
 }

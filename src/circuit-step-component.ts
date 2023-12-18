@@ -242,7 +242,7 @@ export class CircuitStepComponent extends Container {
   activate() {
     this._state = "active";
     this.redrawLine();
-    this.emit("activate", this);
+    this.emit("activated", this);
   }
 
   deactivate() {
