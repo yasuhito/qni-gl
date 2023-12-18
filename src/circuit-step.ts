@@ -34,7 +34,6 @@ export class CircuitStep extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  onHover: Signal<(circuitStep: CircuitStep) => void>;
   onActivate: Signal<(circuitStep: CircuitStep) => void>;
   onGateSnapToDropzone: Signal<
     (circuitStep: CircuitStep, dropzone: DropzoneComponent) => void
@@ -146,7 +145,6 @@ export class CircuitStep extends Container {
   constructor(qubitCount: number) {
     super();
 
-    this.onHover = new Signal();
     this.onActivate = new Signal();
     this.onGateSnapToDropzone = new Signal();
 
@@ -263,8 +261,7 @@ export class CircuitStep extends Container {
 
   protected onPointerOver() {
     if (this.isIdle()) {
-      this.onHover.emit(this);
-
+      this.emit("hover", this);
       this._state = "hover";
       this.redrawLine();
     }

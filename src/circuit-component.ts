@@ -115,7 +115,7 @@ export class CircuitComponent extends Container {
       circuitStep.onGateSnapToDropzone.connect(
         this.redrawDropzoneInputAndOutputWires.bind(this)
       );
-      circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
+      circuitStep.on("hover", this.emitOnStepHoverSignal, this);
       circuitStep.onActivate.connect(this.deactivateAllOtherSteps.bind(this));
     }
   }
