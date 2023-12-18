@@ -84,7 +84,7 @@ export class GatePalette extends Container {
       this.onGrabGate.emit(gate, globalPosition);
     });
 
-    gateSource.onMouseLeaveGate.connect((gate) => {
+    gateSource.on("mouseLeaveGate", (gate) => {
       this.onMouseLeaveGate.emit(gate);
     });
 

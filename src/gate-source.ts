@@ -5,8 +5,6 @@ import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
-import { Signal } from "typed-signals";
-import { SignalGate } from "./gate-component";
 import { XGate } from "./x-gate";
 
 /**
@@ -22,15 +20,10 @@ export class GateSource extends Container {
   view: Container;
   protected border: PIXI.Graphics;
 
-  /** ゲートからマウスポインタが離れた時に発生するシグナル */
-  onMouseLeaveGate: SignalGate;
-
   enterGateRunner: Runner;
 
   constructor(gateClass: typeof GateComponent) {
     super();
-
-    this.onMouseLeaveGate = new Signal();
 
     this.gateClass = gateClass;
     this.view = new Container();
@@ -63,7 +56,7 @@ export class GateSource extends Container {
     this.emit("newGate", gate);
 
     gate.on("mouseLeave", (gate) => {
-      this.onMouseLeaveGate.emit(gate);
+      this.emit("mouseLeaveGate", gate);
     });
     gate.on("grab", (gate, globalPosition) => {
       this.grabGate(gate, globalPosition);
