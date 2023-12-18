@@ -80,7 +80,7 @@ export class GatePalette extends Container {
     });
 
     const gate = gateSource.generateNewGate();
-    gateSource.onGrabGate.connect((gate, globalPosition) => {
+    gateSource.on("grabGate", (gate, globalPosition) => {
       this.onGrabGate.emit(gate, globalPosition);
     });
 

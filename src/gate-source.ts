@@ -6,7 +6,7 @@ import { GateComponent } from "./gate-component";
 import { PhaseGate } from "./phase-gate";
 import { Runner } from "@pixi/runner";
 import { Signal } from "typed-signals";
-import { SignalGate, SignalGateWithPosition } from "./gate-component";
+import { SignalGate } from "./gate-component";
 import { XGate } from "./x-gate";
 
 /**
@@ -22,8 +22,6 @@ export class GateSource extends Container {
   view: Container;
   protected border: PIXI.Graphics;
 
-  /** ゲートをクリックした時に発生するシグナル */
-  onGrabGate: SignalGateWithPosition;
   /** 新しいゲートを生成した時に発生するシグナル */
   onNewGate: SignalGate;
   /** ゲートからマウスポインタが離れた時に発生するシグナル */
@@ -35,7 +33,6 @@ export class GateSource extends Container {
     super();
 
     this.onNewGate = new Signal();
-    this.onGrabGate = new Signal();
     this.onMouseLeaveGate = new Signal();
 
     this.gateClass = gateClass;
@@ -84,6 +81,6 @@ export class GateSource extends Container {
 
   protected grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
     this.generateNewGate();
-    this.onGrabGate.emit(gate, globalPosition);
+    this.emit("grabGate", gate, globalPosition);
   }
 }
