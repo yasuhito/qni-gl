@@ -3,7 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
-import { CircuitStep } from "./circuit-step";
+import { CircuitStepComponent } from "./circuit-step-component";
 import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
@@ -42,7 +42,7 @@ export class App {
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   gatePalette: GatePalette;
   circuit: CircuitComponent;
-  circuitSteps: CircuitStep[] = [];
+  circuitSteps: CircuitStepComponent[] = [];
   stateVectorComponent: StateVectorComponent;
   logger: Logger;
   nameMap = new Map();

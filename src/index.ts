@@ -2,7 +2,7 @@ export * from "./anti-control-gate";
 export * from "./app";
 export * from "./bloch-sphere";
 export * from "./circuit-component";
-export * from "./circuit-step";
+export * from "./circuit-step-component";
 export * from "./circular-gate-mixin";
 export * from "./colors";
 export * from "./constructor";

@@ -1,4 +1,4 @@
-import { CircuitStep } from "./circuit-step";
+import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
 import { DropzoneComponent, WireType } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
@@ -13,10 +13,10 @@ export interface CircuitOptions {
 }
 
 /**
- * Signals that fire in a {@link CircuitStep} and propagate to the {@link CircuitComponent}.
+ * Signals that fire in a {@link CircuitStepComponent} and propagate to the {@link CircuitComponent}.
  */
 export type CircuitStepSignalToCircuitHandler = Signal<
-  (circuit: CircuitComponent, circuitStep: CircuitStep) => void
+  (circuit: CircuitComponent, circuitStep: CircuitStepComponent) => void
 >;
 
 /**
@@ -25,13 +25,13 @@ export type CircuitStepSignalToCircuitHandler = Signal<
 export type DropzoneSignalToCircuitHandler = Signal<
   (
     circuit: CircuitComponent,
-    circuitStep: CircuitStep,
+    circuitStep: CircuitStepComponent,
     dropzone: DropzoneComponent
   ) => void
 >;
 
 /**
- * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
+ * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
  *
  * @noInheritDoc
  */
@@ -42,14 +42,14 @@ export class CircuitComponent extends Container {
   minWireCount = 1;
   /** Maximum number of wires. */
   maxWireCount = 32;
-  /** Signal emitted when mouse hovers over a {@link CircuitStep}. */
+  /** Signal emitted when mouse hovers over a {@link CircuitStepComponent}. */
   onStepHover: CircuitStepSignalToCircuitHandler;
-  /** Signal emitted when a {@link CircuitStep} is activated. */
+  /** Signal emitted when a {@link CircuitStepComponent} is activated. */
   onStepActivated: CircuitStepSignalToCircuitHandler;
   /** Signal emitted when a {@link GateComponent} snaps to a {@link DropzoneComponent}. */
   onGateSnapToDropzone: DropzoneSignalToCircuitHandler;
 
-  /** Layout container for arranging {@link CircuitStep}s in a row. */
+  /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
   private circuitStepsContainer: ListContainer;
 
   /**
@@ -82,10 +82,10 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Returns an array of {@link CircuitStep}s in the {@link CircuitComponent}.
+   * Returns an array of {@link CircuitStepComponent}s in the {@link CircuitComponent}.
    */
-  get steps(): CircuitStep[] {
-    return this.circuitStepsContainer.children as CircuitStep[];
+  get steps(): CircuitStepComponent[] {
+    return this.circuitStepsContainer.children as CircuitStepComponent[];
   }
 
   /**
@@ -109,19 +109,21 @@ export class CircuitComponent extends Container {
     this.addChild(this.circuitStepsContainer);
 
     for (let i = 0; i < options.stepCount; i++) {
-      const circuitStep = new CircuitStep(this.minWireCount);
+      const circuitStep = new CircuitStepComponent(this.minWireCount);
       this.circuitStepsContainer.addChild(circuitStep);
 
-      circuitStep.onGateSnapToDropzone.connect(
-        this.redrawDropzoneInputAndOutputWires.bind(this)
+      circuitStep.on(
+        "gateSnapToDropzone",
+        this.redrawDropzoneInputAndOutputWires,
+        this
       );
-      circuitStep.onHover.connect(this.emitOnStepHoverSignal.bind(this));
-      circuitStep.onActivate.connect(this.deactivateAllOtherSteps.bind(this));
+      circuitStep.on("hover", this.emitOnStepHoverSignal, this);
+      circuitStep.on("activate", this.deactivateAllOtherSteps, this);
     }
   }
 
   private redrawDropzoneInputAndOutputWires(
-    circuitStep: CircuitStep,
+    circuitStep: CircuitStepComponent,
     dropzone: DropzoneComponent
   ) {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
@@ -152,7 +154,7 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Retrieves the {@link CircuitStep} at the specified index.
+   * Retrieves the {@link CircuitStepComponent} at the specified index.
    */
   stepAt(stepIndex: number) {
     if (stepIndex < 0 || stepIndex >= this.steps.length) {
@@ -202,15 +204,15 @@ export class CircuitComponent extends Container {
     return `{"cols":[${cols.join(",")}]}`;
   }
 
-  private emitOnStepHoverSignal(circuitStep: CircuitStep) {
+  private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
     this.onStepHover.emit(this, circuitStep);
   }
 
   /**
-   * Deactivates all other {@link CircuitStep}s except for the specified {@link CircuitStep}.
+   * Deactivates all other {@link CircuitStepComponent}s except for the specified {@link CircuitStepComponent}.
    */
-  private deactivateAllOtherSteps(circuitStep: CircuitStep) {
-    this.steps.forEach((each: CircuitStep) => {
+  private deactivateAllOtherSteps(circuitStep: CircuitStepComponent) {
+    this.steps.forEach((each: CircuitStepComponent) => {
       if (each !== circuitStep && each.isActive()) {
         each.deactivate();
       }
