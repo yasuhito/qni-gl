@@ -106,10 +106,11 @@ export class App {
     this.gatePalette.x = 40;
     this.gatePalette.y = 64;
 
-    this.gatePalette.onNewGate.connect((newGate) => {
+    this.gatePalette.on("newGate", (newGate) => {
       newGate.zIndex = 20;
       this.pixiApp.stage.addChild(newGate);
     });
+
     this.gatePalette.onMouseLeaveGate.connect(() => {
       this.mouseLeaveGate();
     });

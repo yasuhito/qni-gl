@@ -27,8 +27,6 @@ export class GatePalette extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
-  /** 新しいゲートを生成した時に発生するシグナル */
-  onNewGate: SignalGate;
   /** ゲートからマウスポインタが離れた時に発生するシグナル */
   onMouseLeaveGate: SignalGate;
 
@@ -40,7 +38,6 @@ export class GatePalette extends Container {
   constructor() {
     super();
 
-    this.onNewGate = new Signal();
     this.onMouseLeaveGate = new Signal();
 
     this.graphics = new PIXI.Graphics();
@@ -73,7 +70,7 @@ export class GatePalette extends Container {
     gateSource.on("newGate", (newGate) => {
       newGate.x = this.x + currentRow.x + gateSource.x;
       newGate.y = this.y + currentRow.y;
-      this.onNewGate.emit(newGate);
+      this.emit("newGate", newGate);
     });
 
     const gate = gateSource.generateNewGate();
