@@ -13,13 +13,6 @@ export interface CircuitOptions {
 }
 
 /**
- * Signals that fire in a {@link CircuitStepComponent} and propagate to the {@link CircuitComponent}.
- */
-export type CircuitStepSignalToCircuitHandler = Signal<
-  (circuit: CircuitComponent, circuitStep: CircuitStepComponent) => void
->;
-
-/**
  * Signals that fire in a {@link DropzoneComponent} and propagate to the {@link CircuitComponent}.
  */
 export type DropzoneSignalToCircuitHandler = Signal<
