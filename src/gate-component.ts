@@ -144,7 +144,7 @@ export class GateComponent extends Container {
       },
     }
   );
-  actor: ActorRefFrom<typeof this.stateMachine>;
+  private actor: ActorRefFrom<typeof this.stateMachine>;
 
   set dropzone(value: DropzoneComponent | null) {
     this._dropzone = value;
