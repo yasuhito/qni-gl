@@ -78,8 +78,6 @@ export class GatePaletteComponent extends Container {
       this.emit("gateDiscarded", gate);
     });
 
-    // gateSource.enterGateRunner.add(this);
-
     this.gates[gate.gateType()] = gate;
 
     this.redraw();

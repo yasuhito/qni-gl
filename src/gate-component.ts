@@ -143,6 +143,20 @@ export class GateComponent extends Container {
   );
   private actor: ActorRefFrom<typeof this.stateMachine>;
 
+  /**
+   * Returns the gate type of the component.
+   * If the gate type is not defined, it throws an error.
+   */
+  gateType(): string {
+    const klass = this.constructor as typeof GateComponent;
+
+    if (typeof klass.gateType === "string") {
+      return klass.gateType;
+    }
+
+    throw new Error("Gate type is not defined");
+  }
+
   set dropzone(value: DropzoneComponent | null) {
     this._dropzone = value;
   }
@@ -177,16 +191,6 @@ export class GateComponent extends Container {
       .on("pointerup", this.onPointerUp, this);
 
     this.actor = interpret(this.stateMachine).start();
-  }
-
-  gateType(): string | null {
-    const klass = this.constructor as typeof GateComponent;
-
-    if (typeof klass.gateType === "string") {
-      return klass.gateType;
-    } else {
-      return null;
-    }
   }
 
   click(globalPosition: PIXI.Point, dropzone: DropzoneComponent | null) {
