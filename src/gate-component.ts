@@ -38,9 +38,6 @@ export class GateComponent extends Container {
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
-  /** すべての内部要素を保持するコンテナ */
-  view: Container;
-
   protected _shape: PIXI.Graphics;
   protected _dropzone: DropzoneComponent | null = null;
   protected _sprite: PIXI.Sprite;
@@ -159,29 +156,25 @@ export class GateComponent extends Container {
 
     const klass = this.constructor as typeof GateComponent;
 
-    this.view = new Container();
-    this.addChild(this.view);
-
     this._shape = new PIXI.Graphics();
-    this.view.addChild(this._shape);
+    this.addChild(this._shape);
 
     // enable the gate to be interactive...
     // this will allow it to respond to mouse and touch events
-    this.view.eventMode = "static";
+    this.eventMode = "static";
 
     // Scale mode for pixelation
     klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
     this._sprite = new PIXI.Sprite(klass.icon);
-    this.view.addChild(this._sprite);
+    this.addChild(this._sprite);
 
     // setup events for mouse + touch using
     // the pointer events
-    this.view
-      .on("pointerover", this.onPointerOver.bind(this), this.view)
-      .on("pointerout", this.onPointerOut.bind(this), this.view)
-      .on("pointerdown", this.onPointerDown.bind(this), this.view)
-      .on("pointerup", this.onPointerUp.bind(this), this.view);
+    this.on("pointerover", this.onPointerOver, this)
+      .on("pointerout", this.onPointerOut, this)
+      .on("pointerdown", this.onPointerDown, this)
+      .on("pointerup", this.onPointerUp, this);
 
     this.actor = interpret(this.stateMachine).start();
   }
@@ -269,7 +262,7 @@ export class GateComponent extends Container {
 
   private onPointerOver() {
     this.actor.send("Mouse enter");
-    this.view.cursor = "grab";
+    this.cursor = "grab";
   }
 
   private onPointerOut() {
