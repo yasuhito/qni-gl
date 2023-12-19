@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
-import { Runner } from "@pixi/runner";
 import { spacingInPx } from "./util";
 
 /**
@@ -45,9 +44,6 @@ export class GateComponent extends Container {
   protected _shape: PIXI.Graphics;
   protected _dropzone: DropzoneComponent | null = null;
   protected _sprite: PIXI.Sprite;
-
-  /** @todo 消す */
-  snapDropzoneRunner: Runner;
 
   protected stateMachine = createMachine(
     {
@@ -152,7 +148,6 @@ export class GateComponent extends Container {
 
   set dropzone(value: DropzoneComponent | null) {
     this._dropzone = value;
-    this.snapDropzoneRunner.emit(this);
   }
 
   get dropzone(): DropzoneComponent | null {
@@ -163,8 +158,6 @@ export class GateComponent extends Container {
     super();
 
     const klass = this.constructor as typeof GateComponent;
-
-    this.snapDropzoneRunner = new Runner("snapDropzone");
 
     this.view = new Container();
     this.addChild(this.view);
