@@ -7,6 +7,8 @@ import { Spacing } from "./spacing";
  * @noInheritDoc
  */
 export class QubitCircle extends Container {
+  size = "xl";
+
   protected _probabilityValue = 0;
   protected _probabilityCircle: PIXI.Graphics;
   protected _border: PIXI.Graphics;
@@ -27,7 +29,7 @@ export class QubitCircle extends Container {
     }
 
     const radius =
-      (Spacing.size.qubitCircle / 2 - Spacing.borderWidth.gate) *
+      (Spacing.size.qubitCircle[this.size] / 2 - Spacing.borderWidth.gate) *
       Math.sqrt(this.probability * 0.01);
     this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
     this._probabilityCircle.endFill();
@@ -48,8 +50,10 @@ export class QubitCircle extends Container {
     this.drawPhaseHand(this.probability, value);
   }
 
-  constructor(probability: number, phase: number) {
+  constructor(probability: number, phase: number, size = "xl") {
     super();
+
+    this.size = size;
 
     this._probabilityCircle = new PIXI.Graphics();
     this.addChild(this._probabilityCircle);
@@ -71,8 +75,8 @@ export class QubitCircle extends Container {
 
   protected get center() {
     return new PIXI.Point(
-      Spacing.size.qubitCircle / 2,
-      Spacing.size.qubitCircle / 2
+      Spacing.size.qubitCircle[this.size] / 2,
+      Spacing.size.qubitCircle[this.size] / 2
     );
   }
 
@@ -90,7 +94,7 @@ export class QubitCircle extends Container {
     this._border.drawCircle(
       this.center.x,
       this.center.y,
-      Spacing.size.qubitCircle / 2
+      Spacing.size.qubitCircle[this.size] / 2
     );
   }
 
