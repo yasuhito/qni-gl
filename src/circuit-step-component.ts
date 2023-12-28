@@ -33,10 +33,9 @@ export class CircuitStepComponent extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  // protected _view: Container;
-  protected _dropzones: List;
-  protected _state: "idle" | "hover" | "active" = "idle";
-  protected _line: PIXI.Graphics;
+  private _dropzones: List;
+  private _state: "idle" | "hover" | "active" = "idle";
+  private _line: PIXI.Graphics;
 
   static get gapBetweenGates(): number {
     return DropzoneComponent.size / 2;
@@ -145,15 +144,11 @@ export class CircuitStepComponent extends Container {
   constructor(qubitCount: number) {
     super();
 
-    // this._view = new PIXI.Container();
-    // this.addChild(this._view);
-
     this._dropzones = new List({
       type: "vertical",
       elementsMargin: DropzoneComponent.size / 2,
       vertPadding: CircuitStepComponent.paddingY,
     });
-    // this._view.addChild(this._dropzones);
     this.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
@@ -161,26 +156,15 @@ export class CircuitStepComponent extends Container {
       this.appendNewDropzone();
     }
 
-    // setup events for mouse + touch using
-    // the pointer events
-    // this._view
-    //   .on("pointerover", this.onPointerOver, this)
-    //   .on("pointerout", this.onPointerOut, this)
-    //   .on("pointerdown", this.onPointerDown, this);
-
     this.on("pointerover", this.onPointerOver, this)
       .on("pointerout", this.onPointerOut, this)
       .on("pointerdown", this.onPointerDown, this);
+
     // enable the step to be interactive...
     // this will allow it to respond to mouse and touch events
     this.eventMode = "static";
+
     this.updateHitArea();
-    // this.hitArea = new PIXI.Rectangle(
-    //   0,
-    //   0,
-    //   this.componentWidth,
-    //   this.componentHeight
-    // );
 
     this._line = new PIXI.Graphics();
     this.addChild(this._line);
@@ -195,11 +179,11 @@ export class CircuitStepComponent extends Container {
     );
   }
 
-  get componentWidth(): number {
+  private get componentWidth(): number {
     return GateComponent.size * 1.5;
   }
 
-  get componentHeight(): number {
+  private get componentHeight(): number {
     return (
       GateComponent.size * this._dropzones.children.length +
       (this._dropzones.children.length - 1) * (GateComponent.size / 2) +
