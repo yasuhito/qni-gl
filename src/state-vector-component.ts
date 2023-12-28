@@ -26,6 +26,8 @@ export class StateVectorComponent extends Container {
       this.qubitCirclesGridContainer.cols = 8;
     } else if (this.qubitCount == 5) {
       this.qubitCirclesGridContainer.cols = 8;
+    } else if (this.qubitCount == 6) {
+      this.qubitCirclesGridContainer.cols = 16;
     }
 
     this.clear();
