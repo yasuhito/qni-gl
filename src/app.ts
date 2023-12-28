@@ -333,20 +333,12 @@ export class App {
       this.runSimulator();
     }
 
-    // TODO: メソッド化
     if (gate.dropzone && !snapDropzone) {
       this.unsnapGateFromDropzone(gate);
-      // gate.unsnap();
-      // ゲートの親を変更する (gate.dropzone = null にする)
-      // this.pixiApp.stage.addChild(gate);
     }
 
     // gate.dropzone = snapDropzone;
     if (snapDropzone) {
-      // if (gate.gateSource) {
-      //   // TODO: ゲートを Dropzone にアサインした時、登録したハンドラを解除する (assign の反対語は?)
-      //   console.log("ゲートソースからゲートをはずす");
-      // }
       snapDropzone.addChild(gate);
     } else {
       gate.move(pointerPosition);
@@ -354,8 +346,6 @@ export class App {
   }
 
   private unsnapGateFromDropzone(gate: GateComponent) {
-    console.log("はずれた");
-
     gate.unsnap();
     this.pixiApp.stage.addChild(gate);
   }

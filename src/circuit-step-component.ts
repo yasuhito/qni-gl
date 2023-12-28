@@ -113,7 +113,6 @@ export class CircuitStepComponent extends Container {
     const dropzone = new DropzoneComponent();
     dropzone.on("snap", this.onDropzoneSnap, this);
     dropzone.on("grabGate", (gate, globalPosition) => {
-      console.log("CircuitStep: grabGate");
       this.emit("grabGate", gate, globalPosition);
     });
     this._dropzones.addChild(dropzone);

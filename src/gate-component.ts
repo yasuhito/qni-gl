@@ -41,6 +41,8 @@ export class GateComponent extends Container {
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
+  debug = false;
+
   protected _shape: PIXI.Graphics;
   protected _sprite: PIXI.Sprite;
 
@@ -205,7 +207,9 @@ export class GateComponent extends Container {
 
     this.actor = interpret(this.stateMachine)
       .onTransition((state) => {
-        console.log(`${this.gateType()}: ${state.value} state`);
+        if (this.debug) {
+          console.log(`${this.gateType()}: ${state.value} state`);
+        }
       })
       .start();
   }

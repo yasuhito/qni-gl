@@ -91,7 +91,6 @@ export class CircuitComponent extends Container {
       circuitStep.on("hover", this.emitOnStepHoverSignal, this);
       circuitStep.on("activated", this.deactivateAllOtherSteps, this);
       circuitStep.on("grabGate", (gate, globalPosition) => {
-        console.log("Circuit: grabGate");
         this.emit("grabGate", gate, globalPosition);
       });
     }

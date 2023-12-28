@@ -144,7 +144,6 @@ export class DropzoneComponent extends Container {
   }
 
   private emitGrabGateEvent(gate, globalPosition) {
-    console.log("dropzone: grabGate");
     this.emit("grabGate", gate, globalPosition);
   }
 
