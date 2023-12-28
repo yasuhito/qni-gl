@@ -201,10 +201,6 @@ export class GateComponent extends Container {
       .on("pointerdown", this.onPointerDown, this)
       .on("pointerup", this.onPointerUp, this);
 
-    // this.on("pointerenter", () => {
-    //   console.log("!!! pointer enter !!!");
-    // });
-
     this.actor = interpret(this.stateMachine)
       .onTransition((state) => {
         if (this.debug) {
@@ -264,7 +260,6 @@ export class GateComponent extends Container {
   }
 
   protected mouseLeave() {
-    // console.log("🐭 mouse leave");
     this.actor.send("Mouse leave");
   }
 

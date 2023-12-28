@@ -304,10 +304,8 @@ export class App {
   private moveGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
-    // FIXME: this.circuit.steps.forEach で書き換え
-    for (const circuitStep of this.circuit.steps) {
-      // FIXME: circuitStep.dropzones.forEach で書き換え
-      for (const dropzone of circuitStep.dropzones) {
+    this.circuit.steps.forEach((circuitStep) => {
+      circuitStep.dropzones.forEach((dropzone) => {
         if (
           dropzone.isSnappable(
             gate,
@@ -320,8 +318,8 @@ export class App {
           snapDropzone = dropzone;
           gate.snapToDropzone(dropzone, pointerPosition);
         }
-      }
-    }
+      });
+    });
 
     if (
       snapDropzone &&
@@ -354,8 +352,6 @@ export class App {
     if (this.grabbedGate === null) {
       return;
     }
-
-    // console.dir("releaseGate");
 
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
     this.resetCursor();

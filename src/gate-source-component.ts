@@ -59,8 +59,6 @@ export class GateSourceComponent extends Container {
   }
 
   private grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
-    // console.log("gate-source: grabGate()");
-
     this.generateNewGate();
     this.emit("grabGate", gate, globalPosition);
   }
