@@ -1,79 +1,72 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
-import { BlochSphere } from "./bloch-sphere";
+import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
-import { PhaseGate } from "./phase-gate";
-import { Runner } from "@pixi/runner";
-import { XGate } from "./x-gate";
+import { spacingInPx } from "./util";
 
 /**
  * @noInheritDoc
  */
 export class GateSourceComponent extends Container {
-  static size = GateComponent.size;
-  static borderColor = tailwindColors.zinc["300"];
+  static size = spacingInPx(8);
+  static borderColor = Colors.border.gateSource.default;
 
-  gateClass: typeof GateComponent;
-
-  // Container, that holds all inner elements.
-  view: Container;
-  protected border: PIXI.Graphics;
-
-  enterGateRunner: Runner;
+  private gateClass: typeof GateComponent;
+  private border: PIXI.Graphics;
 
   constructor(gateClass: typeof GateComponent) {
     super();
 
     this.gateClass = gateClass;
-    this.view = new Container();
-    this.addChild(this.view);
 
     this.border = new PIXI.Graphics();
     this.border.width = GateSourceComponent.size;
     this.border.height = GateSourceComponent.size;
-    this.view.addChild(this.border);
+    this.addChild(this.border);
 
-    let radius = 4;
-    if (
-      this.gateClass === XGate ||
-      this.gateClass === PhaseGate ||
-      this.gateClass === BlochSphere
-    ) {
-      radius = 9999;
-    }
     this.border.lineStyle(2, GateSourceComponent.borderColor, 1, 0);
-    this.border.drawRoundedRect(this.x, this.y, 32, 32, radius);
-
-    this.enterGateRunner = new Runner("enterGate");
+    this.border.drawRoundedRect(
+      this.x,
+      this.y,
+      GateSourceComponent.size,
+      GateSourceComponent.size,
+      this.gateClass.radius
+    );
   }
 
   generateNewGate(): GateComponent {
     const gate = new this.gateClass();
-    gate.x = this.x;
-    gate.y = this.y;
+    this.addChild(gate);
 
     this.emit("newGate", gate);
 
-    gate.on("mouseLeave", (gate) => {
-      this.emit("mouseLeaveGate", gate);
-    });
-    gate.on("grab", (gate, globalPosition) => {
-      this.grabGate(gate, globalPosition);
-    });
-    gate.on("discarded", (gate) => {
-      this.emit("gateDiscarded", gate);
-    });
+    gate.on("mouseLeave", this.emitMouseLeaveGateEvent, this);
+    gate.on("grab", this.grabGate, this);
+    gate.on("discarded", this.discardGate, this);
+    gate.on("snap", this.removeGateEventListeners, this);
 
     return gate;
   }
 
-  protected enterGate(gate: GateComponent) {
-    this.enterGateRunner.emit(gate);
+  private removeGateEventListeners(gate: GateComponent) {
+    gate.off("grab", this.grabGate, this);
+    gate.off("mouseLeave", this.emitMouseLeaveGateEvent, this);
+    gate.off("snap", this.removeGateEventListeners, this);
   }
 
-  protected grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
+  private emitMouseLeaveGateEvent(gate: GateComponent) {
+    this.emit("mouseLeaveGate", gate);
+  }
+
+  private grabGate(gate: GateComponent, globalPosition: PIXI.Point) {
+    // console.log("gate-source: grabGate()");
+
     this.generateNewGate();
     this.emit("grabGate", gate, globalPosition);
+  }
+
+  private discardGate(gate: GateComponent) {
+    this.removeChild(gate);
+    this.emit("gateDiscarded", gate);
   }
 }

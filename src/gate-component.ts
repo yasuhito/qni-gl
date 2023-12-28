@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { ActorRefFrom, createMachine, interpret } from "xstate";
 import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
+import { GateSourceComponent } from "./gate-source-component";
 import { spacingInPx } from "./util";
 
 /**
@@ -35,11 +36,12 @@ export class GateComponent extends Container {
    */
   static size = spacingInPx(8);
 
+  static radius = 4;
+
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
 
   protected _shape: PIXI.Graphics;
-  protected _dropzone: DropzoneComponent | null = null;
   protected _sprite: PIXI.Sprite;
 
   protected stateMachine = createMachine(
@@ -128,8 +130,7 @@ export class GateComponent extends Container {
         updatePosition: (_context, event: ClickEvent | DragEvent) => {
           if (event.dropzone) {
             // snap した場合
-            const pos = this.parent.toLocal(event.dropzone.getGlobalPosition());
-            this.position.set(pos.x + GateComponent.size / 4, pos.y);
+            this.position.set(GateComponent.size / 4, 0);
           } else {
             const newPos = this.parent.toLocal(event.globalPosition);
             this.position.set(
@@ -157,12 +158,20 @@ export class GateComponent extends Container {
     throw new Error("Gate type is not defined");
   }
 
-  set dropzone(value: DropzoneComponent | null) {
-    this._dropzone = value;
+  get gateSource(): GateSourceComponent | null {
+    if (this.parent instanceof GateSourceComponent) {
+      return this.parent;
+    }
+
+    return null;
   }
 
   get dropzone(): DropzoneComponent | null {
-    return this._dropzone;
+    if (this.parent instanceof DropzoneComponent) {
+      return this.parent;
+    }
+
+    return null;
   }
 
   constructor() {
@@ -190,7 +199,15 @@ export class GateComponent extends Container {
       .on("pointerdown", this.onPointerDown, this)
       .on("pointerup", this.onPointerUp, this);
 
-    this.actor = interpret(this.stateMachine).start();
+    // this.on("pointerenter", () => {
+    //   console.log("!!! pointer enter !!!");
+    // });
+
+    this.actor = interpret(this.stateMachine)
+      .onTransition((state) => {
+        console.log(`${this.gateType()}: ${state.value} state`);
+      })
+      .start();
   }
 
   click(globalPosition: PIXI.Point, dropzone: DropzoneComponent | null) {
@@ -231,6 +248,7 @@ export class GateComponent extends Container {
 
   snap(dropzone: DropzoneComponent) {
     dropzone.snap(this);
+    this.emit("snap", this, dropzone);
   }
 
   unsnap() {
@@ -242,6 +260,7 @@ export class GateComponent extends Container {
   }
 
   protected mouseLeave() {
+    // console.log("🐭 mouse leave");
     this.actor.send("Mouse leave");
   }
 
@@ -265,6 +284,8 @@ export class GateComponent extends Container {
   }
 
   private onPointerOver() {
+    // console.dir("!!!! pointer over !!!!");
+
     this.actor.send("Mouse enter");
     this.cursor = "grab";
   }

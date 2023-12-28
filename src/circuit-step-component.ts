@@ -33,7 +33,7 @@ export class CircuitStepComponent extends Container {
   static hoverLineColor = tailwindColors.purple["300"];
   static activeLineColor = tailwindColors.blue["500"];
 
-  protected _view: Container;
+  // protected _view: Container;
   protected _dropzones: List;
   protected _state: "idle" | "hover" | "active" = "idle";
   protected _line: PIXI.Graphics;
@@ -112,11 +112,17 @@ export class CircuitStepComponent extends Container {
   appendNewDropzone() {
     const dropzone = new DropzoneComponent();
     dropzone.on("snap", this.onDropzoneSnap, this);
+    dropzone.on("grabGate", (gate, globalPosition) => {
+      console.log("CircuitStep: grabGate");
+      this.emit("grabGate", gate, globalPosition);
+    });
     this._dropzones.addChild(dropzone);
 
     if (this._line) {
       this.redrawLine();
     }
+
+    this.updateHitArea();
   }
 
   protected onDropzoneSnap(dropzone: DropzoneComponent) {
@@ -134,20 +140,22 @@ export class CircuitStepComponent extends Container {
     dropzone.destroy();
 
     this.redrawLine();
+    this.updateHitArea();
   }
 
   constructor(qubitCount: number) {
     super();
 
-    this._view = new PIXI.Container();
-    this.addChild(this._view);
+    // this._view = new PIXI.Container();
+    // this.addChild(this._view);
 
     this._dropzones = new List({
       type: "vertical",
       elementsMargin: DropzoneComponent.size / 2,
       vertPadding: CircuitStepComponent.paddingY,
     });
-    this._view.addChild(this._dropzones);
+    // this._view.addChild(this._dropzones);
+    this.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
     for (let i = 0; i < qubitCount; i++) {
@@ -156,25 +164,43 @@ export class CircuitStepComponent extends Container {
 
     // setup events for mouse + touch using
     // the pointer events
-    this._view
-      .on("pointerover", this.onPointerOver, this)
+    // this._view
+    //   .on("pointerover", this.onPointerOver, this)
+    //   .on("pointerout", this.onPointerOut, this)
+    //   .on("pointerdown", this.onPointerDown, this);
+
+    this.on("pointerover", this.onPointerOver, this)
       .on("pointerout", this.onPointerOut, this)
       .on("pointerdown", this.onPointerDown, this);
-
     // enable the step to be interactive...
     // this will allow it to respond to mouse and touch events
-    this._view.eventMode = "static";
-    this._view.hitArea = new PIXI.Rectangle(0, 0, this.width, this.height);
+    this.eventMode = "static";
+    this.updateHitArea();
+    // this.hitArea = new PIXI.Rectangle(
+    //   0,
+    //   0,
+    //   this.componentWidth,
+    //   this.componentHeight
+    // );
 
     this._line = new PIXI.Graphics();
-    this._view.addChild(this._line);
+    this.addChild(this._line);
   }
 
-  get width(): number {
+  updateHitArea() {
+    this.hitArea = new PIXI.Rectangle(
+      0,
+      0,
+      this.componentWidth,
+      this.componentHeight
+    );
+  }
+
+  get componentWidth(): number {
     return GateComponent.size * 1.5;
   }
 
-  get height(): number {
+  get componentHeight(): number {
     return (
       GateComponent.size * this._dropzones.children.length +
       (this._dropzones.children.length - 1) * (GateComponent.size / 2) +
@@ -293,10 +319,10 @@ export class CircuitStepComponent extends Container {
   protected drawLine(color: PIXI.ColorSource) {
     this._line.beginFill(color, 1);
     this._line.drawRect(
-      this.width - CircuitStepComponent.lineWidth,
+      this.componentWidth - CircuitStepComponent.lineWidth / 2,
       0,
       CircuitStepComponent.lineWidth,
-      this.height
+      this.componentHeight
     );
     this._line.endFill();
   }

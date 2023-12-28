@@ -7,6 +7,7 @@ import { JsonableMixin } from "./jsonable-mixin";
  */
 export class BlochSphere extends JsonableMixin(GateComponent) {
   static gateType = "BlochSphere";
+  static radius = 9999;
   static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
     resolution: window.devicePixelRatio,
     resourceOptions: {

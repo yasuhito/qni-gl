@@ -23,6 +23,9 @@ export const Colors = {
       grabbed: tailwindColors.purple["600"],
       active: tailwindColors.teal["300"],
     },
+    gateSource: {
+      default: tailwindColors.zinc["300"],
+    },
     qubitCircle: {
       default: tailwindColors.zinc["500"],
       disabled: tailwindColors.zinc["200"],

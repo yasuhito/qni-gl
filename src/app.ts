@@ -30,6 +30,7 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+// import { Layer, Stage } from "@pixi/layers";
 
 export class App {
   static elementId = "app";
@@ -46,6 +47,10 @@ export class App {
   stateVectorComponent: StateVectorComponent;
   logger: Logger;
   nameMap = new Map();
+  // 各ゲートを回路などよりも全面に表示するためのレイヤー
+  // gateLayer = new Layer();
+  // ドラッグ中のゲートを最前面に表示するためのレイヤー
+  // draggingGateLayer = new Layer();
 
   public static get instance(): App {
     if (!this._instance) {
@@ -79,6 +84,7 @@ export class App {
       backgroundColor: tailwindColors.zinc["50"],
       preserveDrawingBuffer: true,
     });
+    // this.pixiApp.stage = new Stage();
 
     window.addEventListener("resize", this.resize.bind(this), false);
     this.resize();
@@ -94,25 +100,17 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
-    // this.oldGatePalette.newGateRunner.add(this);
-    // this.oldGatePalette.leaveGateRunner.add(this);
-
     this.gatePalette = new GatePaletteComponent();
     this.pixiApp.stage.addChild(this.gatePalette);
-    this.gatePalette.on("grabGate", (gate, globalPosition) => {
-      this.grabGate(gate, globalPosition);
-    });
+    // this.gatePalette.on("newGate", (gate) => {
+    //   gate.parentLayer = this.gateLayer;
+    // });
+    this.gatePalette.on("grabGate", this.grabGate, this);
 
     this.gatePalette.x = 40;
     this.gatePalette.y = 64;
 
-    this.gatePalette.on("newGate", (newGate) => {
-      newGate.zIndex = 20;
-      this.pixiApp.stage.addChild(newGate);
-    });
-    this.gatePalette.on("mouseLeaveGate", () => {
-      this.mouseLeaveGate();
-    });
+    this.gatePalette.on("mouseLeaveGate", this.resetCursor, this);
     this.gatePalette.on("gateDiscarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
@@ -125,30 +123,30 @@ export class App {
       this.runSimulator();
     });
 
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(HGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(XGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(YGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(ZGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(RnotGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(SGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(SDaggerGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(TGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(TDaggerGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(PhaseGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(RxGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(RyGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(RzGate));
+    this.gatePalette.addGate(HGate);
+    this.gatePalette.addGate(XGate);
+    this.gatePalette.addGate(YGate);
+    this.gatePalette.addGate(ZGate);
+    this.gatePalette.addGate(RnotGate);
+    this.gatePalette.addGate(SGate);
+    this.gatePalette.addGate(SDaggerGate);
+    this.gatePalette.addGate(TGate);
+    this.gatePalette.addGate(TDaggerGate);
+    this.gatePalette.addGate(PhaseGate);
+    this.gatePalette.addGate(RxGate);
+    this.gatePalette.addGate(RyGate);
+    this.gatePalette.addGate(RzGate);
 
     this.gatePalette.newRow();
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(SwapGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(ControlGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(AntiControlGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(Write0Gate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(Write1Gate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(MeasurementGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(BlochSphere));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTGate));
-    this.pixiApp.stage.addChild(this.gatePalette.addGate(QFTDaggerGate));
+    this.gatePalette.addGate(SwapGate);
+    this.gatePalette.addGate(ControlGate);
+    this.gatePalette.addGate(AntiControlGate);
+    this.gatePalette.addGate(Write0Gate);
+    this.gatePalette.addGate(Write1Gate);
+    this.gatePalette.addGate(MeasurementGate);
+    this.gatePalette.addGate(BlochSphere);
+    this.gatePalette.addGate(QFTGate);
+    this.gatePalette.addGate(QFTDaggerGate);
 
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
@@ -159,11 +157,15 @@ export class App {
     this.circuit.on("stepHover", this.runSimulator, this);
     this.circuit.on("stepActivated", this.runSimulator, this);
     this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
+    this.circuit.on("grabGate", this.grabGate, this);
 
     this.stateVectorComponent = new StateVectorComponent(
       this.circuit.qubitCountInUse
     );
     this.pixiApp.stage.addChild(this.stateVectorComponent);
+
+    // this.pixiApp.stage.addChild(this.gateLayer);
+    // this.pixiApp.stage.addChild(this.draggingGateLayer);
 
     this.updateStateVectorComponentPosition();
 
@@ -216,21 +218,15 @@ export class App {
     this.pixiApp.renderer.resize(width, height);
   }
 
-  newGate(gate: GateComponent) {
-    this.pixiApp.stage.addChild(gate);
-    this.element.dataset.app = JSON.stringify(this);
-  }
-
-  mouseLeaveGate() {
-    this.pixiApp.stage.cursor = "default";
-  }
-
-  grabGate(gate: GateComponent, pointerPosition: PIXI.Point) {
+  private grabGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
 
-    gate.zIndex = 30;
+    // pixi/layers で重なりを制御する
+    // gate.parentLayer = this.draggingGateLayer;
+
+    this.pixiApp.stage.addChild(gate);
 
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
@@ -247,7 +243,8 @@ export class App {
     // その中で、dropzone が snappable かどうかを判定する
     let dropzone;
 
-    this.maybeAppendCircuitWire();
+    this.circuit.maybeAppendWire();
+
     // TODO: メソッドに切り出す
     this.element.dataset.app = JSON.stringify(this);
     this.updateStateVectorComponentQubitCount();
@@ -271,28 +268,16 @@ export class App {
       }
     }
 
-    gate.dropzone = dropzone;
-    if (!gate.dropzone) {
+    if (dropzone) {
+      dropzone.addChild(gate);
+    } else {
       this.grabbedGate.click(pointerPosition, null);
     }
 
+    // TODO: メソッド化
     this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
-  }
-
-  protected maybeAppendCircuitWire() {
-    const firstStepWireCount = this.circuit.steps[0].wireCount;
-
-    for (const each of this.circuit.steps) {
-      if (each.wireCount !== firstStepWireCount) {
-        throw new Error("All steps must have the same number of wires");
-      }
-
-      if (each.wireCount < this.circuit.maxWireCount) {
-        each.appendNewDropzone();
-      }
-    }
   }
 
   toJSON() {
@@ -311,7 +296,7 @@ export class App {
   }
 
   /**
-   * globalPosition is the global position of the mouse/touch
+   * pointerPosition is the global position of the mouse/touch
    *
    * @param gate ゲート
    * @param pointerPosition マウス/タッチの位置
@@ -319,7 +304,9 @@ export class App {
   private moveGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
+    // FIXME: this.circuit.steps.forEach で書き換え
     for (const circuitStep of this.circuit.steps) {
+      // FIXME: circuitStep.dropzones.forEach で書き換え
       for (const dropzone of circuitStep.dropzones) {
         if (
           dropzone.isSnappable(
@@ -346,14 +333,31 @@ export class App {
       this.runSimulator();
     }
 
+    // TODO: メソッド化
     if (gate.dropzone && !snapDropzone) {
-      gate.unsnap();
+      this.unsnapGateFromDropzone(gate);
+      // gate.unsnap();
+      // ゲートの親を変更する (gate.dropzone = null にする)
+      // this.pixiApp.stage.addChild(gate);
     }
 
-    gate.dropzone = snapDropzone;
-    if (!gate.dropzone) {
+    // gate.dropzone = snapDropzone;
+    if (snapDropzone) {
+      // if (gate.gateSource) {
+      //   // TODO: ゲートを Dropzone にアサインした時、登録したハンドラを解除する (assign の反対語は?)
+      //   console.log("ゲートソースからゲートをはずす");
+      // }
+      snapDropzone.addChild(gate);
+    } else {
       gate.move(pointerPosition);
     }
+  }
+
+  private unsnapGateFromDropzone(gate: GateComponent) {
+    console.log("はずれた");
+
+    gate.unsnap();
+    this.pixiApp.stage.addChild(gate);
   }
 
   private releaseGate() {
@@ -361,10 +365,12 @@ export class App {
       return;
     }
 
+    // console.dir("releaseGate");
+
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
-    this.pixiApp.stage.cursor = "grab";
+    this.resetCursor();
     this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
-    this.grabbedGate.zIndex = 20;
+    // this.grabbedGate.parentLayer = this.gateLayer;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
@@ -373,6 +379,10 @@ export class App {
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
     this.runSimulator();
+  }
+
+  private resetCursor() {
+    this.pixiApp.stage.cursor = "default";
   }
 
   private updateStateVectorComponentQubitCount() {
