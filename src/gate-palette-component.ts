@@ -53,7 +53,7 @@ export class GatePaletteComponent extends Container {
    *
    * @param gateClass 追加するゲートのクラス
    */
-  addGate(gateClass: typeof GateComponent): GateComponent {
+  addGate(gateClass: typeof GateComponent) {
     const currentRow =
       this.gateRows.children[this.gateRows.children.length - 1];
 
@@ -61,12 +61,11 @@ export class GatePaletteComponent extends Container {
     currentRow.addChild(gateSource);
 
     gateSource.on("newGate", (newGate) => {
-      newGate.x = this.x + currentRow.x + gateSource.x;
-      newGate.y = this.y + currentRow.y;
       this.emit("newGate", newGate);
     });
 
     const gate = gateSource.generateNewGate();
+
     gateSource.on("grabGate", (gate, globalPosition) => {
       this.emit("grabGate", gate, globalPosition);
     });
@@ -81,8 +80,6 @@ export class GatePaletteComponent extends Container {
     this.gates[gate.gateType()] = gate;
 
     this.redraw();
-
-    return gate;
   }
 
   /**

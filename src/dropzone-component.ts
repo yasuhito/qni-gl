@@ -2,11 +2,9 @@ import * as PIXI from "pixi.js";
 import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
-import { MeasurementGate } from "./measurement-gate";
 import { Operation } from "./operation";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
 import { rectIntersect } from "./util";
+import { spacingInPx } from "./util";
 
 export enum WireType {
   Quantum = "quantum",
@@ -19,11 +17,10 @@ const LINE_ALIGNMENT_MIDDLE = 0.5;
  * @noInheritDoc
  */
 export class DropzoneComponent extends Container {
-  static size = GateComponent.size;
+  static size = spacingInPx(8);
   static wireWidth = 2;
 
-  view: Container;
-  operation: Operation | null = null;
+  // operation: Operation | null = null;
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
@@ -39,6 +36,16 @@ export class DropzoneComponent extends Container {
 
   get height(): number {
     return DropzoneComponent.size;
+  }
+
+  get operation(): Operation | null {
+    for (const each of this.children) {
+      if (each instanceof GateComponent) {
+        return each as Operation;
+      }
+    }
+
+    return null;
   }
 
   isOccupied() {
@@ -120,17 +127,24 @@ export class DropzoneComponent extends Container {
   }
 
   snap(gate: GateComponent) {
-    this.operation = gate as Operation;
+    this.addChild(gate);
+
+    this.operation.on("grab", this.emitGrabGateEvent, this);
     this.operation.on("discarded", () => {
-      this.operation = null;
+      this.removeChild(this.operation);
     });
+
     this.redrawWires();
     this.emit("snap", this);
   }
 
   unsnap() {
-    this.operation = null;
+    this.operation.off("grab", this.emitGrabGateEvent, this);
     this.redrawWires();
+  }
+
+  private emitGrabGateEvent(gate, globalPosition) {
+    this.emit("grabGate", gate, globalPosition);
   }
 
   redrawWires() {
@@ -166,13 +180,13 @@ export class DropzoneComponent extends Container {
   }
 
   hasWriteGate() {
-    return [Write0Gate, Write1Gate].some(
-      (each) => this.operation instanceof each
+    return ["Write0Gate", "Write1Gate"].some(
+      (each) => this.operation.gateType() === each
     );
   }
 
   hasMeasurementGate() {
-    return this.operation instanceof MeasurementGate;
+    return this.operation.gateType() === "MeasurementGate";
   }
 
   protected drawWire(startX: number, endX: number, color: WireColor) {
@@ -245,8 +259,8 @@ export class DropzoneComponent extends Container {
       return false;
     }
 
-    return [Write0Gate, Write1Gate, MeasurementGate].some(
-      (type) => gate instanceof type
+    return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
+      (type) => gate.gateType() === type
     );
   }
 }

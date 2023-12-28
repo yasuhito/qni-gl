@@ -20,7 +20,7 @@ export class QubitCircle extends Container {
   set probability(value: number) {
     this._probabilityValue = value;
 
-    this._probabilityCircle.clear()
+    this._probabilityCircle.clear();
 
     if (this.probability > 0) {
       this._probabilityCircle.beginFill(Colors.bg.brand.default, 1);
@@ -32,7 +32,7 @@ export class QubitCircle extends Container {
     this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
     this._probabilityCircle.endFill();
 
-    this.drawPhaseHand(this.probability, this._phaseValue)
+    this.drawPhaseHand(this.probability, this._phaseValue);
     this.drawBorder(this.probability);
   }
 
@@ -44,8 +44,8 @@ export class QubitCircle extends Container {
    * 位相をセットする
    */
   set phase(value: number) {
-    this._phaseValue = value
-    this.drawPhaseHand(this.probability, value)
+    this._phaseValue = value;
+    this.drawPhaseHand(this.probability, value);
   }
 
   constructor(probability: number, phase: number) {
@@ -95,7 +95,7 @@ export class QubitCircle extends Container {
   }
 
   protected drawPhaseHand(probability: number, phase: number) {
-    this._phaseHand.clear()
+    this._phaseHand.clear();
 
     if (probability > 0) {
       this._phaseHand

@@ -90,6 +90,9 @@ export class CircuitComponent extends Container {
       );
       circuitStep.on("hover", this.emitOnStepHoverSignal, this);
       circuitStep.on("activated", this.deactivateAllOtherSteps, this);
+      circuitStep.on("grabGate", (gate, globalPosition) => {
+        this.emit("grabGate", gate, globalPosition);
+      });
     }
   }
 
@@ -147,6 +150,20 @@ export class CircuitComponent extends Container {
         each.deleteLastDropzone();
       });
     }
+  }
+
+  maybeAppendWire() {
+    const firstStepWireCount = this.steps[0].wireCount;
+
+    this.steps.forEach((each) => {
+      if (each.wireCount !== firstStepWireCount) {
+        throw new Error("All steps must have the same number of wires");
+      }
+
+      if (each.wireCount < this.maxWireCount) {
+        each.appendNewDropzone();
+      }
+    });
   }
 
   private isLastWireUnused() {
