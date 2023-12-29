@@ -1303,15 +1303,10 @@
   resolved "https://registry.yarnpkg.com/@pixi/display/-/display-7.3.2.tgz#5d4005045ebd47db9974327df2f861e95ad84028"
   integrity sha512-cY5AnZ3TWt5GYGx4e5AQ2/2U9kP+RorBg/O30amJ+8e9bFk9rS8cjh/DDq/hc4lql96BkXAInTl40eHnAML5lQ==
 
-"@pixi/events@7.3.2":
+"@pixi/events@7.3.2", "@pixi/events@^7.3.1":
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/@pixi/events/-/events-7.3.2.tgz#ff985f7dae291a440298b2d5d91dd63341aa36d7"
   integrity sha512-Moca9epu8jk1wIQCdVYjhz2pD9Ol21m50wvWUKvpgt9yM/AjkCLSDt8HO/PmTpavDrkhx5pVVWeDDA6FyUNaGA==
-
-"@pixi/events@^7.3.1":
-  version "7.3.1"
-  resolved "https://registry.yarnpkg.com/@pixi/events/-/events-7.3.1.tgz#6502e29d12127fcb046d09bc0e661c71db6e8d13"
-  integrity sha512-L6MSeFnLo3z/pQMCLGbwp5szp1+26YoZ50De2pT6hMuPGtMtio89IkFU07G1jNuiGhJsPMw4Zn9H71KiZp+X1A==
 
 "@pixi/extensions@7.3.2":
   version "7.3.2"
