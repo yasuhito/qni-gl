@@ -28,6 +28,7 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 4) {
       this.qubitCirclesGridContainer.cols = 8;
     } else if (this.qubitCount == 5) {
+      this.qubitCircleSize = "base";
       this.qubitCirclesGridContainer.cols = 8;
     } else if (this.qubitCount == 6) {
       this.qubitCircleSize = "base";
