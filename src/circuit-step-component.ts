@@ -204,7 +204,7 @@ export class CircuitStepComponent extends Container {
   }
 
   serialize() {
-    const result = [];
+    const result: { type: string; targets: number[] }[] = [];
 
     for (const [klass, sameOps] of groupBy(
       this.operations,

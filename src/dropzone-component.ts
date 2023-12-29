@@ -129,16 +129,21 @@ export class DropzoneComponent extends Container {
   snap(gate: GateComponent) {
     this.addChild(gate);
 
+    if (this.operation === null) {
+      throw new Error("Operation is null");
+    }
+
     this.operation.on("grab", this.emitGrabGateEvent, this);
-    this.operation.on("discarded", () => {
-      this.removeChild(this.operation);
-    });
 
     this.redrawWires();
     this.emit("snap", this);
   }
 
   unsnap() {
+    if (this.operation === null) {
+      throw new Error("Operation is null");
+    }
+
     this.operation.off("grab", this.emitGrabGateEvent, this);
     this.redrawWires();
   }
@@ -181,12 +186,12 @@ export class DropzoneComponent extends Container {
 
   hasWriteGate() {
     return ["Write0Gate", "Write1Gate"].some(
-      (each) => this.operation.gateType() === each
+      (each) => this.operation?.gateType() === each
     );
   }
 
   hasMeasurementGate() {
-    return this.operation.gateType() === "MeasurementGate";
+    return this.operation?.gateType() === "MeasurementGate";
   }
 
   protected drawWire(startX: number, endX: number, color: WireColor) {

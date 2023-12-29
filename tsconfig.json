@@ -2,5 +2,7 @@
   "compilerOptions": {
       "esModuleInterop": true,
       "skipLibCheck": true,
+      // https://stately.ai/docs/migration#xstate-v5-and-typescript
+      "strictNullChecks": true
   }
 }
