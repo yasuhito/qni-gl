@@ -31,7 +31,7 @@
     "vite-plugin-pwa": "^0.17.2",
     "vitest": "^1.0.1",
     "webdriverio": "^8.16.12",
-    "wrap-ansi": "^6.0.0"
+    "wrap-ansi": "~9.0"
   },
   "dependencies": {
     "@pixi/events": "^7.3.1",
