@@ -2216,10 +2216,10 @@
     tweedle.js "^2.0.1"
     typed-signals "^2.5.0"
 
-"@pixi/ui@^0.9.0":
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/@pixi/ui/-/ui-0.9.1.tgz#180b3b5f7d0e4c5900a3e0172e22370906280034"
-  integrity sha512-Q+Ymj/KN3lPR7zv0YI808BXu5TrKtVDQyS+kAIyBJub2DyPeRPLySbXtzcx1oJ/W67Zs0OVPRnQXvbzINNV8yQ==
+"@pixi/ui@~0.10":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@pixi/ui/-/ui-0.10.1.tgz#73f57de1ad87a45a4fbbdc96ac0e0e05ce389a1b"
+  integrity sha512-PzE9Y/GX0inw5n+9lYcvYI++QMIDVf9hLEd5CNc/lIlimnyOuNHdNJuRCJHfDmBVtWZa9kMWzqIetv0a7k+0tQ==
   dependencies:
     tweedle.js "^2.1.0"
     typed-signals "^2.5.0"
