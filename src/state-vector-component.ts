@@ -6,12 +6,15 @@ import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
 import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
+import { Size } from "./size";
 
 /**
  * Represents a component that visualizes the state vector.
  * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
+  qubitCircleSize: Size = "xl";
+
   private _qubitCount = 1;
   private body: PIXI.Graphics;
   private qubitCirclesGridContainer: GridLayout;
@@ -29,7 +32,11 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 6) {
       this.qubitCirclesGridContainer.cols = 16;
     } else if (this.qubitCount == 7) {
+      this.qubitCircleSize = "base";
       this.qubitCirclesGridContainer.cols = 16;
+    } else if (this.qubitCount == 8) {
+      this.qubitCircleSize = "sm";
+      this.qubitCirclesGridContainer.cols = 32;
     }
 
     this.clear();
@@ -112,8 +119,14 @@ export class StateVectorComponent extends Container {
   }
 
   private drawQubitCircles() {
+    this.qubitCircles.forEach((child) => {
+      child.destroy();
+    });
+
     for (let i = 0; i < this.qubitCircleCount; i++) {
-      this.qubitCirclesGridContainer.addChild(new QubitCircle(0, 0));
+      this.qubitCirclesGridContainer.addChild(
+        new QubitCircle(0, 0, this.qubitCircleSize)
+      );
     }
   }
 }
