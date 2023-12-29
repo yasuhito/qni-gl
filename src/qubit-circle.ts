@@ -30,7 +30,8 @@ export class QubitCircle extends Container {
     }
 
     const radius =
-      (Spacing.size.qubitCircle[this.size] / 2 - Spacing.borderWidth.gate) *
+      (Spacing.size.qubitCircle[this.size] / 2 -
+        Spacing.borderWidth.qubitCircle[this.size]) *
       Math.sqrt(this.probability * 0.01);
     this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
     this._probabilityCircle.endFill();
@@ -87,7 +88,7 @@ export class QubitCircle extends Container {
 
   protected drawBorder(probability: number) {
     this._border.lineStyle(
-      Spacing.borderWidth.gate,
+      Spacing.borderWidth.qubitCircle[this.size],
       this.borderColor(probability),
       1,
       0
