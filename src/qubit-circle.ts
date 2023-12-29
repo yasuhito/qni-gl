@@ -1,20 +1,21 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 import { Container } from "pixi.js";
+import { Size } from "./size";
 import { Spacing } from "./spacing";
 
 /**
  * @noInheritDoc
  */
 export class QubitCircle extends Container {
-  size = "xl";
+  size: Size = "xl";
 
-  protected _probabilityValue = 0;
-  protected _probabilityCircle: PIXI.Graphics;
-  protected _border: PIXI.Graphics;
-  protected _phaseValue = 0;
-  protected _phase: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
-  protected _phaseHand: PIXI.Graphics; /* 位相の針 */
+  private _probabilityValue = 0;
+  private _probabilityCircle: PIXI.Graphics;
+  private _border: PIXI.Graphics;
+  private _phaseValue = 0;
+  private _phase: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
+  private _phaseHand: PIXI.Graphics; /* 位相の針 */
 
   /**
    * 確率をセットする
@@ -50,7 +51,7 @@ export class QubitCircle extends Container {
     this.drawPhaseHand(this.probability, value);
   }
 
-  constructor(probability: number, phase: number, size = "xl") {
+  constructor(probability: number, phase: number, size: Size = "xl") {
     super();
 
     this.size = size;

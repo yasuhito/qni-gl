@@ -6,13 +6,14 @@ import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
 import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
+import { Size } from "./size";
 
 /**
  * Represents a component that visualizes the state vector.
  * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
-  qubitCircleSize = "xl";
+  qubitCircleSize: Size = "xl";
 
   private _qubitCount = 1;
   private body: PIXI.Graphics;
