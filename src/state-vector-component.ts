@@ -21,9 +21,15 @@ export class StateVectorComponent extends Container {
 
   set qubitCount(value: number) {
     this._qubitCount = value;
-    if (this.qubitCount == 2) {
+
+    if (this.qubitCount == 1) {
+      this.qubitCircleSize = "xl";
+      this.qubitCirclesGridContainer.cols = 2;
+    } else if (this.qubitCount == 2) {
+      this.qubitCircleSize = "xl";
       this.qubitCirclesGridContainer.cols = 4;
     } else if (this.qubitCount == 3) {
+      this.qubitCircleSize = "xl";
       this.qubitCirclesGridContainer.cols = 4;
     } else if (this.qubitCount == 4) {
       this.qubitCircleSize = "lg";
