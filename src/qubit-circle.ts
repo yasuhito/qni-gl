@@ -106,7 +106,12 @@ export class QubitCircle extends Container {
     if (probability > 0) {
       this._phaseHand
         .beginFill(Colors.icon.default, 1)
-        .drawRect(0, 0, Spacing.width.phaseHand, this.handLength)
+        .drawRect(
+          0,
+          0,
+          Spacing.width.qubitCircle.phaseHand[this.size],
+          this.handLength
+        )
         .endFill();
     }
 
