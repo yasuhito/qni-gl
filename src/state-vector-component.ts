@@ -37,6 +37,9 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 8) {
       this.qubitCircleSize = "sm";
       this.qubitCirclesGridContainer.cols = 32;
+    } else if (this.qubitCount == 9) {
+      this.qubitCircleSize = "xs";
+      this.qubitCirclesGridContainer.cols = 32;
     }
 
     this.clear();
