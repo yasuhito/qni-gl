@@ -2,8 +2,6 @@ import { spacingInPx } from "./util";
 
 export const Spacing = {
   width: {
-    phaseHand: spacingInPx(0.5),
-
     qubitCircle: {
       phaseHand: {
         xl: spacingInPx(0.5),

@@ -64,7 +64,10 @@ export class QubitCircle extends Container {
     this.addChild(this._border);
 
     this._phase = new PIXI.Container();
-    this._phase.pivot = new PIXI.Point(Spacing.width.phaseHand / 2, 0);
+    this._phase.pivot = new PIXI.Point(
+      Spacing.width.qubitCircle.phaseHand[this.size] / 2,
+      0
+    );
     this._phase.position.set(this.center.x, this.center.y);
     this._phaseHand = new PIXI.Graphics();
     this._phase.addChild(this._phaseHand);
