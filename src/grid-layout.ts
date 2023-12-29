@@ -31,9 +31,6 @@ export class GridLayout extends Container {
     }
 
     options?.items?.forEach((item) => this.addChild(item));
-
-    this.on("added", () => this.arrangeChildren());
-    this.on("childAdded", () => this.arrangeChildren());
   }
 
   /**
@@ -56,7 +53,6 @@ export class GridLayout extends Container {
 
   set cols(newValue: number) {
     this._cols = newValue;
-    this.arrangeChildren();
   }
 
   get cols(): number {
@@ -67,8 +63,11 @@ export class GridLayout extends Container {
    * @param margin - Margin between elements.
    */
   set elementsMargin(margin: number) {
-    this.options.elementsMargin = margin;
-    this.arrangeChildren();
+    if (this.options) {
+      this.options.elementsMargin = margin;
+    } else {
+      this.options = { elementsMargin: margin };
+    }
   }
 
   /**
@@ -76,7 +75,7 @@ export class GridLayout extends Container {
    * @returns Margin between elements.
    */
   get elementsMargin(): number {
-    return this.options.elementsMargin;
+    return this.options?.elementsMargin ?? 0;
   }
 
   /**
@@ -84,8 +83,11 @@ export class GridLayout extends Container {
    * @param padding - Vertical padding between GridLayout border and its elements.
    */
   set vertPadding(padding: number) {
-    this.options.vertPadding = padding;
-    this.arrangeChildren();
+    if (this.options) {
+      this.options.vertPadding = padding;
+    } else {
+      this.options = { vertPadding: padding };
+    }
   }
 
   /**
@@ -93,7 +95,7 @@ export class GridLayout extends Container {
    * @returns Vertical padding between GridLayout border and its elements.
    */
   get vertPadding(): number {
-    return this.options.vertPadding;
+    return this.options?.vertPadding ?? 0;
   }
 
   /**
@@ -101,8 +103,11 @@ export class GridLayout extends Container {
    * @param padding - Horizontal padding between GridLayout border and its elements.
    */
   set horPadding(padding: number) {
-    this.options.horPadding = padding;
-    this.arrangeChildren();
+    if (this.options) {
+      this.options.horPadding = padding;
+    } else {
+      this.options = { horPadding: padding };
+    }
   }
 
   /**
@@ -110,14 +115,14 @@ export class GridLayout extends Container {
    * @returns Horizontal padding between GridLayout border and its elements.
    */
   get horPadding(): number {
-    return this.options.horPadding;
+    return this.options?.horPadding ?? 0;
   }
 
   /**
    * Arrange all elements basing in their sizes and component options.
    * Can be arranged vertically, horizontally or bidirectional.
    */
-  private arrangeChildren() {
+  arrangeChildren() {
     let x = this.options?.horPadding ?? 0;
     let y = this.options?.vertPadding ?? 0;
 

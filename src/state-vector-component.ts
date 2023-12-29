@@ -131,5 +131,6 @@ export class StateVectorComponent extends Container {
         new QubitCircle(0, 0, this.qubitCircleSize)
       );
     }
+    this.qubitCirclesGridContainer.arrangeChildren();
   }
 }
