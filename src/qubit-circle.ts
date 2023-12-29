@@ -10,45 +10,45 @@ import { Spacing } from "./spacing";
 export class QubitCircle extends Container {
   size: Size = "xl";
 
-  private _probabilityValue = 0;
-  private _probabilityCircle: PIXI.Graphics;
-  private _border: PIXI.Graphics;
-  private _phaseValue = 0;
-  private _phase: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
-  private _phaseHand: PIXI.Graphics; /* 位相の針 */
+  private _probability = 0;
+  private probabilityCircle: PIXI.Graphics;
+  private border: PIXI.Graphics;
+  private _phase = 0;
+  private phaseContainer: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
+  private phaseHand: PIXI.Graphics; /* 位相の針 */
 
   /**
    * 確率をセットする
    */
   set probability(value: number) {
-    this._probabilityValue = value;
+    this._probability = value;
 
-    this._probabilityCircle.clear();
+    this.probabilityCircle.clear();
 
     if (this.probability > 0) {
-      this._probabilityCircle.beginFill(Colors.bg.brand.default, 1);
+      this.probabilityCircle.beginFill(Colors.bg.brand.default, 1);
     }
 
     const radius =
       (Spacing.size.qubitCircle[this.size] / 2 -
         Spacing.borderWidth.qubitCircle[this.size]) *
       Math.sqrt(this.probability * 0.01);
-    this._probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
-    this._probabilityCircle.endFill();
+    this.probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
+    this.probabilityCircle.endFill();
 
-    this.drawPhaseHand(this.probability, this._phaseValue);
+    this.drawPhaseHand(this.probability, this._phase);
     this.drawBorder(this.probability);
   }
 
   get probability() {
-    return this._probabilityValue;
+    return this._probability;
   }
 
   /**
    * 位相をセットする
    */
   set phase(value: number) {
-    this._phaseValue = value;
+    this._phase = value;
     this.drawPhaseHand(this.probability, value);
   }
 
@@ -57,21 +57,21 @@ export class QubitCircle extends Container {
 
     this.size = size;
 
-    this._probabilityCircle = new PIXI.Graphics();
-    this.addChild(this._probabilityCircle);
+    this.probabilityCircle = new PIXI.Graphics();
+    this.addChild(this.probabilityCircle);
 
-    this._border = new PIXI.Graphics();
-    this.addChild(this._border);
+    this.border = new PIXI.Graphics();
+    this.addChild(this.border);
 
-    this._phase = new PIXI.Container();
-    this._phase.pivot = new PIXI.Point(
+    this.phaseContainer = new PIXI.Container();
+    this.phaseContainer.pivot = new PIXI.Point(
       Spacing.width.qubitCircle.phaseHand[this.size] / 2,
       0
     );
-    this._phase.position.set(this.center.x, this.center.y);
-    this._phaseHand = new PIXI.Graphics();
-    this._phase.addChild(this._phaseHand);
-    this.addChild(this._phase);
+    this.phaseContainer.position.set(this.center.x, this.center.y);
+    this.phaseHand = new PIXI.Graphics();
+    this.phaseContainer.addChild(this.phaseHand);
+    this.addChild(this.phaseContainer);
 
     this.probability = probability;
     this.drawBorder(probability);
@@ -90,13 +90,13 @@ export class QubitCircle extends Container {
   }
 
   protected drawBorder(probability: number) {
-    this._border.lineStyle(
+    this.border.lineStyle(
       Spacing.borderWidth.qubitCircle[this.size],
       this.borderColor(probability),
       1,
       0
     );
-    this._border.drawCircle(
+    this.border.drawCircle(
       this.center.x,
       this.center.y,
       Spacing.size.qubitCircle[this.size] / 2
@@ -104,10 +104,10 @@ export class QubitCircle extends Container {
   }
 
   protected drawPhaseHand(probability: number, phase: number) {
-    this._phaseHand.clear();
+    this.phaseHand.clear();
 
     if (probability > 0) {
-      this._phaseHand
+      this.phaseHand
         .beginFill(Colors.icon.default, 1)
         .drawRect(
           0,
@@ -118,7 +118,7 @@ export class QubitCircle extends Container {
         .endFill();
     }
 
-    this._phase.rotation = Math.PI - (phase / 180) * Math.PI;
+    this.phaseContainer.rotation = Math.PI - (phase / 180) * Math.PI;
   }
 
   protected borderColor(probability: number) {
