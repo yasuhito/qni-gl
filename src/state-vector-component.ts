@@ -49,9 +49,11 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 9) {
       this.qubitCircleSize = "xs";
       this.qubitCirclesGridContainer.cols = 32;
+      this.qubitCirclesGridContainer.elementsMargin = spacingInPx(0.25);
     } else if (this.qubitCount == 10) {
       this.qubitCircleSize = "xs";
       this.qubitCirclesGridContainer.cols = 64;
+      this.qubitCirclesGridContainer.elementsMargin = spacingInPx(0.25);
     }
 
     this.clear();
