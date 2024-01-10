@@ -21,7 +21,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = "default";
 
       this._shape.lineStyle(
-        Spacing.borderWidth.gate,
+        Spacing.borderWidth.gate[this.size],
         Colors.border.gate.idle,
         1,
         0
@@ -30,8 +30,8 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        GateComponent.size,
-        GateComponent.size,
+        this.sizeInPx,
+        this.sizeInPx,
         Spacing.cornerRadius.full
       );
       this._shape.endFill();
@@ -44,7 +44,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = "grab";
 
       this._shape.lineStyle(
-        Spacing.borderWidth.gate,
+        Spacing.borderWidth.gate[this.size],
         Colors.border.gate.hover,
         1,
         0
@@ -53,8 +53,8 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        GateComponent.size,
-        GateComponent.size,
+        this.sizeInPx,
+        this.sizeInPx,
         Spacing.cornerRadius.full
       );
       this._shape.endFill();
@@ -67,7 +67,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = "grabbing";
 
       this._shape.lineStyle(
-        Spacing.borderWidth.gate,
+        Spacing.borderWidth.gate[this.size],
         Colors.border.gate.grabbed,
         1,
         0
@@ -76,8 +76,8 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        GateComponent.size,
-        GateComponent.size,
+        this.sizeInPx,
+        this.sizeInPx,
         Spacing.cornerRadius.full
       );
       this._shape.endFill();
@@ -90,7 +90,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = "grab";
 
       this._shape.lineStyle(
-        Spacing.borderWidth.gate,
+        Spacing.borderWidth.gate[this.size],
         Colors.border.gate.active,
         1,
         0
@@ -99,8 +99,8 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.drawRoundedRect(
         0,
         0,
-        GateComponent.size,
-        GateComponent.size,
+        this.sizeInPx,
+        this.sizeInPx,
         Spacing.cornerRadius.full
       );
       this._shape.endFill();

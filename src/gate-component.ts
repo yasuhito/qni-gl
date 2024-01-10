@@ -3,6 +3,7 @@ import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
+import { Size } from "./size";
 import { spacingInPx } from "./util";
 
 /**
@@ -31,15 +32,22 @@ export class GateComponent extends Container {
 
   /**
    * ゲートの幅と高さ (ピクセル)
-   *
-   * @todo サイズごと (xl, lg, base, sm, xs) に定義する
    */
-  static size = spacingInPx(8);
+  static sizeInPx = {
+    xl: spacingInPx(12),
+    lg: spacingInPx(10),
+    base: spacingInPx(8),
+    sm: spacingInPx(6),
+    xs: spacingInPx(4),
+  };
 
   static radius = 4;
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");
+
+  size: Size = "base";
+  sizeInPx = GateComponent.sizeInPx[this.size];
 
   debug = false;
 
@@ -134,12 +142,12 @@ export class GateComponent extends Container {
 
           if (e.dropzone) {
             // snap した場合
-            this.position.set(GateComponent.size / 4, 0);
+            this.position.set(this.sizeInPx / 4, 0);
           } else {
             const newPos = this.parent.toLocal(e.globalPosition);
             this.position.set(
-              newPos.x - GateComponent.size / 2,
-              newPos.y - GateComponent.size / 2
+              newPos.x - this.sizeInPx / 2,
+              newPos.y - this.sizeInPx / 2
             );
           }
         },

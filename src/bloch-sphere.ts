@@ -113,8 +113,8 @@ export class BlochSphere extends JsonableMixin(GateComponent) {
       this._shape.drawRoundedRect(
         0,
         0,
-        GateComponent.size,
-        GateComponent.size,
+        this.sizeInPx,
+        this.sizeInPx,
         this.style.cornerRadius
       );
     }

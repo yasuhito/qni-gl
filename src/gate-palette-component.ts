@@ -107,7 +107,7 @@ export class GatePaletteComponent extends Container {
     this.graphics.drawRoundedRect(
       0,
       0,
-      GateComponent.size * maxRowLength +
+      GateComponent.sizeInPx.base * maxRowLength +
         GatePaletteComponent.gapBetweenGates * maxRowLength +
         GatePaletteComponent.horizontalPadding * 2 -
         GatePaletteComponent.gapBetweenGates,
