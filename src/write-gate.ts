@@ -136,8 +136,8 @@ export class WriteGate extends JsonableMixin(GateComponent) {
     this._shape.drawRoundedRect(
       0,
       0,
-      WriteGate.size,
-      WriteGate.size,
+      this.sizeInPx,
+      this.sizeInPx,
       this.style.cornerRadius
     );
     this._shape.endFill();

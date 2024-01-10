@@ -180,13 +180,13 @@ export class CircuitStepComponent extends Container {
   }
 
   private get componentWidth(): number {
-    return GateComponent.size * 1.5;
+    return GateComponent.sizeInPx.base * 1.5;
   }
 
   private get componentHeight(): number {
     return (
-      GateComponent.size * this._dropzones.children.length +
-      (this._dropzones.children.length - 1) * (GateComponent.size / 2) +
+      GateComponent.sizeInPx.base * this._dropzones.children.length +
+      (this._dropzones.children.length - 1) * (GateComponent.sizeInPx.base / 2) +
       CircuitStepComponent.paddingY * 2
     );
   }

@@ -139,8 +139,8 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
     this._shape.drawRoundedRect(
       0,
       0,
-      MeasurementGate.size,
-      MeasurementGate.size,
+      this.sizeInPx,
+      this.sizeInPx,
       this.style.cornerRadius
     );
     this._shape.endFill();
