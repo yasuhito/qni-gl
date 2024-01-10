@@ -21,7 +21,6 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = "default";
 
       this._shape.lineStyle(
-        // ゲートのサイズによって線の太さを変える
         Spacing.borderWidth.gate[this.size],
         Colors.border.gate.idle,
         1,

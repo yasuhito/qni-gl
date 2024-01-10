@@ -22,13 +22,12 @@ export const Spacing = {
     },
   },
   borderWidth: {
-    // gate: spacingInPx(0.5),
     gate: {
-      xl: spacingInPx(0.5),
-      lg: spacingInPx(0.5),
-      base: spacingInPx(0.5),
-      sm: spacingInPx(0.25),
-      xs: spacingInPx(0.25),
+      xl: 3,
+      lg: 2.5,
+      base: 2,
+      sm: 1.5,
+      xs: 1,
     },
     qubitCircle: {
       xl: spacingInPx(0.5),
