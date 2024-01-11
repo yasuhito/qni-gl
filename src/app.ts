@@ -304,8 +304,8 @@ export class App {
   private moveGate(gate: GateComponent, pointerPosition: PIXI.Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
-    this.circuit.steps.forEach((circuitStep) => {
-      circuitStep.dropzones.forEach((dropzone) => {
+    for (const circuitStep of this.circuit.steps) {
+      for (const dropzone of circuitStep.dropzones) {
         if (
           dropzone.isSnappable(
             gate,
@@ -318,8 +318,8 @@ export class App {
           snapDropzone = dropzone;
           gate.snapToDropzone(dropzone, pointerPosition);
         }
-      });
-    });
+      }
+    }
 
     if (
       snapDropzone &&

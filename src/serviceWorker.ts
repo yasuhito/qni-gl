@@ -10,7 +10,7 @@ self.addEventListener("message", (event) => {
   const qubitCount = event.data.qubitCount;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
-  const amplitudes = [];
+  const amplitudes: [number, number][] = [];
 
   for (let i = 0; i < vector.height; i++) {
     const c = vector.cell(0, i);

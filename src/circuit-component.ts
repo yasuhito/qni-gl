@@ -185,7 +185,7 @@ export class CircuitComponent extends Container {
   }
 
   toCircuitJSON() {
-    const cols = [];
+    const cols: string[] = [];
     for (const each of this.steps) {
       cols.push(each.toCircuitJSON());
     }
