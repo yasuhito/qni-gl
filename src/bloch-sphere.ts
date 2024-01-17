@@ -17,6 +17,9 @@ export class BlochSphere extends JsonableMixin(
   static grabbedBgColor = tailwindColors.white;
   static activeBgColor = tailwindColors.white;
 
+  // TODO: この値を消したときにブロッホ球に枠線が出ないようにする
+  static radius = 9999;
+
   static style = {
     idleBodyColor: null,
     idleBorderColor: null,
@@ -82,35 +85,36 @@ export class BlochSphere extends JsonableMixin(
   }
 
   private drawSphereLines() {
-    const center = new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
     const borderWidth = Spacing.borderWidth.gate[this.size];
 
     this._shape
       .lineStyle(1, tailwindColors.zinc[300], 1, 0)
-      .moveTo(borderWidth, center.y)
-      .lineTo(this.sizeInPx - borderWidth, center.y)
-      .moveTo(center.x, borderWidth)
-      .lineTo(center.x, this.sizeInPx - borderWidth)
+      .moveTo(borderWidth, this.center.y)
+      .lineTo(this.sizeInPx - borderWidth, this.center.y)
+      .moveTo(this.center.x, borderWidth)
+      .lineTo(this.center.x, this.sizeInPx - borderWidth)
       .drawEllipse(
-        center.x,
-        center.y,
+        this.center.x,
+        this.center.y,
         (this.sizeInPx - 2 * borderWidth) * 0.18,
         (this.sizeInPx - 2 * borderWidth) * 0.5
       )
       .drawEllipse(
-        center.x,
-        center.y,
+        this.center.x,
+        this.center.y,
         (this.sizeInPx - 2 * borderWidth) * 0.5,
         (this.sizeInPx - 2 * borderWidth) * 0.18
       );
   }
 
   private drawVectorEnd() {
-    const center = new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
-
     this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
     this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(center.x, center.y, 3);
+    this._shape.drawCircle(this.center.x, this.center.y, 3);
     this._shape.endFill();
+  }
+
+  private get center() {
+    return new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
   }
 }
