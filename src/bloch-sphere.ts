@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
@@ -17,21 +16,6 @@ export class BlochSphere extends JsonableMixin(
   static grabbedBgColor = tailwindColors.white;
   static activeBgColor = tailwindColors.white;
   static radius = 9999;
-
-  // static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
-  //   resolution: window.devicePixelRatio,
-  //   resourceOptions: {
-  //     scale: window.devicePixelRatio,
-  //   },
-  // });
-  static iconHover = PIXI.Texture.from("./assets/BlochSphere_hover.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
-  static iconGrabbed = PIXI.Texture.from("./assets/BlochSphere_grabbed.svg");
-  static iconActive = PIXI.Texture.from("./assets/BlochSphere_active.svg");
 
   static style = {
     idleBodyColor: null,
