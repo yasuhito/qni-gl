@@ -138,29 +138,6 @@ export class BlochSphere extends JsonableMixin(
     // );
   }
 
-  private updateGraphics(
-    bodyColor: string | null,
-    borderColor: string | null,
-    borderWidth: number | null = null
-  ) {
-    if (borderWidth !== null && borderColor !== null) {
-      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
-    }
-    if (bodyColor !== null) {
-      this._shape.beginFill(bodyColor, 1);
-    }
-    if (this.style.cornerRadius !== null) {
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        this.style.cornerRadius
-      );
-    }
-    this._shape.endFill();
-  }
-
   toCircuitJSON() {
     return '"Bloch"';
   }
