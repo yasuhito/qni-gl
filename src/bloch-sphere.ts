@@ -1,7 +1,8 @@
+import * as PIXI from "pixi.js";
+import * as tailwindColors from "tailwindcss/colors";
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
-import * as tailwindColors from "tailwindcss/colors";
 import { Spacing } from "./spacing";
 
 /**
@@ -51,29 +52,6 @@ export class BlochSphere extends JsonableMixin(
     this._shape.endFill();
   }
 
-  private drawSphereLines() {
-    const borderWidth = Spacing.borderWidth.gate[this.size];
-
-    this._shape
-      .lineStyle(1, tailwindColors.zinc[300], 1, 0)
-      .moveTo(borderWidth, this.sizeInPx / 2)
-      .lineTo(this.sizeInPx - borderWidth, this.sizeInPx / 2)
-      .moveTo(this.sizeInPx / 2, borderWidth)
-      .lineTo(this.sizeInPx / 2, this.sizeInPx - borderWidth)
-      .drawEllipse(
-        this.sizeInPx / 2,
-        this.sizeInPx / 2,
-        (this.sizeInPx - 2 * borderWidth) * 0.18,
-        (this.sizeInPx - 2 * borderWidth) * 0.5
-      )
-      .drawEllipse(
-        this.sizeInPx / 2,
-        this.sizeInPx / 2,
-        (this.sizeInPx - 2 * borderWidth) * 0.5,
-        (this.sizeInPx - 2 * borderWidth) * 0.18
-      );
-  }
-
   applyHoverStyle() {
     this._shape.clear();
     this._shape.zIndex = 0;
@@ -117,8 +95,6 @@ export class BlochSphere extends JsonableMixin(
   }
 
   applyActiveStyle() {
-    // this._sprite.texture = BlochSphere.iconActive;
-
     this._shape.clear();
     this._shape.zIndex = 0;
     this._shape.cursor = "grab";
@@ -140,5 +116,29 @@ export class BlochSphere extends JsonableMixin(
 
   toCircuitJSON() {
     return '"Bloch"';
+  }
+
+  private drawSphereLines() {
+    const center = new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
+    const borderWidth = Spacing.borderWidth.gate[this.size];
+
+    this._shape
+      .lineStyle(1, tailwindColors.zinc[300], 1, 0)
+      .moveTo(borderWidth, center.y)
+      .lineTo(this.sizeInPx - borderWidth, center.y)
+      .moveTo(center.x, borderWidth)
+      .lineTo(center.x, this.sizeInPx - borderWidth)
+      .drawEllipse(
+        center.x,
+        center.y,
+        (this.sizeInPx - 2 * borderWidth) * 0.18,
+        (this.sizeInPx - 2 * borderWidth) * 0.5
+      )
+      .drawEllipse(
+        center.x,
+        center.y,
+        (this.sizeInPx - 2 * borderWidth) * 0.5,
+        (this.sizeInPx - 2 * borderWidth) * 0.18
+      );
   }
 }
