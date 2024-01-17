@@ -45,11 +45,7 @@ export class BlochSphere extends JsonableMixin(
     super.applyIdleStyle();
 
     this.drawSphereLines();
-
-    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
-    this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
-    this._shape.endFill();
+    this.drawVectorEnd();
   }
 
   applyHoverStyle() {
@@ -59,39 +55,17 @@ export class BlochSphere extends JsonableMixin(
 
     super.applyHoverStyle();
     this.drawSphereLines();
-
-    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
-    this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
-    this._shape.endFill();
-
-    // this.updateGraphics(
-    //   this.style.hoverBodyColor,
-    //   this.style.hoverBorderColor,
-    //   this.style.hoverBorderWidth
-    // );
+    this.drawVectorEnd();
   }
 
   applyGrabbedStyle() {
-    // this._sprite.texture = BlochSphere.iconGrabbed;
-
     this._shape.clear();
     this._shape.zIndex = 10;
     this._shape.cursor = "grabbing";
 
     super.applyGrabbedStyle();
     this.drawSphereLines();
-
-    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
-    this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
-    this._shape.endFill();
-
-    // this.updateGraphics(
-    //   this.style.grabbedBodyColor,
-    //   this.style.grabbedBorderColor,
-    //   this.style.grabbedBorderWidth
-    // );
+    this.drawVectorEnd();
   }
 
   applyActiveStyle() {
@@ -101,17 +75,7 @@ export class BlochSphere extends JsonableMixin(
 
     super.applyActiveStyle();
     this.drawSphereLines();
-
-    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
-    this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
-    this._shape.endFill();
-
-    // this.updateGraphics(
-    //   this.style.activeBodyColor,
-    //   this.style.activeBorderColor,
-    //   this.style.activeBorderWidth
-    // );
+    this.drawVectorEnd();
   }
 
   toCircuitJSON() {
@@ -140,5 +104,14 @@ export class BlochSphere extends JsonableMixin(
         (this.sizeInPx - 2 * borderWidth) * 0.5,
         (this.sizeInPx - 2 * borderWidth) * 0.18
       );
+  }
+
+  private drawVectorEnd() {
+    const center = new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
+
+    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
+    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.drawCircle(center.x, center.y, 3);
+    this._shape.endFill();
   }
 }
