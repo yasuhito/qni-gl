@@ -14,6 +14,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<CircularGate> & TBase {
   class CircularGateMixinClass extends Base {
+    static bgColor = Colors.bg.brand.default;
+    static hoverBgColor = Colors.bg.brand.hover;
+    static grabbedBgColor = Colors.bg.brand.grabbed;
+    static activeBgColor = Colors.bg.brand.active;
+
     applyIdleStyle() {
       this._shape.clear();
 
@@ -26,7 +31,10 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.default, 1);
+      this._shape.beginFill(
+        (this.constructor as typeof CircularGateMixinClass).bgColor,
+        1
+      );
       this._shape.drawRoundedRect(
         0,
         0,
@@ -49,7 +57,10 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.hover, 1);
+      this._shape.beginFill(
+        (this.constructor as typeof CircularGateMixinClass).hoverBgColor,
+        1
+      );
       this._shape.drawRoundedRect(
         0,
         0,
@@ -72,7 +83,10 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+      this._shape.beginFill(
+        (this.constructor as typeof CircularGateMixinClass).grabbedBgColor,
+        1
+      );
       this._shape.drawRoundedRect(
         0,
         0,
@@ -95,7 +109,10 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.active, 1);
+      this._shape.beginFill(
+        (this.constructor as typeof CircularGateMixinClass).activeBgColor,
+        1
+      );
       this._shape.drawRoundedRect(
         0,
         0,

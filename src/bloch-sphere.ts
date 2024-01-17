@@ -1,19 +1,29 @@
 import * as PIXI from "pixi.js";
+import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import * as tailwindColors from "tailwindcss/colors";
+import { Spacing } from "./spacing";
 
 /**
  * @noInheritDoc
  */
-export class BlochSphere extends JsonableMixin(GateComponent) {
+export class BlochSphere extends JsonableMixin(
+  CircularGateMixin(GateComponent)
+) {
   static gateType = "BlochSphere";
+  static bgColor = tailwindColors.white;
+  static hoverBgColor = tailwindColors.purple[50];
+  static grabbedBgColor = tailwindColors.white;
+  static activeBgColor = tailwindColors.white;
   static radius = 9999;
-  static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
+
+  // static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
+  //   resolution: window.devicePixelRatio,
+  //   resourceOptions: {
+  //     scale: window.devicePixelRatio,
+  //   },
+  // });
   static iconHover = PIXI.Texture.from("./assets/BlochSphere_hover.svg", {
     resolution: window.devicePixelRatio,
     resourceOptions: {
@@ -47,55 +57,101 @@ export class BlochSphere extends JsonableMixin(GateComponent) {
   }
 
   applyIdleStyle() {
-    this._sprite.texture = BlochSphere.icon;
+    super.applyIdleStyle();
 
-    this._shape.clear();
-    this._shape.zIndex = 0;
-    this._shape.cursor = "default";
+    this.drawSphereLines();
 
-    this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
+    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
+    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
+    this._shape.endFill();
+  }
+
+  private drawSphereLines() {
+    const borderWidth = Spacing.borderWidth.gate[this.size];
+
+    this._shape
+      .lineStyle(1, tailwindColors.zinc[300], 1, 0)
+      .moveTo(borderWidth, this.sizeInPx / 2)
+      .lineTo(this.sizeInPx - borderWidth, this.sizeInPx / 2)
+      .moveTo(this.sizeInPx / 2, borderWidth)
+      .lineTo(this.sizeInPx / 2, this.sizeInPx - borderWidth)
+      .drawEllipse(
+        this.sizeInPx / 2,
+        this.sizeInPx / 2,
+        (this.sizeInPx - 2 * borderWidth) * 0.18,
+        (this.sizeInPx - 2 * borderWidth) * 0.5
+      )
+      .drawEllipse(
+        this.sizeInPx / 2,
+        this.sizeInPx / 2,
+        (this.sizeInPx - 2 * borderWidth) * 0.5,
+        (this.sizeInPx - 2 * borderWidth) * 0.18
+      );
   }
 
   applyHoverStyle() {
-    this._sprite.texture = BlochSphere.iconHover;
-
     this._shape.clear();
     this._shape.zIndex = 0;
     this._shape.cursor = "grab";
 
-    this.updateGraphics(
-      this.style.hoverBodyColor,
-      this.style.hoverBorderColor,
-      this.style.hoverBorderWidth
-    );
+    super.applyHoverStyle();
+    this.drawSphereLines();
+
+    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
+    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
+    this._shape.endFill();
+
+    // this.updateGraphics(
+    //   this.style.hoverBodyColor,
+    //   this.style.hoverBorderColor,
+    //   this.style.hoverBorderWidth
+    // );
   }
 
   applyGrabbedStyle() {
-    this._sprite.texture = BlochSphere.iconGrabbed;
+    // this._sprite.texture = BlochSphere.iconGrabbed;
 
     this._shape.clear();
     this._shape.zIndex = 10;
     this._shape.cursor = "grabbing";
 
-    this.updateGraphics(
-      this.style.grabbedBodyColor,
-      this.style.grabbedBorderColor,
-      this.style.grabbedBorderWidth
-    );
+    super.applyGrabbedStyle();
+    this.drawSphereLines();
+
+    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
+    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
+    this._shape.endFill();
+
+    // this.updateGraphics(
+    //   this.style.grabbedBodyColor,
+    //   this.style.grabbedBorderColor,
+    //   this.style.grabbedBorderWidth
+    // );
   }
 
   applyActiveStyle() {
-    this._sprite.texture = BlochSphere.iconActive;
+    // this._sprite.texture = BlochSphere.iconActive;
 
     this._shape.clear();
     this._shape.zIndex = 0;
     this._shape.cursor = "grab";
 
-    this.updateGraphics(
-      this.style.activeBodyColor,
-      this.style.activeBorderColor,
-      this.style.activeBorderWidth
-    );
+    super.applyActiveStyle();
+    this.drawSphereLines();
+
+    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
+    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, 3);
+    this._shape.endFill();
+
+    // this.updateGraphics(
+    //   this.style.activeBodyColor,
+    //   this.style.activeBorderColor,
+    //   this.style.activeBorderWidth
+    // );
   }
 
   private updateGraphics(
