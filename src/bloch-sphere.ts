@@ -16,7 +16,6 @@ export class BlochSphere extends JsonableMixin(
   static hoverBgColor = tailwindColors.purple[50];
   static grabbedBgColor = tailwindColors.white;
   static activeBgColor = tailwindColors.white;
-  static radius = 9999;
 
   static style = {
     idleBodyColor: null,
