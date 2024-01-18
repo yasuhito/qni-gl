@@ -4,6 +4,7 @@ import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
+import { Colors } from "./colors";
 
 /**
  * @noInheritDoc
@@ -88,10 +89,9 @@ export class BlochSphere extends JsonableMixin(
       );
   }
 
-  // FIXME: tailwindColors.cyan[500] を定数化する
   private drawVectorEnd() {
-    this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
-    this._shape.beginFill(tailwindColors.cyan[500], 1);
+    this._shape.lineStyle(1, Colors.bg.blochSphere.vectorEnd.inactive, 1, 0);
+    this._shape.beginFill(Colors.bg.blochSphere.vectorEnd.inactive, 1);
     this._shape.drawCircle(
       this.center.x,
       this.center.y,

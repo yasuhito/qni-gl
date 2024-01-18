@@ -15,6 +15,12 @@ export const Colors = {
       classical: tailwindColors.zinc["300"],
       quantum: tailwindColors.zinc["900"],
     },
+    blochSphere: {
+      vectorEnd: {
+        // bg.brand.default を使う
+        inactive: tailwindColors.sky["500"],
+      },
+    },
   },
   border: {
     gate: {
