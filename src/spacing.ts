@@ -20,6 +20,9 @@ export const Spacing = {
       sm: spacingInPx(6),
       xs: spacingInPx(4),
     },
+    blochSphere: {
+      vectorEnd: spacingInPx(2),
+    },
   },
   borderWidth: {
     gate: {

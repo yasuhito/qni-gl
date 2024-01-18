@@ -89,11 +89,14 @@ export class BlochSphere extends JsonableMixin(
   }
 
   // FIXME: tailwindColors.cyan[500] を定数化する
-  // FIXME: vectorEnd の半径 3 を定数化する
   private drawVectorEnd() {
     this._shape.lineStyle(1, tailwindColors.cyan[500], 1, 0);
     this._shape.beginFill(tailwindColors.cyan[500], 1);
-    this._shape.drawCircle(this.center.x, this.center.y, 3);
+    this._shape.drawCircle(
+      this.center.x,
+      this.center.y,
+      Spacing.size.blochSphere.vectorEnd / 2
+    );
     this._shape.endFill();
   }
 
