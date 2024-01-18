@@ -72,6 +72,8 @@ export class BlochSphere extends JsonableMixin(
       .lineTo(this.sizeInPx - borderWidth, this.center.y)
       .moveTo(this.center.x, borderWidth)
       .lineTo(this.center.x, this.sizeInPx - borderWidth)
+      .moveTo(this.sizeInPx * 0.35, this.sizeInPx * 0.65)
+      .lineTo(this.sizeInPx * 0.65, this.sizeInPx * 0.35)
       .drawEllipse(
         this.center.x,
         this.center.y,
