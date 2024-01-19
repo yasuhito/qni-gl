@@ -14,10 +14,14 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<CircularGate> & TBase {
   class CircularGateMixinClass extends Base {
-    static bgColor = Colors.bg.brand.default;
-    static hoverBgColor = Colors.bg.brand.hover;
-    static grabbedBgColor = Colors.bg.brand.grabbed;
-    static activeBgColor = Colors.bg.brand.active;
+    static style = {
+      bg: {
+        default: Colors.bg.gate.default,
+        hover: Colors.bg.gate.hover,
+        grabbed: Colors.bg.gate.grabbed,
+        active: Colors.bg.gate.active,
+      },
+    };
 
     applyIdleStyle() {
       this._shape.clear();
@@ -32,7 +36,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0
       );
       this._shape.beginFill(
-        (this.constructor as typeof CircularGateMixinClass).bgColor,
+        (this.constructor as typeof CircularGateMixinClass).style.bg.default,
         1
       );
       this._shape.drawRoundedRect(
@@ -58,7 +62,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0
       );
       this._shape.beginFill(
-        (this.constructor as typeof CircularGateMixinClass).hoverBgColor,
+        (this.constructor as typeof CircularGateMixinClass).style.bg.hover,
         1
       );
       this._shape.drawRoundedRect(
@@ -84,7 +88,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0
       );
       this._shape.beginFill(
-        (this.constructor as typeof CircularGateMixinClass).grabbedBgColor,
+        (this.constructor as typeof CircularGateMixinClass).style.bg.grabbed,
         1
       );
       this._shape.drawRoundedRect(
@@ -110,7 +114,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0
       );
       this._shape.beginFill(
-        (this.constructor as typeof CircularGateMixinClass).activeBgColor,
+        (this.constructor as typeof CircularGateMixinClass).style.bg.active,
         1
       );
       this._shape.drawRoundedRect(

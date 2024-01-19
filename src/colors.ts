@@ -5,6 +5,11 @@ export const Colors = {
     default: tailwindColors.white,
     brand: {
       default: tailwindColors.sky["500"],
+    },
+    gate: {
+      get default() {
+        return Colors.bg.brand.default;
+      },
       hover: tailwindColors.sky["600"],
       grabbed: tailwindColors.purple["500"],
       active: tailwindColors.sky["500"],

@@ -62,7 +62,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
       1,
       0
     );
-    this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+    this._shape.beginFill(Colors.bg.gate.grabbed, 1);
     this._shape.drawRoundedRect(
       0,
       0,

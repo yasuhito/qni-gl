@@ -12,12 +12,14 @@ export class BlochSphere extends JsonableMixin(
   CircularGateMixin(GateComponent)
 ) {
   static gateType = "BlochSphere";
-
-  // FIXME: 見た目の情報をまとめて static style 以下に移動する
-  static bgColor = Colors.bg.blochSphere.body.default;
-  static hoverBgColor = Colors.bg.blochSphere.body.hover;
-  static grabbedBgColor = Colors.bg.blochSphere.body.grabbed;
-  static activeBgColor = Colors.bg.blochSphere.body.active;
+  static style = {
+    bg: {
+      default: Colors.bg.blochSphere.body.default,
+      hover: Colors.bg.blochSphere.body.hover,
+      grabbed: Colors.bg.blochSphere.body.grabbed,
+      active: Colors.bg.blochSphere.body.active,
+    },
+  };
 
   applyIdleStyle() {
     super.applyIdleStyle();
