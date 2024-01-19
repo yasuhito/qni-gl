@@ -18,6 +18,31 @@ export const Colors = {
       classical: tailwindColors.zinc["300"],
       quantum: tailwindColors.zinc["900"],
     },
+    swapGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    controlGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    antiControlGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    writeGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    measurementGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
     blochSphere: {
       body: {
         default: tailwindColors.white,

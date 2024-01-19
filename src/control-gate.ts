@@ -38,6 +38,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
       1,
       0
     );
+    this._shape.beginFill(Colors.bg.controlGate.body.hover, 1);
     this._shape.drawRoundedRect(
       0,
       0,
