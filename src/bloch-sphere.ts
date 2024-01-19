@@ -19,9 +19,6 @@ export class BlochSphere extends JsonableMixin(
   static grabbedBgColor = Colors.bg.blochSphere.body.grabbed;
   static activeBgColor = Colors.bg.blochSphere.body.active;
 
-  // FIXME: この値を消したときにブロッホ球に枠線が出ないようにする
-  static radius = 9999;
-
   applyIdleStyle() {
     super.applyIdleStyle();
     this.drawSphereLines();

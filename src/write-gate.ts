@@ -14,6 +14,7 @@ export class WriteGate extends JsonableMixin(GateComponent) {
   static iconGrabbed = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconGrabbedDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconActive = PIXI.Texture.from("./assets/Placeholder.svg");
+  static borderedOnPalette = true;
 
   static style = {
     idleBodyColor: null,
@@ -56,7 +57,9 @@ export class WriteGate extends JsonableMixin(GateComponent) {
     if (this.dropzone) {
       this._sprite.texture = klass.iconIdleDropzone;
     } else {
-      this._sprite.texture = klass.icon;
+      if (klass.icon) {
+        this._sprite.texture = klass.icon;
+      }
     }
 
     this._shape.clear();

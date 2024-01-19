@@ -40,8 +40,7 @@ export class GateComponent extends Container {
     sm: spacingInPx(6),
     xs: spacingInPx(4),
   };
-
-  static radius = 4;
+  static borderedOnPalette = false;
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon: PIXI.Texture<PIXI.Resource> | null = null; // PIXI.Texture.from("./assets/Placeholder.svg");

@@ -15,6 +15,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+  static borderedOnPalette = true;
 
   applyIdleStyle() {
     this._shape.clear();

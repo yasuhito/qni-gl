@@ -15,6 +15,8 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+  static borderedOnPalette = true;
+
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Measurement_idle_dropzone.svg"
   );

@@ -15,6 +15,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+  static borderedOnPalette = true;
 
   applyIdleStyle() {
     this._shape.clear();

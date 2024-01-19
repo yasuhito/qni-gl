@@ -8,7 +8,6 @@ import { JsonableMixin } from "./jsonable-mixin";
  */
 export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
   static gateType = "XGate";
-  static radius = 9999;
   static icon = PIXI.Texture.from("./assets/X.svg", {
     resolution: window.devicePixelRatio,
     resourceOptions: {
