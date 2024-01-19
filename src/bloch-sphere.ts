@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
@@ -15,10 +14,10 @@ export class BlochSphere extends JsonableMixin(
   static gateType = "BlochSphere";
 
   // FIXME: 見た目の情報をまとめて static style 以下に移動する
-  static bgColor = tailwindColors.white;
-  static hoverBgColor = tailwindColors.purple[50];
-  static grabbedBgColor = tailwindColors.white;
-  static activeBgColor = tailwindColors.white;
+  static bgColor = Colors.bg.blochSphere.body.default;
+  static hoverBgColor = Colors.bg.blochSphere.body.hover;
+  static grabbedBgColor = Colors.bg.blochSphere.body.grabbed;
+  static activeBgColor = Colors.bg.blochSphere.body.active;
 
   // FIXME: この値を消したときにブロッホ球に枠線が出ないようにする
   static radius = 9999;
@@ -66,9 +65,8 @@ export class BlochSphere extends JsonableMixin(
   private drawSphereLines() {
     const borderWidth = Spacing.borderWidth.gate[this.size];
 
-    // FIXME: tailwindColors.zinc[300] を定数化する
     this._shape
-      .lineStyle(1, tailwindColors.zinc[300], 1, 0)
+      .lineStyle(1, Colors.bg.blochSphere.lines, 1, 0)
       .moveTo(borderWidth, this.center.y)
       .lineTo(this.sizeInPx - borderWidth, this.center.y)
       .moveTo(this.center.x, borderWidth)

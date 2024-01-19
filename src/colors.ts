@@ -2,9 +2,7 @@ import * as tailwindColors from "tailwindcss/colors";
 
 export const Colors = {
   bg: {
-    default: {
-      default: tailwindColors.white,
-    },
+    default: tailwindColors.white,
     brand: {
       default: tailwindColors.sky["500"],
       hover: tailwindColors.sky["600"],
@@ -16,9 +14,17 @@ export const Colors = {
       quantum: tailwindColors.zinc["900"],
     },
     blochSphere: {
+      body: {
+        default: tailwindColors.white,
+        hover: tailwindColors.purple[50],
+        grabbed: tailwindColors.white,
+        active: tailwindColors.white,
+      },
+      lines: tailwindColors.zinc["300"],
       vectorEnd: {
-        // bg.brand.default を使う
-        inactive: tailwindColors.sky["500"],
+        get inactive() {
+          return Colors.bg.brand.default;
+        },
       },
     },
   },
