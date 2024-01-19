@@ -15,6 +15,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+  static borderedOnPalette = true;
 
   applyIdleStyle() {
     this._shape.clear();
@@ -37,6 +38,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
       1,
       0
     );
+    this._shape.beginFill(Colors.bg.antiControlGate.body.hover, 1);
     this._shape.drawRoundedRect(
       0,
       0,
@@ -61,7 +63,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
       1,
       0
     );
-    this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+    this._shape.beginFill(Colors.bg.gate.grabbed, 1);
     this._shape.drawRoundedRect(
       0,
       0,

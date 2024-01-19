@@ -3,6 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { Colors } from "./colors";
 
 /**
  * @noInheritDoc
@@ -15,6 +16,8 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+  static borderedOnPalette = true;
+
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Measurement_idle_dropzone.svg"
   );
@@ -32,7 +35,7 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
     idleBodyColor: null,
     idleBorderColor: null,
 
-    hoverBodyColor: null,
+    hoverBodyColor: Colors.bg.controlGate.body.hover,
     hoverBorderColor: tailwindColors.purple["500"],
     hoverBorderWidth: 2,
 

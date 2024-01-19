@@ -3,6 +3,7 @@ import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { spacingInPx } from "./util";
+import { Spacing } from "./spacing";
 
 /**
  * @noInheritDoc
@@ -25,13 +26,16 @@ export class GateSourceComponent extends Container {
     this.addChild(this.border);
 
     this.border.lineStyle(2, GateSourceComponent.borderColor, 1, 0);
-    this.border.drawRoundedRect(
-      this.x,
-      this.y,
-      GateSourceComponent.size,
-      GateSourceComponent.size,
-      this.gateClass.radius
-    );
+
+    if (this.gateClass.borderedOnPalette) {
+      this.border.drawRoundedRect(
+        this.x,
+        this.y,
+        GateSourceComponent.size,
+        GateSourceComponent.size,
+        Spacing.cornerRadius.gate
+      );
+    }
   }
 
   generateNewGate(): GateComponent {

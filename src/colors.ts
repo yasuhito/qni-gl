@@ -2,11 +2,14 @@ import * as tailwindColors from "tailwindcss/colors";
 
 export const Colors = {
   bg: {
-    default: {
-      default: tailwindColors.white,
-    },
+    default: tailwindColors.white,
     brand: {
       default: tailwindColors.sky["500"],
+    },
+    gate: {
+      get default() {
+        return Colors.bg.brand.default;
+      },
       hover: tailwindColors.sky["600"],
       grabbed: tailwindColors.purple["500"],
       active: tailwindColors.sky["500"],
@@ -14,6 +17,45 @@ export const Colors = {
     wire: {
       classical: tailwindColors.zinc["300"],
       quantum: tailwindColors.zinc["900"],
+    },
+    swapGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    controlGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    antiControlGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    writeGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    measurementGate: {
+      body: {
+        hover: tailwindColors.purple[50],
+      },
+    },
+    blochSphere: {
+      body: {
+        default: tailwindColors.white,
+        hover: tailwindColors.purple[50],
+        grabbed: tailwindColors.white,
+        active: tailwindColors.white,
+      },
+      lines: tailwindColors.zinc["300"],
+      vectorEnd: {
+        get inactive() {
+          return Colors.bg.brand.default;
+        },
+      },
     },
   },
   border: {

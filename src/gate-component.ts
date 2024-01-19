@@ -40,11 +40,10 @@ export class GateComponent extends Container {
     sm: spacingInPx(6),
     xs: spacingInPx(4),
   };
-
-  static radius = 4;
+  static borderedOnPalette = false;
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
-  static icon = PIXI.Texture.from("./assets/Placeholder.svg");
+  static icon: PIXI.Texture<PIXI.Resource> | null = null; // PIXI.Texture.from("./assets/Placeholder.svg");
 
   size: Size = "base";
   sizeInPx = GateComponent.sizeInPx[this.size];
@@ -198,11 +197,13 @@ export class GateComponent extends Container {
     // this will allow it to respond to mouse and touch events
     this.eventMode = "static";
 
-    // Scale mode for pixelation
-    klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    if (klass.icon !== null) {
+      // Scale mode for pixelation
+      klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
-    this._sprite = new PIXI.Sprite(klass.icon);
-    this.addChild(this._sprite);
+      this._sprite = new PIXI.Sprite(klass.icon);
+      this.addChild(this._sprite);
+    }
 
     // setup events for mouse + touch using
     // the pointer events

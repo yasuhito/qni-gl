@@ -26,7 +26,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.default, 1);
+      this._shape.beginFill(Colors.bg.gate.default, 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -49,7 +49,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.hover, 1);
+      this._shape.beginFill(Colors.bg.gate.hover, 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -72,7 +72,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+      this._shape.beginFill(Colors.bg.gate.grabbed, 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -95,7 +95,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.active, 1);
+      this._shape.beginFill(Colors.bg.gate.active, 1);
       this._shape.drawRoundedRect(
         0,
         0,

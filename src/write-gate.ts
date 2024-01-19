@@ -3,6 +3,7 @@ import * as tailwindColors from "tailwindcss/colors";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { Colors } from "./colors";
 
 /**
  * @noInheritDoc
@@ -14,12 +15,13 @@ export class WriteGate extends JsonableMixin(GateComponent) {
   static iconGrabbed = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconGrabbedDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
   static iconActive = PIXI.Texture.from("./assets/Placeholder.svg");
+  static borderedOnPalette = true;
 
   static style = {
     idleBodyColor: null,
     idleBorderColor: null,
 
-    hoverBodyColor: null,
+    hoverBodyColor: Colors.bg.writeGate.body.hover,
     hoverBorderColor: tailwindColors.purple["500"],
     hoverBorderWidth: 2,
 
@@ -56,7 +58,9 @@ export class WriteGate extends JsonableMixin(GateComponent) {
     if (this.dropzone) {
       this._sprite.texture = klass.iconIdleDropzone;
     } else {
-      this._sprite.texture = klass.icon;
+      if (klass.icon) {
+        this._sprite.texture = klass.icon;
+      }
     }
 
     this._shape.clear();

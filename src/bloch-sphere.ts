@@ -1,127 +1,103 @@
 import * as PIXI from "pixi.js";
+import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { Spacing } from "./spacing";
+import { Colors } from "./colors";
 
 /**
  * @noInheritDoc
  */
-export class BlochSphere extends JsonableMixin(GateComponent) {
+export class BlochSphere extends JsonableMixin(
+  CircularGateMixin(GateComponent)
+) {
   static gateType = "BlochSphere";
-  static radius = 9999;
-  static icon = PIXI.Texture.from("./assets/BlochSphere.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
-  static iconHover = PIXI.Texture.from("./assets/BlochSphere_hover.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
-  static iconGrabbed = PIXI.Texture.from("./assets/BlochSphere_grabbed.svg");
-  static iconActive = PIXI.Texture.from("./assets/BlochSphere_active.svg");
-
   static style = {
-    idleBodyColor: null,
-    idleBorderColor: null,
-
-    hoverBodyColor: null,
-    hoverBorderColor: null,
-    hoverBorderWidth: null,
-
-    grabbedBodyColor: null,
-    grabbedBorderColor: null,
-    grabbedBorderWidth: null,
-
-    activeBodyColor: null,
-    activeBorderColor: null,
-    activeBorderWidth: null,
-
-    cornerRadius: null,
+    bg: {
+      default: Colors.bg.blochSphere.body.default,
+      hover: Colors.bg.blochSphere.body.hover,
+      grabbed: Colors.bg.blochSphere.body.grabbed,
+      active: Colors.bg.blochSphere.body.active,
+    },
   };
 
-  get style(): typeof BlochSphere.style {
-    return BlochSphere.style;
-  }
-
   applyIdleStyle() {
-    this._sprite.texture = BlochSphere.icon;
-
-    this._shape.clear();
-    this._shape.zIndex = 0;
-    this._shape.cursor = "default";
-
-    this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
+    super.applyIdleStyle();
+    this.drawSphereLines();
+    this.drawVectorEnd();
   }
 
   applyHoverStyle() {
-    this._sprite.texture = BlochSphere.iconHover;
-
     this._shape.clear();
     this._shape.zIndex = 0;
     this._shape.cursor = "grab";
 
-    this.updateGraphics(
-      this.style.hoverBodyColor,
-      this.style.hoverBorderColor,
-      this.style.hoverBorderWidth
-    );
+    super.applyHoverStyle();
+    this.drawSphereLines();
+    this.drawVectorEnd();
   }
 
   applyGrabbedStyle() {
-    this._sprite.texture = BlochSphere.iconGrabbed;
-
     this._shape.clear();
     this._shape.zIndex = 10;
     this._shape.cursor = "grabbing";
 
-    this.updateGraphics(
-      this.style.grabbedBodyColor,
-      this.style.grabbedBorderColor,
-      this.style.grabbedBorderWidth
-    );
+    super.applyGrabbedStyle();
+    this.drawSphereLines();
+    this.drawVectorEnd();
   }
 
   applyActiveStyle() {
-    this._sprite.texture = BlochSphere.iconActive;
-
     this._shape.clear();
     this._shape.zIndex = 0;
     this._shape.cursor = "grab";
 
-    this.updateGraphics(
-      this.style.activeBodyColor,
-      this.style.activeBorderColor,
-      this.style.activeBorderWidth
-    );
-  }
-
-  private updateGraphics(
-    bodyColor: string | null,
-    borderColor: string | null,
-    borderWidth: number | null = null
-  ) {
-    if (borderWidth !== null && borderColor !== null) {
-      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
-    }
-    if (bodyColor !== null) {
-      this._shape.beginFill(bodyColor, 1);
-    }
-    if (this.style.cornerRadius !== null) {
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        this.style.cornerRadius
-      );
-    }
-    this._shape.endFill();
+    super.applyActiveStyle();
+    this.drawSphereLines();
+    this.drawVectorEnd();
   }
 
   toCircuitJSON() {
     return '"Bloch"';
+  }
+
+  private drawSphereLines() {
+    const borderWidth = Spacing.borderWidth.gate[this.size];
+
+    this._shape
+      .lineStyle(1, Colors.bg.blochSphere.lines, 1, 0)
+      .moveTo(borderWidth, this.center.y)
+      .lineTo(this.sizeInPx - borderWidth, this.center.y)
+      .moveTo(this.center.x, borderWidth)
+      .lineTo(this.center.x, this.sizeInPx - borderWidth)
+      .moveTo(this.sizeInPx * 0.35, this.sizeInPx * 0.65)
+      .lineTo(this.sizeInPx * 0.65, this.sizeInPx * 0.35)
+      .drawEllipse(
+        this.center.x,
+        this.center.y,
+        (this.sizeInPx - 2 * borderWidth) * 0.18,
+        (this.sizeInPx - 2 * borderWidth) * 0.5
+      )
+      .drawEllipse(
+        this.center.x,
+        this.center.y,
+        (this.sizeInPx - 2 * borderWidth) * 0.5,
+        (this.sizeInPx - 2 * borderWidth) * 0.18
+      );
+  }
+
+  private drawVectorEnd() {
+    this._shape.lineStyle(1, Colors.bg.blochSphere.vectorEnd.inactive, 1, 0);
+    this._shape.beginFill(Colors.bg.blochSphere.vectorEnd.inactive, 1);
+    this._shape.drawCircle(
+      this.center.x,
+      this.center.y,
+      Spacing.size.blochSphere.vectorEnd / 2
+    );
+    this._shape.endFill();
+  }
+
+  private get center() {
+    return new PIXI.Point(this.sizeInPx / 2, this.sizeInPx / 2);
   }
 }
