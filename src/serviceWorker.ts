@@ -9,6 +9,7 @@ self.addEventListener("install", () => {
 self.addEventListener("message", (event) => {
   const circuitJson = event.data.circuitJson;
   const qubitCount = event.data.qubitCount;
+  const stepIndex = event.data.stepIndex;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
   const amplitudes: [number, number][] = [];
@@ -32,6 +33,7 @@ self.addEventListener("message", (event) => {
       const params = new URLSearchParams({
         id: circuitJson,
         qubitCount: qubitCount,
+        stepIndex: stepIndex,
       });
 
       const response = await fetch(

@@ -10004,6 +10004,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
     self.addEventListener("message", function (event) {
         var circuitJson = event.data.circuitJson;
         var qubitCount = event.data.qubitCount;
+        var stepIndex = event.data.stepIndex;
         var simulator = new yc("0".repeat(qubitCount));
         var vector = simulator.state.matrix.clone();
         var amplitudes = [];
@@ -10022,6 +10023,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             params = new URLSearchParams({
                                 id: circuitJson,
                                 qubitCount: qubitCount,
+                                stepIndex: stepIndex,
                             });
                             return [4 /*yield*/, fetch("http://localhost:3000/backend.json?".concat(params), {
                                     method: "GET",

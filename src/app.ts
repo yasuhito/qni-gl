@@ -385,6 +385,7 @@ export class App {
     this.worker.postMessage({
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
+      stepIndex: this.circuit.activeStepIndex,
     });
   }
 }
