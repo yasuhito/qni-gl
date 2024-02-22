@@ -17,6 +17,51 @@ self.addEventListener("message", (event) => {
     amplitudes.push([c.real, c.imag]);
   }
 
+  // バックエンドを呼ぶ
+  async function call_backend() {
+    try {
+      // const params = new URLSearchParams({
+      //   qubitCount,
+      //   stepIndex,
+      //   targets,
+      //   backend,
+      //   id: json,
+      //   steps: JSON.stringify(steps),
+      // })
+      const params = new URLSearchParams({})
+
+      // TODO: ここで localhost の Rails を呼ぶ
+      // まずは Rails がポート何番で立ち上がるかを確認。
+      const response = await fetch(`http://localhost:3000/backend.json?${params}`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to connect to Qni's backend endpoint.")
+      }
+
+      const jsondata = await response.json()
+      console.dir(jsondata)
+
+      for (let i = 0; i < jsondata.length; i++) {
+        const stepResult = jsondata[i]
+        self.postMessage({
+          type: 'step',
+          step: i,
+          amplitudes: stepResult['amplitudes'],
+          blochVectors: stepResult['blochVectors'],
+          measuredBits: stepResult['measuredBits'],
+          flags: {},
+        })
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+  }
+
+  call_backend()
+
   self.postMessage({
     type: "finished",
     qubitCount: qubitCount,
