@@ -10,9 +10,12 @@ self.addEventListener("message", (event) => {
   const circuitJson = event.data.circuitJson;
   const qubitCount = event.data.qubitCount;
   const stepIndex = event.data.stepIndex;
+  const targets = event.data.targets;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
   const amplitudes: [number, number][] = [];
+
+  console.dir(targets)
 
   for (let i = 0; i < vector.height; i++) {
     const c = vector.cell(0, i);
@@ -34,6 +37,7 @@ self.addEventListener("message", (event) => {
         id: circuitJson,
         qubitCount: qubitCount,
         stepIndex: stepIndex,
+        targets: targets
       });
 
       const response = await fetch(

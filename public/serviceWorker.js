@@ -10005,9 +10005,11 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
         var circuitJson = event.data.circuitJson;
         var qubitCount = event.data.qubitCount;
         var stepIndex = event.data.stepIndex;
+        var targets = event.data.targets;
         var simulator = new yc("0".repeat(qubitCount));
         var vector = simulator.state.matrix.clone();
         var amplitudes = [];
+        console.dir(targets);
         for (var i = 0; i < vector.height; i++) {
             var c = vector.cell(0, i);
             amplitudes.push([c.real, c.imag]);
@@ -10024,6 +10026,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                                 id: circuitJson,
                                 qubitCount: qubitCount,
                                 stepIndex: stepIndex,
+                                targets: targets
                             });
                             return [4 /*yield*/, fetch("http://localhost:3000/backend.json?".concat(params), {
                                     method: "GET",
