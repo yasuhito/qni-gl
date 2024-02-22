@@ -1,3 +1,5 @@
+require 'cirq'
+
 class BackendController < ApplicationController
   def show
     circuit_id = params[:id]
@@ -11,5 +13,11 @@ class BackendController < ApplicationController
     Rails.logger.debug "step_index = #{step_index}"
     Rails.logger.debug "targets = [#{targets.join(', ')}]"
     Rails.logger.debug "steps = #{steps}"
+
+    @step_results = Cirq.new(circuit_id: circuit_id,
+                             qubit_count: qubit_count,
+                             step_index: step_index,
+                             steps: steps,
+                             targets: targets).run
   end
 end

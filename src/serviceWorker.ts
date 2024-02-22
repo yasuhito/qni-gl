@@ -24,14 +24,6 @@ self.addEventListener("message", (event) => {
   // バックエンドを呼ぶ
   async function call_backend() {
     try {
-      // const params = new URLSearchParams({
-      //   qubitCount,
-      //   stepIndex,
-      //   targets,
-      //   backend,
-      //   id: json,
-      //   steps: JSON.stringify(steps),
-      // })
       const params = new URLSearchParams({
         id: circuitJson,
         qubitCount: qubitCount,
@@ -68,13 +60,9 @@ self.addEventListener("message", (event) => {
       // eslint-disable-next-line no-console
       console.error(error);
     }
+
+    self.postMessage({type: 'finish'})
   }
 
   call_backend();
-
-  self.postMessage({
-    type: "finished",
-    qubitCount: qubitCount,
-    amplitudes: amplitudes,
-  });
 });

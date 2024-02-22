@@ -10057,17 +10057,14 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             // eslint-disable-next-line no-console
                             console.error(error_1);
                             return [3 /*break*/, 4];
-                        case 4: return [2 /*return*/];
+                        case 4:
+                            self.postMessage({ type: 'finish' });
+                            return [2 /*return*/];
                     }
                 });
             });
         }
         call_backend();
-        self.postMessage({
-            type: "finished",
-            qubitCount: qubitCount,
-            amplitudes: amplitudes,
-        });
     });
 
 })();

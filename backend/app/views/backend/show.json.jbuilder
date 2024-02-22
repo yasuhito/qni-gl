@@ -1,1 +1,1 @@
-json.array! ['ヤッホー']
+json.array! @step_results
