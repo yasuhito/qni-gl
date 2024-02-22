@@ -382,6 +382,9 @@ export class App {
   }
 
   protected runSimulator() {
-    this.worker.postMessage({ qubitCount: this.circuit.qubitCountInUse });
+    this.worker.postMessage({
+      circuitJson: this.circuit.toCircuitJSON(),
+      qubitCount: this.circuit.qubitCountInUse,
+    });
   }
 }

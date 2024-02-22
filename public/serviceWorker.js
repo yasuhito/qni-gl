@@ -10002,6 +10002,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
     });
     // TODO: Qni の runSimulator にあたるハンドラを実行
     self.addEventListener("message", function (event) {
+        var circuitJson = event.data.circuitJson;
         var qubitCount = event.data.qubitCount;
         var simulator = new yc("0".repeat(qubitCount));
         var vector = simulator.state.matrix.clone();
@@ -10018,9 +10019,12 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                     switch (_a.label) {
                         case 0:
                             _a.trys.push([0, 3, , 4]);
-                            params = new URLSearchParams({});
+                            params = new URLSearchParams({
+                                id: circuitJson,
+                                qubitCount: qubitCount,
+                            });
                             return [4 /*yield*/, fetch("http://localhost:3000/backend.json?".concat(params), {
-                                    method: 'GET',
+                                    method: "GET",
                                 })];
                         case 1:
                             response = _a.sent();
@@ -10034,11 +10038,11 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             for (i = 0; i < jsondata.length; i++) {
                                 stepResult = jsondata[i];
                                 self.postMessage({
-                                    type: 'step',
+                                    type: "step",
                                     step: i,
-                                    amplitudes: stepResult['amplitudes'],
-                                    blochVectors: stepResult['blochVectors'],
-                                    measuredBits: stepResult['measuredBits'],
+                                    amplitudes: stepResult["amplitudes"],
+                                    blochVectors: stepResult["blochVectors"],
+                                    measuredBits: stepResult["measuredBits"],
                                     flags: {},
                                 });
                             }

@@ -7,6 +7,7 @@ self.addEventListener("install", () => {
 
 // TODO: Qni の runSimulator にあたるハンドラを実行
 self.addEventListener("message", (event) => {
+  const circuitJson = event.data.circuitJson;
   const qubitCount = event.data.qubitCount;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
@@ -28,39 +29,43 @@ self.addEventListener("message", (event) => {
       //   id: json,
       //   steps: JSON.stringify(steps),
       // })
-      const params = new URLSearchParams({})
+      const params = new URLSearchParams({
+        id: circuitJson,
+        qubitCount: qubitCount,
+      });
 
-      // TODO: ここで localhost の Rails を呼ぶ
-      // まずは Rails がポート何番で立ち上がるかを確認。
-      const response = await fetch(`http://localhost:3000/backend.json?${params}`, {
-        method: 'GET',
-      })
+      const response = await fetch(
+        `http://localhost:3000/backend.json?${params}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to connect to Qni's backend endpoint.")
+        throw new Error("Failed to connect to Qni's backend endpoint.");
       }
 
-      const jsondata = await response.json()
-      console.dir(jsondata)
+      const jsondata = await response.json();
+      console.dir(jsondata);
 
       for (let i = 0; i < jsondata.length; i++) {
-        const stepResult = jsondata[i]
+        const stepResult = jsondata[i];
         self.postMessage({
-          type: 'step',
+          type: "step",
           step: i,
-          amplitudes: stepResult['amplitudes'],
-          blochVectors: stepResult['blochVectors'],
-          measuredBits: stepResult['measuredBits'],
+          amplitudes: stepResult["amplitudes"],
+          blochVectors: stepResult["blochVectors"],
+          measuredBits: stepResult["measuredBits"],
           flags: {},
-        })
+        });
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(error)
+      console.error(error);
     }
   }
 
-  call_backend()
+  call_backend();
 
   self.postMessage({
     type: "finished",
