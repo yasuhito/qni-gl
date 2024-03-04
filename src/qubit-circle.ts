@@ -118,7 +118,7 @@ export class QubitCircle extends Container {
         .endFill();
     }
 
-    this.phaseContainer.rotation = Math.PI - (phase / 180) * Math.PI;
+    this.phaseContainer.rotation = Math.PI - phase;
   }
 
   protected borderColor(probability: number) {
