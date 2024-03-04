@@ -154,9 +154,9 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    this.circuit.on("stepHover", this.runSimulator, this);
+    // this.circuit.on("stepHover", this.runSimulator, this);
     this.circuit.on("stepActivated", this.runSimulator, this);
-    this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
+    // this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
     this.circuit.on("grabGate", this.grabGate, this);
 
     this.stateVectorComponent = new StateVectorComponent(
@@ -258,7 +258,7 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
-    this.runSimulator();
+    // this.runSimulator();
 
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
@@ -337,7 +337,7 @@ export class App {
       gate.snap(snapDropzone);
       this.updateStateVectorComponentQubitCount();
       this.updateStateVectorComponentPosition();
-      this.runSimulator();
+      // this.runSimulator();
     }
 
     if (gate.dropzone && !snapDropzone) {
