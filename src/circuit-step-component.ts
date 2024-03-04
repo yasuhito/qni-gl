@@ -9,6 +9,7 @@ import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { RnotGate } from "./rnot-gate";
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -246,6 +247,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = zGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "Z", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case RnotGate: {
+          const rnotGates = sameOps as RnotGate[];
+
+          const targetBits = rnotGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "X^½", targets: targetBits };
 
           result.push(serializedGate);
           break;
