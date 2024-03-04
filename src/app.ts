@@ -175,6 +175,15 @@ export class App {
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
+
+    // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると
+    // シミュレータ呼び出しで遅くなるので、決め打ちで初期化しておく
+    if (this.stateVectorComponent.qubitCircles.length !== 2) {
+      throw new Error("qubitCircles.length !== 2");
+    }
+    this.stateVectorComponent.qubitCircles[0].probability = 100;
+    this.stateVectorComponent.qubitCircles[0].phase = 0;
+    this.stateVectorComponent.qubitCircles[1].probability = 0;
   }
 
   private updateStateVectorComponentPosition() {
@@ -386,7 +395,10 @@ export class App {
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
       stepIndex: this.circuit.activeStepIndex,
-      targets: Array.from({ length: Math.pow(2, this.circuit.qubitCountInUse) }, (_, i) => i),
+      targets: Array.from(
+        { length: Math.pow(2, this.circuit.qubitCountInUse) },
+        (_, i) => i
+      ),
       steps: this.circuit.serialize(),
     });
   }
