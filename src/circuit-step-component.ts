@@ -7,6 +7,7 @@ import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -226,6 +227,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = xGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "X", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case YGate: {
+          const yGates = sameOps as YGate[];
+
+          const targetBits = yGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Y", targets: targetBits };
 
           result.push(serializedGate);
           break;
