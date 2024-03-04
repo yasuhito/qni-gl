@@ -8,6 +8,7 @@ import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -236,6 +237,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = yGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "Y", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case ZGate: {
+          const zGates = sameOps as ZGate[];
+
+          const targetBits = zGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Z", targets: targetBits };
 
           result.push(serializedGate);
           break;
