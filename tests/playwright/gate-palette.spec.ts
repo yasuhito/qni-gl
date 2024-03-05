@@ -101,15 +101,15 @@ test.describe("Gate Palette", () => {
     });
   });
 
-  test.describe("Phase Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.PhaseGate;
+  // test.describe("Phase Gate", () => {
+  //   test("changes style when mouseover", async ({ page }) => {
+  //     const gate = gatePalette.gates.PhaseGate;
 
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
-      await expect(page).toHaveScreenshot("phase-gate-hover.png");
-    });
-  });
+  //     await expect(page).toHaveScreenshot("phase-gate-hover.png");
+  //   });
+  // });
 
   test.describe("Rx Gate", () => {
     test("changes style when mouseover", async ({ page }) => {

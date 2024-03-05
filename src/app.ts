@@ -12,7 +12,6 @@ import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
-import { PhaseGate } from "./phase-gate";
 import { QFTDaggerGate } from "./qft-dagger-gate";
 import { QFTGate } from "./qft-gate";
 import { RnotGate } from "./rnot-gate";
@@ -132,7 +131,6 @@ export class App {
     this.gatePalette.addGate(SDaggerGate);
     this.gatePalette.addGate(TGate);
     this.gatePalette.addGate(TDaggerGate);
-    this.gatePalette.addGate(PhaseGate);
     this.gatePalette.addGate(RxGate);
     this.gatePalette.addGate(RyGate);
     this.gatePalette.addGate(RzGate);
