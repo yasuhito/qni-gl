@@ -207,7 +207,7 @@ export class App {
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {
-        qubitCircle.probability = amplifier.abs() * 100;
+        qubitCircle.probability = Math.pow(amplifier.abs(), 2) * 100;
         qubitCircle.phase = amplifier.phase();
       }
     }
