@@ -20,7 +20,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(10000)
 
     await expect(page).toHaveScreenshot("drag-and-drop-h-gate.png");
   });
@@ -32,7 +32,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(10000)
 
     await expect(page).toHaveScreenshot("drag-and-drop-x-gate.png");
   });
@@ -44,7 +44,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(10000)
 
     await expect(page).toHaveScreenshot("drag-and-drop-y-gate.png");
   });
@@ -161,6 +161,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
+    await page.waitForTimeout(5000)
 
     await expect(page).toHaveScreenshot("drag-and-drop-write0-gate.png");
   });
@@ -172,6 +173,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(firstDropzone.x, firstDropzone.y);
     await page.mouse.up();
+    await page.waitForTimeout(5000)
 
     await expect(page).toHaveScreenshot("drag-and-drop-write1-gate.png");
   });
