@@ -11,6 +11,7 @@ import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 import { RnotGate } from "./rnot-gate";
 import { SGate } from "./s-gate"
+import { SDaggerGate } from "./s-dagger-gate"
 import { TGate } from "./t-gate"
 import { Operation } from "./operation";
 
@@ -267,6 +268,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = sGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "S", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case SDaggerGate: {
+          const sdaggerGates = sameOps as SDaggerGate[];
+
+          const targetBits = sdaggerGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "S†", targets: targetBits };
 
           result.push(serializedGate);
           break;
