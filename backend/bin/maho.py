@@ -207,6 +207,16 @@ class cirqbridge:
                                            for index in circuit_qni['controls']]
                         _c = [cirq.ControlledOperation(controledqubits, cirq.Z(
                             index)**0.25) for index in targetqubits]
+                elif circuit_qni['type'] == u'T†':
+                    targetqubits = [qubits[index]
+                                    for index in circuit_qni['targets']]
+                    if not "controls" in circuit_qni:
+                        _c = [cirq.Z(index)**(-0.25) for index in targetqubits]
+                    else:
+                        controledqubits = [qubits[index]
+                                           for index in circuit_qni['controls']]
+                        _c = [cirq.ControlledOperation(controledqubits, cirq.Z(
+                            index)**(-0.25)) for index in targetqubits]
                 elif circuit_qni['type'] == u'X^½':
                     targetqubits = [qubits[index]
                                     for index in circuit_qni['targets']]
