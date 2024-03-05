@@ -111,35 +111,35 @@ test.describe("Gate Palette", () => {
   //   });
   // });
 
-  test.describe("Rx Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.RxGate;
+  // test.describe("Rx Gate", () => {
+  //   test("changes style when mouseover", async ({ page }) => {
+  //     const gate = gatePalette.gates.RxGate;
 
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
-      await expect(page).toHaveScreenshot("rx-gate-hover.png");
-    });
-  });
+  //     await expect(page).toHaveScreenshot("rx-gate-hover.png");
+  //   });
+  // });
 
-  test.describe("Ry Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.RyGate;
+  // test.describe("Ry Gate", () => {
+  //   test("changes style when mouseover", async ({ page }) => {
+  //     const gate = gatePalette.gates.RyGate;
 
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
-      await expect(page).toHaveScreenshot("ry-gate-hover.png");
-    });
-  });
+  //     await expect(page).toHaveScreenshot("ry-gate-hover.png");
+  //   });
+  // });
 
-  test.describe("Rz Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.RzGate;
+  // test.describe("Rz Gate", () => {
+  //   test("changes style when mouseover", async ({ page }) => {
+  //     const gate = gatePalette.gates.RzGate;
 
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
-      await expect(page).toHaveScreenshot("rz-gate-hover.png");
-    });
-  });
+  //     await expect(page).toHaveScreenshot("rz-gate-hover.png");
+  //   });
+  // });
 
   test.describe("Swap Gate", () => {
     test("changes style when mouseover", async ({ page }) => {

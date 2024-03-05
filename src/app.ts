@@ -15,9 +15,6 @@ import { MeasurementGate } from "./measurement-gate";
 import { QFTDaggerGate } from "./qft-dagger-gate";
 import { QFTGate } from "./qft-gate";
 import { RnotGate } from "./rnot-gate";
-import { RxGate } from "./rx-gate";
-import { RyGate } from "./ry-gate";
-import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
 import { StateVectorComponent } from "./state-vector-component";
@@ -131,9 +128,6 @@ export class App {
     this.gatePalette.addGate(SDaggerGate);
     this.gatePalette.addGate(TGate);
     this.gatePalette.addGate(TDaggerGate);
-    this.gatePalette.addGate(RxGate);
-    this.gatePalette.addGate(RyGate);
-    this.gatePalette.addGate(RzGate);
 
     this.gatePalette.newRow();
     this.gatePalette.addGate(SwapGate);
