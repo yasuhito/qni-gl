@@ -6,6 +6,18 @@ import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
+import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
+import { RnotGate } from "./rnot-gate";
+import { SGate } from "./s-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { TGate } from "./t-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { SwapGate } from "./swap-gate";
+import { ControlGate } from "./control-gate"
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -186,7 +198,8 @@ export class CircuitStepComponent extends Container {
   private get componentHeight(): number {
     return (
       GateComponent.sizeInPx.base * this._dropzones.children.length +
-      (this._dropzones.children.length - 1) * (GateComponent.sizeInPx.base / 2) +
+      (this._dropzones.children.length - 1) *
+        (GateComponent.sizeInPx.base / 2) +
       CircuitStepComponent.paddingY * 2
     );
   }
@@ -216,6 +229,114 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = hGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "H", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case XGate: {
+          const xGates = sameOps as XGate[];
+
+          const targetBits = xGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "X", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case YGate: {
+          const yGates = sameOps as YGate[];
+
+          const targetBits = yGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Y", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case ZGate: {
+          const zGates = sameOps as ZGate[];
+
+          const targetBits = zGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Z", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case RnotGate: {
+          const rnotGates = sameOps as RnotGate[];
+
+          const targetBits = rnotGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "X^½", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case SGate: {
+          const sGates = sameOps as SGate[];
+
+          const targetBits = sGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "S", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case SDaggerGate: {
+          const sdaggerGates = sameOps as SDaggerGate[];
+
+          const targetBits = sdaggerGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "S†", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case TGate: {
+          const tGates = sameOps as TGate[];
+
+          const targetBits = tGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "T", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case TDaggerGate: {
+          const tdaggerGates = sameOps as TGate[];
+
+          const targetBits = tdaggerGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "T†", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case Write0Gate: {
+          const write0Gates = sameOps as Write0Gate[];
+
+          const targetBits = write0Gates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "|0>", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case Write1Gate: {
+          const write1Gates = sameOps as Write1Gate[];
+
+          const targetBits = write1Gates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "|1>", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case SwapGate: {
+          const swapGates = sameOps as SwapGate[];
+
+          const targetBits = swapGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Swap", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case ControlGate: {
+          const controlGates = sameOps as ControlGate[];
+
+          const targetBits = controlGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "•", targets: targetBits };
 
           result.push(serializedGate);
           break;
