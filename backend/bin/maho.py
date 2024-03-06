@@ -238,9 +238,7 @@ class cirqbridge:
                         _c = [cirq.CZ(qubits[circuit_qni['targets'][0]],
                                       qubits[circuit_qni['targets'][1]])]
                     elif len(targetqubits) < 2:
-                        #                        print("the number of target qubits must be larger than 2")
-                        #                        sys.stdout.flush()
-                        exit(1)
+                        _c = []
                     else:
                         # we regard the first and the second qubit as the target qubits,
                         # and others are controlled qubits.

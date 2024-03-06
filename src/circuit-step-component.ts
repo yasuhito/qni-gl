@@ -17,6 +17,7 @@ import { TDaggerGate } from "./t-dagger-gate";
 import { Write0Gate } from "./write0-gate";
 import { Write1Gate } from "./write1-gate";
 import { SwapGate } from "./swap-gate";
+import { ControlGate } from "./control-gate"
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -327,6 +328,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = swapGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "Swap", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case ControlGate: {
+          const controlGates = sameOps as ControlGate[];
+
+          const targetBits = controlGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "•", targets: targetBits };
 
           result.push(serializedGate);
           break;
