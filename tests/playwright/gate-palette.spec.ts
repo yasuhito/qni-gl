@@ -161,15 +161,15 @@ test.describe("Gate Palette", () => {
     });
   });
 
-  test.describe("Anti Control Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.AntiControlGate;
+  // test.describe("Anti Control Gate", () => {
+  //   test("changes style when mouseover", async ({ page }) => {
+  //     const gate = gatePalette.gates.AntiControlGate;
 
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
-      await expect(page).toHaveScreenshot("anti-control-gate-hover.png");
-    });
-  });
+  //     await expect(page).toHaveScreenshot("anti-control-gate-hover.png");
+  //   });
+  // });
 
   test.describe("|0> Gate", () => {
     test("changes style when mouseover", async ({ page }) => {

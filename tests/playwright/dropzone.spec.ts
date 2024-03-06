@@ -145,16 +145,16 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("drag-and-drop-control-gate.png");
   });
 
-  test("Drag and drop Anti Control gate", async ({ page }) => {
-    const gate = gatePalette.gates.AntiControlGate;
+  // test("Drag and drop Anti Control gate", async ({ page }) => {
+  //   const gate = gatePalette.gates.AntiControlGate;
 
-    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-    await page.mouse.down();
-    await page.mouse.move(firstDropzone.x, firstDropzone.y);
-    await page.mouse.up();
+  //   await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
+  //   await page.mouse.down();
+  //   await page.mouse.move(firstDropzone.x, firstDropzone.y);
+  //   await page.mouse.up();
 
-    await expect(page).toHaveScreenshot("drag-and-drop-anti-control-gate.png");
-  });
+  //   await expect(page).toHaveScreenshot("drag-and-drop-anti-control-gate.png");
+  // });
 
   test("Drag and drop |0> gate", async ({ page }) => {
     const gate = gatePalette.gates.Write0Gate;

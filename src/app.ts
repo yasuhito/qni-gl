@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
-import { AntiControlGate } from "./anti-control-gate";
 import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
@@ -132,7 +131,6 @@ export class App {
     this.gatePalette.newRow();
     this.gatePalette.addGate(SwapGate);
     this.gatePalette.addGate(ControlGate);
-    this.gatePalette.addGate(AntiControlGate);
     this.gatePalette.addGate(Write0Gate);
     this.gatePalette.addGate(Write1Gate);
     this.gatePalette.addGate(MeasurementGate);
