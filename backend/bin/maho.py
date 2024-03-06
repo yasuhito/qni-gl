@@ -272,10 +272,13 @@ class cirqbridge:
                     measurement_moment[_current_index].append(_m)
                     m = m + len(targetqubits)
                 elif circuit_qni['type'] == u'Swap':
-                    targetqubit0 = qubits[circuit_qni['targets'][0]]
-                    targetqubit1 = qubits[circuit_qni['targets'][1]]
-                    _c = []
-                    _c.append(cirq.SWAP(targetqubit0, targetqubit1))
+                    if len(circuit_qni['targets']) != 2:
+                        _c = []
+                    else:
+                        targetqubit0 = qubits[circuit_qni['targets'][0]]
+                        targetqubit1 = qubits[circuit_qni['targets'][1]]
+                        _c = []
+                        _c.append(cirq.SWAP(targetqubit0, targetqubit1))
                 elif circuit_qni['type'] == u'Bloch':
                     targetqubits = [qubits[index]
                                     for index in circuit_qni['targets']]

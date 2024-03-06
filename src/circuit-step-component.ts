@@ -10,12 +10,13 @@ import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 import { RnotGate } from "./rnot-gate";
-import { SGate } from "./s-gate"
-import { SDaggerGate } from "./s-dagger-gate"
-import { TGate } from "./t-gate"
-import { TDaggerGate } from "./t-dagger-gate"
-import { Write0Gate } from "./write0-gate"
-import { Write1Gate } from "./write1-gate"
+import { SGate } from "./s-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { TGate } from "./t-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { SwapGate } from "./swap-gate";
 import { Operation } from "./operation";
 
 const groupBy = <K, V>(
@@ -196,7 +197,8 @@ export class CircuitStepComponent extends Container {
   private get componentHeight(): number {
     return (
       GateComponent.sizeInPx.base * this._dropzones.children.length +
-      (this._dropzones.children.length - 1) * (GateComponent.sizeInPx.base / 2) +
+      (this._dropzones.children.length - 1) *
+        (GateComponent.sizeInPx.base / 2) +
       CircuitStepComponent.paddingY * 2
     );
   }
@@ -316,6 +318,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = write1Gates.map((each) => this.indexOf(each));
           const serializedGate = { type: "|1>", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case SwapGate: {
+          const swapGates = sameOps as SwapGate[];
+
+          const targetBits = swapGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Swap", targets: targetBits };
 
           result.push(serializedGate);
           break;
