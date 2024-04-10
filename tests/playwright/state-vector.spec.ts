@@ -1,12 +1,17 @@
 import { appData, centerPosition } from "./test-helpers";
-import { test, expect } from "@playwright/test";
+import { test, expect, Locator } from "@playwright/test";
 
 test.describe("Dropzone", () => {
   let app;
+  let idle: Locator;
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+
     app = await appData(page);
+    idle = page.locator('#app[data-state="idle"]');
+
+    await idle.waitFor();
   });
 
   test("1 qubit", async ({ page }) => {
@@ -17,7 +22,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(5000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-1qubit.png");
   });
@@ -30,7 +35,7 @@ test.describe("Dropzone", () => {
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-2qubit.png");
   });
@@ -46,7 +51,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-3qubit.png");
   });
@@ -71,7 +76,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-4qubit.png");
   });
@@ -104,7 +109,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-5qubit.png");
   });
@@ -145,7 +150,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit6 = app.circuit.steps[0].dropzones[5];
     await page.mouse.move(dropzoneBit6.x, dropzoneBit6.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-6qubit.png");
   });
@@ -194,7 +199,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit7 = app.circuit.steps[0].dropzones[6];
     await page.mouse.move(dropzoneBit7.x, dropzoneBit7.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-7qubit.png");
   });
@@ -251,7 +256,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit8 = app.circuit.steps[0].dropzones[7];
     await page.mouse.move(dropzoneBit8.x, dropzoneBit8.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-8qubit.png");
   });
@@ -316,7 +321,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit9 = app.circuit.steps[0].dropzones[8];
     await page.mouse.move(dropzoneBit9.x, dropzoneBit9.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-9qubit.png");
   });
@@ -389,7 +394,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit10 = app.circuit.steps[0].dropzones[9];
     await page.mouse.move(dropzoneBit10.x, dropzoneBit10.y);
     await page.mouse.up();
-    await page.waitForTimeout(10000)
+    await idle.waitFor();
 
     await expect(page).toHaveScreenshot("state-vector-10qubit.png");
   });
