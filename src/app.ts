@@ -115,6 +115,7 @@ export class App {
 
       this.updateStateVectorComponentQubitCount();
       this.updateStateVectorComponentPosition();
+
       this.runSimulator();
     });
 
@@ -200,6 +201,13 @@ export class App {
         qubitCircle.probability = Math.pow(amplifier.abs(), 2) * 100;
         qubitCircle.phase = amplifier.phase();
       }
+    }
+
+    // ページの <div id="app" data-state="running"></div> を
+    // <div id="app" data-state="idle"></div> に変更
+    const eventType = event.data.type;
+    if (eventType === "finish") {
+      this.element.dataset.state = "idle";
     }
   }
 
@@ -363,6 +371,7 @@ export class App {
 
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
+
     this.runSimulator();
   }
 
@@ -381,6 +390,10 @@ export class App {
   }
 
   protected runSimulator() {
+    // ページの <div id="app"></div> を
+    // <div id="app" data-state="running"></div> に変更
+    this.element.dataset.state = "running";
+
     this.worker.postMessage({
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
