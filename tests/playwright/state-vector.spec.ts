@@ -1,8 +1,9 @@
+import { App } from "../../src/app";
 import { appData, centerPosition } from "./test-helpers";
 import { test, expect, Locator } from "@playwright/test";
 
 test.describe("Dropzone", () => {
-  let app;
+  let app: App;
   let idle: Locator;
 
   test.beforeEach(async ({ page }) => {
