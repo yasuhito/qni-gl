@@ -187,18 +187,6 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("drag-and-drop-measurement-gate.png");
   });
 
-  test("Drag and drop Bloch Sphere", async ({ page }) => {
-    const gate = gatePalette.gates.BlochSphere;
-
-    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-    await page.mouse.down();
-    await page.mouse.move(firstDropzone.x, firstDropzone.y);
-    await page.mouse.up();
-    await idle.waitFor();
-
-    await expect(page).toHaveScreenshot("drag-and-drop-bloch-sphere.png");
-  });
-
   test("Drag and drop QFT gate", async ({ page }) => {
     const gate = gatePalette.gates.QFTGate;
 

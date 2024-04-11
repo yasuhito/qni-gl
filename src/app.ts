@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
-import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Complex } from "@qni/common";
@@ -135,7 +134,6 @@ export class App {
     this.gatePalette.addGate(Write0Gate);
     this.gatePalette.addGate(Write1Gate);
     this.gatePalette.addGate(MeasurementGate);
-    this.gatePalette.addGate(BlochSphere);
     this.gatePalette.addGate(QFTGate);
     this.gatePalette.addGate(QFTDaggerGate);
 

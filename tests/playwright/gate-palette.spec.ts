@@ -201,16 +201,6 @@ test.describe("Gate Palette", () => {
     });
   });
 
-  test.describe("Bloch Sphere", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.BlochSphere;
-
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-
-      await expect(page).toHaveScreenshot("bloch-sphere-hover.png");
-    });
-  });
-
   test.describe("QFT Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
       const gate = gatePalette.gates.QFTGate;
