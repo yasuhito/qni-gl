@@ -10,7 +10,6 @@ import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
-import { QFTGate } from "./qft-gate";
 import { RnotGate } from "./rnot-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
@@ -133,7 +132,6 @@ export class App {
     this.gatePalette.addGate(Write0Gate);
     this.gatePalette.addGate(Write1Gate);
     this.gatePalette.addGate(MeasurementGate);
-    this.gatePalette.addGate(QFTGate);
 
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
