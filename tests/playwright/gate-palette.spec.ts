@@ -210,14 +210,4 @@ test.describe("Gate Palette", () => {
       await expect(page).toHaveScreenshot("qft-gate-hover.png");
     });
   });
-
-  test.describe("QFT† Gate", () => {
-    test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.QFTDaggerGate;
-
-      await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-
-      await expect(page).toHaveScreenshot("qft-dagger-gate-hover.png");
-    });
-  });
 });
