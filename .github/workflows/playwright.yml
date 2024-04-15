@@ -36,6 +36,8 @@ jobs:
       run: yarn
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
+    - name: Run backend server
+      run: yarn backend -d
     - name: Run Playwright tests
       run: yarn playwright test
     - uses: actions/upload-artifact@v3
