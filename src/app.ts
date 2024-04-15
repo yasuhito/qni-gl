@@ -1,7 +1,5 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
-import { AntiControlGate } from "./anti-control-gate";
-import { BlochSphere } from "./bloch-sphere";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Complex } from "@qni/common";
@@ -12,13 +10,7 @@ import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
 import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
-import { PhaseGate } from "./phase-gate";
-import { QFTDaggerGate } from "./qft-dagger-gate";
-import { QFTGate } from "./qft-gate";
 import { RnotGate } from "./rnot-gate";
-import { RxGate } from "./rx-gate";
-import { RyGate } from "./ry-gate";
-import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
 import { StateVectorComponent } from "./state-vector-component";
@@ -120,6 +112,7 @@ export class App {
 
       this.updateStateVectorComponentQubitCount();
       this.updateStateVectorComponentPosition();
+
       this.runSimulator();
     });
 
@@ -132,21 +125,13 @@ export class App {
     this.gatePalette.addGate(SDaggerGate);
     this.gatePalette.addGate(TGate);
     this.gatePalette.addGate(TDaggerGate);
-    this.gatePalette.addGate(PhaseGate);
-    this.gatePalette.addGate(RxGate);
-    this.gatePalette.addGate(RyGate);
-    this.gatePalette.addGate(RzGate);
 
     this.gatePalette.newRow();
     this.gatePalette.addGate(SwapGate);
     this.gatePalette.addGate(ControlGate);
-    this.gatePalette.addGate(AntiControlGate);
     this.gatePalette.addGate(Write0Gate);
     this.gatePalette.addGate(Write1Gate);
     this.gatePalette.addGate(MeasurementGate);
-    this.gatePalette.addGate(BlochSphere);
-    this.gatePalette.addGate(QFTGate);
-    this.gatePalette.addGate(QFTDaggerGate);
 
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
@@ -154,9 +139,9 @@ export class App {
     this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    this.circuit.on("stepHover", this.runSimulator, this);
+    // this.circuit.on("stepHover", this.runSimulator, this);
     this.circuit.on("stepActivated", this.runSimulator, this);
-    this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
+    // this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
     this.circuit.on("grabGate", this.grabGate, this);
 
     this.stateVectorComponent = new StateVectorComponent(
@@ -175,6 +160,15 @@ export class App {
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
+
+    // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると
+    // シミュレータ呼び出しで遅くなるので、決め打ちで初期化しておく
+    if (this.stateVectorComponent.qubitCircles.length !== 2) {
+      throw new Error("qubitCircles.length !== 2");
+    }
+    this.stateVectorComponent.qubitCircles[0].probability = 100;
+    this.stateVectorComponent.qubitCircles[0].phase = 0;
+    this.stateVectorComponent.qubitCircles[1].probability = 0;
   }
 
   private updateStateVectorComponentPosition() {
@@ -198,9 +192,16 @@ export class App {
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {
-        qubitCircle.probability = amplifier.abs() * 100;
+        qubitCircle.probability = Math.pow(amplifier.abs(), 2) * 100;
         qubitCircle.phase = amplifier.phase();
       }
+    }
+
+    // ページの <div id="app" data-state="running"></div> を
+    // <div id="app" data-state="idle"></div> に変更
+    const eventType = event.data.type;
+    if (eventType === "finish") {
+      this.element.dataset.state = "idle";
     }
   }
 
@@ -249,7 +250,7 @@ export class App {
     this.element.dataset.app = JSON.stringify(this);
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
-    this.runSimulator();
+    // this.runSimulator();
 
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
@@ -328,7 +329,7 @@ export class App {
       gate.snap(snapDropzone);
       this.updateStateVectorComponentQubitCount();
       this.updateStateVectorComponentPosition();
-      this.runSimulator();
+      // this.runSimulator();
     }
 
     if (gate.dropzone && !snapDropzone) {
@@ -364,6 +365,7 @@ export class App {
 
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
+
     this.runSimulator();
   }
 
@@ -382,6 +384,19 @@ export class App {
   }
 
   protected runSimulator() {
-    this.worker.postMessage({ qubitCount: this.circuit.qubitCountInUse });
+    // ページの <div id="app"></div> を
+    // <div id="app" data-state="running"></div> に変更
+    this.element.dataset.state = "running";
+
+    this.worker.postMessage({
+      circuitJson: this.circuit.toCircuitJSON(),
+      qubitCount: this.circuit.qubitCountInUse,
+      stepIndex: this.circuit.activeStepIndex,
+      targets: Array.from(
+        { length: Math.pow(2, this.circuit.qubitCountInUse) },
+        (_, i) => i
+      ),
+      steps: this.circuit.serialize(),
+    });
   }
 }

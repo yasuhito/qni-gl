@@ -25,10 +25,11 @@ export class GatePaletteComponent extends Container {
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
+  gates: { [key: string]: GateComponent | null } = {};
+
   protected graphics: PIXI.Graphics;
   protected gateClasses: (typeof GateComponent)[][] = [];
   protected gateRows: List;
-  private gates = {};
 
   constructor() {
     super();

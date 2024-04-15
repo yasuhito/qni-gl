@@ -63,6 +63,17 @@ export class CircuitComponent extends Container {
     return this.circuitStepsContainer.children as CircuitStepComponent[];
   }
 
+  get activeStepIndex() {
+    for (let i = 0; i < this.steps.length; i++) {
+      const step = this.steps[i];
+      if (step.isActive()) {
+        return i;
+      }
+    }
+
+    throw new Error("No active step found");
+  }
+
   /**
    * Returns a new {@link CircuitComponent} instance.
    *
