@@ -10040,7 +10040,6 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             return [4 /*yield*/, response.json()];
                         case 2:
                             jsondata = _a.sent();
-                            console.dir(jsondata);
                             for (i = 0; i < jsondata.length; i++) {
                                 stepResult = jsondata[i];
                                 self.postMessage({

@@ -89,6 +89,7 @@ def maho_call(qubit_count, step_index, steps):
         logger.debug(each)
 
     result_list = br.run_circuit_until_step_index(circuit, measurement_moment, step_index, steps)
+    logger.debug("result_list")
     logger.debug(result_list)
 
     # [complex ...] => {0: [real,img] ..}
@@ -104,10 +105,15 @@ def maho_call(qubit_count, step_index, steps):
                 return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
             else:
                 return {"amplitudes": convert_amp(item[":amplitude"])}
+        else:
+            if ":measuredBits" in item:
+                return {"measuredBits": item[":measuredBits"]}
         return {}
 
     return [convert_item(item) for item in result_list]
 
 step_results = maho_call(qubit_count, step_index, steps)
+logger.debug("step_results")
 logger.debug(step_results)
+
 print(json.dumps(step_results))

@@ -44,7 +44,6 @@ self.addEventListener("message", (event) => {
       }
 
       const jsondata = await response.json();
-      console.dir(jsondata)
 
       for (let i = 0; i < jsondata.length; i++) {
         const stepResult = jsondata[i];
