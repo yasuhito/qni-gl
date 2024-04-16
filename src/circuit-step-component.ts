@@ -1,24 +1,25 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
+import { ControlGate } from "./control-gate"
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
-import { List } from "@pixi/ui";
-import { spacingInPx } from "./util";
 import { HGate } from "./h-gate";
+import { List } from "@pixi/ui";
+import { MeasurementGate } from "./measurement-gate";
+import { Operation } from "./operation";
+import { RnotGate } from "./rnot-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { SGate } from "./s-gate";
+import { SwapGate } from "./swap-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { TGate } from "./t-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { RnotGate } from "./rnot-gate";
-import { SGate } from "./s-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { TGate } from "./t-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { SwapGate } from "./swap-gate";
-import { ControlGate } from "./control-gate"
-import { Operation } from "./operation";
+import { spacingInPx } from "./util";
 
 const groupBy = <K, V>(
   array: readonly V[],
@@ -337,6 +338,15 @@ export class CircuitStepComponent extends Container {
 
           const targetBits = controlGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "•", targets: targetBits };
+
+          result.push(serializedGate);
+          break;
+        }
+        case MeasurementGate: {
+          const measurementGates = sameOps as MeasurementGate[];
+
+          const targetBits = measurementGates.map((each) => this.indexOf(each));
+          const serializedGate = { type: "Measure", targets: targetBits };
 
           result.push(serializedGate);
           break;

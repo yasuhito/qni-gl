@@ -183,6 +183,9 @@ export class App {
       return;
     }
 
+    console.log("event.data.measuredBits")
+    console.dir(event.data.measuredBits)
+
     const amplitudes = event.data.amplitudes;
 
     for (const ket in amplitudes) {

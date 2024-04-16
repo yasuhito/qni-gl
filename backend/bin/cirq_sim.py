@@ -100,7 +100,10 @@ def maho_call(qubit_count, step_index, steps):
 
     def convert_item(item):
         if ":amplitude" in item:
-            return {"amplitudes": convert_amp(item[":amplitude"])}
+            if ":measuredBits" in item:
+                return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
+            else:
+                return {"amplitudes": convert_amp(item[":amplitude"])}
         return {}
 
     return [convert_item(item) for item in result_list]
