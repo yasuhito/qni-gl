@@ -14,13 +14,11 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
     0: PIXI.Texture.from("./assets/Measurement_value0.svg"),
     1: PIXI.Texture.from("./assets/Measurement_value1.svg"),
   };
-  static iconIdleDropzone = PIXI.Texture.from(
-    "./assets/Measurement_idle_dropzone.svg"
-  );
-  static iconHover = PIXI.Texture.from("./assets/Measurement_hover.svg");
-  static iconHoverDropzone = PIXI.Texture.from(
-    "./assets/Measurement_hover_dropzone.svg"
-  );
+  static hoverIcon = {
+    "": PIXI.Texture.from("./assets/Measurement_hover.svg"),
+    0: PIXI.Texture.from("./assets/Measurement_value0.svg"),
+    1: PIXI.Texture.from("./assets/Measurement_value1.svg"),
+  }
   static iconGrabbed = PIXI.Texture.from("./assets/Measurement_grabbed.svg");
   static iconGrabbedDropzone = PIXI.Texture.from(
     "./assets/Measurement_grabbed_dropzone.svg"
@@ -87,9 +85,9 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
 
   applyHoverStyle() {
     if (this.dropzone) {
-      this._sprite.texture = MeasurementGate.iconHoverDropzone;
+      this._sprite.texture = MeasurementGate.hoverIcon[this.value];
     } else {
-      this._sprite.texture = MeasurementGate.iconHover;
+      this._sprite.texture = MeasurementGate.hoverIcon[""];
     }
 
     this._shape.clear();
