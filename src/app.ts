@@ -183,6 +183,27 @@ export class App {
       return;
     }
 
+    const stepIndex = event.data.step;
+    const step = this.circuit.steps[stepIndex];
+
+    if (event.data.measuredBits) {
+      for (const [bit, value] of Object.entries(event.data.measuredBits)) {
+        // もし value が '' | 0 | 1 でない場合はエラー
+        if (value !== "" && value !== 0 && value !== 1) {
+          throw new Error("value is not '' | 0 | 1");
+        }
+
+        const dropzone = step.dropzoneAt(parseInt(bit));
+        const measurementGate = dropzone.operation;
+
+        // もし measurementGate が MeasurementGate でない場合はエラー
+        if (!(measurementGate instanceof MeasurementGate)) {
+          throw new Error("measurementGate is not MeasurementGate");
+        }
+        measurementGate.value = value;
+      }
+    }
+
     const amplitudes = event.data.amplitudes;
 
     for (const ket in amplitudes) {
