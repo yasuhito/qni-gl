@@ -101,6 +101,12 @@ export class CircuitStepComponent extends Container {
     });
   }
 
+  get freeDropzones() {
+    return this.dropzones.filter((each) => {
+      return !each.isOccupied();
+    });
+  }
+
   private get operations(): Operation[] {
     return this.occupiedDropzones
       .map((each) => each.operation)
@@ -190,6 +196,47 @@ export class CircuitStepComponent extends Container {
       this.componentWidth,
       this.componentHeight
     );
+  }
+
+  bit(dropzone: DropzoneComponent): number {
+    const bit = this.dropzones.indexOf(dropzone)
+    // Util.need(bit !== -1, 'circuit-dropzone not found.')
+
+    return bit
+  }
+
+
+  updateSwapConnections(): void {
+    const swapDropzones = this.swapGateDropzones
+
+    if (swapDropzones.length !== 2) {
+    //   for (const each of swapDropzones) {
+    //     const swapGate = each.operation as SwapGateElement
+    //     swapGate.disable()
+    //   }
+    } else {
+      for (const swap of swapDropzones) {
+        // TODO: つながっていない Swap ゲートは disabled (灰色表示) にする
+        // const swapGate = swap.operation as SwapGate
+        // swapGate.enable()
+        swap.connectTop = swapDropzones.some(each => this.bit(each) < this.bit(swap))
+        swap.connectBottom = swapDropzones.some(each => this.bit(each) > this.bit(swap))
+      }
+
+      const swapBits = swapDropzones.map(each => this.bit(each))
+      for (const dropzone of this.freeDropzones) {
+        const minBit = Math.min(...swapBits)
+        const maxBit = Math.max(...swapBits)
+        if (minBit < this.bit(dropzone) && this.bit(dropzone) < maxBit) {
+          dropzone.connectTop = true
+          dropzone.connectBottom = true
+        }
+      }
+    }
+  }
+
+  private get swapGateDropzones(): DropzoneComponent[] {
+    return this.occupiedDropzones.filter(each => each.operation instanceof SwapGate)
   }
 
   private get componentWidth(): number {

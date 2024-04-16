@@ -1,3 +1,4 @@
+import * as tailwindColors from "tailwindcss/colors";
 import * as PIXI from "pixi.js";
 import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
@@ -19,12 +20,17 @@ const LINE_ALIGNMENT_MIDDLE = 0.5;
 export class DropzoneComponent extends Container {
   static size = spacingInPx(8);
   static wireWidth = 2;
+  static connectionWidth = 4;
 
   // operation: Operation | null = null;
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
+  _connectTop = false;
+  _connectBottom = false;
+
   protected wire: PIXI.Graphics;
+  protected connection: PIXI.Graphics;
 
   get size(): number {
     return DropzoneComponent.size;
@@ -52,13 +58,35 @@ export class DropzoneComponent extends Container {
     return this.operation !== null;
   }
 
+  set connectTop(value) {
+    this._connectTop = value
+    this.redrawConnections()
+  }
+
+  get connectTop() {
+    return this._connectTop;
+  }
+
+  set connectBottom(value) {
+    this._connectBottom = value
+    this.redrawConnections()
+  }
+
+  get connectBottom() {
+    return this._connectBottom
+  }
+
   constructor() {
     super();
 
     this.wire = new PIXI.Graphics();
     this.addChild(this.wire);
 
+    this.connection = new PIXI.Graphics();
+    this.addChild(this.connection)
+
     this.redrawWires();
+    this.redrawConnections();
   }
 
   /**
@@ -167,6 +195,25 @@ export class DropzoneComponent extends Container {
     );
   }
 
+  redrawConnections() {
+    this.connection.clear()
+
+    if (this.connectTop) {
+      this.drawConnection(
+        this.lowerConnectionStartY,
+        this.lowerConnectionEndY,
+        this.inputWireColor
+      );
+    }
+    if (this.connectBottom) {
+      this.drawConnection(
+        this.upperConnectionStartY,
+        this.upperConnectionEndY,
+        this.inputWireColor
+      );
+    }
+  }
+
   toJSON() {
     const pos = this.getGlobalPosition();
 
@@ -201,8 +248,19 @@ export class DropzoneComponent extends Container {
       .lineTo(endX, this.wireY);
   }
 
+  protected drawConnection(startY: number, endY: number) {
+    this.wire
+      .lineStyle(this.connectionWidth, tailwindColors.sky["500"], this.wireAlpha, this.wireAlignment)
+      .moveTo(this.connectionX, startY)
+      .lineTo(this.connectionX, endY);
+  }
+
   protected get wireWidth() {
     return DropzoneComponent.wireWidth;
+  }
+
+  protected get connectionWidth() {
+    return DropzoneComponent.connectionWidth;
   }
 
   protected get inputWireColor() {
@@ -257,6 +315,30 @@ export class DropzoneComponent extends Container {
 
   protected get wireAlignment() {
     return LINE_ALIGNMENT_MIDDLE;
+  }
+
+  protected get connectionX() {
+    const center = new PIXI.Point(
+      DropzoneComponent.size * 0.75,
+      DropzoneComponent.size / 2
+    );
+    return center.x;
+  }
+
+  protected get lowerConnectionStartY() {
+    return DropzoneComponent.size * -0.25;
+  }
+
+  protected get lowerConnectionEndY() {
+    return DropzoneComponent.size * 0.5;
+  }
+
+  protected get upperConnectionStartY() {
+    return DropzoneComponent.size * 0.5;
+  }
+
+  protected get upperConnectionEndY() {
+    return DropzoneComponent.size * 1.25;
   }
 
   protected isIconGate(gate: GateComponent | null) {
