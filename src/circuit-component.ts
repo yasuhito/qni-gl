@@ -177,6 +177,12 @@ export class CircuitComponent extends Container {
     });
   }
 
+  updateSwapConnections() {
+    this.steps.forEach((each) => {
+      each.updateSwapConnections()
+    })
+  }
+
   private isLastWireUnused() {
     return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
   }

@@ -383,6 +383,7 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.removeUnusedUpperWires();
+    this.circuit.updateSwapConnections();
 
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
