@@ -63,19 +63,19 @@ class cirqbridge:
         measurement_moment = []
         _current_index = 0
 
-        for column_qni in circuit_from_qni:
-            self.logger.debug("circuit step: {}".format(column_qni))
-            #            print("circuit column", column_qni)
+        for step in circuit_from_qni:
+            self.logger.debug("circuit step: {}".format(step))
+            #            print("circuit column", step)
             #            sys.stdout.flush()
             moment = []
             measurement_moment.append([])
 
             # empty step is converted to I gate
-            if len(column_qni) == 0:
+            if len(step) == 0:
                 for bit in range(qubit_count):
                     moment.append([cirq.I(qubits[bit])])
 
-            for circuit_qni in column_qni:
+            for circuit_qni in step:
                 if circuit_qni['type'] == u'H':
                     if "if" in circuit_qni:  # classical control
                         targetqubits = [qubits[index]
