@@ -85,11 +85,11 @@ def maho_call(qubit_count, step_index, steps):
     br = maho.cirqbridge(logger)
     circuit, measurement_moment = br.build_circuit(qubit_count, steps)
 
-    for each in str(circuit).split("\n"):
-        logger.debug(each)
+    # for each in str(circuit).split("\n"):
+    #     logger.debug(each)
 
     result_list = br.run_circuit_until_step_index(circuit, measurement_moment, step_index, steps)
-    logger.debug(result_list)
+    # logger.debug(result_list)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):

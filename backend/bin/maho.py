@@ -43,12 +43,20 @@ class cirqbridge:
         return label
 
     def build_circuit(self, numofqubits, _circuit_from_qni):
-        #        print("build_circuit")
-        #        sys.stdout.flush()
         transformations = (standard_transformations +
                            (implicit_multiplication_application,) + (convert_xor,))
         circuit_from_qni = []
+
+        self.logger.debug("*** circuit_from_qni ***")
+        self.logger.debug("numofqubits = {}".format(numofqubits))
+
         for a in _circuit_from_qni:
+            self.logger.debug(a)
+            cirq_targets = []
+            if len(a) > 0:
+                cirq_targets = sorted(list(map(lambda x: numofqubits - x - 1, a[0]['targets'])))
+                a[0]['targets'] = cirq_targets
+            self.logger.debug("cirq_targets: {}".format(cirq_targets))
             circuit_from_qni.append(a)
             sys.stdout.flush()
         qubits = cirq.LineQubit.range(numofqubits)
@@ -296,17 +304,14 @@ class cirqbridge:
 #        sys.stdout.flush()
         return c, measurement_moment
 
-    def run_circuit_until_step_index(self, c, measurement_moment, until, steps):
-        #        print("run_circuit_until_step_index")
-        #        print("circuit:")
-        #        print(c)
-        #        sys.stdout.flush()
-        #        print("until (corrected):", until)
-        #        sys.stdout.flush()
-        #        print("steps(len):", len(steps))
-        #        sys.stdout.flush()
-        #        print("steps:", steps)
-        #        sys.stdout.flush()
+    def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps):
+        self.logger.debug("run_circuit_until_step_index()")
+        for each in str(c).split("\n"):
+            self.logger.debug(each)
+        self.logger.debug("steps: {}".format(steps))
+        self.logger.debug("step_index (corrected): {}".format(step_index))
+        self.logger.debug("steps(len): {}".format(len(steps)))
+
         cirq_simulator = cirq.Simulator()
         _data = []
         counter = -1
@@ -327,8 +332,8 @@ class cirqbridge:
             if sleep_flag == 1:
                 continue
 
-#            print("current step[%d]" % counter, steps[counter])
-#            sys.stdout.flush()
+            self.logger.debug("step[{}]: {}".format(counter, steps[counter]))
+
             if steps[counter] == []:
                 pass
             else:
@@ -345,8 +350,9 @@ class cirqbridge:
                         dic[':blochVectors'][_bloch_target] = blochxyz
 #                        print("bloch sphere: ", blochxyz)
 #                        sys.stdout.flush()
-            if counter == until:
+            if counter == step_index:
                 dic[':amplitude'] = step.state_vector()
+                self.logger.debug("amplitudes: {}".format(step.state_vector()))
 #                print("amplitudes: ", step.state_vector())
 #                sys.stdout.flush()
             _data.append(dic)
