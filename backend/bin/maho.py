@@ -42,36 +42,39 @@ class cirqbridge:
         label = 'm' + str(counter)
         return label
 
-    def build_circuit(self, numofqubits, _circuit_from_qni):
+    def build_circuit(self, qubit_count, _circuit_from_qni):
         transformations = (standard_transformations +
                            (implicit_multiplication_application,) + (convert_xor,))
         circuit_from_qni = []
 
         self.logger.debug("*** circuit_from_qni ***")
-        self.logger.debug("numofqubits = {}".format(numofqubits))
+        self.logger.debug("qubit_count = {}".format(qubit_count))
 
-        for a in _circuit_from_qni:
-            self.logger.debug(a)
-            cirq_targets = []
-            if len(a) > 0:
-                cirq_targets = sorted(list(map(lambda x: numofqubits - x - 1, a[0]['targets'])))
-                a[0]['targets'] = cirq_targets
-            self.logger.debug("cirq_targets: {}".format(cirq_targets))
-            circuit_from_qni.append(a)
-            sys.stdout.flush()
-        qubits = cirq.LineQubit.range(numofqubits)
+        for step in _circuit_from_qni:
+            self.logger.debug(step)
+            if len(step) > 0:
+                # Cirq の最下位ビットは回路の一番下のワイヤになるので、'targets' を反転させる
+                step[0]['targets'] = sorted(list(map(lambda target_bit: qubit_count - target_bit - 1, step[0]['targets'])))
+            circuit_from_qni.append(step)
+
+        qubits = cirq.LineQubit.range(qubit_count)
         c = cirq.Circuit()
         m = 0
         measurement_moment = []
         _current_index = 0
+
         for column_qni in circuit_from_qni:
+            self.logger.debug("circuit step: {}".format(column_qni))
             #            print("circuit column", column_qni)
             #            sys.stdout.flush()
             moment = []
             measurement_moment.append([])
-            if len(column_qni) == 0:  # null or invalid step is converted to I gate
-                _c = [cirq.I(qubits[0])]
-                moment.append(_c)
+
+            # empty step is converted to I gate
+            if len(column_qni) == 0:
+                for bit in range(qubit_count):
+                    moment.append([cirq.I(qubits[bit])])
+
             for circuit_qni in column_qni:
                 if circuit_qni['type'] == u'H':
                     if "if" in circuit_qni:  # classical control
