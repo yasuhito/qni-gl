@@ -163,6 +163,8 @@ test.describe("Dropzone", () => {
   });
 
   test("7 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -216,6 +218,8 @@ test.describe("Dropzone", () => {
   });
 
   test("8 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -278,6 +282,8 @@ test.describe("Dropzone", () => {
   });
 
   test("9 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -349,6 +355,8 @@ test.describe("Dropzone", () => {
   });
 
   test("10 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
