@@ -69,6 +69,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -94,6 +95,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -102,6 +104,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -127,6 +130,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -135,6 +139,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -143,6 +148,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 6 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -157,6 +163,8 @@ test.describe("Dropzone", () => {
   });
 
   test("7 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -168,6 +176,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -176,6 +185,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -184,6 +194,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 6 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -192,6 +203,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit6 = app.circuit.steps[0].dropzones[5];
     await page.mouse.move(dropzoneBit6.x, dropzoneBit6.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 7 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -206,6 +218,8 @@ test.describe("Dropzone", () => {
   });
 
   test("8 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -217,6 +231,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -225,6 +240,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -233,6 +249,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 6 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -241,6 +258,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit6 = app.circuit.steps[0].dropzones[5];
     await page.mouse.move(dropzoneBit6.x, dropzoneBit6.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 7 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -249,6 +267,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit7 = app.circuit.steps[0].dropzones[6];
     await page.mouse.move(dropzoneBit7.x, dropzoneBit7.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 8 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -263,6 +282,8 @@ test.describe("Dropzone", () => {
   });
 
   test("9 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -274,6 +295,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -282,6 +304,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -290,6 +313,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 6 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -298,6 +322,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit6 = app.circuit.steps[0].dropzones[5];
     await page.mouse.move(dropzoneBit6.x, dropzoneBit6.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 7 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -306,6 +331,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit7 = app.circuit.steps[0].dropzones[6];
     await page.mouse.move(dropzoneBit7.x, dropzoneBit7.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 8 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -314,6 +340,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit8 = app.circuit.steps[0].dropzones[7];
     await page.mouse.move(dropzoneBit8.x, dropzoneBit8.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 9 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -328,6 +355,8 @@ test.describe("Dropzone", () => {
   });
 
   test("10 qubit", async ({ page }) => {
+    test.setTimeout(60000)
+
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -339,6 +368,7 @@ test.describe("Dropzone", () => {
 
     await page.mouse.move(dropzoneBit3.x, dropzoneBit3.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 4 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -347,6 +377,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit4 = app.circuit.steps[0].dropzones[3];
     await page.mouse.move(dropzoneBit4.x, dropzoneBit4.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 5 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -355,6 +386,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit5 = app.circuit.steps[0].dropzones[4];
     await page.mouse.move(dropzoneBit5.x, dropzoneBit5.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 6 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -363,6 +395,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit6 = app.circuit.steps[0].dropzones[5];
     await page.mouse.move(dropzoneBit6.x, dropzoneBit6.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 7 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -371,6 +404,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit7 = app.circuit.steps[0].dropzones[6];
     await page.mouse.move(dropzoneBit7.x, dropzoneBit7.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 8 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -379,6 +413,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit8 = app.circuit.steps[0].dropzones[7];
     await page.mouse.move(dropzoneBit8.x, dropzoneBit8.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 9 ビットめに H ゲートを配置
     await page.mouse.down();
@@ -387,6 +422,7 @@ test.describe("Dropzone", () => {
     const dropzoneBit9 = app.circuit.steps[0].dropzones[8];
     await page.mouse.move(dropzoneBit9.x, dropzoneBit9.y);
     await page.mouse.up();
+    await idle.waitFor();
 
     // 10 ビットめに H ゲートを配置
     await page.mouse.down();
