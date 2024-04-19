@@ -83,7 +83,7 @@ class cirqbridge:
                 elif gate['type'] == u'X':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
-                        _c = [cirq.X(qubit) for qubit in targetQubits]
+                        _c = [cirq.X(target) for target in targetQubits]
                     else:
                         controlQubits = [qubits[control]
                                          for control in gate['controls']]
@@ -91,13 +91,7 @@ class cirqbridge:
                             controlQubits, cirq.X(target)) for target in targetQubits]
                 elif gate['type'] == u'Y':
                     targetQubits = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.Y(index) for index in targetQubits]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(
-                            controlQubits, cirq.Y(index)) for index in targetQubits]
+                    _c = [cirq.Y(target) for target in targetQubits]
                 elif gate['type'] == u'Z':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
