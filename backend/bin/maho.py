@@ -78,21 +78,8 @@ class cirqbridge:
 
             for gate in step:
                 if gate['type'] == u'H':
-                    if not "if" in gate:
-                        targetQubits = self._target_qubits(qubits, gate)
-                        if not "controls" in gate:
-                            _c = [cirq.H(qubit) for qubit in targetQubits]
-                        else:
-                            controlledQubits = [qubits[controlBit]
-                                                for controlBit in gate['controls']]
-                            _c = [cirq.ControlledOperation(
-                                controlledQubits, cirq.H(qubit)) for qubit in targetQubits]
-                    else:
-                        targetQubits = self._target_qubits(qubits, gate)
-                        label = self.lookup_measurement_label(
-                            circuit_qni, gate['if'])
-                        _c = [cirq.H(index).with_classical_controls(label)
-                              for index in targetQubits]
+                    targetQubits = self._target_qubits(qubits, gate)
+                    _c = [cirq.H(qubit) for qubit in targetQubits]
                 elif gate['type'] == u'X':
                     if "if" in gate:  # classical control
                         targetQubits = self._target_qubits(qubits, gate)
