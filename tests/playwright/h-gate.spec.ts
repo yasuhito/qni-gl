@@ -1,5 +1,5 @@
-import { GateComponent } from "../../src";
 import { App } from "../../src/app";
+import { GateComponent } from "../../src";
 import { appData, centerPosition } from "./test-helpers";
 import { test, expect, Locator } from "@playwright/test";
 
@@ -13,10 +13,9 @@ test.describe("H Gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
+    hGate = app.gatePalette.gates.HGate;
 
     await idle.waitFor();
-
-    hGate = app.gatePalette.gates.HGate;
   });
 
   test("Place an H gate on the first bit", async ({ page }) => {
