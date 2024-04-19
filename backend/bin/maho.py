@@ -79,41 +79,34 @@ class cirqbridge:
             for gate in step:
                 if gate['type'] == u'H':
                     targetQubits = self._target_qubits(qubits, gate)
-                    _c = [cirq.H(qubit) for qubit in targetQubits]
+                    _c = [cirq.H(target) for target in targetQubits]
                 elif gate['type'] == u'X':
-                    if "if" in gate:  # classical control
-                        targetQubits = self._target_qubits(qubits, gate)
-                        label = self.lookup_measurement_label(
-                            circuit_qni, gate['if'])
-                        _c = [cirq.X(index).with_classical_controls(label)
-                              for index in targetQubits]
+                    targetQubits = self._target_qubits(qubits, gate)
+                    if not "controls" in gate:
+                        _c = [cirq.X(qubit) for qubit in targetQubits]
                     else:
-                        targetQubits = self._target_qubits(qubits, gate)
-                        if not "controls" in gate:
-                            _c = [cirq.X(index) for index in targetQubits]
-                        else:
-                            controlledQubits = [qubits[index]
-                                                for index in gate['controls']]
-                            _c = [cirq.ControlledOperation(
-                                controlledQubits, cirq.X(index)) for index in targetQubits]
+                        controlQubits = [qubits[control]
+                                         for control in gate['controls']]
+                        _c = [cirq.ControlledOperation(
+                            controlQubits, cirq.X(target)) for target in targetQubits]
                 elif gate['type'] == u'Y':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Y(index) for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
                         _c = [cirq.ControlledOperation(
-                            controlledQubits, cirq.Y(index)) for index in targetQubits]
+                            controlQubits, cirq.Y(index)) for index in targetQubits]
                 elif gate['type'] == u'Z':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Z(index) for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
                         _c = [cirq.ControlledOperation(
-                            controlledQubits, cirq.Z(index)) for index in targetQubits]
+                            controlQubits, cirq.Z(index)) for index in targetQubits]
                 elif gate['type'] == u'Rx':
                     _angle = gate['angle'].replace(u'π', 'pi')
                     expr = parse_expr(_angle, transformations=transformations)
@@ -123,9 +116,9 @@ class cirqbridge:
                         _c = [cirq.rx(angle).on(index)
                               for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.rx(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.rx(
                             angle).on(index)) for index in targetQubits]
                 elif gate['type'] == u'Ry':
                     _angle = gate['angle'].replace(u'π', 'pi')
@@ -136,9 +129,9 @@ class cirqbridge:
                         _c = [cirq.ry(angle).on(index)
                               for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.ry(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.ry(
                             angle).on(index)) for index in targetQubits]
                 elif gate['type'] == u'Rz':
                     _angle = gate['angle'].replace(u'π', 'pi')
@@ -149,9 +142,9 @@ class cirqbridge:
                         _c = [cirq.rz(angle).on(index)
                               for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.rz(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.rz(
                             angle).on(index)) for index in targetQubits]
                 elif gate['type'] == u'P':
                     _angle = gate['angle'].replace(u'π', 'pi') + '/ pi'
@@ -162,54 +155,54 @@ class cirqbridge:
                         _c = [cirq.ZPowGate(exponent=angle).on(index)
                               for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.ZPowGate(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.ZPowGate(
                             exponent=angle).on(index)) for index in targetQubits]
                 elif gate['type'] == u'S':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Z(index)**0.5 for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.Z(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
                             index)**0.5) for index in targetQubits]
                 elif gate['type'] == u'S†':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Z(index)**(-0.5) for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.Z(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
                             index)**(-0.5)) for index in targetQubits]
                 elif gate['type'] == u'T':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Z(index)**0.25 for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.Z(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
                             index)**0.25) for index in targetQubits]
                 elif gate['type'] == u'T†':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.Z(index)**(-0.25) for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.Z(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
                             index)**(-0.25)) for index in targetQubits]
                 elif gate['type'] == u'X^½':
                     targetQubits = self._target_qubits(qubits, gate)
                     if not "controls" in gate:
                         _c = [cirq.X(index)**0.5 for index in targetQubits]
                     else:
-                        controlledQubits = [qubits[index]
-                                            for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.X(
+                        controlQubits = [qubits[index]
+                                         for index in gate['controls']]
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.X(
                             index)**0.5) for index in targetQubits]
                 elif gate['type'] == u'•':
                     if "controls" in gate:
@@ -225,12 +218,12 @@ class cirqbridge:
                     else:
                         # we regard the first and the second qubit as the target qubits,
                         # and others are controlled qubits.
-                        controlledQubits = []
+                        controlQubits = []
                         for _i in range(len(gate['targets'])-2):
-                            controlledQubits.append(
+                            controlQubits.append(
                                 qubits[gate['targets'][_i+2]])
                         sys.stdout.flush()
-                        _c = [cirq.ControlledOperation(controlledQubits, cirq.CZ(
+                        _c = [cirq.ControlledOperation(controlQubits, cirq.CZ(
                             qubits[gate['targets'][0]], qubits[gate['targets'][1]]))]
                 elif gate['type'] == u'|0>':
                     targetQubits = self._target_qubits(qubits, gate)
