@@ -94,13 +94,7 @@ class cirqbridge:
                     _c = [cirq.Y(target) for target in targets]
                 elif gate['type'] == u'Z':
                     targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.Z(index) for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(
-                            controlQubits, cirq.Z(index)) for index in targets]
+                    _c = [cirq.Z(target) for target in targets]
                 elif gate['type'] == u'Rx':
                     _angle = gate['angle'].replace(u'π', 'pi')
                     expr = parse_expr(_angle, transformations=transformations)
