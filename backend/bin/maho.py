@@ -107,6 +107,15 @@ class cirqbridge:
                 elif gate['type'] == u'T':
                     targets = self._target_qubits(qubits, gate)
                     _c = [cirq.Z(target)**0.25 for target in targets]
+                elif gate['type'] == u'T†':
+                    targets = self._target_qubits(qubits, gate)
+                    _c = [cirq.Z(target)**(-0.25) for target in targets]
+                elif gate['type'] == u'Swap':
+                    _c = []
+                    if len(gate['targets']) == 2:
+                        target0 = qubits[gate['targets'][0]]
+                        target1 = qubits[gate['targets'][1]]
+                        _c.append(cirq.SWAP(target0, target1))
                 elif gate['type'] == u'P':
                     _angle = gate['angle'].replace(u'π', 'pi') + '/ pi'
                     expr = parse_expr(_angle, transformations=transformations)
@@ -120,15 +129,6 @@ class cirqbridge:
                                          for index in gate['controls']]
                         _c = [cirq.ControlledOperation(controlQubits, cirq.ZPowGate(
                             exponent=angle).on(index)) for index in targets]
-                elif gate['type'] == u'T†':
-                    targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.Z(index)**(-0.25) for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
-                            index)**(-0.25)) for index in targets]
                 elif gate['type'] == u'•':
                     if "controls" in gate:
                         #                        print("control is not supported for CZ gate", gate['type'])
@@ -167,14 +167,6 @@ class cirqbridge:
                           for index in range(len(targets))]
                     measurement_moment[_current_index].append(_m)
                     m = m + len(targets)
-                elif gate['type'] == u'Swap':
-                    if len(gate['targets']) != 2:
-                        _c = []
-                    else:
-                        targetqubit0 = qubits[gate['targets'][0]]
-                        targetqubit1 = qubits[gate['targets'][1]]
-                        _c = []
-                        _c.append(cirq.SWAP(targetqubit0, targetqubit1))
                 elif gate['type'] == u'Bloch':
                     targets = self._target_qubits(qubits, gate)
                     # add a dummy gate to count Bloch operation as a step
