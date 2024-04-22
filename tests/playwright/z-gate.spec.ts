@@ -18,7 +18,7 @@ test.describe("Z gate", () => {
     await idle.waitFor();
   });
 
-  test("Place an Z gate on the first bit", async ({ page }) => {
+  test("Place a Z gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
     await page.mouse.move(centerPosition(zGate).x, centerPosition(zGate).y);
@@ -30,7 +30,7 @@ test.describe("Z gate", () => {
     await expect(page).toHaveScreenshot("z-gate-bit1.png");
   });
 
-  test("Place an Z gate on the second bit", async ({ page }) => {
+  test("Place a Z gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
     await page.mouse.move(centerPosition(zGate).x, centerPosition(zGate).y);
@@ -42,7 +42,7 @@ test.describe("Z gate", () => {
     await expect(page).toHaveScreenshot("z-gate-bit2.png");
   });
 
-  test("Place an Z gate on the third bit", async ({ page }) => {
+  test("Place a Z gate on the third bit", async ({ page }) => {
     await page.mouse.move(centerPosition(zGate).x, centerPosition(zGate).y);
     await page.mouse.down();
 
