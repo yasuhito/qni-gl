@@ -18,7 +18,7 @@ test.describe("Y gate", () => {
     await idle.waitFor();
   });
 
-  test("Place an Y gate on the first bit", async ({ page }) => {
+  test("Place a Y gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
     await page.mouse.move(centerPosition(yGate).x, centerPosition(yGate).y);
@@ -30,7 +30,7 @@ test.describe("Y gate", () => {
     await expect(page).toHaveScreenshot("y-gate-bit1.png");
   });
 
-  test("Place an Y gate on the second bit", async ({ page }) => {
+  test("Place a Y gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
     await page.mouse.move(centerPosition(yGate).x, centerPosition(yGate).y);
@@ -42,7 +42,7 @@ test.describe("Y gate", () => {
     await expect(page).toHaveScreenshot("y-gate-bit2.png");
   });
 
-  test("Place an Y gate on the third bit", async ({ page }) => {
+  test("Place a Y gate on the third bit", async ({ page }) => {
     await page.mouse.move(centerPosition(yGate).x, centerPosition(yGate).y);
     await page.mouse.down();
 
