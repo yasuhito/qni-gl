@@ -95,45 +95,9 @@ class cirqbridge:
                 elif gate['type'] == u'Z':
                     targets = self._target_qubits(qubits, gate)
                     _c = [cirq.Z(target) for target in targets]
-                elif gate['type'] == u'Rx':
-                    _angle = gate['angle'].replace(u'π', 'pi')
-                    expr = parse_expr(_angle, transformations=transformations)
-                    angle = float(expr.evalf())
+                elif gate['type'] == u'X^½':
                     targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.rx(angle).on(index)
-                              for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.rx(
-                            angle).on(index)) for index in targets]
-                elif gate['type'] == u'Ry':
-                    _angle = gate['angle'].replace(u'π', 'pi')
-                    expr = parse_expr(_angle, transformations=transformations)
-                    angle = float(expr.evalf())
-                    targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.ry(angle).on(index)
-                              for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.ry(
-                            angle).on(index)) for index in targets]
-                elif gate['type'] == u'Rz':
-                    _angle = gate['angle'].replace(u'π', 'pi')
-                    expr = parse_expr(_angle, transformations=transformations)
-                    angle = float(expr.evalf())
-                    targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.rz(angle).on(index)
-                              for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.rz(
-                            angle).on(index)) for index in targets]
+                    _c = [cirq.X(target)**0.5 for target in targets]
                 elif gate['type'] == u'P':
                     _angle = gate['angle'].replace(u'π', 'pi') + '/ pi'
                     expr = parse_expr(_angle, transformations=transformations)
@@ -183,15 +147,6 @@ class cirqbridge:
                                          for index in gate['controls']]
                         _c = [cirq.ControlledOperation(controlQubits, cirq.Z(
                             index)**(-0.25)) for index in targets]
-                elif gate['type'] == u'X^½':
-                    targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.X(index)**0.5 for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.X(
-                            index)**0.5) for index in targets]
                 elif gate['type'] == u'•':
                     if "controls" in gate:
                         #                        print("control is not supported for CZ gate", gate['type'])
