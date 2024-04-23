@@ -193,12 +193,13 @@ export class App {
           throw new Error("value is not '' | 0 | 1");
         }
 
-        const dropzone = step.dropzoneAt(parseInt(bit));
+        const qubitCount = this.circuit.qubitCountInUse;
+        const dropzone = step.dropzoneAt(qubitCount - parseInt(bit) - 1);
         const measurementGate = dropzone.operation;
 
         // もし measurementGate が MeasurementGate でない場合はエラー
         if (!(measurementGate instanceof MeasurementGate)) {
-          throw new Error("measurementGate is not MeasurementGate");
+          throw new Error(`${measurementGate} is not MeasurementGate`);
         }
         measurementGate.value = value;
       }

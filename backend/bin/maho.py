@@ -154,16 +154,9 @@ class cirqbridge:
                           for index in range(len(targets))]
                     measurement_moment[_current_index].append(_m)
                     m = m + len(targets)
-                elif gate['type'] == u'Bloch':
-                    targets = self._target_qubits(qubits, gate)
-                    # add a dummy gate to count Bloch operation as a step
-                    _c = [cirq.ops.I(index) for index in targets]
-                elif gate['type'] == u'':
-                    pass  # nop
                 else:
-                    #                    print("unsupported gate", gate['type'])
-                    #                    sys.stdout.flush()
                     exit(1)
+
                 for __c in _c:
                     moment.append(__c)
             c.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
