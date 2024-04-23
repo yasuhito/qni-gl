@@ -137,26 +137,13 @@ class cirqbridge:
                         sys.stdout.flush()
                         _c = [cirq.ControlledOperation(controls, cirq.CZ(
                             qubits[gate['targets'][0]], qubits[gate['targets'][1]]))]
-                elif gate['type'] == u'P':
-                    _angle = gate['angle'].replace(u'π', 'pi') + '/ pi'
-                    expr = parse_expr(_angle, transformations=transformations)
-                    angle = float(expr.evalf())
-                    targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.ZPowGate(exponent=angle).on(index)
-                              for index in targets]
-                    else:
-                        controlQubits = [qubits[index]
-                                         for index in gate['controls']]
-                        _c = [cirq.ControlledOperation(controlQubits, cirq.ZPowGate(
-                            exponent=angle).on(index)) for index in targets]
                 elif gate['type'] == u'|0>':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.ops.reset(index) for index in targets]
+                    _c = [cirq.ops.reset(target) for target in targets]
                 elif gate['type'] == u'|1>':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.ops.reset(index) for index in targets]
-                    _c.append([cirq.X(index) for index in targets])
+                    _c = [cirq.ops.reset(target) for target in targets]
+                    _c.append([cirq.X(target) for target in targets])
                 elif gate['type'] == u'Measure':
                     targets = self._target_qubits(qubits, gate)
                     _c = [cirq.measure(targets[index], key='m' + str(m + index))
