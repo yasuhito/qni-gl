@@ -193,12 +193,15 @@ export class App {
           throw new Error("value is not '' | 0 | 1");
         }
 
-        const dropzone = step.dropzoneAt(parseInt(bit));
+        const qubitCount = this.circuit.qubitCountInUse;
+        // TODO: ビットオーダーの変換をサービスワーカ側で行う
+        // フロントエンドからは Qni のビットオーダ (上が下位) しか意識しなくて良いようにする
+        const dropzone = step.dropzoneAt(qubitCount - parseInt(bit) - 1);
         const measurementGate = dropzone.operation;
 
         // もし measurementGate が MeasurementGate でない場合はエラー
         if (!(measurementGate instanceof MeasurementGate)) {
-          throw new Error("measurementGate is not MeasurementGate");
+          throw new Error(`${measurementGate} is not MeasurementGate`);
         }
         measurementGate.value = value;
       }
