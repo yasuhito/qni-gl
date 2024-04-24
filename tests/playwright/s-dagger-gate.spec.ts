@@ -55,4 +55,29 @@ test.describe("S† gate", () => {
 
     await expect(page).toHaveScreenshot("s-dagger-gate-bit3.png");
   });
+
+  test("Apply an S† gate to state |1>.", async ({ page  }) => {
+    const dropzone00 = app.circuit.steps[0].dropzones[0];
+    const xGate = app.gatePalette.gates.XGate;
+
+    await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
+    await page.mouse.down();
+    await page.mouse.move(dropzone00.x, dropzone00.y);
+    await page.mouse.up();
+    await idle.waitFor();
+
+    const dropzone10 = app.circuit.steps[1].dropzones[0];
+
+    await page.mouse.move(centerPosition(sDaggerGate).x, centerPosition(sDaggerGate).y);
+    await page.mouse.down();
+    await page.mouse.move(dropzone10.x, dropzone10.y);
+    await page.mouse.up();
+    await idle.waitFor();
+
+    const step1 = app.circuit.steps[1]
+    await page.mouse.click(step1.x, step1.y);
+    await idle.waitFor();
+
+    await expect(page).toHaveScreenshot("s-dagger-gate-state-|1>.png");
+  })
 });
