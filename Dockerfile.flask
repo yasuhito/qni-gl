@@ -1,0 +1,62 @@
+FROM node:lts
+
+RUN apt update
+RUN apt -y upgrade
+RUN apt install -y sudo
+RUN apt install -y tzdata
+# set your timezone
+ENV TZ Asia/Tokyo
+RUN echo "${TZ}" > /etc/timezone \
+  && rm /etc/localtime \
+  && ln -s /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+  && dpkg-reconfigure -f noninteractive tzdata
+
+#RUN apt install -y python3-flask
+RUN apt install -y nginx
+RUN apt install -y apache2-utils
+RUN apt install -y uwsgi 
+RUN apt install -y python3-flask
+RUN apt install -y uwsgi-plugin-python3
+RUN apt install -y python3-pip
+
+RUN pip3 install cirq --break-system-packages
+ENV LC_ALL=es_US.UTF-8
+
+RUN mkdir /vite-project
+COPY assets src public tests index.html main.ts\
+      package.json rollup.config.js style.css\
+      tsconfig.json vite.config.ts yarn.lock\
+      /vite-project
+RUN cd /vite-project && yarn && yarn build
+
+RUN echo '                                           \n\
+server {                                             \n\
+    listen 8000;                                     \n\
+    root /vite-project/;                             \n\
+    index index.html index.htm;                      \n\
+    location / {                                     \n\
+        auth_basic "Restricted";                     \n\
+        auth_basic_user_file /etc/nginx/.htpasswd;   \n\
+        location /sim {                            \n\
+            include uwsgi_params;                    \n\
+            uwsgi_pass unix:///tmp/uwsgi.sock;       \n\
+        }                                            \n\
+    }                                                \n\
+} ' >> /etc/nginx/conf.d/merged.conf
+
+COPY backend_flask /backend_flask
+
+## yarn
+## RUN npm install -g yarn
+
+## to start the dev server exec
+## $ yarn dev
+
+RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
+
+#CMD ["/bin/bash", "-c", "nginx"]
+
+STOPSIGNAL SIGTERM
+CMD cd /backend_flask ; nginx; uwsgi --ini sim.ini
+#CMD ["nginx", "-g", "daemon off;"]
+#CMD ["/bin/bash"]
