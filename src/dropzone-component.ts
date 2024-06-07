@@ -1,4 +1,3 @@
-import * as tailwindColors from "tailwindcss/colors";
 import * as PIXI from "pixi.js";
 import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
@@ -59,8 +58,8 @@ export class DropzoneComponent extends Container {
   }
 
   set connectTop(value) {
-    this._connectTop = value
-    this.redrawConnections()
+    this._connectTop = value;
+    this.redrawConnections();
   }
 
   get connectTop() {
@@ -68,12 +67,12 @@ export class DropzoneComponent extends Container {
   }
 
   set connectBottom(value) {
-    this._connectBottom = value
-    this.redrawConnections()
+    this._connectBottom = value;
+    this.redrawConnections();
   }
 
   get connectBottom() {
-    return this._connectBottom
+    return this._connectBottom;
   }
 
   constructor() {
@@ -83,7 +82,7 @@ export class DropzoneComponent extends Container {
     this.addChild(this.wire);
 
     this.connection = new PIXI.Graphics();
-    this.addChild(this.connection)
+    this.addChild(this.connection);
 
     this.redrawWires();
     this.redrawConnections();
@@ -196,7 +195,7 @@ export class DropzoneComponent extends Container {
   }
 
   redrawConnections() {
-    this.connection.clear()
+    this.connection.clear();
 
     if (this.connectTop) {
       this.drawConnection(
@@ -248,9 +247,14 @@ export class DropzoneComponent extends Container {
       .lineTo(endX, this.wireY);
   }
 
-  protected drawConnection(startY: number, endY: number) {
+  protected drawConnection(startY: number, endY: number, wireColor: WireColor) {
     this.wire
-      .lineStyle(this.connectionWidth, tailwindColors.sky["500"], this.wireAlpha, this.wireAlignment)
+      .lineStyle(
+        this.connectionWidth,
+        wireColor,
+        this.wireAlpha,
+        this.wireAlignment
+      )
       .moveTo(this.connectionX, startY)
       .lineTo(this.connectionX, endY);
   }
