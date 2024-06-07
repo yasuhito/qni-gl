@@ -1,5 +1,6 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 export default defineConfig({
   plugins: [
@@ -12,6 +13,14 @@ export default defineConfig({
         injectionPoint: undefined,
       },
     }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'assets',
+          dest: ''
+        }
+      ]
+    })
   ],
   test: {
     browser: {

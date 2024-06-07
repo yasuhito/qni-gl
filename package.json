@@ -30,6 +30,7 @@
     "typedoc": "^0.25.1",
     "typedoc-plugin-no-inherit": "^1.4.0",
     "vite-plugin-pwa": "^0.17.2",
+    "vite-plugin-static-copy": "^1.0.5",
     "vitest": "^1.0.1",
     "webdriverio": "^8.16.12",
     "wrap-ansi": "~9.0"
