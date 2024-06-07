@@ -23,16 +23,21 @@ RUN pip3 install cirq --break-system-packages
 ENV LC_ALL=es_US.UTF-8
 
 RUN mkdir /vite-project
-COPY assets src public tests index.html main.ts\
+COPY assets/ /vite-project/assets/
+COPY src/ /vite-project/src/
+COPY public/ /vite-project/public/
+COPY tests/ /vite-project/tests/
+
+COPY index.html main.ts\
       package.json rollup.config.js style.css\
       tsconfig.json vite.config.ts yarn.lock\
-      /vite-project
+      /vite-project/
 RUN cd /vite-project && yarn && yarn build
 
 RUN echo '                                           \n\
 server {                                             \n\
     listen 8000;                                     \n\
-    root /vite-project/;                             \n\
+    root /vite-project/dist;                         \n\
     index index.html index.htm;                      \n\
     location / {                                     \n\
         auth_basic "Restricted";                     \n\
@@ -56,7 +61,7 @@ RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
 
 #CMD ["/bin/bash", "-c", "nginx"]
 
-STOPSIGNAL SIGTERM
+#STOPSIGNAL SIGTERM
 CMD cd /backend_flask ; nginx; uwsgi --ini sim.ini
 #CMD ["nginx", "-g", "daemon off;"]
 #CMD ["/bin/bash"]
