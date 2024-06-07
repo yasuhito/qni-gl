@@ -1,5 +1,6 @@
 from flask import Flask, make_response, request
 import sys
+import io
 import json
 import random
 import logging
@@ -8,6 +9,8 @@ import maho
 logger = logging.Logger('myLogger')
 
 app = Flask(__name__)
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 @app.route('/sim', methods=["GET"])
 def sim():
