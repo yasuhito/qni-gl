@@ -1,16 +1,17 @@
 import * as tailwindColors from "tailwindcss/colors";
 
 export const Colors = {
+  bg: tailwindColors.white,
+  "bg.brand": tailwindColors.sky["500"],
+  "bg.brand.hover": tailwindColors.sky["600"],
+  "bg.brand.grabbed": tailwindColors.purple["500"],
+  "bg.brand.active": tailwindColors.sky["500"],
+  border: tailwindColors.sky["700"],
+  "border.gate": tailwindColors.sky["700"],
+};
+
+export const ColorsOld = {
   bg: {
-    default: {
-      default: tailwindColors.white,
-    },
-    brand: {
-      default: tailwindColors.sky["500"],
-      hover: tailwindColors.sky["600"],
-      grabbed: tailwindColors.purple["500"],
-      active: tailwindColors.sky["500"],
-    },
     wire: {
       classical: tailwindColors.zinc["300"],
       quantum: tailwindColors.zinc["900"],
@@ -44,7 +45,7 @@ export const Colors = {
 };
 
 export type WireColor =
-  | typeof Colors.bg.wire.classical
-  | typeof Colors.bg.wire.quantum;
+  | typeof ColorsOld.bg.wire.classical
+  | typeof ColorsOld.bg.wire.quantum;
 
 export const FULL_OPACITY = 1;

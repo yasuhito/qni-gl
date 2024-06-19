@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
+import { Colors, ColorsOld } from "./colors";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
@@ -22,7 +22,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     this._shape.zIndex = 0;
     this._shape.cursor = "default";
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = ColorsOld.icon.gate.secondary;
   }
 
   applyHoverStyle() {
@@ -33,7 +33,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.hover,
+      ColorsOld.border.gate.hover,
       1,
       0
     );
@@ -46,7 +46,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = ColorsOld.icon.gate.secondary;
   }
 
   applyGrabbedStyle() {
@@ -57,11 +57,11 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.grabbed,
+      ColorsOld.border.gate.grabbed,
       1,
       0
     );
-    this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+    this._shape.beginFill(Colors["bg.brand.grabbed"], 1);
     this._shape.drawRoundedRect(
       0,
       0,
@@ -71,7 +71,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.default;
+    this._sprite.tint = ColorsOld.icon.gate.default;
   }
 
   applyActiveStyle() {
@@ -82,7 +82,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.active,
+      ColorsOld.border.gate.active,
       1,
       0
     );
@@ -95,7 +95,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = ColorsOld.icon.gate.secondary;
   }
 
   toCircuitJSON() {

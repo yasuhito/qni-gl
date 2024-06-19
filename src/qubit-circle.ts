@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
+import { Colors, ColorsOld } from "./colors";
 import { Container } from "pixi.js";
 import { Size } from "./size";
 import { Spacing } from "./spacing";
@@ -26,7 +26,7 @@ export class QubitCircle extends Container {
     this.probabilityCircle.clear();
 
     if (this.probability > 0) {
-      this.probabilityCircle.beginFill(Colors.bg.brand.default, 1);
+      this.probabilityCircle.beginFill(Colors["bg.brand"], 1);
     }
 
     const radius =
@@ -108,7 +108,7 @@ export class QubitCircle extends Container {
 
     if (probability > 0) {
       this.phaseHand
-        .beginFill(Colors.icon.default, 1)
+        .beginFill(ColorsOld.icon.default, 1)
         .drawRect(
           0,
           0,
@@ -123,9 +123,9 @@ export class QubitCircle extends Container {
 
   protected borderColor(probability: number) {
     if (probability === 0) {
-      return Colors.border.qubitCircle.disabled;
+      return ColorsOld.border.qubitCircle.disabled;
     }
 
-    return Colors.border.qubitCircle.default;
+    return ColorsOld.border.qubitCircle.default;
   }
 }

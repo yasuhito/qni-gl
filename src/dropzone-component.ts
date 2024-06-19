@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors, FULL_OPACITY, WireColor } from "./colors";
+import { ColorsOld, Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
@@ -243,7 +243,7 @@ export class DropzoneComponent extends Container {
     this.wire
       .lineStyle(
         this.connectionWidth,
-        Colors.bg.brand.default,
+        Colors["bg.brand"],
         this.wireAlpha,
         this.wireAlignment
       )
@@ -261,18 +261,18 @@ export class DropzoneComponent extends Container {
 
   protected get inputWireColor() {
     if (this.inputWireType === WireType.Quantum) {
-      return Colors.bg.wire.quantum;
+      return ColorsOld.bg.wire.quantum;
     }
 
-    return Colors.bg.wire.classical;
+    return ColorsOld.bg.wire.classical;
   }
 
   protected get outputWireColor() {
     if (this.outputWireType === WireType.Quantum) {
-      return Colors.bg.wire.quantum;
+      return ColorsOld.bg.wire.quantum;
     }
 
-    return Colors.bg.wire.classical;
+    return ColorsOld.bg.wire.classical;
   }
 
   protected get inputWireStartX() {

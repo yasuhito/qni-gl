@@ -1,7 +1,8 @@
-import { Colors } from "./colors";
+import { ColorsOld } from "./colors";
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
 import { Spacing } from "./spacing";
+import { Colors } from "./colors";
 
 export declare class CircularGate {
   applyIdleStyle(): void;
@@ -22,11 +23,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors.border.gate.idle,
+        Colors["border.gate"],
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.default, 1);
+      this._shape.beginFill(Colors["bg.brand"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -45,11 +46,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors.border.gate.hover,
+        ColorsOld.border.gate.hover,
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.hover, 1);
+      this._shape.beginFill(Colors["bg.brand.hover"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -68,11 +69,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors.border.gate.grabbed,
+        ColorsOld.border.gate.grabbed,
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+      this._shape.beginFill(Colors["bg.brand.grabbed"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -91,11 +92,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors.border.gate.active,
+        ColorsOld.border.gate.active,
         1,
         0
       );
-      this._shape.beginFill(Colors.bg.brand.active, 1);
+      this._shape.beginFill(Colors["bg.brand.active"], 1);
       this._shape.drawRoundedRect(
         0,
         0,

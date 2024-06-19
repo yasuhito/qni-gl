@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
+import { Colors, ColorsOld } from "./colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GridLayout } from "./grid-layout";
@@ -118,8 +118,8 @@ export class StateVectorComponent extends Container {
   }
 
   private drawBody() {
-    this.body.lineStyle(1, Colors.border.stateVector.default, 1, 0);
-    this.body.beginFill(Colors.bg.default.default);
+    this.body.lineStyle(1, ColorsOld.border.stateVector.default, 1, 0);
+    this.body.beginFill(Colors["bg"]);
     this.body.drawRoundedRect(
       0,
       0,
