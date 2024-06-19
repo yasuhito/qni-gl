@@ -198,18 +198,10 @@ export class DropzoneComponent extends Container {
     this.connection.clear();
 
     if (this.connectTop) {
-      this.drawConnection(
-        this.lowerConnectionStartY,
-        this.lowerConnectionEndY,
-        this.inputWireColor
-      );
+      this.drawConnection(this.lowerConnectionStartY, this.lowerConnectionEndY);
     }
     if (this.connectBottom) {
-      this.drawConnection(
-        this.upperConnectionStartY,
-        this.upperConnectionEndY,
-        this.inputWireColor
-      );
+      this.drawConnection(this.upperConnectionStartY, this.upperConnectionEndY);
     }
   }
 
@@ -247,11 +239,11 @@ export class DropzoneComponent extends Container {
       .lineTo(endX, this.wireY);
   }
 
-  protected drawConnection(startY: number, endY: number, wireColor: WireColor) {
+  protected drawConnection(startY: number, endY: number) {
     this.wire
       .lineStyle(
         this.connectionWidth,
-        wireColor,
+        Colors.bg.brand.default,
         this.wireAlpha,
         this.wireAlignment
       )
