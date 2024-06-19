@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
+import { Colors } from "./colors";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
@@ -21,14 +22,14 @@ export class GatePaletteComponent extends Container {
   /** @ignore パレットの角の丸み */
   static cornerRadius = spacingInPx(3);
   /** @ignore パレットの枠線の色 */
-  static borderColor = tailwindColors.zinc["400"];
+  static borderColor = Colors["border.component"];
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 
   gates: { [key: string]: GateComponent | null } = {};
 
   protected graphics: PIXI.Graphics;
-  protected gateClasses: (typeof GateComponent)[][] = [];
+  protected gateClasses: typeof GateComponent[][] = [];
   protected gateRows: List;
 
   constructor() {

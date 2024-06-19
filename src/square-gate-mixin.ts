@@ -1,4 +1,4 @@
-import { Colors, ColorsOld } from "./colors";
+import { Colors } from "./colors";
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
 import { Spacing } from "./spacing";
@@ -22,7 +22,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border.gate"],
+        Colors["border.brand"],
         1,
         0
       );
@@ -45,7 +45,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        ColorsOld.border.gate.hover,
+        Colors["border.brand.hover"],
         1,
         0
       );
@@ -68,7 +68,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        ColorsOld.border.gate.grabbed,
+        Colors["border.brand.grabbed"],
         1,
         0
       );
@@ -91,7 +91,7 @@ export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        ColorsOld.border.gate.active,
+        Colors["border.brand.active"],
         1,
         0
       );

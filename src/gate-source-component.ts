@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { ColorsOld } from "./colors";
+import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { spacingInPx } from "./util";
@@ -9,7 +9,7 @@ import { spacingInPx } from "./util";
  */
 export class GateSourceComponent extends Container {
   static size = spacingInPx(8);
-  static borderColor = ColorsOld.border.gateSource.default;
+  static borderColor = Colors["border.inverse"];
 
   private gateClass: typeof GateComponent;
   private border: PIXI.Graphics;

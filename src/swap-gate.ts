@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors, ColorsOld } from "./colors";
+import { Colors } from "./colors";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
@@ -22,7 +22,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     this._shape.zIndex = 0;
     this._shape.cursor = "default";
 
-    this._sprite.tint = ColorsOld.icon.gate.secondary;
+    this._sprite.tint = Colors["icon.brand"];
   }
 
   applyHoverStyle() {
@@ -33,7 +33,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      ColorsOld.border.gate.hover,
+      Colors["border.brand.hover"],
       1,
       0
     );
@@ -46,7 +46,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = ColorsOld.icon.gate.secondary;
+    this._sprite.tint = Colors["icon.brand"];
   }
 
   applyGrabbedStyle() {
@@ -57,7 +57,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      ColorsOld.border.gate.grabbed,
+      Colors["border.brand.grabbed"],
       1,
       0
     );
@@ -71,7 +71,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = ColorsOld.icon.gate.default;
+    this._sprite.tint = Colors["icon.onbrand"];
   }
 
   applyActiveStyle() {
@@ -82,7 +82,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      ColorsOld.border.gate.active,
+      Colors["border.brand.active"],
       1,
       0
     );
@@ -95,7 +95,7 @@ export class SwapGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = ColorsOld.icon.gate.secondary;
+    this._sprite.tint = Colors["icon.brand"];
   }
 
   toCircuitJSON() {
