@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { Colors, FULL_OPACITY, WireColor } from "./colors";
+import { Colors, FULL_OPACITY, ConnectionColor, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
@@ -201,14 +201,16 @@ export class DropzoneComponent extends Container {
       this.drawConnection(
         this.lowerConnectionStartY,
         this.lowerConnectionEndY,
-        this.inputWireColor
+        Colors.bg.brand.default
+        // this.inputWireColor
       );
     }
     if (this.connectBottom) {
       this.drawConnection(
         this.upperConnectionStartY,
         this.upperConnectionEndY,
-        this.inputWireColor
+        Colors.bg.brand.default
+        // this.inputWireColor
       );
     }
   }
@@ -247,11 +249,11 @@ export class DropzoneComponent extends Container {
       .lineTo(endX, this.wireY);
   }
 
-  protected drawConnection(startY: number, endY: number, wireColor: WireColor) {
+  protected drawConnection(startY: number, endY: number, connectionColor: ConnectionColor) {
     this.wire
       .lineStyle(
         this.connectionWidth,
-        wireColor,
+        connectionColor,
         this.wireAlpha,
         this.wireAlignment
       )

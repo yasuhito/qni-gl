@@ -47,4 +47,6 @@ export type WireColor =
   | typeof Colors.bg.wire.classical
   | typeof Colors.bg.wire.quantum;
 
+export type ConnectionColor = typeof Colors.bg.brand.default
+
 export const FULL_OPACITY = 1;
