@@ -5,7 +5,7 @@ import * as tailwindColors from "tailwindcss/colors";
 // Prominence (optional): "strong" | "secondary" | "tertiary"
 // Interaction (optional): "hover" | "grabbed" | "active"
 
-type BgColorKey = "bg" | "bg-brand" | "bg-brand-hover" | "bg-brand-grabbed";
+type BgColorKey = "bg" | "bg-brand" | "bg-brand-hover" | "bg-active";
 
 type TextColorKey = "text" | "text-inverse";
 
@@ -31,7 +31,7 @@ export const Colors: Colors = {
   bg: tailwindColors.white,
   "bg-brand": tailwindColors.sky["500"],
   "bg-brand-hover": tailwindColors.sky["600"],
-  "bg-brand-grabbed": tailwindColors.purple["500"],
+  "bg-active": tailwindColors.purple["500"],
   text: tailwindColors.zinc["900"],
   "text-inverse": tailwindColors.zinc["200"],
   "border-onbrand": tailwindColors.sky["700"],
