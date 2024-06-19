@@ -15,4 +15,8 @@ export default {
     resolve(), // Node.jsの解決アルゴリズムを使用
     commonjs(), // CommonJSモジュールをES6に変換
   ],
+  onwarn: (warning, defaultHandler) => {
+    if (warning.loc.file.includes("/node_modules/")) return;
+    defaultHandler(warning)
+  }
 };
