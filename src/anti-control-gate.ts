@@ -22,7 +22,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
     this._shape.zIndex = 0;
     this._shape.cursor = "default";
 
-    this._sprite.tint = Colors["icon.brand"];
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   applyHoverStyle() {
@@ -33,7 +33,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors["border.brand.hover"],
+      Colors["border-onbrand-hover"],
       1,
       0
     );
@@ -46,7 +46,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors["icon.brand"];
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   applyGrabbedStyle() {
@@ -57,11 +57,11 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors["border.brand.grabbed"],
+      Colors["border-onbrand-grabbed"],
       1,
       0
     );
-    this._shape.beginFill(Colors["bg.brand.grabbed"], 1);
+    this._shape.beginFill(Colors["bg-brand-grabbed"], 1);
     this._shape.drawRoundedRect(
       0,
       0,
@@ -71,7 +71,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors["icon.onbrand"];
+    this._sprite.tint = Colors["icon-onbrand"];
   }
 
   applyActiveStyle() {
@@ -82,7 +82,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors["border.brand.active"],
+      Colors["border-active"],
       1,
       0
     );
@@ -95,7 +95,7 @@ export class AntiControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors["icon.brand"];
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   toCircuitJSON() {

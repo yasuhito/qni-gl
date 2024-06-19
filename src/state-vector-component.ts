@@ -118,7 +118,7 @@ export class StateVectorComponent extends Container {
   }
 
   private drawBody() {
-    this.body.lineStyle(1, Colors["border.component"], 1, 0);
+    this.body.lineStyle(1, Colors["border-component"], 1, 0);
     this.body.beginFill(Colors["bg"]);
     this.body.drawRoundedRect(
       0,

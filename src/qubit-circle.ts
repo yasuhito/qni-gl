@@ -26,7 +26,7 @@ export class QubitCircle extends Container {
     this.probabilityCircle.clear();
 
     if (this.probability > 0) {
-      this.probabilityCircle.beginFill(Colors["bg.brand"], 1);
+      this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
     }
 
     const radius =
@@ -123,9 +123,9 @@ export class QubitCircle extends Container {
 
   protected borderColor(probability: number) {
     if (probability === 0) {
-      return Colors["border.component.strong.disabled"];
+      return Colors["border-component-strong-disabled"];
     }
 
-    return Colors["border.component.strong"];
+    return Colors["border-component-strong"];
   }
 }

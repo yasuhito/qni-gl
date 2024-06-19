@@ -22,7 +22,7 @@ export class GatePaletteComponent extends Container {
   /** @ignore パレットの角の丸み */
   static cornerRadius = spacingInPx(3);
   /** @ignore パレットの枠線の色 */
-  static borderColor = Colors["border.component"];
+  static borderColor = Colors["border-component"];
   /** @ignore パレットの背景色 */
   static backgroundColor = tailwindColors.white;
 

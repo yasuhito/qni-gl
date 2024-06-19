@@ -22,11 +22,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border.brand"],
+        Colors["border-onbrand"],
         1,
         0
       );
-      this._shape.beginFill(Colors["bg.brand"], 1);
+      this._shape.beginFill(Colors["bg-brand"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -45,11 +45,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border.brand.hover"],
+        Colors["border-onbrand-hover"],
         1,
         0
       );
-      this._shape.beginFill(Colors["bg.brand.hover"], 1);
+      this._shape.beginFill(Colors["bg-brand-hover"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -68,11 +68,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border.brand.grabbed"],
+        Colors["border-onbrand-grabbed"],
         1,
         0
       );
-      this._shape.beginFill(Colors["bg.brand.grabbed"], 1);
+      this._shape.beginFill(Colors["bg-brand-grabbed"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
@@ -91,11 +91,11 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border.brand.active"],
+        Colors["border-active"],
         1,
         0
       );
-      this._shape.beginFill(Colors["bg.brand.active"], 1);
+      this._shape.beginFill(Colors["bg-brand"], 1);
       this._shape.drawRoundedRect(
         0,
         0,
