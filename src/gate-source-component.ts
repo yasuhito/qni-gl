@@ -25,13 +25,15 @@ export class GateSourceComponent extends Container {
     this.addChild(this.border);
 
     this.border.lineStyle(2, GateSourceComponent.borderColor, 1, 0);
-    this.border.drawRoundedRect(
-      this.x,
-      this.y,
-      GateSourceComponent.size,
-      GateSourceComponent.size,
-      this.gateClass.radius
-    );
+    if (this.gateClass.name !== "XGate") {
+      this.border.drawRoundedRect(
+        0,
+        0,
+        GateSourceComponent.size,
+        GateSourceComponent.size,
+        this.gateClass.cornerRadius
+      );
+    }
   }
 
   generateNewGate(): GateComponent {

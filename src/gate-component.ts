@@ -5,6 +5,7 @@ import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
+import { Spacing } from "./spacing";
 
 /**
  * ゲートのクリックイベント
@@ -29,6 +30,7 @@ export type DragEvent = {
  */
 export class GateComponent extends Container {
   static gateType: string;
+  static cornerRadius = Spacing.cornerRadius.gate;
 
   /**
    * ゲートの幅と高さ (ピクセル)
@@ -40,8 +42,6 @@ export class GateComponent extends Container {
     sm: spacingInPx(6),
     xs: spacingInPx(4),
   };
-
-  static radius = 4;
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static icon = PIXI.Texture.from("./assets/Placeholder.svg");

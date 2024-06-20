@@ -14,6 +14,8 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<CircularGate> & TBase {
   class CircularGateMixinClass extends Base {
+    static cornerRadius = Spacing.cornerRadius.full;
+
     applyIdleStyle() {
       this._shape.clear();
 
@@ -32,7 +34,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0,
         this.sizeInPx,
         this.sizeInPx,
-        Spacing.cornerRadius.full
+        CircularGateMixinClass.cornerRadius
       );
       this._shape.endFill();
     }
@@ -55,7 +57,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0,
         this.sizeInPx,
         this.sizeInPx,
-        Spacing.cornerRadius.full
+        CircularGateMixinClass.cornerRadius
       );
       this._shape.endFill();
     }
@@ -78,7 +80,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0,
         this.sizeInPx,
         this.sizeInPx,
-        Spacing.cornerRadius.full
+        CircularGateMixinClass.cornerRadius
       );
       this._shape.endFill();
     }
@@ -101,7 +103,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
         0,
         this.sizeInPx,
         this.sizeInPx,
-        Spacing.cornerRadius.full
+        CircularGateMixinClass.cornerRadius
       );
       this._shape.endFill();
     }
