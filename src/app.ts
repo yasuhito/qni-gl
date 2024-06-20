@@ -385,6 +385,8 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
+    this.circuit.removeEmptySteps();
+    this.circuit.appendMinimumSteps();
     this.circuit.removeUnusedUpperWires();
     this.circuit.updateSwapConnections();
 

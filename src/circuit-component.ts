@@ -24,6 +24,8 @@ export class CircuitComponent extends Container {
   /** Maximum number of wires. */
   maxWireCount = 32;
 
+  minStepCount = 5;
+
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
   private circuitStepsContainer: ListContainer;
 
@@ -71,7 +73,7 @@ export class CircuitComponent extends Container {
       }
     }
 
-    throw new Error("No active step found");
+    return null
   }
 
   /**
@@ -82,6 +84,7 @@ export class CircuitComponent extends Container {
   constructor(options: CircuitOptions) {
     super();
 
+    this.minStepCount = options.stepCount
     this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
@@ -147,6 +150,36 @@ export class CircuitComponent extends Container {
     }
 
     return this.steps[stepIndex];
+  }
+
+  removeEmptySteps(): void {
+    for (const each of this.emptySteps) {
+      each.destroy()
+    }
+  }
+
+  appendMinimumSteps(): void {
+    const nsteps = this.minStepCount - this.steps.length
+
+    for (let i = 0; i < nsteps; i++) {
+      const circuitStep = new CircuitStepComponent(this.wireCount);
+      this.circuitStepsContainer.addChild(circuitStep);
+
+      circuitStep.on(
+        "gateSnapToDropzone",
+        this.redrawDropzoneInputAndOutputWires,
+        this
+      );
+      circuitStep.on("hover", this.emitOnStepHoverSignal, this);
+      circuitStep.on("activated", this.deactivateAllOtherSteps, this);
+      circuitStep.on("grabGate", (gate, globalPosition) => {
+        this.emit("grabGate", gate, globalPosition);
+      });
+    }
+  }
+
+  private get emptySteps(): CircuitStepComponent[] {
+    return this.steps.filter(each => each.isEmpty)
   }
 
   /**

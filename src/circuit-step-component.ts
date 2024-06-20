@@ -69,6 +69,10 @@ export class CircuitStepComponent extends Container {
     return this.dropzones.length;
   }
 
+  get isEmpty(): boolean {
+    return this.dropzones.every(each => each.operation === null)
+  }
+
   /**
    * Gets the qubit count in use.
    * If no gate is placed in any {@link DropzoneComponent}, returns 0.
