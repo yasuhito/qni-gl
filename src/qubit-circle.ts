@@ -26,7 +26,7 @@ export class QubitCircle extends Container {
     this.probabilityCircle.clear();
 
     if (this.probability > 0) {
-      this.probabilityCircle.beginFill(Colors.bg.brand.default, 1);
+      this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
     }
 
     const radius =
@@ -108,7 +108,7 @@ export class QubitCircle extends Container {
 
     if (probability > 0) {
       this.phaseHand
-        .beginFill(Colors.icon.default, 1)
+        .beginFill(Colors["border.icon"], 1)
         .drawRect(
           0,
           0,
@@ -123,9 +123,9 @@ export class QubitCircle extends Container {
 
   protected borderColor(probability: number) {
     if (probability === 0) {
-      return Colors.border.qubitCircle.disabled;
+      return Colors["border-component-strong-disabled"];
     }
 
-    return Colors.border.qubitCircle.default;
+    return Colors["border-component-strong"];
   }
 }

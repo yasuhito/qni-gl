@@ -22,7 +22,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
     this._shape.zIndex = 0;
     this._shape.cursor = "default";
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   applyHoverStyle() {
@@ -33,7 +33,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.hover,
+      Colors["border-hover"],
       1,
       0
     );
@@ -46,7 +46,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   applyGrabbedStyle() {
@@ -57,11 +57,11 @@ export class ControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.grabbed,
+      Colors["border-pressed"],
       1,
       0
     );
-    this._shape.beginFill(Colors.bg.brand.grabbed, 1);
+    this._shape.beginFill(Colors["bg-active"], 1);
     this._shape.drawRoundedRect(
       0,
       0,
@@ -71,7 +71,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.default;
+    this._sprite.tint = Colors["icon-onbrand"];
   }
 
   applyActiveStyle() {
@@ -82,7 +82,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
 
     this._shape.lineStyle(
       Spacing.borderWidth.gate[this.size],
-      Colors.border.gate.active,
+      Colors["border-active"],
       1,
       0
     );
@@ -95,7 +95,7 @@ export class ControlGate extends JsonableMixin(GateComponent) {
     );
     this._shape.endFill();
 
-    this._sprite.tint = Colors.icon.gate.secondary;
+    this._sprite.tint = Colors["icon-brand"];
   }
 
   toCircuitJSON() {

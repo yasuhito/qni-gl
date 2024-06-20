@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Complex } from "@qni/common";
@@ -22,6 +21,7 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { Colors } from "./colors";
 // import { Layer, Stage } from "@pixi/layers";
 
 export class App {
@@ -73,7 +73,7 @@ export class App {
       resolution: window.devicePixelRatio || 1,
       antialias: true,
       autoDensity: true,
-      backgroundColor: tailwindColors.zinc["50"],
+      backgroundColor: Colors["bg"],
       preserveDrawingBuffer: true,
     });
     // this.pixiApp.stage = new Stage();

@@ -9,7 +9,7 @@ import { spacingInPx } from "./util";
  */
 export class GateSourceComponent extends Container {
   static size = spacingInPx(8);
-  static borderColor = Colors.border.gateSource.default;
+  static borderColor = Colors["border-inverse"];
 
   private gateClass: typeof GateComponent;
   private border: PIXI.Graphics;

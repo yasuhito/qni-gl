@@ -1,7 +1,6 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
-import { ControlGate } from "./control-gate"
+import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { HGate } from "./h-gate";
@@ -20,6 +19,7 @@ import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 import { spacingInPx } from "./util";
+import { Colors } from "./colors";
 
 const groupBy = <K, V>(
   array: readonly V[],
@@ -43,8 +43,8 @@ const groupBy = <K, V>(
  */
 export class CircuitStepComponent extends Container {
   static lineWidth = spacingInPx(1);
-  static hoverLineColor = tailwindColors.purple["300"];
-  static activeLineColor = tailwindColors.blue["500"];
+  static hoverLineColor = Colors["bg-brand-hover"];
+  static activeLineColor = Colors["bg-brand"];
 
   private _dropzones: List;
   private _state: "idle" | "hover" | "active" = "idle";
@@ -199,44 +199,49 @@ export class CircuitStepComponent extends Container {
   }
 
   bit(dropzone: DropzoneComponent): number {
-    const bit = this.dropzones.indexOf(dropzone)
+    const bit = this.dropzones.indexOf(dropzone);
     // Util.need(bit !== -1, 'circuit-dropzone not found.')
 
-    return bit
+    return bit;
   }
 
-
   updateSwapConnections(): void {
-    const swapDropzones = this.swapGateDropzones
+    const swapDropzones = this.swapGateDropzones;
 
     if (swapDropzones.length !== 2) {
-    //   for (const each of swapDropzones) {
-    //     const swapGate = each.operation as SwapGateElement
-    //     swapGate.disable()
-    //   }
+      //   for (const each of swapDropzones) {
+      //     const swapGate = each.operation as SwapGateElement
+      //     swapGate.disable()
+      //   }
     } else {
       for (const swap of swapDropzones) {
         // TODO: つながっていない Swap ゲートは disabled (灰色表示) にする
         // const swapGate = swap.operation as SwapGate
         // swapGate.enable()
-        swap.connectTop = swapDropzones.some(each => this.bit(each) < this.bit(swap))
-        swap.connectBottom = swapDropzones.some(each => this.bit(each) > this.bit(swap))
+        swap.connectTop = swapDropzones.some(
+          (each) => this.bit(each) < this.bit(swap)
+        );
+        swap.connectBottom = swapDropzones.some(
+          (each) => this.bit(each) > this.bit(swap)
+        );
       }
 
-      const swapBits = swapDropzones.map(each => this.bit(each))
+      const swapBits = swapDropzones.map((each) => this.bit(each));
       for (const dropzone of this.freeDropzones) {
-        const minBit = Math.min(...swapBits)
-        const maxBit = Math.max(...swapBits)
+        const minBit = Math.min(...swapBits);
+        const maxBit = Math.max(...swapBits);
         if (minBit < this.bit(dropzone) && this.bit(dropzone) < maxBit) {
-          dropzone.connectTop = true
-          dropzone.connectBottom = true
+          dropzone.connectTop = true;
+          dropzone.connectBottom = true;
         }
       }
     }
   }
 
   private get swapGateDropzones(): DropzoneComponent[] {
-    return this.occupiedDropzones.filter(each => each.operation instanceof SwapGate)
+    return this.occupiedDropzones.filter(
+      (each) => each.operation instanceof SwapGate
+    );
   }
 
   private get componentWidth(): number {

@@ -243,7 +243,7 @@ export class DropzoneComponent extends Container {
     this.wire
       .lineStyle(
         this.connectionWidth,
-        Colors.bg.brand.default,
+        Colors["bg-brand"],
         this.wireAlpha,
         this.wireAlignment
       )
@@ -261,18 +261,18 @@ export class DropzoneComponent extends Container {
 
   protected get inputWireColor() {
     if (this.inputWireType === WireType.Quantum) {
-      return Colors.bg.wire.quantum;
+      return Colors["text"];
     }
 
-    return Colors.bg.wire.classical;
+    return Colors["text-inverse"];
   }
 
   protected get outputWireColor() {
     if (this.outputWireType === WireType.Quantum) {
-      return Colors.bg.wire.quantum;
+      return Colors["text"];
     }
 
-    return Colors.bg.wire.classical;
+    return Colors["text-inverse"];
   }
 
   protected get inputWireStartX() {
