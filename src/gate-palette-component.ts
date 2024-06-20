@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { Container } from "pixi.js";
 import { Colors } from "./colors";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
@@ -21,10 +20,6 @@ export class GatePaletteComponent extends Container {
   static gapBetweenGates = spacingInPx(2);
   /** @ignore パレットの角の丸み */
   static cornerRadius = spacingInPx(3);
-  /** @ignore パレットの枠線の色 */
-  static borderColor = Colors["border-component"];
-  /** @ignore パレットの背景色 */
-  static backgroundColor = tailwindColors.white;
 
   gates: { [key: string]: GateComponent | null } = {};
 
@@ -104,8 +99,8 @@ export class GatePaletteComponent extends Container {
       ...this.gateRows.children.map((row) => row.children.length)
     );
 
-    this.graphics.lineStyle(1, GatePaletteComponent.borderColor, 1, 0);
-    this.graphics.beginFill(GatePaletteComponent.backgroundColor);
+    this.graphics.lineStyle(1, Colors["border-component"], 1, 0);
+    this.graphics.beginFill(Colors["bg-component"]);
     this.graphics.drawRoundedRect(
       0,
       0,

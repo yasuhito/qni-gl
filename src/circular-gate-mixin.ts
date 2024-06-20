@@ -45,7 +45,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border-onbrand-hover"],
+        Colors["border-hover"],
         1,
         0
       );
@@ -68,7 +68,7 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
 
       this._shape.lineStyle(
         Spacing.borderWidth.gate[this.size],
-        Colors["border-onbrand-grabbed"],
+        Colors["border-pressed"],
         1,
         0
       );
