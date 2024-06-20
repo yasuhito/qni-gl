@@ -33,7 +33,10 @@ export class CircuitComponent extends Container {
    * Returns the number of wires (bits) in the {@link CircuitComponent}.
    */
   get wireCount() {
-    const wireCount = this.stepAt(0).wireCount;
+    let wireCount = this.minWireCount;
+    if (this.steps.length > 0) {
+      wireCount = this.stepAt(0).wireCount;
+    }
 
     this.steps.forEach((each) => {
       if (each.wireCount !== wireCount) {
@@ -73,7 +76,7 @@ export class CircuitComponent extends Container {
       }
     }
 
-    return null
+    return null;
   }
 
   /**
@@ -84,7 +87,7 @@ export class CircuitComponent extends Container {
   constructor(options: CircuitOptions) {
     super();
 
-    this.minStepCount = options.stepCount
+    this.minStepCount = options.stepCount;
     this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
@@ -94,20 +97,24 @@ export class CircuitComponent extends Container {
     this.addChild(this.circuitStepsContainer);
 
     for (let i = 0; i < options.stepCount; i++) {
-      const circuitStep = new CircuitStepComponent(this.minWireCount);
-      this.circuitStepsContainer.addChild(circuitStep);
-
-      circuitStep.on(
-        "gateSnapToDropzone",
-        this.redrawDropzoneInputAndOutputWires,
-        this
-      );
-      circuitStep.on("hover", this.emitOnStepHoverSignal, this);
-      circuitStep.on("activated", this.deactivateAllOtherSteps, this);
-      circuitStep.on("grabGate", (gate, globalPosition) => {
-        this.emit("grabGate", gate, globalPosition);
-      });
+      this.appendStep();
     }
+  }
+
+  private appendStep(wireCount = this.minWireCount) {
+    const circuitStep = new CircuitStepComponent(wireCount);
+    this.circuitStepsContainer.addChild(circuitStep);
+
+    circuitStep.on(
+      "gateSnapToDropzone",
+      this.redrawDropzoneInputAndOutputWires,
+      this
+    );
+    circuitStep.on("hover", this.emitOnStepHoverSignal, this);
+    circuitStep.on("activated", this.deactivateAllOtherSteps, this);
+    circuitStep.on("grabGate", (gate, globalPosition) => {
+      this.emit("grabGate", gate, globalPosition);
+    });
   }
 
   private redrawDropzoneInputAndOutputWires(
@@ -152,40 +159,35 @@ export class CircuitComponent extends Container {
     return this.steps[stepIndex];
   }
 
-  removeEmptySteps(): void {
+  update(): void {
+    this.removeEmptySteps();
+    this.appendMinimumSteps();
+    this.removeUnusedUpperWires();
+    this.updateSwapConnections();
+  }
+
+  private removeEmptySteps(): void {
     for (const each of this.emptySteps) {
-      each.destroy()
+      each.destroy();
     }
   }
 
-  appendMinimumSteps(): void {
-    const nsteps = this.minStepCount - this.steps.length
+  private appendMinimumSteps(): void {
+    const nsteps = this.minStepCount - this.steps.length;
 
     for (let i = 0; i < nsteps; i++) {
-      const circuitStep = new CircuitStepComponent(this.wireCount);
-      this.circuitStepsContainer.addChild(circuitStep);
-
-      circuitStep.on(
-        "gateSnapToDropzone",
-        this.redrawDropzoneInputAndOutputWires,
-        this
-      );
-      circuitStep.on("hover", this.emitOnStepHoverSignal, this);
-      circuitStep.on("activated", this.deactivateAllOtherSteps, this);
-      circuitStep.on("grabGate", (gate, globalPosition) => {
-        this.emit("grabGate", gate, globalPosition);
-      });
+      this.appendStep(this.wireCount);
     }
   }
 
   private get emptySteps(): CircuitStepComponent[] {
-    return this.steps.filter(each => each.isEmpty)
+    return this.steps.filter((each) => each.isEmpty);
   }
 
   /**
    * Delete unused upper wires.
    */
-  removeUnusedUpperWires() {
+  private removeUnusedUpperWires() {
     while (
       this.isLastWireUnused() &&
       this.maxWireCountForAllSteps > this.minWireCount
@@ -210,10 +212,10 @@ export class CircuitComponent extends Container {
     });
   }
 
-  updateSwapConnections() {
+  private updateSwapConnections() {
     this.steps.forEach((each) => {
-      each.updateSwapConnections()
-    })
+      each.updateSwapConnections();
+    });
   }
 
   private isLastWireUnused() {

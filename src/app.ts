@@ -108,7 +108,10 @@ export class App {
       this.grabbedGate = null;
       this.pixiApp.stage.removeChild(gate);
 
-      this.circuit.removeUnusedUpperWires();
+      this.circuit.update();
+      if (this.circuit.activeStepIndex === null) {
+        this.circuit.stepAt(0).activate();
+      }
 
       this.updateStateVectorComponentQubitCount();
       this.updateStateVectorComponentPosition();
@@ -156,7 +159,7 @@ export class App {
 
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
-    this.circuit.steps[0].activate();
+    this.circuit.stepAt(0).activate();
 
     this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
@@ -184,7 +187,7 @@ export class App {
     }
 
     const stepIndex = event.data.step;
-    const step = this.circuit.steps[stepIndex];
+    const step = this.circuit.stepAt(stepIndex);
 
     if (event.data.measuredBits) {
       for (const [bit, value] of Object.entries(event.data.measuredBits)) {
@@ -385,10 +388,7 @@ export class App {
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 
-    this.circuit.removeEmptySteps();
-    this.circuit.appendMinimumSteps();
-    this.circuit.removeUnusedUpperWires();
-    this.circuit.updateSwapConnections();
+    this.circuit.update();
 
     this.updateStateVectorComponentQubitCount();
     this.updateStateVectorComponentPosition();
