@@ -1,9 +1,8 @@
 import * as tailwindColors from "tailwindcss/colors";
 
-// Type (required): "bg" | "text" | "icon" | "border"
-// Color Role (optional): "brand" | "component" | "inverse" | "on*"
-// Prominence (optional): "strong" | "secondary" | "tertiary"
-// Interaction (optional): "hover" | "grabbed" | "active"
+// 色の命名規則については以下の動画を参照:
+// The hardest part about building dark mode is that people think it’s easy - Figma team (Config 2022)
+// https://www.youtube.com/watch?v=1DTnojio89Y
 
 type BgColorKey =
   | "bg"
@@ -42,7 +41,7 @@ export const Colors: Colors = {
   "text-inverse": tailwindColors.zinc["200"],
   "border-onbrand": tailwindColors.sky["700"],
   "border-hover": tailwindColors.purple["500"],
-  "border-pressed": tailwindColors.purple["600"],
+  "border-pressed": tailwindColors.purple["700"],
   "border-active": tailwindColors.teal["300"],
   "border-component": tailwindColors.zinc["400"],
   "border-component-strong": tailwindColors.zinc["500"],

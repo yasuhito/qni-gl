@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import * as tailwindColors from "tailwindcss/colors";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
@@ -25,11 +24,11 @@ export class WriteGate extends JsonableMixin(GateComponent) {
     hoverBorderWidth: 2,
 
     grabbedBodyColor: Colors["bg-active"],
-    grabbedBorderColor: tailwindColors.purple["700"],
+    grabbedBorderColor: Colors["border-pressed"],
     grabbedBorderWidth: 1,
 
     activeBodyColor: null,
-    activeBorderColor: tailwindColors.teal["300"],
+    activeBorderColor: Colors["border-active"],
     activeBorderWidth: 2,
 
     cornerRadius: 4,
