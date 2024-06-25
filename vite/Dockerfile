@@ -12,6 +12,9 @@
 # Playwrightの公式Dockerイメージを使用
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 
+# Rails app lives here
+WORKDIR /vite
+
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 # 必要な追加の依存関係をインストール
@@ -30,12 +33,18 @@ RUN curl -qL https://www.npmjs.com/install.sh | sh
 # yarnのインストール
 RUN npm install -g yarn
 
-# エントリーポイントスクリプトをコピーし、実行権限を付与
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Copy application code
+COPY . .
 
-# 開発サーバーを開始するためのコマンド
-ENTRYPOINT ["docker-entrypoint.sh"]
+RUN yarn
 
-# デフォルトコマンドを設定
-CMD ["/bin/bash"]
+# # エントリーポイントスクリプトをコピーし、実行権限を付与
+# COPY docker-entrypoint.sh /usr/local/bin/
+# RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# # 開発サーバーを開始するためのコマンド
+# ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Start the server by default, this can be overwritten at runtime
+EXPOSE 5173
+CMD ["yarn", "dev", "--host"]
