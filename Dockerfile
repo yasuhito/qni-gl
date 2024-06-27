@@ -49,7 +49,8 @@ RUN apt install -y libyaml-dev
 
 # Node.jsのインストール
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
-    apt install -y nodejs
+    apt install -y nodejs && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
 
 # npmのインストール
 RUN curl -qL https://www.npmjs.com/install.sh | sh
