@@ -32,10 +32,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+      working-directory: vite/
     - name: Install dependencies (yarn)
       run: yarn
+      working-directory: vite/
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
+      working-directory: vite/
     - name: Run backend server
       run: yarn backend -d
     - name: Run Playwright tests
