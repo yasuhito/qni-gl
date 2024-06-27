@@ -1,10 +1,10 @@
 # 1. The Qniapp is built as follows:
-#   $ git clone https://github.com/qniapp/qni.git
-#   $ cd qni
-#   $ docker build -f Dockerfile . -t qni_server
+#   $ git clone https://github.com/yasuhito/qni-gl.git
+#   $ cd qni-gl
+#   $ docker build -f Dockerfile . -t qni-gl
 # 2. Then run by:
-#   $ docker run -p 3000:3000 --rm -it -v .:/qni qni_server
-# 3. access http://127.0.0.1:3000 in your browser
+#   $ docker run -p 5173:5173 --rm -it -v .:/qni-gl qni-gl
+# 3. access http://127.0.0.1:5173 in your browser
 
 # Troubleshooting
 #   If the port 3000 is already used, change 3000 to 4000 (for example)
@@ -44,7 +44,7 @@ RUN PREFIX=/usr/local ./ruby-build/install.sh
 RUN rm -rf ruby-build
 RUN ruby-build 2.7.4 /usr/local
 
-# backend/ で bundle するのに必要なライブラリをインストール
+# backend_rails/ で bundle するのに必要なライブラリをインストール
 RUN apt install -y libyaml-dev
 
 # Node.jsのインストール
@@ -62,7 +62,7 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # 開発サーバーを開始するためのコマンド
-# ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # デフォルトコマンドを設定
 CMD ["/bin/bash"]
