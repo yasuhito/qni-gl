@@ -11,7 +11,7 @@
     "build:sw": "rollup -c",
     "preview": "vite preview",
     "test": "yarn lint && vitest run --dir tests/vitest && playwright test",
-    "backend": "./backend/bin/rails server",
+    "backend": "../backend_rails/bin/rails server",
     "lint": "eslint .",
     "doc": "typedoc"
   },
