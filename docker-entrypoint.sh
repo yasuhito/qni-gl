@@ -10,6 +10,7 @@ bundle install
 
 # vite ディレクトリに移動
 cd /qni-gl/vite
+yarn
 
 # 任意のコマンドを実行
 exec "$@"
