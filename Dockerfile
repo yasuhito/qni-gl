@@ -1,10 +1,10 @@
 # 1. The Qniapp is built as follows:
-#   $ git clone https://github.com/qniapp/qni.git
-#   $ cd qni
-#   $ docker build -f Dockerfile . -t qni_server
+#   $ git clone https://github.com/yasuhito/qni-gl.git
+#   $ cd qni-gl
+#   $ docker build -f Dockerfile . -t qni-gl
 # 2. Then run by:
-#   $ docker run -p 3000:3000 --rm -it qni_server
-# 3. access http://127.0.0.1:3000 in your browser
+#   $ docker run -p 5173:5173 --rm -it -v .:/qni-gl qni-gl
+# 3. access http://127.0.0.1:5173 in your browser
 
 # Troubleshooting
 #   If the port 3000 is already used, change 3000 to 4000 (for example)
@@ -14,42 +14,56 @@
 # Inside VS Code with DevContainer
 # open this directory with 'Dev Containers: Open Folder in Container'
 
-FROM ubuntu:20.04
+# Playwrightの公式Dockerイメージを使用
+FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 
-RUN apt update
-RUN apt -y upgrade
-RUN apt install -y sudo
-RUN apt install -y tzdata
-# set your timezone
-ENV TZ Asia/Tokyo
-RUN echo "${TZ}" > /etc/timezone \
-  && rm /etc/localtime \
-  && ln -s /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
-  && dpkg-reconfigure -f noninteractive tzdata
+RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-RUN apt install -y build-essential
-RUN apt install -y git wget time curl libssl-dev zlib1g-dev libpq-dev libgtk2.0-0 libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1
-RUN apt install -y redis-server
-RUN apt install -y ng-common ng-cjk emacs-nox
-#RUN apt install -y postgresql postgresql-contrib
+# 必要な追加の依存関係をインストール
+RUN apt update && \
+    apt -y upgrade && \
+    apt install -y sudo tzdata build-essential git wget time curl libssl-dev zlib1g-dev libpq-dev libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 redis-server
 
-## node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-RUN apt-get install -y nodejs
+# cirq のインストール
+RUN apt install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt -y update
+RUN apt install -y python3.8 pip
 
-## npm
+# set python 3 as the default python version
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
+    && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+RUN pip3 install --upgrade pip requests setuptools pipenv
+
+RUN python -m pip install --upgrade pip
+RUN python -m pip install cirq
+
+# ruby-build を使って任意の Ruby バージョンをインストール
+RUN git clone --depth=1 https://github.com/rbenv/ruby-build
+RUN PREFIX=/usr/local ./ruby-build/install.sh
+RUN rm -rf ruby-build
+RUN ruby-build 2.7.4 /usr/local
+
+# backend_rails/ で bundle するのに必要なライブラリをインストール
+RUN apt install -y libyaml-dev
+
+# Node.jsのインストール
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
+    apt install -y nodejs && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
+
+# npmのインストール
 RUN curl -qL https://www.npmjs.com/install.sh | sh
 
-## yarn
+# yarnのインストール
 RUN npm install -g yarn
 
-#COPY ./package.json /
-#COPY ./yarn.lock /
+# エントリーポイントスクリプトをコピーし、実行権限を付与
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-RUN yarn
-# RUN yarn build
+# 開発サーバーを開始するためのコマンド
+ENTRYPOINT ["docker-entrypoint.sh"]
 
-## to start the dev server exec
-## $ yarn dev
-
-ENTRYPOINT ["/bin/bash"]
+# デフォルトコマンドを設定
+CMD ["/bin/bash"]
