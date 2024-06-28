@@ -160,10 +160,17 @@ export class CircuitComponent extends Container {
   }
 
   update(): void {
+    const activeStepIndex = this.activeStepIndex;
+    if (activeStepIndex == null) {
+      throw new Error("activeStepIndex == null");
+    }
+
     this.removeEmptySteps();
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
     this.updateSwapConnections();
+
+    this.stepAt(activeStepIndex).activate();
   }
 
   private removeEmptySteps(): void {
