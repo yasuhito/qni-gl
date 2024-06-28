@@ -70,7 +70,7 @@ export class CircuitStepComponent extends Container {
   }
 
   get isEmpty(): boolean {
-    return this.dropzones.every(each => each.operation === null)
+    return this.dropzones.every((each) => each.operation === null);
   }
 
   /**
@@ -440,6 +440,10 @@ export class CircuitStepComponent extends Container {
   }
 
   activate() {
+    if (this.isActive()) {
+      return;
+    }
+
     this._state = "active";
     this.redrawLine();
     this.emit("activated", this);
