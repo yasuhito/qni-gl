@@ -33,7 +33,7 @@ self.addEventListener("message", (event) => {
       });
 
       const response = await fetch(
-        `http://localhost:3000/backend.json?${params}`,
+        `http://localhost:8000/sim?${params}`,
         {
           method: "GET",
         }

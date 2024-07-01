@@ -36,6 +36,11 @@ RUN npm install -g yarn
 RUN apt install -y nginx apache2-utils uwsgi python3-flask uwsgi-plugin-python3 && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
 
+# 設定ファイル
+COPY backend_flask/merged.conf /etc/nginx/conf.d/
+# COPY .htpasswd /etc/nginx/
+RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
+
 # エントリーポイントスクリプトをコピーし、実行権限を付与
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
