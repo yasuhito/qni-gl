@@ -42,6 +42,7 @@
     "@pixi/events": "^7.3.1",
     "@pixi/filter-drop-shadow": "^5.2.0",
     "@pixi/layout": "^0.3.2",
+    "@pixi/sprite": "^7.4.2",
     "@pixi/ui": "~0.10",
     "@qni/simulator": "^0.0.86",
     "pixi.js": "^7.2.4",
