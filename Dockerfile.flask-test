@@ -46,8 +46,8 @@ COPY backend_flask/merged.conf /etc/nginx/conf.d/
 RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
 
 # 非特権ユーザーの作成と権限設定
-RUN useradd -m -d /home/uwsgi -s /bin/bash uwsgiuser
-RUN chown -R uwsgiuser:uwsgiuser /tmp /var/log/uwsgi /etc/nginx
+RUN useradd -m -d /home/uwsgi -s /bin/bash uwsgiuser && \
+  chown -R uwsgiuser:uwsgiuser /tmp /var/log/uwsgi /etc/nginx
 
 # vite のビルドと nginx の起動
 COPY docker-entrypoint.sh /usr/local/bin/
