@@ -35,9 +35,12 @@ self.addEventListener("message", (event) => {
       console.log("Sending request to backend with the following parameters:");
       console.dir(Object.fromEntries(params.entries()));
 
-      const response = await fetch(`http://localhost:8000/sim?${params}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `http://localhost:8000/backend.json?${params}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 502) {

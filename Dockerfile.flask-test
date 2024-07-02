@@ -46,4 +46,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # uWSGI を起動
-CMD ["uwsgi", "--chdir", "/qni-gl/backend_flask", "--ini", "/qni-gl/backend_flask/sim.ini"]
+CMD ["uwsgi", "--chdir", "/qni-gl/backend_flask", "--ini", "/qni-gl/backend_flask/backend.ini"]

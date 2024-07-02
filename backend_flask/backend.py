@@ -1,13 +1,11 @@
-# TODO: /sim などで使っている "sim" → "backend" にすべて変更
-
+from cirq_runner import CirqRunner
 from flask import Flask, Response, request
-import sys
 import json
 import logging
-from cirq_runner import CirqRunner
+import sys
 
 # logger
-logger = logging.Logger('sim.py')
+logger = logging.Logger('backend.py')
 stderr_handler = logging.StreamHandler(sys.stderr)
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -19,8 +17,8 @@ stderr_handler.setLevel(logging.DEBUG)
 app = Flask(__name__)
 
 
-@app.route('/sim', methods=["GET"])
-def sim():
+@app.route('/backend.json', methods=["GET"])
+def backend():
     id = request.args.get('id')
     qubit_count = int(request.args.get('qubitCount'))
     step_index = int(request.args.get('stepIndex'))
@@ -34,7 +32,7 @@ def sim():
     logger.debug("steps = %s", steps)
 
     try:
-        step_results = maho_call(qubit_count, step_index, steps)
+        step_results = run_cirq(qubit_count, step_index, steps)
         logger.debug("step_results = %s", step_results)
 
         step_results_json = Response(json.dumps(step_results),
@@ -46,7 +44,7 @@ def sim():
         return "Internal Server Error ", 500
 
 
-def maho_call(qubit_count, step_index, steps):
+def run_cirq(qubit_count, step_index, steps):
     cirq_runner = CirqRunner(logger)
     circuit, measurement_moment = cirq_runner.build_circuit(qubit_count, steps)
 

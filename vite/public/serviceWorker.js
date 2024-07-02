@@ -10043,7 +10043,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             });
                             console.log("Sending request to backend with the following parameters:");
                             console.dir(Object.fromEntries(params.entries()));
-                            return [4 /*yield*/, fetch("http://localhost:8000/sim?".concat(params), {
+                            return [4 /*yield*/, fetch("http://localhost:8000/backend.json?".concat(params), {
                                     method: "GET",
                                 })];
                         case 1:
