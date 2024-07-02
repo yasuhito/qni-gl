@@ -40,10 +40,14 @@ RUN apt install -y nginx apache2-utils uwsgi python3-flask uwsgi-plugin-python3 
 COPY backend_flask/merged.conf /etc/nginx/conf.d/
 RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
 
+# 非特権ユーザーの作成と権限設定
+RUN useradd -m -d /home/uwsgi -s /bin/bash uwsgiuser
+RUN chown -R uwsgiuser:uwsgiuser /tmp /var/log/uwsgi /etc/nginx
+
 # vite のビルドと nginx の起動
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # uWSGI を起動
-CMD ["uwsgi", "--chdir", "/qni-gl/backend_flask", "--ini", "/qni-gl/backend_flask/backend.ini"]
+CMD ["uwsgi", "--chdir", "/qni-gl/backend_flask", "--ini", "/qni-gl/backend_flask/backend.ini", "--uid", "uwsgiuser", "--gid", "uwsgiuser"]
