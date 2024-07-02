@@ -1,3 +1,8 @@
+# イメージのビルド
+#   docker build -f Dockerfile.flask-test . -t qni-gl-flask
+# イメージの実行
+#   docker run -p 8000:8000 --rm -it -v .:/qni-gl qni-gl-flask
+
 # Playwright の公式 Docker イメージを使用
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 
@@ -6,7 +11,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 # 必要な追加の依存関係をインストール
 RUN apt update && \
   apt -y upgrade && \
-  apt install -y sudo tzdata build-essential git curl libssl-dev zlib1g-dev libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1
+  apt install -y tzdata build-essential git curl libssl-dev zlib1g-dev libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1
 
 # cirq のインストール
 RUN apt install -y software-properties-common
