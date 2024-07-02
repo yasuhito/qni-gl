@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request
+from flask import Flask, Response, make_response, request
 import sys
 import io
 import json
@@ -12,6 +12,7 @@ app = Flask(__name__)
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
+
 @app.route('/sim', methods=["GET"])
 def sim():
     print("args = ", request.args)
@@ -21,18 +22,25 @@ def sim():
     targets = request.args.get('targets')
     print("targets = ", request.args.get('targets'))
     steps = json.loads(request.args.get('steps'))
-    print("steps = ", steps)
+    print("original request steps = ", steps, file=sys.stderr)
     try:
-        steps = insert_ident(steps, qubit_count)
+        # ???: この insert_ident が不要な気がするので、いったんコメントアウト
+        # steps = insert_ident(steps, qubit_count)
         steps = reverse_targets(steps, qubit_count)
-        print("steps = ", steps)
+        print("reversed steps = ", steps, file=sys.stderr)
 
         step_results = maho_call(qubit_count, step_index, steps)
-        print(step_results)
-        return step_results
+        print("step_results = ", step_results, file=sys.stderr)
+
+        step_results_json = Response(json.dumps(step_results),
+                                     mimetype='application/json')
+
+        return step_results_json
     except Exception as e:
-        logging.exception(e)
+        logging.error("An error occurred: %s", str(e))
+        # logging.exception(e)
         return "Internal Server Error ", 500
+
 
 @app.route('/simold', methods=["POST"])
 def simold():
@@ -40,7 +48,7 @@ def simold():
         return "not supported Content-Type", 400
 
     req = json.loads(request.data.decode('utf-8'))
-        
+
     try:
         return json_process(req)
     except Exception as e:
@@ -51,9 +59,14 @@ def simold():
 def maho_call(qubit_count, step_index, steps):
     br = maho.cirqbridge(logger)
     circuit, measurement_moment = br.build_circuit(qubit_count, steps)
-    logger.debug(str(circuit))
-    result_list = br.run_circuit_until_step_index(circuit, measurement_moment, step_index, steps)
-    logger.debug(result_list)
+
+    for each in str(circuit).split("\n"):
+        print(each, file=sys.stderr)
+        # logger.debug(each)
+
+    result_list = br.run_circuit_until_step_index(
+        circuit, measurement_moment, step_index, steps)
+    # logger.debug(result_list)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):
@@ -64,19 +77,66 @@ def maho_call(qubit_count, step_index, steps):
 
     def convert_item(item):
         if ":amplitude" in item:
-            return {"amplitudes": convert_amp(item[":amplitude"])}
+            if ":measuredBits" in item:
+                return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
+            else:
+                return {"amplitudes": convert_amp(item[":amplitude"])}
+        else:
+            if ":measuredBits" in item:
+                return {"measuredBits": item[":measuredBits"]}
         return {}
 
     return [convert_item(item) for item in result_list]
 
+# def maho_call(qubit_count, step_index, steps):
+#     br = maho.cirqbridge(logger)
+#     circuit, measurement_moment = br.build_circuit(qubit_count, steps)
+#     logger.debug(str(circuit))
+#     result_list = br.run_circuit_until_step_index(
+#         circuit, measurement_moment, step_index, steps)
+#     logger.debug(result_list)
+
+#     # [complex ...] => {0: [real,img] ..}
+#     def convert_amp(amp):
+#         res = {}
+#         for i in range(amp.size):
+#             res[i] = [float(amp[i].real), float(amp[i].imag)]
+#         return res
+
+#     def convert_item(item):
+#         if ":amplitude" in item:
+#             return {"amplitudes": convert_amp(item[":amplitude"])}
+#         return {}
+
+#     return [convert_item(item) for item in result_list]
+
+
 def insert_ident(steps, qubit_count):
+    """
+    Inserts an identity gate into the given list of steps at index 1.
+
+    Parameters:
+    - steps (list): The list of steps representing a quantum circuit.
+    - qubit_count (int): The number of qubits in the circuit.
+
+    Returns:
+    - list: The updated list of steps with the identity gate inserted.
+
+    Example:
+    >>> steps = [[{'type': 'X', 'targets': [0]}], [{'type': 'Y', 'targets': [1]}]]
+    >>> qubit_count = 2
+    >>> insert_ident(steps, qubit_count)
+    [[{'type': 'X', 'targets': [0]}], [{'type': '…', 'targets': [0, 1]}], [{'type': 'Y', 'targets': [1]}]]
+    """
     tmp_d = {'type': '…', 'targets': list(range(qubit_count))}
     steps.insert(1, [tmp_d])
     return steps
 
+
 def reverse_targets(steps, qubit_count):
     def reverse_one(l):
         return [qubit_count-1-i for i in l]
+
     def reverse_one_dict(d):
         d2 = d.copy()
         d2['targets'] = reverse_one(d['targets'])
@@ -106,4 +166,3 @@ def json_process(json_dict):
     step_results = maho_call(qubit_count, step_index, steps)
     logger.debug(step_results)
     return step_results
-

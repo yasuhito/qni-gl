@@ -10041,6 +10041,8 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                                 targets: targets,
                                 steps: JSON.stringify(steps),
                             });
+                            console.log("Sending request to backend with the following parameters:");
+                            console.dir(Object.fromEntries(params.entries()));
                             return [4 /*yield*/, fetch("http://localhost:8000/sim?".concat(params), {
                                     method: "GET",
                                 })];
