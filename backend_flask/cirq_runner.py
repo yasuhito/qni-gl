@@ -1,17 +1,15 @@
 import cirq
 import sys
 from sympy import *
-from sympy.parsing.sympy_parser import standard_transformations, implicit_multiplication_application, convert_xor
 from cirq.circuits import InsertStrategy
 
 
-class cirqbridge:
+class CirqRunner:
     def __init__(self, logger):
         self.logger = logger
         return
 
     def lookup_measurement_label(self, _circuit_from_qni, label):
-        numofdevices = 0
         counter = 0
         label_found = 0
         for _i in _circuit_from_qni:
@@ -33,8 +31,6 @@ class cirqbridge:
         return label
 
     def build_circuit(self, qubit_count, circuit_qni):
-        transformations = (standard_transformations +
-                           (implicit_multiplication_application,) + (convert_xor,))
         circuit_from_qni = []
 
         for step in circuit_qni:

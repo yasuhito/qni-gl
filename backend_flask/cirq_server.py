@@ -1,26 +1,21 @@
 #!/usr/bin/env python
-import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import random
 import logging
-import maho
+import cirq_runner
 
 """
 curl -X POST -H 'Content-type: application/json' --data @test.json http://localhost:3001/cirq
 """
 
 logger = logging.Logger("mylogger")
-#handler = logging.FileHandler("/tmp/qni_cirq.log")
+# handler = logging.FileHandler("/tmp/qni_cirq.log")
 handler = logging.StreamHandler()
 fmt = logging.Formatter('%(asctime)s - %(message)s')
 handler.setFormatter(fmt)
 logger.addHandler(handler)
 logger.setLevel(10)
 
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import logging
-import json
 
 class S(BaseHTTPRequestHandler):
     def _set_response(self, code, content):
@@ -41,8 +36,8 @@ class S(BaseHTTPRequestHandler):
         if content_type != 'application/json':
             self._set_response(400, "Content-Type must be application/json")
             return
-        content_length = int(self.headers['Content-Length']) 
-        post_data = self.rfile.read(content_length) 
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
         req = json.loads(post_data.decode('utf-8'))
         logging.debug(req)
         try:
@@ -55,10 +50,11 @@ class S(BaseHTTPRequestHandler):
 
 
 def maho_call(qubit_count, step_index, steps):
-    br = maho.cirqbridge(logger)
+    br = cirq_runner.CirqRunner(logger)
     circuit, measurement_moment = br.build_circuit(qubit_count, steps)
     logger.debug(str(circuit))
-    result_list = br.run_circuit_until_step_index(circuit, measurement_moment, step_index, steps)
+    result_list = br.run_circuit_until_step_index(
+        circuit, measurement_moment, step_index, steps)
     logger.debug(result_list)
 
     # [complex ...] => {0: [real,img] ..}
@@ -75,14 +71,17 @@ def maho_call(qubit_count, step_index, steps):
 
     return [convert_item(item) for item in result_list]
 
+
 def insert_ident(steps, qubit_count):
     tmp_d = {'type': '…', 'targets': list(range(qubit_count))}
     steps.insert(1, [tmp_d])
     return steps
 
+
 def reverse_targets(steps, qubit_count):
     def reverse_one(l):
         return [qubit_count-1-i for i in l]
+
     def reverse_one_dict(d):
         d2 = d.copy()
         d2['targets'] = reverse_one(d['targets'])
@@ -113,6 +112,7 @@ def json_process(json_dict):
     logger.debug(step_results)
     return step_results
 
+
 def run(handler_factory, port=3001):
     logging.basicConfig(level=logging.DEBUG)
     server_address = ('', port)
@@ -124,6 +124,7 @@ def run(handler_factory, port=3001):
         pass
     httpd.server_close()
     logging.info('Stopping httpd...\n')
+
 
 if __name__ == '__main__':
     from sys import argv
