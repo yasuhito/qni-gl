@@ -6,12 +6,13 @@
 # Playwright の公式 Docker イメージを使用
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 
+# タイムゾーンの設定
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 # 必要な追加の依存関係をインストール
 RUN apt update && \
   apt -y upgrade && \
-  apt install -y tzdata build-essential git curl libssl-dev zlib1g-dev libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1
+  apt install -y libssl-dev zlib1g-dev libnss3
 
 # Python のセットアップと cirq のインストール
 RUN apt install -y software-properties-common && \
