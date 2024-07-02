@@ -1,11 +1,7 @@
 import cirq
-import io
 import sys
-import numpy as np
-# import qsimcirq
 from sympy import *
-from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
-# sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+from sympy.parsing.sympy_parser import standard_transformations, implicit_multiplication_application, convert_xor
 from cirq.circuits import InsertStrategy
 
 
@@ -16,17 +12,11 @@ class cirqbridge:
 
     def lookup_measurement_label(self, _circuit_from_qni, label):
         numofdevices = 0
-#        print("measurement_label: lookup for ", label)
-#        sys.stdout.flush()
-#        print("_circuit", _circuit_from_qni)
-#        sys.stdout.flush()
         counter = 0
         label_found = 0
         for _i in _circuit_from_qni:
             if label_found == 1:
                 break
-#            print("_i, counter ", _i, counter)
-#            sys.stdout.flush()
             if _i == []:
                 continue
             for _p in range(len(_i)):
@@ -47,11 +37,7 @@ class cirqbridge:
                            (implicit_multiplication_application,) + (convert_xor,))
         circuit_from_qni = []
 
-        self.logger.debug("*** circuit_from_qni ***")
-        self.logger.debug("qubit_count = {}".format(qubit_count))
-
         for step in circuit_qni:
-            self.logger.debug(step)
             if len(step) > 0:
                 # Cirq の最下位ビットは回路の一番下のワイヤになるので、'targets' を反転させる
                 step[0]['targets'] = sorted(
@@ -65,9 +51,6 @@ class cirqbridge:
         _current_index = 0
 
         for step in circuit_from_qni:
-            self.logger.debug("circuit step: {}".format(step))
-            #            print("circuit column", step)
-            #            sys.stdout.flush()
             moment = []
             measurement_moment.append([])
 
@@ -161,18 +144,10 @@ class cirqbridge:
                     moment.append(__c)
             c.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
             _current_index = _current_index + 1
-#        print(c)
-#        sys.stdout.flush()
+
         return c, measurement_moment
 
     def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps):
-        self.logger.debug("run_circuit_until_step_index()")
-        for each in str(c).split("\n"):
-            self.logger.debug(each)
-        self.logger.debug("steps: {}".format(steps))
-        self.logger.debug("step_index (corrected): {}".format(step_index))
-        self.logger.debug("steps(len): {}".format(len(steps)))
-
         cirq_simulator = cirq.Simulator()
         _data = []
         counter = -1
@@ -193,8 +168,6 @@ class cirqbridge:
             if sleep_flag == 1:
                 continue
 
-            self.logger.debug("step[{}]: {}".format(counter, steps[counter]))
-
             if steps[counter] == []:
                 pass
             else:
@@ -213,9 +186,7 @@ class cirqbridge:
 #                        sys.stdout.flush()
             if counter == step_index:
                 dic[':amplitude'] = step.state_vector()
-                self.logger.debug("amplitudes: {}".format(step.state_vector()))
-#                print("amplitudes: ", step.state_vector())
-#                sys.stdout.flush()
+
             _data.append(dic)
         if len(step.measurements) != 0:
             for i in range(len(measurement_moment)):
