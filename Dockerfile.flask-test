@@ -23,7 +23,7 @@ RUN python -m pip install --upgrade pip
 RUN python -m pip install cirq
 
 # Node.jsのインストール
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
   apt install -y nodejs
 
 # npmのインストール
