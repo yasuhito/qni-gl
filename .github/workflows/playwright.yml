@@ -24,14 +24,9 @@ jobs:
         run: python -c "import sys; print(sys.version)"
       - name: Install dependencies (pip)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y uwsgi uwsgi-plugin-python3
-      - name: Create and activate virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install uwsgi
         working-directory: backend/
       - name: Install dependencies (yarn)
         run: yarn
@@ -41,7 +36,6 @@ jobs:
         working-directory: vite/
       - name: Run backend server
         run: |
-          source venv/bin/activate
           uwsgi --ini backend.ini --master --daemonize uwsgi.log
         working-directory: backend/
       - name: Run Playwright tests
