@@ -1,7 +1,7 @@
 # イメージのビルド
 #   docker build -f Dockerfile.flask-test . -t qni-gl-flask
 # イメージの実行
-#   docker run -p 8000:8000 --rm -it -v .:/qni-gl qni-gl-flask
+#   docker run -p 8000:8000 -p 9323:9323 --rm -it -v .:/qni-gl qni-gl-flask
 
 # Playwright の公式 Docker イメージを使用
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy
@@ -51,4 +51,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # uWSGI を起動
-CMD ["uwsgi", "--chdir", "/qni-gl/backend", "--ini", "/qni-gl/backend/backend.ini", "--uid", "uwsgiuser", "--gid", "uwsgiuser", "--master"]
+CMD ["/bin/bash"]
