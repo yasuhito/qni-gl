@@ -36,7 +36,7 @@ jobs:
         run: yarn playwright install --with-deps
         working-directory: vite/
       - name: Run backend server
-        run: tox -e backend
+        run: uwsgi --ini backend.ini --master --daemonize uwsgi.log
         working-directory: backend/
       - name: Run Playwright tests
         run: yarn playwright test
