@@ -9,48 +9,49 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
-    - name: Set up Python
-      # This is the version of the action for setting up Python, not the Python version.
-      uses: actions/setup-python@v4
-      with:
-        # Semantic version range syntax or exact version of a Python version
-        python-version: "3.x"
-    # You can test your matrix by printing the current Python version
-    - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
-    - name: Install dependencies (pip)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y uwsgi uwsgi-plugin-python3
-        python -m pip install --upgrade pip
-        pip install --upgrade setuptools wheel
-        pip install -r requirements.txt
-      working-directory: vite/
-    - name: Install dependencies (yarn)
-      run: yarn
-      working-directory: vite/
-    - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps
-      working-directory: vite/
-    - name: Run backend server
-      run: tox -e backend
-      working-directory: backend/
-    - name: Run Playwright tests
-      run: yarn playwright test
-      working-directory: vite/
-    - uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: playwright-report
-        path: vite/playwright-report/
-        retention-days: 30
-    - uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: uwsgi-log
-        path: backend/uwsgi.log
-        retention-days: 30
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Set up Python
+        # This is the version of the action for setting up Python, not the Python version.
+        uses: actions/setup-python@v4
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: "3.x"
+      # You can test your matrix by printing the current Python version
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install dependencies (pip)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y uwsgi uwsgi-plugin-python3
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools wheel
+          pip install matplotlib==3.3.4
+          pip install -r requirements.txt
+        working-directory: vite/
+      - name: Install dependencies (yarn)
+        run: yarn
+        working-directory: vite/
+      - name: Install Playwright Browsers
+        run: yarn playwright install --with-deps
+        working-directory: vite/
+      - name: Run backend server
+        run: tox -e backend
+        working-directory: backend/
+      - name: Run Playwright tests
+        run: yarn playwright test
+        working-directory: vite/
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: vite/playwright-report/
+          retention-days: 30
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: uwsgi-log
+          path: backend/uwsgi.log
+          retention-days: 30
