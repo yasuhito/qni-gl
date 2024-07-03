@@ -25,7 +25,7 @@ jobs:
         working-directory: vite/
       - name: Run backend server
         run: |
-          gunicorn backend:app --limit-request-line 8192
+          gunicorn backend:app --limit-request-line 8192 --daemon
         working-directory: backend/
       - name: Run Playwright tests
         run: yarn playwright test
