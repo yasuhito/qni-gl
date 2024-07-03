@@ -45,3 +45,9 @@ jobs:
         name: playwright-report
         path: vite/playwright-report/
         retention-days: 30
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: uwsgi-log
+        path: backend/uwsgi.log
+        retention-days: 30
