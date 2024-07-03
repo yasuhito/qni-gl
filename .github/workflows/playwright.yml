@@ -16,11 +16,10 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 uwsgi uwsgi-plugin-python3
+          sudo apt-get install -y uwsgi uwsgi-plugin-python3
       - name: Install dependencies (pip)
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip3 install -r requirements.txt
         working-directory: backend/
       - name: Install dependencies (yarn)
         run: yarn
