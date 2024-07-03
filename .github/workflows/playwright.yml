@@ -13,16 +13,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Set up Python
-        id: setup-python # Add an ID to reference the step later
-        # This is the version of the action for setting up Python, not the Python version.
-        uses: actions/setup-python@v4
-        with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: "3.7"
-      # You can test your matrix by printing the current Python version
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
       - name: Install system dependencies
         run: |
           sudo apt-get update
