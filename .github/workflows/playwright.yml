@@ -15,7 +15,7 @@ jobs:
           node-version: 18
       - name: Install dependencies (pip)
         run: |
-          pip3 install -r requirements.txt
+          pip install -r requirements.txt
         working-directory: backend/
       - name: Install dependencies (yarn)
         run: yarn
