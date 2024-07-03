@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 18
       - name: Set up Python
-        id: setup-python  # Add an ID to reference the step later
+        id: setup-python # Add an ID to reference the step later
         # This is the version of the action for setting up Python, not the Python version.
         uses: actions/setup-python@v4
         with:
@@ -37,7 +37,7 @@ jobs:
         working-directory: vite/
       - name: Run backend server
         run: |
-          uwsgi --ini backend.ini --master --daemonize uwsgi.log --pythonpath ${{ steps.setup-python.outputs.python-location }}
+          uwsgi --ini backend.ini --master --daemonize uwsgi.log --pythonpath '${{ steps.setup-python.outputs.python-path }}'
         working-directory: backend/
       - name: Run Playwright tests
         run: yarn playwright test
