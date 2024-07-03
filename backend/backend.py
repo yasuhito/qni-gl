@@ -1,5 +1,5 @@
 from cirq_runner import CirqRunner
-from flask import Flask, Response, request
+from flask import Flask, Response, jsonify, request
 import json
 import logging
 import sys
@@ -35,10 +35,7 @@ def backend():
         step_results = run_cirq(qubit_count, step_index, steps)
         logger.debug("step_results = %s", step_results)
 
-        step_results_json = Response(json.dumps(step_results),
-                                     mimetype='application/json')
-
-        return step_results_json
+        return jsonify(step_results)
     except Exception as e:
         logger.error("An error occurred: %s", str(e))
         return "Internal Server Error ", 500
