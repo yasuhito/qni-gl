@@ -1,5 +1,6 @@
 from cirq_runner import CirqRunner
 from flask import Flask, Response, jsonify, request
+from flask_cors import CORS
 import json
 import logging
 import sys
@@ -15,7 +16,7 @@ logger.setLevel(logging.DEBUG)
 stderr_handler.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/backend.json', methods=["GET"])
 def backend():

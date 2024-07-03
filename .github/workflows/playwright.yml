@@ -13,10 +13,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y uwsgi uwsgi-plugin-python3
       - name: Install dependencies (pip)
         run: |
           pip3 install -r requirements.txt
@@ -29,7 +25,7 @@ jobs:
         working-directory: vite/
       - name: Run backend server
         run: |
-          uwsgi --ini backend.ini --master --daemonize uwsgi.log
+          gunicorn backend:app --limit-request-line 8192
         working-directory: backend/
       - name: Run Playwright tests
         run: yarn playwright test
