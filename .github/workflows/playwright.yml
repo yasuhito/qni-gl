@@ -25,7 +25,7 @@ jobs:
         working-directory: vite/
       - name: Run backend server
         run: |
-          gunicorn backend:app --limit-request-line 8192 --daemon
+          gunicorn --daemon
         working-directory: backend/
       - name: Run Playwright tests
         run: yarn playwright test
@@ -39,6 +39,18 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: uwsgi-log
-          path: backend/uwsgi.log
+          name: access-log
+          path: backend/access.log
+          retention-days: 30
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: error-log
+          path: backend/error.log
+          retention-days: 30
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: backend-log
+          path: backend/backend.log
           retention-days: 30
