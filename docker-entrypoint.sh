@@ -11,9 +11,9 @@ yarn build
 # nginx の起動
 nginx
 
-# uWSGI の起動
+# gunicorn の起動
 cd /qni-gl/backend
-gunicorn --daemon
+gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 
 # 任意のコマンドを実行
 exec "$@"
