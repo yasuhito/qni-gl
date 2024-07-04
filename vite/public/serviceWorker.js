@@ -10041,12 +10041,20 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                                 targets: targets,
                                 steps: JSON.stringify(steps),
                             });
-                            return [4 /*yield*/, fetch("http://localhost:3000/backend.json?".concat(params), {
+                            console.log("Sending request to backend with the following parameters:");
+                            console.dir(Object.fromEntries(params.entries()));
+                            return [4 /*yield*/, fetch("http://localhost:8000/backend.json?".concat(params), {
                                     method: "GET",
                                 })];
                         case 1:
                             response = _a.sent();
                             if (!response.ok) {
+                                if (response.status === 502) {
+                                    console.error("502 Bad Gateway: The backend server is currently down. It is likely that the uWSGI server is down.");
+                                }
+                                else {
+                                    console.error("HTTP error ".concat(response.status, ": ").concat(response.statusText));
+                                }
                                 throw new Error("Failed to connect to Qni's backend endpoint.");
                             }
                             return [4 /*yield*/, response.json()];
@@ -10069,7 +10077,7 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             console.error(error_1);
                             return [3 /*break*/, 4];
                         case 4:
-                            self.postMessage({ type: 'finish' });
+                            self.postMessage({ type: "finish" });
                             return [2 /*return*/];
                     }
                 });

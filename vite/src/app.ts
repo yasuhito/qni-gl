@@ -7,7 +7,6 @@ import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
-import { Logger } from "./logger";
 import { MeasurementGate } from "./measurement-gate";
 import { RnotGate } from "./rnot-gate";
 import { SDaggerGate } from "./s-dagger-gate";
@@ -37,7 +36,6 @@ export class App {
   circuit: CircuitComponent;
   circuitSteps: CircuitStepComponent[] = [];
   stateVectorComponent: StateVectorComponent;
-  logger: Logger;
   nameMap = new Map();
   // 各ゲートを回路などよりも全面に表示するためのレイヤー
   // gateLayer = new Layer();
@@ -161,7 +159,6 @@ export class App {
     // これによって、最初のステップの状態ベクトルが表示される
     this.circuit.stepAt(0).activate();
 
-    this.logger = new Logger(this.pixiApp);
     this.nameMap.set(this.pixiApp.stage, "stage");
 
     // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると

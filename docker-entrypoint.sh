@@ -3,14 +3,17 @@
 # エラーが発生した場合にスクリプトを終了する
 set -e
 
-# Railsサーバーの起動
-cd /qni-gl/backend_rails
-bundle install
-./bin/rails s -d -b 0.0.0.0
-
-# vite ディレクトリに移動
+# vite のビルド
 cd /qni-gl/vite
 yarn
+yarn build
+
+# nginx の起動
+nginx
+
+# gunicorn の起動
+cd /qni-gl/backend
+gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 
 # 任意のコマンドを実行
 exec "$@"

@@ -32,14 +32,27 @@ self.addEventListener("message", (event) => {
         steps: JSON.stringify(steps),
       });
 
+      console.log("Sending request to backend with the following parameters:");
+      console.dir(Object.fromEntries(params.entries()));
+
       const response = await fetch(
-        `http://localhost:3000/backend.json?${params}`,
+        `http://localhost:8000/backend.json?${params}`,
         {
           method: "GET",
         }
       );
 
       if (!response.ok) {
+        if (response.status === 502) {
+          console.error(
+            "502 Bad Gateway: The backend server is currently down. It is likely that the uWSGI server is down."
+          );
+        } else {
+          console.error(
+            `HTTP error ${response.status}: ${response.statusText}`
+          );
+        }
+
         throw new Error("Failed to connect to Qni's backend endpoint.");
       }
 
@@ -60,7 +73,7 @@ self.addEventListener("message", (event) => {
       console.error(error);
     }
 
-    self.postMessage({type: 'finish'})
+    self.postMessage({ type: "finish" });
   }
 
   call_backend();

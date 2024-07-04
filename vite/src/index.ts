@@ -13,7 +13,6 @@ export * from "./gate-palette-component";
 export * from "./gate-source-component";
 export * from "./grid-layout";
 export * from "./h-gate";
-export * from "./logger";
 export * from "./measurement-gate";
 export * from "./operation";
 export * from "./phase-gate";

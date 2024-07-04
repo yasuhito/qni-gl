@@ -1,0 +1,96 @@
+from cirq_runner import CirqRunner
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from logging.handlers import RotatingFileHandler
+import json
+import logging
+
+app = Flask(__name__)
+CORS(app)
+
+
+def setup_logger():
+    """
+    Gunicorn の stderr と backend.log の両方にログを出力するためのロガーをセットアップする
+    """
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # カスタムフォーマットを設定
+    log_format = '[%(asctime)s] [%(levelname)s] %(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S %z'
+
+    # Gunicorn の stderr にログを出力するためのハンドラ
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+    stream_formatter = logging.Formatter(log_format, datefmt=date_format)
+    stream_handler.setFormatter(stream_formatter)
+
+    # backend.log ファイルにログを出力するためのハンドラ
+    file_handler = RotatingFileHandler(
+        'backend.log', maxBytes=10000, backupCount=1)
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(log_format, datefmt=date_format)
+    file_handler.setFormatter(file_formatter)
+
+    # ロガーにハンドラを追加
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+
+
+setup_logger()
+
+
+@app.route('/backend.json', methods=["GET"])
+def backend():
+    id = request.args.get('id')
+    qubit_count = int(request.args.get('qubitCount'))
+    step_index = int(request.args.get('stepIndex'))
+    targets = request.args.get('targets')
+    steps = json.loads(request.args.get('steps'))
+
+    app.logger.debug("circuit_id = %s", id)
+    app.logger.debug("qubit_count = %d", qubit_count)
+    app.logger.debug("step_index = %d", step_index)
+    app.logger.debug("targets = %s", targets)
+    app.logger.debug("steps = %s", steps)
+
+    try:
+        step_results = run_cirq(qubit_count, step_index, steps)
+        app.logger.debug("step_results = %s", step_results)
+
+        return jsonify(step_results)
+    except Exception as e:
+        app.logger.error("An error occurred: %s", str(e))
+        return "Internal Server Error ", 500
+
+
+def run_cirq(qubit_count, step_index, steps):
+    cirq_runner = CirqRunner(app.logger)
+    circuit, measurement_moment = cirq_runner.build_circuit(qubit_count, steps)
+
+    for each in str(circuit).split("\n"):
+        app.logger.debug(each)
+
+    result_list = cirq_runner.run_circuit_until_step_index(
+        circuit, measurement_moment, step_index, steps)
+
+    # [complex ...] => {0: [real,img] ..}
+    def convert_amp(amp):
+        res = {}
+        for i in range(amp.size):
+            res[i] = [float(amp[i].real), float(amp[i].imag)]
+        return res
+
+    def convert_item(item):
+        if ":amplitude" in item:
+            if ":measuredBits" in item:
+                return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
+            else:
+                return {"amplitudes": convert_amp(item[":amplitude"])}
+        else:
+            if ":measuredBits" in item:
+                return {"measuredBits": item[":measuredBits"]}
+        return {}
+
+    return [convert_item(item) for item in result_list]
