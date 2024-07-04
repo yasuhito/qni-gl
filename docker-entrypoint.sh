@@ -12,7 +12,8 @@ yarn build
 nginx
 
 # uWSGI の起動
-uwsgi --chdir /qni-gl/backend --ini /qni-gl/backend/backend.ini --uid uwsgiuser --gid uwsgiuser --master --daemonize /var/log/uwsgi.log
+cd /qni-gl/backend
+gunicorn --daemon
 
 # 任意のコマンドを実行
 exec "$@"
