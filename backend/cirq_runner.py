@@ -33,11 +33,18 @@ class CirqRunner:
     def build_circuit(self, qubit_count, circuit_qni):
         circuit_from_qni = []
 
+        # Function to reverse and sort the target and control bits
+        def reverse_and_sort(bits, qubit_count):
+            return sorted(qubit_count - bit - 1 for bit in bits)
+
         for step in circuit_qni:
-            if len(step) > 0:
-                # Cirq の最下位ビットは回路の一番下のワイヤになるので、'targets' を反転させる
-                step[0]['targets'] = sorted(
-                    list(map(lambda target_bit: qubit_count - target_bit - 1, step[0]['targets'])))
+            for gate in step:
+                if 'targets' in gate:
+                    gate['targets'] = reverse_and_sort(
+                        gate['targets'], qubit_count)
+                if 'controls' in gate:
+                    gate['controls'] = reverse_and_sort(
+                        gate['controls'], qubit_count)
             circuit_from_qni.append(step)
 
         qubits = cirq.LineQubit.range(qubit_count)

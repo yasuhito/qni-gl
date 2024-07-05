@@ -76,5 +76,4 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 WORKDIR /qni-gl/vite
 RUN yarn
 
-# Start Vite
-CMD ["yarn", "dev"]
+CMD ["/bin/bash"]

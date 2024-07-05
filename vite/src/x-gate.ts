@@ -15,6 +15,16 @@ export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
     },
   });
 
+  private _controls: number[] = [];
+
+  get controls() {
+    return this._controls;
+  }
+
+  set controls(value: number[]) {
+    this._controls = value.sort();
+  }
+
   toCircuitJSON() {
     return '"X"';
   }

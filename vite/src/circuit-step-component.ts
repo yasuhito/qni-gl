@@ -267,14 +267,12 @@ export class CircuitStepComponent extends Container {
 
     // コントロールされるゲートの上下接続をセット
     for (const each of controllableDropzones) {
-      if (!(each.operation instanceof XGate))
+      if (!(each.operation instanceof XGate)) {
         throw new Error(`${each.operation} isn't controllable.`);
-      // each.operation.controls = this.controlBits(
-      //   each,
-      //   allControlBits,
-      //   connectionProps
-      // );
-      // each.operation.antiControls = allAntiControlBits;
+      }
+
+      each.operation.controls = allControlBits;
+
       each.connectTop = activeOperationBits.some((other) => {
         return other < this.bit(each);
       });
@@ -370,7 +368,14 @@ export class CircuitStepComponent extends Container {
           const xGates = sameOps as XGate[];
 
           const targetBits = xGates.map((each) => this.indexOf(each));
+          const controlBits = this.controlGateDropzones().map((each) =>
+            this.bit(each)
+          );
           const serializedGate = { type: "X", targets: targetBits };
+
+          if (controlBits.length > 0) {
+            serializedGate["controls"] = controlBits;
+          }
 
           result.push(serializedGate);
           break;
