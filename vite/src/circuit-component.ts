@@ -169,6 +169,7 @@ export class CircuitComponent extends Container {
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
     this.updateSwapConnections();
+    this.updateControlledUConnections();
 
     this.stepAt(activeStepIndex).activate();
   }
@@ -222,6 +223,13 @@ export class CircuitComponent extends Container {
   private updateSwapConnections() {
     this.steps.forEach((each) => {
       each.updateSwapConnections();
+    });
+  }
+
+  private updateControlledUConnections() {
+    this.steps.forEach((each) => {
+      each.updateControlledUConnections();
+      each.updateFreeDropzoneConnections();
     });
   }
 
