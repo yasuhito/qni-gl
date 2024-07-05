@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# エラーが発生した場合にスクリプトを終了する
+# Exit the script if any command fails
 set -e
 
-# vite のビルド
+# Build the Vite project
 cd /qni-gl/vite
 yarn build
 
-# gunicorn の起動
+# Start gunicorn
 cd /qni-gl/backend
 gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 
-# nginx の起動
+# Start nginx
 nginx
 
-# 任意のコマンドを実行
+# Execute any passed command
 exec "$@"
