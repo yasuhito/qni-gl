@@ -1,23 +1,42 @@
-# イメージのビルド
-#   docker build -f Dockerfile.flask-test . -t qni-gl-flask
-# イメージの実行
-#   docker run -p 8000:8000 -p 9323:9323 --rm -it -v .:/qni-gl qni-gl-flask
+# Note:
+# The default command starts the Vite server using `yarn dev`.
+# You can override this default command using `docker run` with a different command.
+#
+# Examples:
+# 1. Build the Docker image:
+#    docker build -f Dockerfile . -t qni-gl
+#    - This command builds the Docker image using the Dockerfile in the current directory and tags it as `qni-gl`.
+#
+# 2. Start an interactive bash session inside the container:
+#    docker run -p 8000:8000 --rm -it qni-gl /bin/bash
+#    - This will start a bash session instead of the Vite server.
+#    - Useful for debugging or running other commands manually.
+#
+# 3. Start the Vite server with the source code mounted from the host:
+#    docker run -p 8000:8000 --rm -it -v $(pwd):/qni-gl qni-gl
+#    - The `-v $(pwd):/qni-gl` option mounts the current directory from the host to the container.
+#    - This allows you to edit files on your host and see changes immediately in the container.
+#
+# 4. Run a different command inside the container:
+#    docker run -p 8000:8000 --rm -it qni-gl /bin/bash -c "yarn build"
+#    - This will execute `yarn build` inside the container instead of the default `yarn dev`.
+#
+# 5. Run the container without mounting the source code:
+#    docker run -p 8000:8000 --rm -it qni-gl
+#    - This will start the Vite server using the code copied into the container during the build.
 
-# Playwright の公式 Docker イメージを使用
+# Use the official Playwright Docker image
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 
-# タイムゾーンの設定
+# Set the timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-RUN mkdir /qni-gl
-COPY . /qni-gl
-
-# 必要な追加の依存関係をインストール
+# Install necessary dependencies
 RUN apt update && \
   apt -y upgrade && \
   apt install -y libssl-dev zlib1g-dev libnss3
 
-# Python のセットアップと cirq のインストール
+# Setup Python and install cirq
 RUN apt install -y software-properties-common && \
   add-apt-repository ppa:deadsnakes/ppa && \
   apt -y update && \
@@ -26,28 +45,36 @@ RUN apt install -y software-properties-common && \
   update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
   pip install --upgrade pip requests setuptools pipenv cirq gunicorn flask-cors
 
-# Node.jsのインストール
+# Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
   apt install -y nodejs
 
-# npmのインストール
+# Install npm
 RUN curl -qL https://www.npmjs.com/install.sh | sh
 
-# yarnのインストール
+# Install yarn
 RUN npm install -g yarn
 
-# nginx 等のインストール
-RUN apt install -y nginx apache2-utils uwsgi python3-flask uwsgi-plugin-python3 && \
+# Install nginx and other dependencies
+RUN apt install -y nginx apache2-utils python3-flask && \
   rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
 
-# nginx 用の設定ファイルを準備
+# Prepare nginx configuration
 COPY backend/merged.conf /etc/nginx/conf.d/
 RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
 
-# vite のビルドと nginx の起動
+# Copy the source code
+RUN mkdir /qni-gl
+COPY . /qni-gl
+
+# Copy the entrypoint script and set permissions
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# uWSGI を起動
-CMD ["/bin/bash"]
+# Install dependencies
+WORKDIR /qni-gl/vite
+RUN yarn
+
+# Start Vite
+CMD ["yarn", "dev"]
