@@ -289,13 +289,18 @@ export class CircuitStepComponent extends Container {
     );
     const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
     const activeOperationBits = activeControlBits.concat(controllableBits);
-    const minBit = Math.min(...activeOperationBits);
-    const maxBit = Math.max(...activeOperationBits);
+    const minBit =
+      activeOperationBits.length == 0 ? 0 : Math.min(...activeOperationBits);
+    const maxBit =
+      activeOperationBits.length == 0 ? 0 : Math.max(...activeOperationBits);
 
     for (const each of this.freeDropzones) {
       if (minBit < this.bit(each) && this.bit(each) < maxBit) {
         each.connectTop = true;
         each.connectBottom = true;
+      } else {
+        each.connectTop = false;
+        each.connectBottom = false;
       }
     }
   }

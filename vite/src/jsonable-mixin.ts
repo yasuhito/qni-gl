@@ -3,6 +3,7 @@ import { GateComponent } from "./gate-component";
 
 export declare class Jsonable {
   toCircuitJSON(): string;
+  gateChar(): string;
 }
 
 export function JsonableMixin<TBase extends Constructor<GateComponent>>(
@@ -11,6 +12,10 @@ export function JsonableMixin<TBase extends Constructor<GateComponent>>(
   class JsonableMixinClass extends Base {
     toCircuitJSON() {
       throw new Error("Not implemented");
+    }
+
+    gateChar() {
+      return "?";
     }
   }
 

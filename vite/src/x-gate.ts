@@ -28,4 +28,8 @@ export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
   toCircuitJSON() {
     return '"X"';
   }
+
+  gateChar() {
+    return "X";
+  }
 }

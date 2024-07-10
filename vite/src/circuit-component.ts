@@ -118,7 +118,7 @@ export class CircuitComponent extends Container {
     dropzone: DropzoneComponent
   ) {
     this.redrawDropzoneInputAndOutputWires(circuitStep, dropzone);
-    this.updateControlledUConnections();
+    this.updateGateConnections();
   }
 
   private redrawDropzoneInputAndOutputWires(
@@ -173,7 +173,7 @@ export class CircuitComponent extends Container {
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
     this.updateSwapConnections();
-    this.updateControlledUConnections();
+    this.updateGateConnections();
 
     this.stepAt(activeStepIndex).activate();
   }
@@ -230,11 +230,14 @@ export class CircuitComponent extends Container {
     });
   }
 
-  private updateControlledUConnections() {
+  private updateGateConnections() {
     this.steps.forEach((each) => {
       each.updateControlledUConnections();
       each.updateFreeDropzoneConnections();
     });
+
+    // デバッグ
+    console.log(this.toString());
   }
 
   private isLastWireUnused() {
@@ -261,6 +264,35 @@ export class CircuitComponent extends Container {
       cols.push(each.toCircuitJSON());
     }
     return `{"cols":[${cols.join(",")}]}`;
+  }
+
+  toString() {
+    const output = Array(this.qubitCountInUse * 2)
+      .fill("")
+      .map((_, i) => {
+        if (i % 2 == 0) {
+          return `${i / 2}: ───`;
+        } else {
+          return "";
+        }
+      });
+
+    this.steps.forEach((step) => {
+      step.dropzones.forEach((dropzone, qubitIndex) => {
+        if (qubitIndex < this.qubitCountInUse) {
+          const gate = dropzone.operation;
+
+          if (gate) {
+            const gateChar = dropzone.operation.gateChar();
+            output[qubitIndex * 2] += `${gateChar}───`;
+          } else {
+            output[qubitIndex * 2] += `────`;
+          }
+        }
+      });
+    });
+
+    return output.join("\n");
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
