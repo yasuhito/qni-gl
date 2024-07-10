@@ -211,12 +211,18 @@ export class CircuitStepComponent extends Container {
 
   updateSwapConnections(): void {
     const swapDropzones = this.swapGateDropzones;
+    const swapBits = swapDropzones.map((each) => this.bit(each));
 
     if (swapDropzones.length !== 2) {
-      //   for (const each of swapDropzones) {
-      //     const swapGate = each.operation as SwapGateElement
-      //     swapGate.disable()
-      //   }
+      for (const dropzone of this.dropzones) {
+        const minBit = Math.min(...swapBits);
+        const maxBit = Math.max(...swapBits);
+
+        if (minBit <= this.bit(dropzone) && this.bit(dropzone) <= maxBit) {
+          dropzone.connectTop = false;
+          dropzone.connectBottom = false;
+        }
+      }
     } else {
       for (const swap of swapDropzones) {
         // TODO: つながっていない Swap ゲートは disabled (灰色表示) にする
@@ -230,7 +236,6 @@ export class CircuitStepComponent extends Container {
         );
       }
 
-      const swapBits = swapDropzones.map((each) => this.bit(each));
       for (const dropzone of this.freeDropzones) {
         const minBit = Math.min(...swapBits);
         const maxBit = Math.max(...swapBits);
@@ -240,6 +245,85 @@ export class CircuitStepComponent extends Container {
         }
       }
     }
+  }
+
+  updateControlledUConnections(): void {
+    const controllableDropzones = this.controllableDropzones();
+    const controlDropzones = this.controlGateDropzones();
+    const allControlBits = controlDropzones.map((dz) => this.bit(dz));
+
+    // すべての • のうち、有効なゲートのビット配列
+    const activeControlBits =
+      controlDropzones.length == 0
+        ? allControlBits
+        : allControlBits.slice(0, controlDropzones.length);
+    const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
+    const activeOperationBits = activeControlBits.concat(controllableBits);
+
+    // コントロールゲートの上下接続をセット
+    controlDropzones.forEach((each) => {
+      each.connectBottom = activeOperationBits.some((other) => {
+        return this.bit(each) < other;
+      });
+      each.connectTop = activeOperationBits.some((other) => {
+        return this.bit(each) > other;
+      });
+    });
+
+    // コントロールされるゲートの上下接続をセット
+    for (const each of controllableDropzones) {
+      if (!(each.operation instanceof XGate)) {
+        throw new Error(`${each.operation} isn't controllable.`);
+      }
+
+      each.operation.controls = allControlBits;
+
+      each.connectTop = activeOperationBits.some((other) => {
+        return other < this.bit(each);
+      });
+      each.connectBottom = activeOperationBits.some((other) => {
+        return other > this.bit(each);
+      });
+    }
+  }
+
+  updateFreeDropzoneConnections(): void {
+    const controllableDropzones = this.controllableDropzones();
+    const activeControlBits = this.controlGateDropzones().map((each) =>
+      this.bit(each)
+    );
+    const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
+    const activeOperationBits = activeControlBits.concat(controllableBits);
+    const minBit =
+      activeOperationBits.length == 0 ? 0 : Math.min(...activeOperationBits);
+    const maxBit =
+      activeOperationBits.length == 0 ? 0 : Math.max(...activeOperationBits);
+
+    for (const each of this.freeDropzones) {
+      if (minBit < this.bit(each) && this.bit(each) < maxBit) {
+        each.connectTop = true;
+        each.connectBottom = true;
+      } else {
+        each.connectTop = false;
+        each.connectBottom = false;
+      }
+    }
+  }
+
+  private controllableDropzones(): DropzoneComponent[] {
+    return this.occupiedDropzones.filter((each) => {
+      if (each.operation instanceof XGate) {
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+  private controlGateDropzones(): DropzoneComponent[] {
+    return this.occupiedDropzones.filter(
+      (each) => each.operation instanceof ControlGate
+    );
   }
 
   private get swapGateDropzones(): DropzoneComponent[] {
@@ -294,7 +378,14 @@ export class CircuitStepComponent extends Container {
           const xGates = sameOps as XGate[];
 
           const targetBits = xGates.map((each) => this.indexOf(each));
+          const controlBits = this.controlGateDropzones().map((each) =>
+            this.bit(each)
+          );
           const serializedGate = { type: "X", targets: targetBits };
+
+          if (controlBits.length > 0) {
+            serializedGate["controls"] = controlBits;
+          }
 
           result.push(serializedGate);
           break;
@@ -390,8 +481,12 @@ export class CircuitStepComponent extends Container {
           break;
         }
         case ControlGate: {
-          const controlGates = sameOps as ControlGate[];
+          // もし同じステップに X ゲートがある場合、X ゲート側でシリアライズするのでここでは何もしない
+          if (this.operations.some((op) => op instanceof XGate)) {
+            break;
+          }
 
+          const controlGates = sameOps as ControlGate[];
           const targetBits = controlGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "•", targets: targetBits };
 

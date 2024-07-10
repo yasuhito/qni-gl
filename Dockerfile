@@ -32,22 +32,22 @@ FROM mcr.microsoft.com/playwright:v1.44.1-jammy
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 # Install necessary dependencies
-RUN apt update && \
-  apt -y upgrade && \
-  apt install -y libssl-dev zlib1g-dev libnss3
+RUN apt-get update && \
+  apt-get -y upgrade && \
+  apt-get install -y --no-install-recommends libssl-dev zlib1g-dev libnss3
 
 # Setup Python and install cirq
-RUN apt install -y software-properties-common && \
+RUN apt-get install -y --no-install-recommends software-properties-common && \
   add-apt-repository ppa:deadsnakes/ppa && \
-  apt -y update && \
-  apt install -y python3.8 python3-pip && \
+  apt-get -y update && \
+  apt-get install -y --no-install-recommends python3.8 python3-pip && \
   update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
   update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
   pip install --upgrade pip requests setuptools pipenv cirq gunicorn flask-cors
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-  apt install -y nodejs
+  apt-get install -y --no-install-recommends nodejs
 
 # Install npm
 RUN curl -qL https://www.npmjs.com/install.sh | sh
@@ -56,7 +56,7 @@ RUN curl -qL https://www.npmjs.com/install.sh | sh
 RUN npm install -g yarn
 
 # Install nginx and other dependencies
-RUN apt install -y nginx apache2-utils python3-flask && \
+RUN apt-get install -y --no-install-recommends nginx apache2-utils python3-flask && \
   rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
 
 # Prepare nginx configuration
@@ -76,5 +76,4 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 WORKDIR /qni-gl/vite
 RUN yarn
 
-# Start Vite
-CMD ["yarn", "dev"]
+CMD ["/bin/bash"]

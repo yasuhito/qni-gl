@@ -99,6 +99,10 @@ export class ControlGate extends JsonableMixin(GateComponent) {
   }
 
   toCircuitJSON() {
-    return '"•"';
+    return `"${this.gateChar()}"`;
+  }
+
+  gateChar() {
+    return "•";
   }
 }

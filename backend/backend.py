@@ -1,9 +1,9 @@
 from cirq_runner import CirqRunner
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from logging.handlers import RotatingFileHandler
 import json
 import logging
+import traceback
 
 app = Flask(__name__)
 CORS(app)
@@ -27,8 +27,7 @@ def setup_logger():
     stream_handler.setFormatter(stream_formatter)
 
     # backend.log ファイルにログを出力するためのハンドラ
-    file_handler = RotatingFileHandler(
-        'backend.log', maxBytes=10000, backupCount=1)
+    file_handler = logging.FileHandler('backend.log')
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(log_format, datefmt=date_format)
     file_handler.setFormatter(file_formatter)
@@ -62,6 +61,7 @@ def backend():
         return jsonify(step_results)
     except Exception as e:
         app.logger.error("An error occurred: %s", str(e))
+        app.logger.error("Stack trace: %s", traceback.format_exc())
         return "Internal Server Error ", 500
 
 
