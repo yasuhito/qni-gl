@@ -240,7 +240,7 @@ export class DropzoneComponent extends Container {
   }
 
   protected drawConnection(startY: number, endY: number) {
-    this.wire
+    this.connection
       .lineStyle(
         this.connectionWidth,
         Colors["bg-brand"],
