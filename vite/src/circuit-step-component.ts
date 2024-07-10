@@ -471,8 +471,12 @@ export class CircuitStepComponent extends Container {
           break;
         }
         case ControlGate: {
-          const controlGates = sameOps as ControlGate[];
+          // もし同じステップに X ゲートがある場合、X ゲート側でシリアライズするのでここでは何もしない
+          if (this.operations.some((op) => op instanceof XGate)) {
+            break;
+          }
 
+          const controlGates = sameOps as ControlGate[];
           const targetBits = controlGates.map((each) => this.indexOf(each));
           const serializedGate = { type: "•", targets: targetBits };
 
