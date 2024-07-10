@@ -105,16 +105,20 @@ export class CircuitComponent extends Container {
     const circuitStep = new CircuitStepComponent(wireCount);
     this.circuitStepsContainer.addChild(circuitStep);
 
-    circuitStep.on(
-      "gateSnapToDropzone",
-      this.redrawDropzoneInputAndOutputWires,
-      this
-    );
+    circuitStep.on("gateSnapToDropzone", this.onGateSnapToDropzone, this);
     circuitStep.on("hover", this.emitOnStepHoverSignal, this);
     circuitStep.on("activated", this.deactivateAllOtherSteps, this);
     circuitStep.on("grabGate", (gate, globalPosition) => {
       this.emit("grabGate", gate, globalPosition);
     });
+  }
+
+  private onGateSnapToDropzone(
+    circuitStep: CircuitStepComponent,
+    dropzone: DropzoneComponent
+  ) {
+    this.redrawDropzoneInputAndOutputWires(circuitStep, dropzone);
+    this.updateControlledUConnections();
   }
 
   private redrawDropzoneInputAndOutputWires(
