@@ -211,12 +211,18 @@ export class CircuitStepComponent extends Container {
 
   updateSwapConnections(): void {
     const swapDropzones = this.swapGateDropzones;
+    const swapBits = swapDropzones.map((each) => this.bit(each));
 
     if (swapDropzones.length !== 2) {
-      //   for (const each of swapDropzones) {
-      //     const swapGate = each.operation as SwapGateElement
-      //     swapGate.disable()
-      //   }
+      for (const dropzone of this.dropzones) {
+        const minBit = Math.min(...swapBits);
+        const maxBit = Math.max(...swapBits);
+
+        if (minBit <= this.bit(dropzone) && this.bit(dropzone) <= maxBit) {
+          dropzone.connectTop = false;
+          dropzone.connectBottom = false;
+        }
+      }
     } else {
       for (const swap of swapDropzones) {
         // TODO: つながっていない Swap ゲートは disabled (灰色表示) にする
@@ -230,7 +236,6 @@ export class CircuitStepComponent extends Container {
         );
       }
 
-      const swapBits = swapDropzones.map((each) => this.bit(each));
       for (const dropzone of this.freeDropzones) {
         const minBit = Math.min(...swapBits);
         const maxBit = Math.max(...swapBits);
