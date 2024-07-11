@@ -42,13 +42,13 @@ const groupBy = <K, V>(
  * @noInheritDoc
  */
 export class CircuitStepComponent extends Container {
-  static lineWidth = spacingInPx(1);
+  static currentStepMarkerWidth = spacingInPx(1);
   static hoverLineColor = Colors["bg-brand-hover"];
   static activeLineColor = Colors["bg-brand"];
 
   private _dropzones: List;
   private _state: "idle" | "hover" | "active" = "idle";
-  private _line: PIXI.Graphics;
+  private _currentStepMarker: PIXI.Graphics;
 
   static get gapBetweenGates(): number {
     return DropzoneComponent.size / 2;
@@ -139,7 +139,7 @@ export class CircuitStepComponent extends Container {
     });
     this._dropzones.addChild(dropzone);
 
-    if (this._line) {
+    if (this._currentStepMarker) {
       this.redrawLine();
     }
 
@@ -172,6 +172,9 @@ export class CircuitStepComponent extends Container {
       elementsMargin: DropzoneComponent.size / 2,
       vertPadding: CircuitStepComponent.paddingY,
     });
+
+    this._dropzones.x = 0;
+    this._dropzones.y = 0;
     this.addChild(this._dropzones);
     this._dropzones.eventMode = "static";
 
@@ -189,8 +192,9 @@ export class CircuitStepComponent extends Container {
 
     this.updateHitArea();
 
-    this._line = new PIXI.Graphics();
-    this.addChild(this._line);
+    this._currentStepMarker = new PIXI.Graphics();
+    this.drawCurrentStepMarker(0x000000, 0);
+    this.addChild(this._currentStepMarker);
   }
 
   updateHitArea() {
@@ -541,17 +545,18 @@ export class CircuitStepComponent extends Container {
 
     this._state = "active";
     this.redrawLine();
-    this.emit("activated", this);
+    this.emit("circuit-step.activated", this);
   }
 
   deactivate() {
     this._state = "idle";
-    this._line.clear();
+
+    this.hideCurrentStepMarker();
   }
 
   protected onPointerOver() {
     if (this.isIdle()) {
-      this.emit("hover", this);
+      this.emit("circuit-step.hover", this);
       this._state = "hover";
       this.redrawLine();
     }
@@ -561,7 +566,7 @@ export class CircuitStepComponent extends Container {
     if (this.isHover()) {
       this._state = "idle";
 
-      this._line.clear();
+      this.hideCurrentStepMarker();
     }
   }
 
@@ -572,31 +577,45 @@ export class CircuitStepComponent extends Container {
   }
 
   protected redrawLine() {
-    this._line.clear();
-
     if (this.isHover()) {
+      this.showCurrentStepMarker();
       this.drawHoverLine();
     } else if (this.isActive()) {
+      this.showCurrentStepMarker();
       this.drawActiveLine();
     }
   }
 
+  protected showCurrentStepMarker() {
+    this._currentStepMarker.alpha = 1;
+  }
+
+  protected hideCurrentStepMarker() {
+    this._currentStepMarker.alpha = 0;
+  }
+
+  protected drawCurrentStepMarker(color: PIXI.ColorSource, alpha = 1) {
+    this._currentStepMarker.clear();
+
+    this._currentStepMarker.beginFill(color);
+    this._currentStepMarker.drawRect(
+      this.componentWidth - CircuitStepComponent.currentStepMarkerWidth / 2,
+      0,
+      CircuitStepComponent.currentStepMarkerWidth,
+      this.componentHeight
+    );
+    this._currentStepMarker.endFill();
+
+    // this._currentStepMarker.beginFill(color, 0) と最初から alpha = 0 で描画すると、
+    // 必要な幅が確保されない。なので endFill() した後であらためて alpha を指定する。
+    this._currentStepMarker.alpha = alpha;
+  }
+
   protected drawHoverLine() {
-    this.drawLine(CircuitStepComponent.hoverLineColor);
+    this.drawCurrentStepMarker(CircuitStepComponent.hoverLineColor);
   }
 
   protected drawActiveLine() {
-    this.drawLine(CircuitStepComponent.activeLineColor);
-  }
-
-  protected drawLine(color: PIXI.ColorSource) {
-    this._line.beginFill(color, 1);
-    this._line.drawRect(
-      this.componentWidth - CircuitStepComponent.lineWidth / 2,
-      0,
-      CircuitStepComponent.lineWidth,
-      this.componentHeight
-    );
-    this._line.endFill();
+    this.drawCurrentStepMarker(CircuitStepComponent.activeLineColor);
   }
 }

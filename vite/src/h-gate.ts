@@ -16,6 +16,10 @@ export class HGate extends JsonableMixin(SquareGateMixin(GateComponent)) {
   });
 
   toCircuitJSON() {
-    return '"H"';
+    return `"${this.gateChar()}"`;
+  }
+
+  gateChar() {
+    return "H";
   }
 }
