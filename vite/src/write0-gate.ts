@@ -28,4 +28,8 @@ export class Write0Gate extends WriteGate {
   toCircuitJSON() {
     return '"|0>"';
   }
+
+  gateChar() {
+    return "0";
+  }
 }

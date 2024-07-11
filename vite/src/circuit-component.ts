@@ -93,6 +93,7 @@ export class CircuitComponent extends Container {
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
       type: "horizontal",
+      elementsMargin: -CircuitStepComponent.currentStepMarkerWidth / 2,
     });
     this.addChild(this.circuitStepsContainer);
 
@@ -106,8 +107,12 @@ export class CircuitComponent extends Container {
     this.circuitStepsContainer.addChild(circuitStep);
 
     circuitStep.on("gateSnapToDropzone", this.onGateSnapToDropzone, this);
-    circuitStep.on("hover", this.emitOnStepHoverSignal, this);
-    circuitStep.on("activated", this.deactivateAllOtherSteps, this);
+    circuitStep.on("circuit-step.hover", this.emitOnStepHoverSignal, this);
+    circuitStep.on(
+      "circuit-step.activated",
+      this.deactivateAllOtherSteps,
+      this
+    );
     circuitStep.on("grabGate", (gate, globalPosition) => {
       this.emit("grabGate", gate, globalPosition);
     });
