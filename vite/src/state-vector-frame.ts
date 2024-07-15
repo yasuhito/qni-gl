@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 
-export class CircuitFrame extends PIXI.Container {
+export class StateVectorFrame extends PIXI.Container {
   readonly app: PIXI.Application;
   readonly background: PIXI.Graphics;
 
@@ -14,16 +14,18 @@ export class CircuitFrame extends PIXI.Container {
     this.initBackground(height);
   }
 
-  update(height: number) {
+  update(y: number, height: number) {
     this.background.clear();
 
-    this.background.beginFill(Colors["bg"]);
+    this.background.beginFill(Colors["bg-component"]);
     this.background.drawRect(0, 0, this.app.screen.width, height);
     this.background.endFill();
+
+    this.y = y;
   }
 
   private initBackground(height: number) {
-    this.background.beginFill(Colors["bg"]);
+    this.background.beginFill(Colors["bg-component"]);
     this.background.drawRect(0, 0, this.app.screen.width, height);
     this.background.endFill();
     this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加

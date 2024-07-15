@@ -24,7 +24,7 @@ import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 import { FrameDivider } from "./frame-divider";
 import { CircuitFrame } from "./circuit-frame";
-// import { Layer, Stage } from "@pixi/layers";
+import { StateVectorFrame } from "./state-vector-frame";
 
 export class App {
   static elementId = "app";
@@ -35,8 +35,7 @@ export class App {
   element: HTMLElement;
   mainContainer: List;
   circuitFrame: CircuitFrame;
-  stateVectorFrame: PIXI.Container;
-  stateVectorFrameBackground: PIXI.Graphics;
+  stateVectorFrame: StateVectorFrame;
   frameDivider: FrameDivider;
 
   activeGate: GateComponent | null = null;
@@ -112,18 +111,11 @@ export class App {
     );
     this.mainContainer.addChild(this.circuitFrame);
 
-    this.stateVectorFrame = new PIXI.Container();
-    this.mainContainer.addChild(this.stateVectorFrame);
-    this.stateVectorFrameBackground = new PIXI.Graphics();
-    this.stateVectorFrameBackground.beginFill(Colors["bg"]);
-    this.stateVectorFrameBackground.drawRect(
-      0,
-      0,
-      this.pixiApp.screen.width,
+    this.stateVectorFrame = new StateVectorFrame(
+      this.pixiApp,
       this.pixiApp.screen.height * 0.4
     );
-    this.stateVectorFrameBackground.endFill();
-    this.stateVectorFrame.addChildAt(this.stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
+    this.mainContainer.addChild(this.stateVectorFrame);
 
     // 量子回路と状態ベクトルの境界線
     this.frameDivider = new FrameDivider(
@@ -137,9 +129,12 @@ export class App {
 
       this.frameDivider.move(event);
 
-      // 上下フレームのリサイズ
-      this.circuitFrame.resize(this.frameDivider.y);
-      this.updateStateVectorBackground();
+      // 上下フレームの更新
+      this.circuitFrame.update(this.frameDivider.y);
+      this.stateVectorFrame.update(
+        this.frameDivider.y + this.frameDivider.height,
+        this.pixiApp.screen.height - this.frameDivider.y
+      );
       // 状態ベクトルの位置を更新
       this.updateStateVectorComponentPosition();
     });
@@ -206,10 +201,6 @@ export class App {
       this.circuit.qubitCountInUse
     );
     this.stateVectorFrame.addChild(this.stateVectorComponent);
-    // this.pixiApp.stage.addChild(this.stateVectorComponent);
-
-    // this.pixiApp.stage.addChild(this.gateLayer);
-    // this.pixiApp.stage.addChild(this.draggingGateLayer);
 
     this.updateStateVectorComponentPosition();
 
@@ -227,20 +218,6 @@ export class App {
     this.stateVectorComponent.qubitCircles[0].probability = 100;
     this.stateVectorComponent.qubitCircles[0].phase = 0;
     this.stateVectorComponent.qubitCircles[1].probability = 0;
-  }
-
-  private updateStateVectorBackground() {
-    this.stateVectorFrameBackground.clear();
-    this.stateVectorFrameBackground.beginFill(Colors["bg"]);
-    this.stateVectorFrameBackground.drawRect(
-      0,
-      0,
-      this.pixiApp.screen.width,
-      this.pixiApp.screen.height - this.frameDivider.y
-    );
-    this.stateVectorFrameBackground.endFill();
-
-    this.stateVectorFrame.y = this.frameDivider.y + this.frameDivider.height;
   }
 
   private updateStateVectorComponentPosition() {
