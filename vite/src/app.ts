@@ -34,6 +34,7 @@ export class App {
   element: HTMLElement;
   mainContainer: List;
   circuitFrame: PIXI.Container;
+  circuitFrameBackground: PIXI.Graphics;
   stateVectorFrame: PIXI.Container;
   frameDivider: FrameDivider;
 
@@ -106,16 +107,16 @@ export class App {
 
     this.circuitFrame = new PIXI.Container();
     this.mainContainer.addChild(this.circuitFrame);
-    const circuitFrameBackground = new PIXI.Graphics();
-    circuitFrameBackground.beginFill(Colors["bg"]);
-    circuitFrameBackground.drawRect(
+    this.circuitFrameBackground = new PIXI.Graphics();
+    this.circuitFrameBackground.beginFill(Colors["bg"]);
+    this.circuitFrameBackground.drawRect(
       0,
       0,
       this.pixiApp.screen.width,
       this.pixiApp.screen.height * 0.6
     );
-    circuitFrameBackground.endFill();
-    this.circuitFrame.addChildAt(circuitFrameBackground, 0); // 背景を一番下のレイヤーに追加
+    this.circuitFrameBackground.endFill();
+    this.circuitFrame.addChildAt(this.circuitFrameBackground, 0); // 背景を一番下のレイヤーに追加
 
     this.stateVectorFrame = new PIXI.Container();
     this.mainContainer.addChild(this.stateVectorFrame);
@@ -130,48 +131,42 @@ export class App {
     stateVectorFrameBackground.endFill();
     this.stateVectorFrame.addChildAt(stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
 
+    // 量子回路と状態ベクトルの境界線
     this.frameDivider = new FrameDivider(
-      this.pixiApp.screen.width,
+      this.pixiApp,
       this.circuitFrame.height
     );
     this.pixiApp.stage.addChild(this.frameDivider);
 
-    this.frameDivider.on("frame-divider:start-dragging", () => {
-      this.pixiApp.stage.cursor = "ns-resize";
-    });
-    this.frameDivider.on("frame-divider:end-dragging", () => {
-      this.pixiApp.stage.cursor = "default";
-    });
-
     this.pixiApp.stage.on("pointermove", (event) => {
-      if (this.frameDivider.dragging) {
-        this.frameDivider.move(event, this.pixiApp);
+      if (!this.frameDivider.dragging) return;
 
-        // drawRects();
-        circuitFrameBackground.clear();
-        circuitFrameBackground.beginFill(Colors["bg"]);
-        circuitFrameBackground.drawRect(
-          0,
-          0,
-          this.pixiApp.screen.width,
-          this.frameDivider.y
-        );
-        circuitFrameBackground.endFill();
+      this.frameDivider.move(event);
 
-        stateVectorFrameBackground.clear();
-        stateVectorFrameBackground.beginFill(Colors["bg"]);
-        stateVectorFrameBackground.drawRect(
-          0,
-          0,
-          this.pixiApp.screen.width,
-          this.pixiApp.screen.height - this.frameDivider.y
-        );
-        stateVectorFrameBackground.endFill();
+      // drawRects();
+      this.resizeCircuitFrameBackground();
+      // this.circuitFrameBackground.clear();
+      // this.circuitFrameBackground.beginFill(Colors["bg"]);
+      // this.circuitFrameBackground.drawRect(
+      //   0,
+      //   0,
+      //   this.pixiApp.screen.width,
+      //   this.frameDivider.y
+      // );
+      // this.circuitFrameBackground.endFill();
 
-        this.stateVectorFrame.y =
-          this.frameDivider.y + this.frameDivider.height;
-        this.updateStateVectorComponentPosition();
-      }
+      stateVectorFrameBackground.clear();
+      stateVectorFrameBackground.beginFill(Colors["bg"]);
+      stateVectorFrameBackground.drawRect(
+        0,
+        0,
+        this.pixiApp.screen.width,
+        this.pixiApp.screen.height - this.frameDivider.y
+      );
+      stateVectorFrameBackground.endFill();
+
+      this.stateVectorFrame.y = this.frameDivider.y + this.frameDivider.height;
+      this.updateStateVectorComponentPosition();
     });
 
     this.gatePalette = new GatePaletteComponent();
@@ -257,6 +252,19 @@ export class App {
     this.stateVectorComponent.qubitCircles[0].probability = 100;
     this.stateVectorComponent.qubitCircles[0].phase = 0;
     this.stateVectorComponent.qubitCircles[1].probability = 0;
+  }
+
+  private resizeCircuitFrameBackground() {
+    this.circuitFrameBackground.clear();
+
+    this.circuitFrameBackground.beginFill(Colors["bg"]);
+    this.circuitFrameBackground.drawRect(
+      0,
+      0,
+      this.pixiApp.screen.width,
+      this.frameDivider.y
+    );
+    this.circuitFrameBackground.endFill();
   }
 
   private updateStateVectorComponentPosition() {
