@@ -1,12 +1,14 @@
 import * as PIXI from "pixi.js";
 import { CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
+import { Colors } from "./colors";
 import { Complex } from "@qni/common";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { HGate } from "./h-gate";
+import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
 import { RnotGate } from "./rnot-gate";
 import { SDaggerGate } from "./s-dagger-gate";
@@ -20,7 +22,6 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { Colors } from "./colors";
 // import { Layer, Stage } from "@pixi/layers";
 
 export class App {
@@ -28,7 +29,13 @@ export class App {
   private static _instance: App;
 
   declare worker: Worker;
+
   element: HTMLElement;
+  mainContainer: List;
+  circuitFrame: PIXI.Container;
+  stateVectorFrame: PIXI.Container;
+  frameBorder: PIXI.Graphics;
+
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
@@ -90,8 +97,107 @@ export class App {
       .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
       .on("pointerdown", this.maybeDeactivateGate.bind(this));
 
+    this.mainContainer = new List({
+      type: "vertical",
+    });
+    this.mainContainer.sortableChildren = true;
+    this.pixiApp.stage.addChild(this.mainContainer);
+
+    this.circuitFrame = new PIXI.Container();
+    this.mainContainer.addChild(this.circuitFrame);
+    const circuitFrameBackground = new PIXI.Graphics();
+    circuitFrameBackground.beginFill(Colors["bg"]);
+    circuitFrameBackground.drawRect(
+      0,
+      0,
+      this.pixiApp.screen.width,
+      this.pixiApp.screen.height * 0.6
+    );
+    circuitFrameBackground.endFill();
+    this.circuitFrame.addChildAt(circuitFrameBackground, 0); // 背景を一番下のレイヤーに追加
+
+    this.stateVectorFrame = new PIXI.Container();
+    this.mainContainer.addChild(this.stateVectorFrame);
+    const stateVectorFrameBackground = new PIXI.Graphics();
+    stateVectorFrameBackground.beginFill(Colors["bg"]);
+    stateVectorFrameBackground.drawRect(
+      0,
+      0,
+      this.pixiApp.screen.width,
+      this.pixiApp.screen.height * 0.4
+    );
+    stateVectorFrameBackground.endFill();
+    this.stateVectorFrame.addChildAt(stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
+
+    this.frameBorder = new PIXI.Graphics();
+    this.frameBorder.beginFill(Colors["border-component"]);
+    this.frameBorder.drawRect(0, 0, this.pixiApp.screen.width, 2);
+    this.frameBorder.endFill();
+    this.frameBorder.interactive = true;
+    // this.frameBorder.buttonMode = true;
+    this.frameBorder.cursor = "ns-resize";
+    this.pixiApp.stage.addChild(this.frameBorder);
+
+    // 境界線の初期位置
+    const borderPosition = this.circuitFrame.height;
+    this.frameBorder.y = borderPosition;
+
+    let draggingBorder = false;
+    let dragBorderStartY = 0;
+
+    this.frameBorder
+      .on("pointerdown", (event) => {
+        draggingBorder = true;
+        dragBorderStartY = event.data.global.y - this.frameBorder.y;
+        this.pixiApp.stage.cursor = "ns-resize";
+      })
+      .on("pointerup", () => {
+        draggingBorder = false;
+        this.pixiApp.stage.cursor = "default";
+      })
+      .on("pointerupoutside", () => {
+        draggingBorder = false;
+        this.pixiApp.stage.cursor = "default";
+      });
+
+    this.pixiApp.stage.on("pointermove", (event) => {
+      if (draggingBorder) {
+        let borderPosition = event.data.global.y - dragBorderStartY;
+        if (borderPosition < 0) borderPosition = 0;
+        if (borderPosition > this.pixiApp.screen.height)
+          borderPosition = this.pixiApp.screen.height;
+
+        this.frameBorder.y = borderPosition;
+
+        // drawRects();
+        circuitFrameBackground.clear();
+        circuitFrameBackground.beginFill(Colors["bg"]);
+        circuitFrameBackground.drawRect(
+          0,
+          0,
+          this.pixiApp.screen.width,
+          borderPosition
+        );
+        circuitFrameBackground.endFill();
+
+        stateVectorFrameBackground.clear();
+        stateVectorFrameBackground.beginFill(Colors["bg"]);
+        stateVectorFrameBackground.drawRect(
+          0,
+          0,
+          this.pixiApp.screen.width,
+          this.pixiApp.screen.height - borderPosition
+        );
+        stateVectorFrameBackground.endFill();
+
+        this.stateVectorFrame.y = borderPosition + this.frameBorder.height;
+        this.updateStateVectorComponentPosition();
+      }
+    });
+
     this.gatePalette = new GatePaletteComponent();
-    this.pixiApp.stage.addChild(this.gatePalette);
+    this.circuitFrame.addChild(this.gatePalette);
+    // this.pixiApp.stage.addChild(this.gatePalette);
     // this.gatePalette.on("newGate", (gate) => {
     //   gate.parentLayer = this.gateLayer;
     // });
@@ -104,7 +210,8 @@ export class App {
     this.gatePalette.on("gateDiscarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
-      this.pixiApp.stage.removeChild(gate);
+      this.circuitFrame.removeChild(gate);
+      // this.pixiApp.stage.removeChild(gate);
 
       this.circuit.update();
       if (this.circuit.activeStepIndex === null) {
@@ -137,7 +244,8 @@ export class App {
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.circuit.x = this.gatePalette.x;
     this.circuit.y = 64 + this.gatePalette.height + 64;
-    this.pixiApp.stage.addChild(this.circuit);
+    this.circuitFrame.addChild(this.circuit);
+    // this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
     // this.circuit.on("stepHover", this.runSimulator, this);
@@ -148,7 +256,8 @@ export class App {
     this.stateVectorComponent = new StateVectorComponent(
       this.circuit.qubitCountInUse
     );
-    this.pixiApp.stage.addChild(this.stateVectorComponent);
+    this.stateVectorFrame.addChild(this.stateVectorComponent);
+    // this.pixiApp.stage.addChild(this.stateVectorComponent);
 
     // this.pixiApp.stage.addChild(this.gateLayer);
     // this.pixiApp.stage.addChild(this.draggingGateLayer);
@@ -175,7 +284,7 @@ export class App {
     this.stateVectorComponent.x =
       (this.screenWidth - this.stateVectorComponent.width) / 2;
     this.stateVectorComponent.y =
-      this.screenHeight - 32 - this.stateVectorComponent.height;
+      this.stateVectorFrame.height / 2 - this.stateVectorComponent.height / 2;
   }
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
@@ -251,7 +360,8 @@ export class App {
     // pixi/layers で重なりを制御する
     // gate.parentLayer = this.draggingGateLayer;
 
-    this.pixiApp.stage.addChild(gate);
+    // this.pixiApp.stage.addChild(gate);
+    this.circuitFrame.addChild(gate);
 
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
@@ -261,7 +371,8 @@ export class App {
     this.grabbedGate.on("discarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
-      this.pixiApp.stage.removeChild(gate);
+      this.circuitFrame.removeChild(gate);
+      // this.pixiApp.stage.removeChild(gate);
     });
 
     // this.dropzones についてループを回す
@@ -370,7 +481,8 @@ export class App {
 
   private unsnapGateFromDropzone(gate: GateComponent) {
     gate.unsnap();
-    this.pixiApp.stage.addChild(gate);
+    this.circuitFrame.addChild(gate);
+    // this.pixiApp.stage.addChild(gate);
   }
 
   private releaseGate() {

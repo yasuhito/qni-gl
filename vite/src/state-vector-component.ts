@@ -1,10 +1,8 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
-import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
 import { Size } from "./size";
 
@@ -118,16 +116,16 @@ export class StateVectorComponent extends Container {
   }
 
   private drawBody() {
-    this.body.lineStyle(1, Colors["border-component"], 1, 0);
-    this.body.beginFill(Colors["bg-component"]);
-    this.body.drawRoundedRect(
-      0,
-      0,
-      this.bodyWidth,
-      this.bodyHeight,
-      Spacing.cornerRadius.stateVector
-    );
-    this.body.endFill();
+    // this.body.lineStyle(1, Colors["border-component"], 1, 0);
+    // this.body.beginFill(Colors["bg-component"]);
+    // this.body.drawRoundedRect(
+    //   0,
+    //   0,
+    //   this.bodyWidth,
+    //   this.bodyHeight,
+    //   Spacing.cornerRadius.stateVector
+    // );
+    // this.body.endFill();
 
     this.body.filters = [
       new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
