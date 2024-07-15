@@ -22,6 +22,7 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
+import { FrameDivider } from "./frame-divider";
 // import { Layer, Stage } from "@pixi/layers";
 
 export class App {
@@ -34,7 +35,7 @@ export class App {
   mainContainer: List;
   circuitFrame: PIXI.Container;
   stateVectorFrame: PIXI.Container;
-  frameBorder: PIXI.Graphics;
+  frameDivider: FrameDivider;
 
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
@@ -129,45 +130,22 @@ export class App {
     stateVectorFrameBackground.endFill();
     this.stateVectorFrame.addChildAt(stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
 
-    this.frameBorder = new PIXI.Graphics();
-    this.frameBorder.beginFill(Colors["border-component"]);
-    this.frameBorder.drawRect(0, 0, this.pixiApp.screen.width, 2);
-    this.frameBorder.endFill();
-    this.frameBorder.interactive = true;
-    // this.frameBorder.buttonMode = true;
-    this.frameBorder.cursor = "ns-resize";
-    this.pixiApp.stage.addChild(this.frameBorder);
+    this.frameDivider = new FrameDivider(
+      this.pixiApp.screen.width,
+      this.circuitFrame.height
+    );
+    this.pixiApp.stage.addChild(this.frameDivider);
 
-    // 境界線の初期位置
-    const borderPosition = this.circuitFrame.height;
-    this.frameBorder.y = borderPosition;
-
-    let draggingBorder = false;
-    let dragBorderStartY = 0;
-
-    this.frameBorder
-      .on("pointerdown", (event) => {
-        draggingBorder = true;
-        dragBorderStartY = event.data.global.y - this.frameBorder.y;
-        this.pixiApp.stage.cursor = "ns-resize";
-      })
-      .on("pointerup", () => {
-        draggingBorder = false;
-        this.pixiApp.stage.cursor = "default";
-      })
-      .on("pointerupoutside", () => {
-        draggingBorder = false;
-        this.pixiApp.stage.cursor = "default";
-      });
+    this.frameDivider.on("frame-divider:start-dragging", () => {
+      this.pixiApp.stage.cursor = "ns-resize";
+    });
+    this.frameDivider.on("frame-divider:end-dragging", () => {
+      this.pixiApp.stage.cursor = "default";
+    });
 
     this.pixiApp.stage.on("pointermove", (event) => {
-      if (draggingBorder) {
-        let borderPosition = event.data.global.y - dragBorderStartY;
-        if (borderPosition < 0) borderPosition = 0;
-        if (borderPosition > this.pixiApp.screen.height)
-          borderPosition = this.pixiApp.screen.height;
-
-        this.frameBorder.y = borderPosition;
+      if (this.frameDivider.dragging) {
+        this.frameDivider.move(event, this.pixiApp);
 
         // drawRects();
         circuitFrameBackground.clear();
@@ -176,7 +154,7 @@ export class App {
           0,
           0,
           this.pixiApp.screen.width,
-          borderPosition
+          this.frameDivider.y
         );
         circuitFrameBackground.endFill();
 
@@ -186,11 +164,12 @@ export class App {
           0,
           0,
           this.pixiApp.screen.width,
-          this.pixiApp.screen.height - borderPosition
+          this.pixiApp.screen.height - this.frameDivider.y
         );
         stateVectorFrameBackground.endFill();
 
-        this.stateVectorFrame.y = borderPosition + this.frameBorder.height;
+        this.stateVectorFrame.y =
+          this.frameDivider.y + this.frameDivider.height;
         this.updateStateVectorComponentPosition();
       }
     });
