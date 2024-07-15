@@ -36,6 +36,7 @@ export class App {
   circuitFrame: PIXI.Container;
   circuitFrameBackground: PIXI.Graphics;
   stateVectorFrame: PIXI.Container;
+  stateVectorFrameBackground: PIXI.Graphics;
   frameDivider: FrameDivider;
 
   activeGate: GateComponent | null = null;
@@ -120,16 +121,16 @@ export class App {
 
     this.stateVectorFrame = new PIXI.Container();
     this.mainContainer.addChild(this.stateVectorFrame);
-    const stateVectorFrameBackground = new PIXI.Graphics();
-    stateVectorFrameBackground.beginFill(Colors["bg"]);
-    stateVectorFrameBackground.drawRect(
+    this.stateVectorFrameBackground = new PIXI.Graphics();
+    this.stateVectorFrameBackground.beginFill(Colors["bg"]);
+    this.stateVectorFrameBackground.drawRect(
       0,
       0,
       this.pixiApp.screen.width,
       this.pixiApp.screen.height * 0.4
     );
-    stateVectorFrameBackground.endFill();
-    this.stateVectorFrame.addChildAt(stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
+    this.stateVectorFrameBackground.endFill();
+    this.stateVectorFrame.addChildAt(this.stateVectorFrameBackground, 0); // 背景を一番下のレイヤーに追加
 
     // 量子回路と状態ベクトルの境界線
     this.frameDivider = new FrameDivider(
@@ -143,29 +144,10 @@ export class App {
 
       this.frameDivider.move(event);
 
-      // drawRects();
+      // 上下フレームのリサイズ
       this.resizeCircuitFrameBackground();
-      // this.circuitFrameBackground.clear();
-      // this.circuitFrameBackground.beginFill(Colors["bg"]);
-      // this.circuitFrameBackground.drawRect(
-      //   0,
-      //   0,
-      //   this.pixiApp.screen.width,
-      //   this.frameDivider.y
-      // );
-      // this.circuitFrameBackground.endFill();
-
-      stateVectorFrameBackground.clear();
-      stateVectorFrameBackground.beginFill(Colors["bg"]);
-      stateVectorFrameBackground.drawRect(
-        0,
-        0,
-        this.pixiApp.screen.width,
-        this.pixiApp.screen.height - this.frameDivider.y
-      );
-      stateVectorFrameBackground.endFill();
-
-      this.stateVectorFrame.y = this.frameDivider.y + this.frameDivider.height;
+      this.updateStateVectorBackground();
+      // 状態ベクトルの位置を更新
       this.updateStateVectorComponentPosition();
     });
 
@@ -265,6 +247,20 @@ export class App {
       this.frameDivider.y
     );
     this.circuitFrameBackground.endFill();
+  }
+
+  private updateStateVectorBackground() {
+    this.stateVectorFrameBackground.clear();
+    this.stateVectorFrameBackground.beginFill(Colors["bg"]);
+    this.stateVectorFrameBackground.drawRect(
+      0,
+      0,
+      this.pixiApp.screen.width,
+      this.pixiApp.screen.height - this.frameDivider.y
+    );
+    this.stateVectorFrameBackground.endFill();
+
+    this.stateVectorFrame.y = this.frameDivider.y + this.frameDivider.height;
   }
 
   private updateStateVectorComponentPosition() {
