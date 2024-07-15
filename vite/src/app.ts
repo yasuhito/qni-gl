@@ -23,6 +23,7 @@ import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 import { FrameDivider } from "./frame-divider";
+import { CircuitFrame } from "./circuit-frame";
 // import { Layer, Stage } from "@pixi/layers";
 
 export class App {
@@ -33,8 +34,7 @@ export class App {
 
   element: HTMLElement;
   mainContainer: List;
-  circuitFrame: PIXI.Container;
-  circuitFrameBackground: PIXI.Graphics;
+  circuitFrame: CircuitFrame;
   stateVectorFrame: PIXI.Container;
   stateVectorFrameBackground: PIXI.Graphics;
   frameDivider: FrameDivider;
@@ -106,18 +106,11 @@ export class App {
     this.mainContainer.sortableChildren = true;
     this.pixiApp.stage.addChild(this.mainContainer);
 
-    this.circuitFrame = new PIXI.Container();
-    this.mainContainer.addChild(this.circuitFrame);
-    this.circuitFrameBackground = new PIXI.Graphics();
-    this.circuitFrameBackground.beginFill(Colors["bg"]);
-    this.circuitFrameBackground.drawRect(
-      0,
-      0,
-      this.pixiApp.screen.width,
+    this.circuitFrame = new CircuitFrame(
+      this.pixiApp,
       this.pixiApp.screen.height * 0.6
     );
-    this.circuitFrameBackground.endFill();
-    this.circuitFrame.addChildAt(this.circuitFrameBackground, 0); // 背景を一番下のレイヤーに追加
+    this.mainContainer.addChild(this.circuitFrame);
 
     this.stateVectorFrame = new PIXI.Container();
     this.mainContainer.addChild(this.stateVectorFrame);
@@ -145,7 +138,7 @@ export class App {
       this.frameDivider.move(event);
 
       // 上下フレームのリサイズ
-      this.resizeCircuitFrameBackground();
+      this.circuitFrame.resize(this.frameDivider.y);
       this.updateStateVectorBackground();
       // 状態ベクトルの位置を更新
       this.updateStateVectorComponentPosition();
@@ -234,19 +227,6 @@ export class App {
     this.stateVectorComponent.qubitCircles[0].probability = 100;
     this.stateVectorComponent.qubitCircles[0].phase = 0;
     this.stateVectorComponent.qubitCircles[1].probability = 0;
-  }
-
-  private resizeCircuitFrameBackground() {
-    this.circuitFrameBackground.clear();
-
-    this.circuitFrameBackground.beginFill(Colors["bg"]);
-    this.circuitFrameBackground.drawRect(
-      0,
-      0,
-      this.pixiApp.screen.width,
-      this.frameDivider.y
-    );
-    this.circuitFrameBackground.endFill();
   }
 
   private updateStateVectorBackground() {
