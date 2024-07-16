@@ -13,7 +13,7 @@ test.describe("Z gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    zGate = app.circuitFrame.gatePalette.gates.ZGate;
+    zGate = app.gatePalette.gates.ZGate;
 
     await idle.waitFor();
   });
@@ -58,7 +58,7 @@ test.describe("Z gate", () => {
 
   test("Apply a Z-gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
-    const xGate = app.circuitFrame.gatePalette.gates.XGate;
+    const xGate = app.gatePalette.gates.XGate;
 
     await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
     await page.mouse.down();
