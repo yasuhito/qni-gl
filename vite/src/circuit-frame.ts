@@ -63,6 +63,8 @@ export class CircuitFrame extends PIXI.Container {
   readonly background: PIXI.Graphics;
   readonly gatePalette: GatePaletteComponent;
   readonly circuit: CircuitComponent;
+  private maskGraphics: PIXI.Graphics; // マスク用のグラフィック
+  private scrollContainer: PIXI.Container; // スクロール用のコンテナ
 
   /**
    * インスタンスを取得するメソッド
@@ -83,14 +85,23 @@ export class CircuitFrame extends PIXI.Container {
     this.background = new PIXI.Graphics();
     this.gatePalette = new GatePaletteComponent();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
+    this.maskGraphics = new PIXI.Graphics(); // マスク用のグラフィック
+    this.scrollContainer = new PIXI.Container(); // スクロール用のコンテナ
 
     this.initBackground(height);
     this.initGatePalette();
     this.initCircuit();
+    this.scrollContainer.y = 0; // スクロールコンテナの初期位置を設定
+    this.scrollContainer.height = height;
 
     this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
-    this.addChild(this.gatePalette);
-    this.addChild(this.circuit);
+    this.addChild(this.scrollContainer); // スクロール用コンテナを追加
+    this.scrollContainer.addChild(this.gatePalette); // ゲートパレットをスクロールコンテナに追加
+    this.scrollContainer.addChild(this.circuit); // 回路をスクロールコンテナに追加
+    this.addChild(this.maskGraphics); // マスク用グラフィックを追加
+    this.scrollContainer.mask = this.maskGraphics; // マスクを設定
+
+    this.initScrollEvents(); // スクロールイベントの初期化
   }
 
   /**
@@ -103,6 +114,8 @@ export class CircuitFrame extends PIXI.Container {
     this.background.beginFill(Colors["bg"]);
     this.background.drawRect(0, 0, this.app.screen.width, height);
     this.background.endFill();
+
+    this.updateMask(height); // マスクの更新
   }
 
   /**
@@ -204,5 +217,47 @@ export class CircuitFrame extends PIXI.Container {
     pointerPosition: PIXI.Point
   ): void {
     this.emit(CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE, gate, pointerPosition);
+  }
+
+  /**
+   * スクロールイベントの初期化
+   */
+  private initScrollEvents(): void {
+    this.interactive = true;
+    this.on("wheel", this.handleScroll, this);
+  }
+
+  /**
+   * マスクの更新
+   * @param height - 新しいマスクの高さ
+   */
+  private updateMask(height: number): void {
+    this.maskGraphics.clear();
+    this.maskGraphics.beginFill(0xffffff);
+    this.maskGraphics.drawRect(0, 0, this.app.screen.width, height);
+    this.maskGraphics.endFill();
+  }
+
+  /**
+   * スクロール処理
+   * @param event - ホイールイベント
+   */
+  private handleScroll(event: WheelEvent): void {
+    const deltaY = event.deltaY;
+    this.scrollContainer.y -= deltaY;
+
+    // スクロール範囲の制限
+    if (this.scrollContainer.y > 0) {
+      this.scrollContainer.y = 0;
+    }
+
+    const maxScrollY =
+      this.circuit.height +
+      this.gatePalette.height +
+      256 -
+      this.maskGraphics.height;
+    if (this.scrollContainer.y < -maxScrollY) {
+      this.scrollContainer.y = -maxScrollY;
+    }
   }
 }
