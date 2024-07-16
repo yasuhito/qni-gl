@@ -13,7 +13,7 @@ test.describe("Control gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    controlGate = app.gatePalette.gates.ControlGate;
+    controlGate = app.circuitFrame.gatePalette.gates.ControlGate;
 
     await idle.waitFor();
   });
@@ -21,7 +21,10 @@ test.describe("Control gate", () => {
   test("Place a Control gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
-    await page.mouse.move(centerPosition(controlGate).x, centerPosition(controlGate).y);
+    await page.mouse.move(
+      centerPosition(controlGate).x,
+      centerPosition(controlGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -33,7 +36,10 @@ test.describe("Control gate", () => {
   test("Place a Control gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(controlGate).x, centerPosition(controlGate).y);
+    await page.mouse.move(
+      centerPosition(controlGate).x,
+      centerPosition(controlGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -43,7 +49,10 @@ test.describe("Control gate", () => {
   });
 
   test("Place a Control gate on the third bit", async ({ page }) => {
-    await page.mouse.move(centerPosition(controlGate).x, centerPosition(controlGate).y);
+    await page.mouse.move(
+      centerPosition(controlGate).x,
+      centerPosition(controlGate).y
+    );
     await page.mouse.down();
 
     app = await appData(page);

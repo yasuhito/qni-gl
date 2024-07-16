@@ -13,7 +13,7 @@ test.describe("S† gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    sDaggerGate = app.gatePalette.gates.SDaggerGate;
+    sDaggerGate = app.circuitFrame.gatePalette.gates.SDaggerGate;
 
     await idle.waitFor();
   });
@@ -21,7 +21,10 @@ test.describe("S† gate", () => {
   test("Place an S† gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
-    await page.mouse.move(centerPosition(sDaggerGate).x, centerPosition(sDaggerGate).y);
+    await page.mouse.move(
+      centerPosition(sDaggerGate).x,
+      centerPosition(sDaggerGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -33,7 +36,10 @@ test.describe("S† gate", () => {
   test("Place an S† gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(sDaggerGate).x, centerPosition(sDaggerGate).y);
+    await page.mouse.move(
+      centerPosition(sDaggerGate).x,
+      centerPosition(sDaggerGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -43,7 +49,10 @@ test.describe("S† gate", () => {
   });
 
   test("Place an S† gate on the third bit", async ({ page }) => {
-    await page.mouse.move(centerPosition(sDaggerGate).x, centerPosition(sDaggerGate).y);
+    await page.mouse.move(
+      centerPosition(sDaggerGate).x,
+      centerPosition(sDaggerGate).y
+    );
     await page.mouse.down();
 
     app = await appData(page);
@@ -56,9 +65,9 @@ test.describe("S† gate", () => {
     await expect(page).toHaveScreenshot("s-dagger-gate-bit3.png");
   });
 
-  test("Apply an S† gate to state |1>.", async ({ page  }) => {
+  test("Apply an S† gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
-    const xGate = app.gatePalette.gates.XGate;
+    const xGate = app.circuitFrame.gatePalette.gates.XGate;
 
     await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
     await page.mouse.down();
@@ -68,16 +77,19 @@ test.describe("S† gate", () => {
 
     const dropzone10 = app.circuit.steps[1].dropzones[0];
 
-    await page.mouse.move(centerPosition(sDaggerGate).x, centerPosition(sDaggerGate).y);
+    await page.mouse.move(
+      centerPosition(sDaggerGate).x,
+      centerPosition(sDaggerGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone10.x, dropzone10.y);
     await page.mouse.up();
     await idle.waitFor();
 
-    const step1 = app.circuit.steps[1]
+    const step1 = app.circuit.steps[1];
     await page.mouse.click(step1.x, step1.y);
     await idle.waitFor();
 
     await expect(page).toHaveScreenshot("s-dagger-gate-state-|1>.png");
-  })
+  });
 });

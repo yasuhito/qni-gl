@@ -8,7 +8,7 @@ test.describe("Gate Palette", () => {
     await page.goto("/");
 
     const app = await appData(page);
-    gatePalette = app.gatePalette;
+    gatePalette = app.circuitFrame.gatePalette;
   });
 
   test.describe("H Gate", () => {

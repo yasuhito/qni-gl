@@ -1,29 +1,15 @@
 import * as PIXI from "pixi.js";
 import { CircuitComponent } from "./circuit-component";
+import { CIRCUIT_FRAME_EVENTS, CircuitFrame } from "./circuit-frame";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Colors } from "./colors";
 import { Complex } from "@qni/common";
-import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
+import { FrameDivider } from "./frame-divider";
 import { GateComponent } from "./gate-component";
-import { GatePaletteComponent } from "./gate-palette-component";
-import { HGate } from "./h-gate";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import { RnotGate } from "./rnot-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { SGate } from "./s-gate";
 import { StateVectorComponent } from "./state-vector-component";
-import { SwapGate } from "./swap-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { TGate } from "./t-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
-import { FrameDivider } from "./frame-divider";
-import { CircuitFrame } from "./circuit-frame";
 import { StateVectorFrame } from "./state-vector-frame";
 
 export class App {
@@ -41,7 +27,6 @@ export class App {
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  gatePalette: GatePaletteComponent;
   circuit: CircuitComponent;
   circuitSteps: CircuitStepComponent[] = [];
   stateVectorComponent: StateVectorComponent;
@@ -130,7 +115,7 @@ export class App {
       this.frameDivider.move(event);
 
       // 上下フレームの更新
-      this.circuitFrame.update(this.frameDivider.y);
+      this.circuitFrame.resize(this.frameDivider.y);
       this.stateVectorFrame.update(
         this.frameDivider.y + this.frameDivider.height,
         this.pixiApp.screen.height - this.frameDivider.y
@@ -139,55 +124,25 @@ export class App {
       this.updateStateVectorComponentPosition();
     });
 
-    this.gatePalette = new GatePaletteComponent();
-    this.circuitFrame.addChild(this.gatePalette);
-    // this.pixiApp.stage.addChild(this.gatePalette);
-    // this.gatePalette.on("newGate", (gate) => {
-    //   gate.parentLayer = this.gateLayer;
-    // });
-    this.gatePalette.on("grabGate", this.grabGate, this);
-
-    this.gatePalette.x = 40;
-    this.gatePalette.y = 64;
-
-    this.gatePalette.on("mouseLeaveGate", this.resetCursor, this);
-    this.gatePalette.on("gateDiscarded", (gate) => {
-      this.activeGate = null;
-      this.grabbedGate = null;
-      this.circuitFrame.removeChild(gate);
-      // this.pixiApp.stage.removeChild(gate);
-
-      this.circuit.update();
-      if (this.circuit.activeStepIndex === null) {
-        this.circuit.stepAt(0).activate();
-      }
-
-      this.updateStateVectorComponentQubitCount();
-      this.updateStateVectorComponentPosition();
-
-      this.runSimulator();
-    });
-
-    this.gatePalette.addGate(HGate);
-    this.gatePalette.addGate(XGate);
-    this.gatePalette.addGate(YGate);
-    this.gatePalette.addGate(ZGate);
-    this.gatePalette.addGate(RnotGate);
-    this.gatePalette.addGate(SGate);
-    this.gatePalette.addGate(SDaggerGate);
-    this.gatePalette.addGate(TGate);
-    this.gatePalette.addGate(TDaggerGate);
-
-    this.gatePalette.newRow();
-    this.gatePalette.addGate(SwapGate);
-    this.gatePalette.addGate(ControlGate);
-    this.gatePalette.addGate(Write0Gate);
-    this.gatePalette.addGate(Write1Gate);
-    this.gatePalette.addGate(MeasurementGate);
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.GRAB_PALETTE_GATE,
+      this.grabGate,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.MOUSE_LEAVE_PALETTE_GATE,
+      this.resetCursor,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.PALETTE_GATE_DISCARDED,
+      this.gateDiscarded,
+      this
+    );
 
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    this.circuit.x = this.gatePalette.x;
-    this.circuit.y = 64 + this.gatePalette.height + 64;
+    this.circuit.x = this.circuitFrame.gatePalette.x;
+    this.circuit.y = 64 + this.circuitFrame.gatePalette.height + 64;
     this.circuitFrame.addChild(this.circuit);
     // this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
@@ -218,6 +173,19 @@ export class App {
     this.stateVectorComponent.qubitCircles[0].probability = 100;
     this.stateVectorComponent.qubitCircles[0].phase = 0;
     this.stateVectorComponent.qubitCircles[1].probability = 0;
+  }
+
+  private gateDiscarded(gate: GateComponent) {
+    this.activeGate = null;
+    this.grabbedGate = null;
+    this.circuitFrame.removeChild(gate);
+    this.circuit.update();
+    if (this.circuit.activeStepIndex === null) {
+      this.circuit.stepAt(0).activate();
+    }
+    this.updateStateVectorComponentQubitCount();
+    this.updateStateVectorComponentPosition();
+    this.runSimulator();
   }
 
   private updateStateVectorComponentPosition() {
@@ -297,11 +265,7 @@ export class App {
       this.activeGate.deactivate();
     }
 
-    // pixi/layers で重なりを制御する
-    // gate.parentLayer = this.draggingGateLayer;
-
-    // this.pixiApp.stage.addChild(gate);
-    this.circuitFrame.addChild(gate);
+    // this.circuitFrame.addChild(gate);
 
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch
@@ -358,7 +322,7 @@ export class App {
 
   toJSON() {
     return {
-      gatePalette: this.gatePalette,
+      gatePalette: this.circuitFrame.gatePalette,
       circuit: this.circuit || "",
     };
   }

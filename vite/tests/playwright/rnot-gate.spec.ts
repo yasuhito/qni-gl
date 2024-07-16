@@ -13,7 +13,7 @@ test.describe("Rnot gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    rnotGate = app.gatePalette.gates.RnotGate;
+    rnotGate = app.circuitFrame.gatePalette.gates.RnotGate;
 
     await idle.waitFor();
   });
@@ -21,7 +21,10 @@ test.describe("Rnot gate", () => {
   test("Place an Rnot gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
-    await page.mouse.move(centerPosition(rnotGate).x, centerPosition(rnotGate).y);
+    await page.mouse.move(
+      centerPosition(rnotGate).x,
+      centerPosition(rnotGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -33,7 +36,10 @@ test.describe("Rnot gate", () => {
   test("Place an Rnot gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(rnotGate).x, centerPosition(rnotGate).y);
+    await page.mouse.move(
+      centerPosition(rnotGate).x,
+      centerPosition(rnotGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -43,7 +49,10 @@ test.describe("Rnot gate", () => {
   });
 
   test("Place an Rnot gate on the third bit", async ({ page }) => {
-    await page.mouse.move(centerPosition(rnotGate).x, centerPosition(rnotGate).y);
+    await page.mouse.move(
+      centerPosition(rnotGate).x,
+      centerPosition(rnotGate).y
+    );
     await page.mouse.down();
 
     app = await appData(page);

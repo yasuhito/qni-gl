@@ -12,7 +12,7 @@ test.describe("Dropzone", () => {
     await page.goto("/");
 
     const app = await appData(page);
-    gatePalette = app.gatePalette;
+    gatePalette = app.circuitFrame.gatePalette;
     firstDropzone = app.circuit.steps[0].dropzones[0];
     idle = page.locator('#app[data-state="idle"]');
 
