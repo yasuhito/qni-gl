@@ -13,7 +13,7 @@ test.describe("S gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    sGate = app.circuitFrame.gatePalette.gates.SGate;
+    sGate = app.gatePalette.gates.SGate;
 
     await idle.waitFor();
   });
@@ -58,7 +58,7 @@ test.describe("S gate", () => {
 
   test("Apply an S gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
-    const xGate = app.circuitFrame.gatePalette.gates.XGate;
+    const xGate = app.gatePalette.gates.XGate;
 
     await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
     await page.mouse.down();
