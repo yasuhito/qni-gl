@@ -124,6 +124,9 @@ export class App {
     );
     this.pixiApp.stage.addChild(this.frameDivider);
 
+    console.log(`this.frameDivider.y = ${this.frameDivider.y}`);
+    console.log(`this.frameDivider.width = ${this.frameDivider.width}`);
+
     this.pixiApp.stage.on("pointermove", (event) => {
       if (!this.frameDivider.dragging) return;
 

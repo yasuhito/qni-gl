@@ -63,8 +63,8 @@ export class CircuitFrame extends PIXI.Container {
   readonly background: PIXI.Graphics;
   readonly gatePalette: GatePaletteComponent;
   readonly circuit: CircuitComponent;
-  private maskGraphics: PIXI.Graphics; // マスク用のグラフィック
-  private scrollContainer: PIXI.Container; // スクロール用のコンテナ
+  private maskGraphics: PIXI.Graphics;
+  private scrollContainer: PIXI.Container;
 
   /**
    * インスタンスを取得するメソッド
@@ -85,41 +85,26 @@ export class CircuitFrame extends PIXI.Container {
     this.background = new PIXI.Graphics();
     this.gatePalette = new GatePaletteComponent();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    this.maskGraphics = new PIXI.Graphics(); // マスク用のグラフィック
-    this.scrollContainer = new PIXI.Container(); // スクロール用のコンテナ
+    this.maskGraphics = new PIXI.Graphics();
+    this.scrollContainer = new PIXI.Container();
 
     this.initBackground(height);
     this.initGatePalette();
     this.initCircuit();
 
-    this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
-    this.addChild(this.scrollContainer); // スクロール用コンテナを追加
-    this.scrollContainer.addChild(this.gatePalette); // ゲートパレットをスクロールコンテナに追加
-    this.scrollContainer.addChild(this.circuit); // 回路をスクロールコンテナに追加
-    this.addChild(this.maskGraphics); // マスク用グラフィックを追加
-    this.scrollContainer.mask = this.maskGraphics; // マスクを設定
+    this.addChildAt(this.background, 0);
+    this.addChild(this.scrollContainer);
+    this.addChild(this.gatePalette);
+    this.scrollContainer.addChild(this.circuit);
+    this.addChild(this.maskGraphics);
+    this.scrollContainer.mask = this.maskGraphics;
 
-    // console.log(`this.scrollContainer.x = ${this.scrollContainer.x}`);
-    // console.log(`this.scrollContainer.y = ${this.scrollContainer.y}`);
-    // console.log(`this.scrollContainer.width = ${this.scrollContainer.width}`);
-    // console.log(`this.scrollContainer.height = ${this.scrollContainer.height}`);
+    console.log(`this.height = ${this.height}`);
+    console.log(`this.width = ${this.width}`);
+    console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
+    console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
 
-    // console.log(`this.gatePalette.x = ${this.gatePalette.x}`);
-    // console.log(`this.gatePalette.y = ${this.gatePalette.y}`);
-    // console.log(`this.gatePalette.width = ${this.gatePalette.width}`);
-    // console.log(`this.gatePalette.height = ${this.gatePalette.height}`);
-
-    // console.log(`this.circuit.x = ${this.circuit.x}`);
-    // console.log(`this.circuit.y = ${this.circuit.y}`);
-    // console.log(`this.circuit.width = ${this.circuit.width}`);
-    // console.log(`this.circuit.height = ${this.circuit.height}`);
-
-    // console.log(`this.maskGraphics.x = ${this.maskGraphics.x}`);
-    // console.log(`this.maskGraphics.y = ${this.maskGraphics.y}`);
-    // console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
-    // console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
-
-    this.initScrollEvents(); // スクロールイベントの初期化
+    this.initScrollEvents();
   }
 
   /**
@@ -133,7 +118,7 @@ export class CircuitFrame extends PIXI.Container {
     this.background.drawRect(0, 0, this.app.screen.width, height);
     this.background.endFill();
 
-    this.updateMask(height); // マスクの更新
+    this.updateMask(height);
   }
 
   /**
@@ -261,7 +246,6 @@ export class CircuitFrame extends PIXI.Container {
    * @param event - ホイールイベント
    */
   private handleScroll(event: WheelEvent): void {
-    // circuit の高さがフレームの高さより小さい場合はスクロールを禁止
     if (
       this.circuit.y + this.circuit.height + 128 <=
       this.maskGraphics.height
