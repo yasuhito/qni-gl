@@ -137,25 +137,42 @@ export class StateVectorFrame extends PIXI.Container {
    * @param event - ホイールイベント
    */
   private handleScroll(event: WheelEvent): void {
-    // stateVector の高さがフレームの高さより小さい場合はスクロールを禁止
-    if (this.stateVector.height <= this.maskGraphics.height) {
-      return;
+    // stateVector の高さがフレームの高さより小さい場合は縦スクロールを禁止
+    if (this.stateVector.height > this.maskGraphics.height) {
+      const deltaY = event.deltaY;
+      this.scrollContainer.y -= deltaY;
+
+      // 縦スクロール範囲の制限
+      if (this.scrollContainer.y > 0) {
+        this.scrollContainer.y = 0;
+      }
+
+      const maxScrollY =
+        this.stateVector.height + // 状態ベクトルの高さを取得
+        32 - // 固定の余白や追加の高さ
+        this.maskGraphics.height;
+      if (this.scrollContainer.y < -maxScrollY) {
+        this.scrollContainer.y = -maxScrollY;
+      }
     }
 
-    const deltaY = event.deltaY;
-    this.scrollContainer.y -= deltaY;
+    // stateVector の幅がフレームの幅より小さい場合は横スクロールを禁止
+    if (this.stateVector.width > this.maskGraphics.width) {
+      const deltaX = event.deltaX;
+      this.scrollContainer.x -= deltaX;
 
-    // スクロール範囲の制限
-    if (this.scrollContainer.y > 0) {
-      this.scrollContainer.y = 0;
-    }
+      // 横スクロール範囲の制限
+      if (this.scrollContainer.x > 0) {
+        this.scrollContainer.x = 0;
+      }
 
-    const maxScrollY =
-      this.stateVector.height + // 状態ベクトルの高さを取得
-      64 -
-      this.maskGraphics.height;
-    if (this.scrollContainer.y < -maxScrollY) {
-      this.scrollContainer.y = -maxScrollY;
+      const maxScrollX =
+        this.stateVector.width + // 状態ベクトルの幅を取得
+        32 - // 固定の余白や追加の幅
+        this.maskGraphics.width;
+      if (this.scrollContainer.x < -maxScrollX) {
+        this.scrollContainer.x = -maxScrollX;
+      }
     }
   }
 }
