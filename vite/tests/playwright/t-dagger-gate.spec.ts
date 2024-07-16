@@ -13,7 +13,7 @@ test.describe("T† gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    tDaggerGate = app.circuitFrame.gatePalette.gates.TDaggerGate;
+    tDaggerGate = app.gatePalette.gates.TDaggerGate;
 
     await idle.waitFor();
   });
