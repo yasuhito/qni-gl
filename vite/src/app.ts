@@ -11,6 +11,7 @@ import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
 import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
+import { GatePaletteComponent } from "./gate-palette-component";
 
 export class App {
   static elementId = "app";
@@ -28,7 +29,6 @@ export class App {
   grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
   circuitSteps: CircuitStepComponent[] = [];
-  stateVectorComponent: StateVectorComponent;
   nameMap = new Map();
 
   public static get instance(): App {
@@ -38,6 +38,18 @@ export class App {
 
     // 自身が持つインスタンスを返す
     return this._instance;
+  }
+
+  get gatePalette(): GatePaletteComponent {
+    return this.circuitFrame.gatePalette;
+  }
+
+  get circuit(): CircuitComponent {
+    return this.circuitFrame.circuit;
+  }
+
+  get stateVector(): StateVectorComponent {
+    return this.stateVectorFrame.stateVector;
   }
 
   constructor(elementId: string) {
@@ -148,11 +160,6 @@ export class App {
       this
     );
 
-    this.stateVectorComponent = new StateVectorComponent(
-      this.circuit.qubitCountInUse
-    );
-    this.stateVectorFrame.addChild(this.stateVectorComponent);
-
     this.updateStateVectorComponentPosition();
 
     // 回路の最初のステップをアクティブにする
@@ -160,15 +167,6 @@ export class App {
     this.circuit.stepAt(0).activate();
 
     this.nameMap.set(this.pixiApp.stage, "stage");
-
-    // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると
-    // シミュレータ呼び出しで遅くなるので、決め打ちで初期化しておく
-    if (this.stateVectorComponent.qubitCircles.length !== 2) {
-      throw new Error("qubitCircles.length !== 2");
-    }
-    this.stateVectorComponent.qubitCircles[0].probability = 100;
-    this.stateVectorComponent.qubitCircles[0].phase = 0;
-    this.stateVectorComponent.qubitCircles[1].probability = 0;
   }
 
   private gateDiscarded(gate: GateComponent) {
@@ -185,14 +183,13 @@ export class App {
   }
 
   private updateStateVectorComponentPosition() {
-    this.stateVectorComponent.x =
-      (this.screenWidth - this.stateVectorComponent.width) / 2;
-    this.stateVectorComponent.y =
-      this.stateVectorFrame.height / 2 - this.stateVectorComponent.height / 2;
+    this.stateVector.x = (this.screenWidth - this.stateVector.bodyWidth) / 2;
+    this.stateVector.y =
+      (this.stateVectorFrame.height - this.stateVector.bodyHeight) / 2;
   }
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
-    if (!this.stateVectorComponent) {
+    if (!this.stateVector) {
       return;
     }
 
@@ -225,7 +222,7 @@ export class App {
     for (const ket in amplitudes) {
       const c = amplitudes[ket];
       const amplifier = new Complex(c[0], c[1]);
-      const qubitCircle = this.stateVectorComponent.qubitCircles[ket];
+      const qubitCircle = this.stateVector.qubitCircles[ket];
 
       // FIXME: qubitCircle が undefined になることがある
       if (qubitCircle) {
@@ -318,7 +315,7 @@ export class App {
 
   toJSON() {
     return {
-      gatePalette: this.circuitFrame.gatePalette,
+      gatePalette: this.gatePalette,
       circuit: this.circuit || "",
     };
   }
@@ -410,7 +407,7 @@ export class App {
   }
 
   private updateStateVectorComponentQubitCount() {
-    this.stateVectorComponent.qubitCount = this.circuit.qubitCountInUse;
+    this.stateVector.qubitCount = this.circuit.qubitCountInUse;
   }
 
   private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
@@ -434,9 +431,5 @@ export class App {
       ),
       steps: this.circuit.serialize(),
     });
-  }
-
-  get circuit(): CircuitComponent {
-    return this.circuitFrame.circuit;
   }
 }
