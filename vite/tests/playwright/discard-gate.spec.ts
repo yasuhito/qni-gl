@@ -10,7 +10,7 @@ test.describe("Discard gates", () => {
     await page.goto("/");
 
     const app = await appData(page);
-    gatePalette = app.circuitFrame.gatePalette;
+    gatePalette = app.gatePalette;
     idle = page.locator('#app[data-state="idle"]');
   });
 
