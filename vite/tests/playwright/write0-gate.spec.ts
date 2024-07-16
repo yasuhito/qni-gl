@@ -13,7 +13,7 @@ test.describe("|0> gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    write0Gate = app.circuitFrame.gatePalette.gates.Write0Gate;
+    write0Gate = app.gatePalette.gates.Write0Gate;
 
     await idle.waitFor();
   });
