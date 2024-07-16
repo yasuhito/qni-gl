@@ -82,13 +82,17 @@ export class StateVectorFrame extends PIXI.Container {
   }
 
   private updateStateVectorPosition() {
-    // this.stateVector.x =
-    //   (this.app.screen.width - this.stateVector.bodyWidth) / 2;
-    // this.stateVector.y = (this.height - this.stateVector.bodyHeight) / 2;
-
-    this.scrollContainer.x =
-      (this.app.screen.width - this.stateVector.bodyWidth) / 2;
-    this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
+    if (
+      this.stateVector.width > this.app.screen.width ||
+      this.stateVector.height > this.height
+    ) {
+      this.scrollContainer.x = 0;
+      this.scrollContainer.y = 0;
+    } else {
+      this.scrollContainer.x =
+        (this.app.screen.width - this.stateVector.bodyWidth) / 2;
+      this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
+    }
   }
 
   private initBackground(height: number) {

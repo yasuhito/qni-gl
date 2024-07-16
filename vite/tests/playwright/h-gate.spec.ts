@@ -13,7 +13,7 @@ test.describe("H Gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    hGate = app.circuitFrame.gatePalette.gates.HGate;
+    hGate = app.gatePalette.gates.HGate;
 
     await idle.waitFor();
   });

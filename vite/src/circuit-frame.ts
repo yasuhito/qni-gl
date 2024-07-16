@@ -99,11 +99,6 @@ export class CircuitFrame extends PIXI.Container {
     this.addChild(this.maskGraphics);
     this.scrollContainer.mask = this.maskGraphics;
 
-    console.log(`this.height = ${this.height}`);
-    console.log(`this.width = ${this.width}`);
-    console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
-    console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
-
     this.initScrollEvents();
   }
 
