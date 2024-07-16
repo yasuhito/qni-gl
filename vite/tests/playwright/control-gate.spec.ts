@@ -13,7 +13,7 @@ test.describe("Control gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    controlGate = app.circuitFrame.gatePalette.gates.ControlGate;
+    controlGate = app.gatePalette.gates.ControlGate;
 
     await idle.waitFor();
   });

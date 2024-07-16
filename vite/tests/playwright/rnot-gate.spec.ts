@@ -13,7 +13,7 @@ test.describe("Rnot gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    rnotGate = app.circuitFrame.gatePalette.gates.RnotGate;
+    rnotGate = app.gatePalette.gates.RnotGate;
 
     await idle.waitFor();
   });

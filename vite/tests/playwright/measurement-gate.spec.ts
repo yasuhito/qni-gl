@@ -13,7 +13,7 @@ test.describe("Measurement gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    measurementGate = app.circuitFrame.gatePalette.gates.MeasurementGate;
+    measurementGate = app.gatePalette.gates.MeasurementGate;
 
     await idle.waitFor();
   });
