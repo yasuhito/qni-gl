@@ -5,11 +5,25 @@ import { Colors } from "./colors";
  * 量子回路フレームと状態ベクトルフレーム間のドラッグ可能な分割線を表すクラス。
  */
 export class FrameDivider extends PIXI.Graphics {
+  private static instance: FrameDivider | null = null;
+
   app: PIXI.Application;
   dragging = false;
   dragStartY = 0;
 
-  constructor(app: PIXI.Application, initialY: number) {
+  /**
+   * インスタンスを取得するメソッド
+   * @param app - PIXI アプリケーションインスタンス
+   * @param initialY - 初期 Y 座標
+   */
+  static getInstance(app: PIXI.Application, initialY: number): FrameDivider {
+    if (this.instance === null) {
+      this.instance = new FrameDivider(app, initialY);
+    }
+    return this.instance;
+  }
+
+  private constructor(app: PIXI.Application, initialY: number) {
     super();
 
     this.app = app;

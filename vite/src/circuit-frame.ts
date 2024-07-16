@@ -57,17 +57,26 @@ const PALETTE_SECOND_ROW_GATES = [
  * 量子回路の表示用フレームを表すクラス。
  */
 export class CircuitFrame extends PIXI.Container {
+  private static instance: CircuitFrame | null = null;
+
   readonly app: PIXI.Application;
   readonly background: PIXI.Graphics;
   readonly gatePalette: GatePaletteComponent;
   readonly circuit: CircuitComponent;
 
   /**
-   * コンストラクタ
+   * インスタンスを取得するメソッド
    * @param app - PIXI アプリケーションインスタンス
    * @param height - 初期のフレームの高さ
    */
-  constructor(app: PIXI.Application, height: number) {
+  static getInstance(app: PIXI.Application, height: number): CircuitFrame {
+    if (this.instance === null) {
+      this.instance = new CircuitFrame(app, height);
+    }
+    return this.instance;
+  }
+
+  private constructor(app: PIXI.Application, height: number) {
     super();
 
     this.app = app;

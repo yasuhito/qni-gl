@@ -6,6 +6,10 @@ import { QubitCircle } from "./qubit-circle";
 import { spacingInPx } from "./util";
 import { Size } from "./size";
 
+export const STATE_VECTOR_EVENTS = {
+  CHANGE: "state-vector:change",
+};
+
 /**
  * Represents a component that visualizes the state vector.
  * @noInheritDoc
@@ -56,6 +60,8 @@ export class StateVectorComponent extends Container {
 
     this.clear();
     this.draw();
+
+    this.emit(STATE_VECTOR_EVENTS.CHANGE, this.qubitCount);
   }
 
   get qubitCount() {

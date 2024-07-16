@@ -1,13 +1,30 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import { StateVectorComponent } from "./state-vector-component";
+import {
+  STATE_VECTOR_EVENTS,
+  StateVectorComponent,
+} from "./state-vector-component";
 
 export class StateVectorFrame extends PIXI.Container {
+  private static instance: StateVectorFrame | null = null;
+
   readonly app: PIXI.Application;
   readonly background: PIXI.Graphics;
   stateVector: StateVectorComponent;
 
-  constructor(app: PIXI.Application, height: number) {
+  /**
+   * インスタンスを取得するメソッド
+   * @param app - PIXI アプリケーションインスタンス
+   * @param height - 初期のフレームの高さ
+   */
+  static getInstance(app: PIXI.Application, height: number): StateVectorFrame {
+    if (this.instance === null) {
+      this.instance = new StateVectorFrame(app, height);
+    }
+    return this.instance;
+  }
+
+  private constructor(app: PIXI.Application, height: number) {
     super();
 
     this.app = app;
@@ -19,6 +36,8 @@ export class StateVectorFrame extends PIXI.Container {
 
     this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
     this.addChild(this.stateVector);
+
+    this.updateStateVectorPosition();
   }
 
   update(y: number, height: number) {
@@ -29,6 +48,14 @@ export class StateVectorFrame extends PIXI.Container {
     this.background.endFill();
 
     this.y = y;
+
+    this.updateStateVectorPosition();
+  }
+
+  private updateStateVectorPosition() {
+    this.stateVector.x =
+      (this.app.screen.width - this.stateVector.bodyWidth) / 2;
+    this.stateVector.y = (this.height - this.stateVector.bodyHeight) / 2;
   }
 
   private initBackground(height: number) {
@@ -47,5 +74,9 @@ export class StateVectorFrame extends PIXI.Container {
     this.stateVector.qubitCircles[0].probability = 100;
     this.stateVector.qubitCircles[0].phase = 0;
     this.stateVector.qubitCircles[1].probability = 0;
+
+    this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
+      this.updateStateVectorPosition();
+    });
   }
 }

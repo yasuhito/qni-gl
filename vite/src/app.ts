@@ -97,20 +97,20 @@ export class App {
     this.mainContainer.sortableChildren = true;
     this.pixiApp.stage.addChild(this.mainContainer);
 
-    this.circuitFrame = new CircuitFrame(
+    this.circuitFrame = CircuitFrame.getInstance(
       this.pixiApp,
       this.pixiApp.screen.height * 0.6
     );
     this.mainContainer.addChild(this.circuitFrame);
 
-    this.stateVectorFrame = new StateVectorFrame(
+    this.stateVectorFrame = StateVectorFrame.getInstance(
       this.pixiApp,
       this.pixiApp.screen.height * 0.4
     );
     this.mainContainer.addChild(this.stateVectorFrame);
 
     // 量子回路と状態ベクトルの境界線
-    this.frameDivider = new FrameDivider(
+    this.frameDivider = FrameDivider.getInstance(
       this.pixiApp,
       this.circuitFrame.height
     );
@@ -127,8 +127,6 @@ export class App {
         this.frameDivider.y + this.frameDivider.height,
         this.pixiApp.screen.height - this.frameDivider.y
       );
-      // 状態ベクトルの位置を更新
-      this.updateStateVectorComponentPosition();
     });
 
     this.circuitFrame.on(
@@ -160,8 +158,6 @@ export class App {
       this
     );
 
-    this.updateStateVectorComponentPosition();
-
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
     this.circuit.stepAt(0).activate();
@@ -178,14 +174,7 @@ export class App {
       this.circuit.stepAt(0).activate();
     }
     this.updateStateVectorComponentQubitCount();
-    this.updateStateVectorComponentPosition();
     this.runSimulator();
-  }
-
-  private updateStateVectorComponentPosition() {
-    this.stateVector.x = (this.screenWidth - this.stateVector.bodyWidth) / 2;
-    this.stateVector.y =
-      (this.stateVectorFrame.height - this.stateVector.bodyHeight) / 2;
   }
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
@@ -281,8 +270,6 @@ export class App {
     // TODO: メソッドに切り出す
     this.element.dataset.app = JSON.stringify(this);
     this.updateStateVectorComponentQubitCount();
-    this.updateStateVectorComponentPosition();
-    // this.runSimulator();
 
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
@@ -360,8 +347,6 @@ export class App {
     ) {
       gate.snap(snapDropzone);
       this.updateStateVectorComponentQubitCount();
-      this.updateStateVectorComponentPosition();
-      // this.runSimulator();
     }
 
     if (gate.dropzone && !snapDropzone) {
@@ -397,8 +382,6 @@ export class App {
     this.circuit.update();
 
     this.updateStateVectorComponentQubitCount();
-    this.updateStateVectorComponentPosition();
-
     this.runSimulator();
   }
 
