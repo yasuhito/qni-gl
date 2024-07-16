@@ -247,7 +247,7 @@ export class CircuitComponent extends Container {
     });
 
     // デバッグ
-    console.log(this.toString());
+    // console.log(this.toString());
   }
 
   private isLastWireUnused() {

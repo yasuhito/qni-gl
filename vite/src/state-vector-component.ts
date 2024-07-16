@@ -1,6 +1,5 @@
 import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
-import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
 import { spacingInPx } from "./util";
@@ -109,7 +108,6 @@ export class StateVectorComponent extends Container {
 
   private draw() {
     this.drawQubitCircles();
-    this.drawBody();
   }
 
   private clear() {
@@ -121,23 +119,13 @@ export class StateVectorComponent extends Container {
     this.qubitCirclesGridContainer.removeChildren();
   }
 
-  private drawBody() {
-    this.body.filters = [
-      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
-      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
-    ];
-  }
-
   private drawQubitCircles() {
-    this.qubitCircles.forEach((child) => {
-      child.destroy();
-    });
-
     for (let i = 0; i < this.qubitCircleCount; i++) {
       this.qubitCirclesGridContainer.addChild(
         new QubitCircle(0, 0, this.qubitCircleSize)
       );
     }
+
     this.qubitCirclesGridContainer.arrangeChildren();
   }
 }

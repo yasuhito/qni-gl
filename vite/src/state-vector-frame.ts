@@ -4,6 +4,7 @@ import {
   STATE_VECTOR_EVENTS,
   StateVectorComponent,
 } from "./state-vector-component";
+import { throttle } from "lodash";
 
 export class StateVectorFrame extends PIXI.Container {
   private static instance: StateVectorFrame | null = null;
@@ -13,6 +14,7 @@ export class StateVectorFrame extends PIXI.Container {
   readonly stateVector: StateVectorComponent;
   private maskGraphics: PIXI.Graphics; // マスク用のグラフィックを追加
   private scrollContainer: PIXI.Container; // スクロール用のコンテナを追加
+  private lastScrollTime = 0; // 最後のスクロールイベントの時間
 
   /**
    * インスタンスを取得するメソッド
@@ -118,7 +120,7 @@ export class StateVectorFrame extends PIXI.Container {
    */
   private initScrollEvents(): void {
     this.interactive = true;
-    this.on("wheel", this.handleScroll, this);
+    this.on("wheel", throttle(this.handleScroll, 100), this);
   }
 
   /**
@@ -151,6 +153,7 @@ export class StateVectorFrame extends PIXI.Container {
         this.stateVector.height + // 状態ベクトルの高さを取得
         32 - // 固定の余白や追加の高さ
         this.maskGraphics.height;
+
       if (this.scrollContainer.y < -maxScrollY) {
         this.scrollContainer.y = -maxScrollY;
       }
