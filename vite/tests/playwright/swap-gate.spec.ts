@@ -13,7 +13,7 @@ test.describe("Swap gate", () => {
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    swapGate = app.circuitFrame.gatePalette.gates.SwapGate;
+    swapGate = app.gatePalette.gates.SwapGate;
 
     await idle.waitFor();
   });
