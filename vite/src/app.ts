@@ -27,14 +27,9 @@ export class App {
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
   pixiApp: PIXI.Application<HTMLCanvasElement>;
-  circuit: CircuitComponent;
   circuitSteps: CircuitStepComponent[] = [];
   stateVectorComponent: StateVectorComponent;
   nameMap = new Map();
-  // 各ゲートを回路などよりも全面に表示するためのレイヤー
-  // gateLayer = new Layer();
-  // ドラッグ中のゲートを最前面に表示するためのレイヤー
-  // draggingGateLayer = new Layer();
 
   public static get instance(): App {
     if (!this._instance) {
@@ -135,22 +130,23 @@ export class App {
       this
     );
     this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_GATE_DISCARDED,
+      CIRCUIT_FRAME_EVENTS.DISCARD_PALETTE_GATE,
       this.gateDiscarded,
       this
     );
 
-    this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    this.circuit.x = this.circuitFrame.gatePalette.x;
-    this.circuit.y = 64 + this.circuitFrame.gatePalette.height + 64;
-    this.circuitFrame.addChild(this.circuit);
-    // this.pixiApp.stage.addChild(this.circuit);
     this.element.dataset.app = JSON.stringify(this);
 
-    // this.circuit.on("stepHover", this.runSimulator, this);
-    this.circuit.on("stepActivated", this.runSimulator, this);
-    // this.circuit.on("gateSnapToDropzone", this.runSimulator, this);
-    this.circuit.on("grabGate", this.grabGate, this);
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.ACTIVATE_CIRCUIT_STEP,
+      this.runSimulator,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE,
+      this.grabGate,
+      this
+    );
 
     this.stateVectorComponent = new StateVectorComponent(
       this.circuit.qubitCountInUse
@@ -438,5 +434,9 @@ export class App {
       ),
       steps: this.circuit.serialize(),
     });
+  }
+
+  get circuit(): CircuitComponent {
+    return this.circuitFrame.circuit;
   }
 }

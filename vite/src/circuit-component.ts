@@ -11,6 +11,11 @@ export interface CircuitOptions {
   stepCount: number;
 }
 
+export const CIRCUIT_EVENTS = {
+  GRAB_GATE: "circuit:grab-gate",
+  ACTIVATE_STEP: "circuit:activate-step",
+};
+
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
  *
@@ -114,7 +119,7 @@ export class CircuitComponent extends Container {
       this
     );
     circuitStep.on("grabGate", (gate, globalPosition) => {
-      this.emit("grabGate", gate, globalPosition);
+      this.emit(CIRCUIT_EVENTS.GRAB_GATE, gate, globalPosition);
     });
   }
 
@@ -314,6 +319,6 @@ export class CircuitComponent extends Container {
       }
     });
 
-    this.emit("stepActivated", this, circuitStep);
+    this.emit(CIRCUIT_EVENTS.ACTIVATE_STEP, circuitStep);
   }
 }
