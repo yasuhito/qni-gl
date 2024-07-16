@@ -35,12 +35,13 @@ self.addEventListener("message", (event) => {
       console.log("Sending request to backend with the following parameters:");
       console.dir(Object.fromEntries(params.entries()));
 
-      const response = await fetch(
-        `http://localhost:8000/backend.json?${params}`,
-        {
-          method: "GET",
-        }
-      );
+      const response = await fetch(`http://localhost:8000/backend.json`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded", // URLSearchParams を使用する場合
+        },
+        body: params.toString(), // パラメータをボディに設定
+      });
 
       if (!response.ok) {
         if (response.status === 502) {

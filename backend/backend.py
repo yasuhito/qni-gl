@@ -40,13 +40,13 @@ def setup_logger():
 setup_logger()
 
 
-@app.route('/backend.json', methods=["GET"])
+@app.route('/backend.json', methods=["POST"])
 def backend():
-    id = request.args.get('id')
-    qubit_count = int(request.args.get('qubitCount'))
-    step_index = int(request.args.get('stepIndex'))
-    targets = request.args.get('targets')
-    steps = json.loads(request.args.get('steps'))
+    id = request.form.get('id')
+    qubit_count = int(request.form.get('qubitCount'))
+    step_index = int(request.form.get('stepIndex'))
+    targets = request.form.get('targets')
+    steps = json.loads(request.form.get('steps'))
 
     app.logger.debug("circuit_id = %s", id)
     app.logger.debug("qubit_count = %d", qubit_count)
