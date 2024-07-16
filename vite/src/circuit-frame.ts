@@ -91,8 +91,6 @@ export class CircuitFrame extends PIXI.Container {
     this.initBackground(height);
     this.initGatePalette();
     this.initCircuit();
-    this.scrollContainer.y = 0; // スクロールコンテナの初期位置を設定
-    this.scrollContainer.height = height;
 
     this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
     this.addChild(this.scrollContainer); // スクロール用コンテナを追加
@@ -100,6 +98,26 @@ export class CircuitFrame extends PIXI.Container {
     this.scrollContainer.addChild(this.circuit); // 回路をスクロールコンテナに追加
     this.addChild(this.maskGraphics); // マスク用グラフィックを追加
     this.scrollContainer.mask = this.maskGraphics; // マスクを設定
+
+    // console.log(`this.scrollContainer.x = ${this.scrollContainer.x}`);
+    // console.log(`this.scrollContainer.y = ${this.scrollContainer.y}`);
+    // console.log(`this.scrollContainer.width = ${this.scrollContainer.width}`);
+    // console.log(`this.scrollContainer.height = ${this.scrollContainer.height}`);
+
+    // console.log(`this.gatePalette.x = ${this.gatePalette.x}`);
+    // console.log(`this.gatePalette.y = ${this.gatePalette.y}`);
+    // console.log(`this.gatePalette.width = ${this.gatePalette.width}`);
+    // console.log(`this.gatePalette.height = ${this.gatePalette.height}`);
+
+    // console.log(`this.circuit.x = ${this.circuit.x}`);
+    // console.log(`this.circuit.y = ${this.circuit.y}`);
+    // console.log(`this.circuit.width = ${this.circuit.width}`);
+    // console.log(`this.circuit.height = ${this.circuit.height}`);
+
+    // console.log(`this.maskGraphics.x = ${this.maskGraphics.x}`);
+    // console.log(`this.maskGraphics.y = ${this.maskGraphics.y}`);
+    // console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
+    // console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
 
     this.initScrollEvents(); // スクロールイベントの初期化
   }
@@ -243,6 +261,14 @@ export class CircuitFrame extends PIXI.Container {
    * @param event - ホイールイベント
    */
   private handleScroll(event: WheelEvent): void {
+    // circuit の高さがフレームの高さより小さい場合はスクロールを禁止
+    if (
+      this.circuit.y + this.circuit.height + 128 <=
+      this.maskGraphics.height
+    ) {
+      return;
+    }
+
     const deltaY = event.deltaY;
     this.scrollContainer.y -= deltaY;
 

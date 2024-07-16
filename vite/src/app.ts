@@ -53,6 +53,14 @@ export class App {
   }
 
   constructor(elementId: string) {
+    window.addEventListener(
+      "wheel",
+      (event) => {
+        event.preventDefault();
+      },
+      { passive: false }
+    );
+
     const el = document.getElementById(elementId);
     if (el === null) {
       throw new Error("Could not find #app");

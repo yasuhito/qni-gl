@@ -10,7 +10,9 @@ export class StateVectorFrame extends PIXI.Container {
 
   readonly app: PIXI.Application;
   readonly background: PIXI.Graphics;
-  stateVector: StateVectorComponent;
+  readonly stateVector: StateVectorComponent;
+  private maskGraphics: PIXI.Graphics; // マスク用のグラフィックを追加
+  private scrollContainer: PIXI.Container; // スクロール用のコンテナを追加
 
   /**
    * インスタンスを取得するメソッド
@@ -30,12 +32,36 @@ export class StateVectorFrame extends PIXI.Container {
     this.app = app;
     this.background = new PIXI.Graphics();
     this.stateVector = new StateVectorComponent(1);
+    this.maskGraphics = new PIXI.Graphics(); // マスク用のグラフィックを初期化
+    this.scrollContainer = new PIXI.Container(); // スクロール用のコンテナを初期化
 
     this.initBackground(height);
     this.initStateVector();
 
+    this.scrollContainer.y = 0; // スクロールコンテナの初期位置を設定
+
     this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
-    this.addChild(this.stateVector);
+    this.addChild(this.scrollContainer); // スクロール用コンテナを追加
+    this.scrollContainer.addChild(this.stateVector); // 状態ベクトルをスクロールコンテナに追加
+    this.addChild(this.maskGraphics); // マスク用グラフィックを追加
+    this.scrollContainer.mask = this.maskGraphics; // マスクを設定
+
+    // console.log(`this.scrollContainer.x = ${this.scrollContainer.x}`);
+    // console.log(`this.scrollContainer.y = ${this.scrollContainer.y}`);
+    // console.log(`this.scrollContainer.width = ${this.scrollContainer.width}`);
+    // console.log(`this.scrollContainer.height = ${this.scrollContainer.height}`);
+
+    // console.log(`this.stateVector.x = ${this.stateVector.x}`);
+    // console.log(`this.stateVector.y = ${this.stateVector.y}`);
+    // console.log(`this.stateVector.width = ${this.stateVector.width}`);
+    // console.log(`this.stateVector.height = ${this.stateVector.height}`);
+
+    // console.log(`this.maskGraphics.x = ${this.maskGraphics.x}`);
+    // console.log(`this.maskGraphics.y = ${this.maskGraphics.y}`);
+    // console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
+    // console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
+
+    this.initScrollEvents(); // スクロールイベントの初期化
 
     this.updateStateVectorPosition();
   }
@@ -50,18 +76,25 @@ export class StateVectorFrame extends PIXI.Container {
     this.y = y;
 
     this.updateStateVectorPosition();
+    this.updateMask(height);
   }
 
   private updateStateVectorPosition() {
-    this.stateVector.x =
+    // this.stateVector.x =
+    //   (this.app.screen.width - this.stateVector.bodyWidth) / 2;
+    // this.stateVector.y = (this.height - this.stateVector.bodyHeight) / 2;
+
+    this.scrollContainer.x =
       (this.app.screen.width - this.stateVector.bodyWidth) / 2;
-    this.stateVector.y = (this.height - this.stateVector.bodyHeight) / 2;
+    this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
   }
 
   private initBackground(height: number) {
     this.background.beginFill(Colors["bg-component"]);
     this.background.drawRect(0, 0, this.app.screen.width, height);
     this.background.endFill();
+
+    this.updateMask(height);
   }
 
   private initStateVector() {
@@ -78,5 +111,51 @@ export class StateVectorFrame extends PIXI.Container {
     this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
       this.updateStateVectorPosition();
     });
+  }
+
+  /**
+   * スクロールイベントの初期化
+   */
+  private initScrollEvents(): void {
+    this.interactive = true;
+    this.on("wheel", this.handleScroll, this);
+  }
+
+  /**
+   * マスクの更新
+   * @param height - 新しいマスクの高さ
+   */
+  private updateMask(height: number): void {
+    this.maskGraphics.clear();
+    this.maskGraphics.beginFill(0xffffff);
+    this.maskGraphics.drawRect(0, 0, this.app.screen.width, height);
+    this.maskGraphics.endFill();
+  }
+
+  /**
+   * スクロール処理
+   * @param event - ホイールイベント
+   */
+  private handleScroll(event: WheelEvent): void {
+    // stateVector の高さがフレームの高さより小さい場合はスクロールを禁止
+    if (this.stateVector.height <= this.maskGraphics.height) {
+      return;
+    }
+
+    const deltaY = event.deltaY;
+    this.scrollContainer.y -= deltaY;
+
+    // スクロール範囲の制限
+    if (this.scrollContainer.y > 0) {
+      this.scrollContainer.y = 0;
+    }
+
+    const maxScrollY =
+      this.stateVector.height + // 状態ベクトルの高さを取得
+      64 -
+      this.maskGraphics.height;
+    if (this.scrollContainer.y < -maxScrollY) {
+      this.scrollContainer.y = -maxScrollY;
+    }
   }
 }
