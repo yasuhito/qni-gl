@@ -21,7 +21,10 @@ test.describe("Swap gate", () => {
   test("Place a Swap gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -33,7 +36,10 @@ test.describe("Swap gate", () => {
   test("Place a Swap gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -43,7 +49,10 @@ test.describe("Swap gate", () => {
   });
 
   test("Place a Swap gate on the third bit", async ({ page }) => {
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
 
     app = await appData(page);
@@ -60,12 +69,18 @@ test.describe("Swap gate", () => {
     const dropzoneBit0 = app.circuit.steps[0].dropzones[0];
     const dropzoneBit1 = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzoneBit0.x, dropzoneBit0.y);
     await page.mouse.up();
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzoneBit1.x, dropzoneBit1.y);
     await page.mouse.up();
@@ -79,17 +94,26 @@ test.describe("Swap gate", () => {
     const dropzoneBit0 = app.circuit.steps[0].dropzones[0];
     const dropzoneBit1 = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzoneBit0.x, dropzoneBit0.y);
     await page.mouse.up();
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzoneBit1.x, dropzoneBit1.y);
     await page.mouse.up();
 
-    await page.mouse.move(centerPosition(swapGate).x, centerPosition(swapGate).y);
+    await page.mouse.move(
+      centerPosition(swapGate).x,
+      centerPosition(swapGate).y
+    );
     await page.mouse.down();
     app = await appData(page);
     const dropzoneBit2 = app.circuit.steps[0].dropzones[2];

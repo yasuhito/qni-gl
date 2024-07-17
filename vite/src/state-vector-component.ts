@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
 import { Container } from "pixi.js";
-import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
-import { Spacing } from "./spacing";
 import { spacingInPx } from "./util";
 import { Size } from "./size";
+
+export const STATE_VECTOR_EVENTS = {
+  CHANGE: "state-vector:change",
+};
 
 /**
  * Represents a component that visualizes the state vector.
@@ -58,6 +59,8 @@ export class StateVectorComponent extends Container {
 
     this.clear();
     this.draw();
+
+    this.emit(STATE_VECTOR_EVENTS.CHANGE, this.qubitCount);
   }
 
   get qubitCount() {
@@ -72,14 +75,14 @@ export class StateVectorComponent extends Container {
     return this.qubitCirclesGridContainer.children as Array<QubitCircle>;
   }
 
-  private get bodyWidth() {
+  get bodyWidth() {
     return (
       this.qubitCirclesGridContainer.width +
       this.qubitCirclesGridContainer.horPadding * 2
     );
   }
 
-  private get bodyHeight() {
+  get bodyHeight() {
     return (
       this.qubitCirclesGridContainer.height +
       this.qubitCirclesGridContainer.vertPadding * 2
@@ -105,7 +108,6 @@ export class StateVectorComponent extends Container {
 
   private draw() {
     this.drawQubitCircles();
-    this.drawBody();
   }
 
   private clear() {
@@ -117,34 +119,13 @@ export class StateVectorComponent extends Container {
     this.qubitCirclesGridContainer.removeChildren();
   }
 
-  private drawBody() {
-    this.body.lineStyle(1, Colors["border-component"], 1, 0);
-    this.body.beginFill(Colors["bg-component"]);
-    this.body.drawRoundedRect(
-      0,
-      0,
-      this.bodyWidth,
-      this.bodyHeight,
-      Spacing.cornerRadius.stateVector
-    );
-    this.body.endFill();
-
-    this.body.filters = [
-      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
-      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
-    ];
-  }
-
   private drawQubitCircles() {
-    this.qubitCircles.forEach((child) => {
-      child.destroy();
-    });
-
     for (let i = 0; i < this.qubitCircleCount; i++) {
       this.qubitCirclesGridContainer.addChild(
         new QubitCircle(0, 0, this.qubitCircleSize)
       );
     }
+
     this.qubitCirclesGridContainer.arrangeChildren();
   }
 }

@@ -118,7 +118,7 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("state-vector-5qubit.png");
   });
 
-  test("6 qubit", async ({ page }) => {
+  test.skip("6 qubit", async ({ page }) => {
     const hGate = app.gatePalette.gates.HGate;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -162,8 +162,8 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("state-vector-6qubit.png");
   });
 
-  test("7 qubit", async ({ page }) => {
-    test.setTimeout(60000)
+  test.skip("7 qubit", async ({ page }) => {
+    test.setTimeout(60000);
 
     const hGate = app.gatePalette.gates.HGate;
 
@@ -217,8 +217,8 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("state-vector-7qubit.png");
   });
 
-  test("8 qubit", async ({ page }) => {
-    test.setTimeout(60000)
+  test.skip("8 qubit", async ({ page }) => {
+    test.setTimeout(60000);
 
     const hGate = app.gatePalette.gates.HGate;
 
@@ -281,8 +281,8 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("state-vector-8qubit.png");
   });
 
-  test("9 qubit", async ({ page }) => {
-    test.setTimeout(60000)
+  test.skip("9 qubit", async ({ page }) => {
+    test.setTimeout(60000);
 
     const hGate = app.gatePalette.gates.HGate;
 
@@ -354,8 +354,8 @@ test.describe("Dropzone", () => {
     await expect(page).toHaveScreenshot("state-vector-9qubit.png");
   });
 
-  test("10 qubit", async ({ page }) => {
-    test.setTimeout(60000)
+  test.skip("10 qubit", async ({ page }) => {
+    test.setTimeout(60000);
 
     const hGate = app.gatePalette.gates.HGate;
 

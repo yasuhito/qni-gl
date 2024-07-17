@@ -21,7 +21,10 @@ test.describe("|0> gate", () => {
   test("Place a |0> gate on the first bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[0];
 
-    await page.mouse.move(centerPosition(write0Gate).x, centerPosition(write0Gate).y);
+    await page.mouse.move(
+      centerPosition(write0Gate).x,
+      centerPosition(write0Gate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -33,7 +36,10 @@ test.describe("|0> gate", () => {
   test("Place a |0> gate on the second bit", async ({ page }) => {
     const dropzone = app.circuit.steps[0].dropzones[1];
 
-    await page.mouse.move(centerPosition(write0Gate).x, centerPosition(write0Gate).y);
+    await page.mouse.move(
+      centerPosition(write0Gate).x,
+      centerPosition(write0Gate).y
+    );
     await page.mouse.down();
     await page.mouse.move(dropzone.x, dropzone.y);
     await page.mouse.up();
@@ -43,7 +49,10 @@ test.describe("|0> gate", () => {
   });
 
   test("Place a |0> gate on the third bit", async ({ page }) => {
-    await page.mouse.move(centerPosition(write0Gate).x, centerPosition(write0Gate).y);
+    await page.mouse.move(
+      centerPosition(write0Gate).x,
+      centerPosition(write0Gate).y
+    );
     await page.mouse.down();
 
     app = await appData(page);

@@ -56,7 +56,7 @@ test.describe("Z gate", () => {
     await expect(page).toHaveScreenshot("z-gate-bit3.png");
   });
 
-  test("Apply a Z-gate to state |1>.", async ({ page  }) => {
+  test("Apply a Z-gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
     const xGate = app.gatePalette.gates.XGate;
 
@@ -74,10 +74,10 @@ test.describe("Z gate", () => {
     await page.mouse.up();
     await idle.waitFor();
 
-    const step1 = app.circuit.steps[1]
+    const step1 = app.circuit.steps[1];
     await page.mouse.click(step1.x, step1.y);
     await idle.waitFor();
 
     await expect(page).toHaveScreenshot("z-gate-state-|1>.png");
-  })
+  });
 });

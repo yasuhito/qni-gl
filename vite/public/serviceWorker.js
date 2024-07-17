@@ -10043,8 +10043,12 @@ Args: ${i}`;throw new Error(n)}}static notNull(c){D.need(c!=null,"notNull");}sta
                             });
                             console.log("Sending request to backend with the following parameters:");
                             console.dir(Object.fromEntries(params.entries()));
-                            return [4 /*yield*/, fetch("http://localhost:8000/backend.json?".concat(params), {
-                                    method: "GET",
+                            return [4 /*yield*/, fetch("http://localhost:8000/backend.json", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/x-www-form-urlencoded", // URLSearchParams を使用する場合
+                                    },
+                                    body: params.toString(), // パラメータをボディに設定
                                 })];
                         case 1:
                             response = _a.sent();

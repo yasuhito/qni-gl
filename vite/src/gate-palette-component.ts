@@ -7,6 +7,12 @@ import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
 
+export const GATE_PALETTE_EVENTS = {
+  GRAB_GATE: "gate-palette:grab-gate",
+  MOUSE_LEAVE_GATE: "gate-palette:mouse-leave-gate",
+  GATE_DISCARDED: "gate-palette:gate-discarded",
+};
+
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。
  * @noInheritDoc
@@ -64,14 +70,14 @@ export class GatePaletteComponent extends Container {
     const gate = gateSource.generateNewGate();
 
     gateSource.on("grabGate", (gate, globalPosition) => {
-      this.emit("grabGate", gate, globalPosition);
+      this.emit("gate-palette:grab-gate", gate, globalPosition);
     });
     gateSource.on("mouseLeaveGate", (gate) => {
-      this.emit("mouseLeaveGate", gate);
+      this.emit("gate-palette:mouse-leave-gate", gate);
     });
     gateSource.on("gateDiscarded", (gate) => {
       this.gates[gate.gateType()] = null;
-      this.emit("gateDiscarded", gate);
+      this.emit("gate-palette:gate-discarded", gate);
     });
 
     this.gates[gate.gateType()] = gate;

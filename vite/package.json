@@ -44,6 +44,7 @@
     "@pixi/sprite": "^7.4.2",
     "@pixi/ui": "~0.10",
     "@qni/simulator": "^0.0.86",
+    "lodash": "^4.17.21",
     "pixi.js": "^7.2.4",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.4.5",
