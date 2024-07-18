@@ -112,7 +112,7 @@ export class App {
     this.mainContainer.addChild(this.circuitFrame);
 
     this.stateVectorFrame = StateVectorFrame.getInstance(
-      this.pixiApp,
+      this.pixiApp.screen.width,
       this.pixiApp.screen.height * 0.4
     );
     this.mainContainer.addChild(this.stateVectorFrame);
@@ -124,9 +124,6 @@ export class App {
     );
     this.pixiApp.stage.addChild(this.frameDivider);
 
-    console.log(`this.frameDivider.y = ${this.frameDivider.y}`);
-    console.log(`this.frameDivider.width = ${this.frameDivider.width}`);
-
     this.pixiApp.stage.on("pointermove", (event) => {
       if (!this.frameDivider.dragging) return;
 
@@ -134,8 +131,9 @@ export class App {
 
       // 上下フレームの更新
       this.circuitFrame.resize(this.frameDivider.y);
-      this.stateVectorFrame.update(
+      this.stateVectorFrame.repositionAndResize(
         this.frameDivider.y + this.frameDivider.height,
+        this.pixiApp.screen.width,
         this.pixiApp.screen.height - this.frameDivider.y
       );
     });
@@ -250,7 +248,15 @@ export class App {
   resize() {
     const width = window.innerWidth;
     const height = window.innerHeight;
+
     this.pixiApp.renderer.resize(width, height);
+    if (this.stateVectorFrame) {
+      this.stateVectorFrame.repositionAndResize(
+        this.frameDivider.y + this.frameDivider.height,
+        this.pixiApp.screen.width,
+        this.pixiApp.screen.height - this.frameDivider.y
+      );
+    }
   }
 
   private grabGate(gate: GateComponent, pointerPosition: PIXI.Point) {

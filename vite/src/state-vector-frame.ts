@@ -5,181 +5,207 @@ import {
   StateVectorComponent,
 } from "./state-vector-component";
 import { throttle } from "lodash";
+import { Spacing } from "./spacing";
 
+/**
+ * スクロール機能つきフレーム。状態ベクトルを表示する。
+ */
 export class StateVectorFrame extends PIXI.Container {
   private static instance: StateVectorFrame | null = null;
+  private static readonly PADDING_MULTIPLIER: number = 2;
 
-  readonly app: PIXI.Application;
-  readonly background: PIXI.Graphics;
   readonly stateVector: StateVectorComponent;
-  private maskGraphics: PIXI.Graphics; // マスク用のグラフィックを追加
-  private scrollContainer: PIXI.Container; // スクロール用のコンテナを追加
-  private lastScrollTime = 0; // 最後のスクロールイベントの時間
+
+  private frameWidth: number;
+  private frameHeight: number;
+  private readonly background: PIXI.Graphics;
+  private maskGraphics: PIXI.Graphics;
+  private scrollContainer: PIXI.Container;
 
   /**
-   * インスタンスを取得するメソッド
-   * @param app - PIXI アプリケーションインスタンス
-   * @param height - 初期のフレームの高さ
+   * インスタンスを取得
    */
-  static getInstance(app: PIXI.Application, height: number): StateVectorFrame {
+  static getInstance(width: number, height: number): StateVectorFrame {
     if (this.instance === null) {
-      this.instance = new StateVectorFrame(app, height);
+      this.instance = new StateVectorFrame(width, height);
     }
     return this.instance;
   }
 
-  private constructor(app: PIXI.Application, height: number) {
+  private constructor(width: number, height: number) {
     super();
 
-    this.app = app;
+    this.frameWidth = width;
+    this.frameHeight = height;
     this.background = new PIXI.Graphics();
     this.stateVector = new StateVectorComponent(1);
-    this.maskGraphics = new PIXI.Graphics(); // マスク用のグラフィックを初期化
-    this.scrollContainer = new PIXI.Container(); // スクロール用のコンテナを初期化
+    this.maskGraphics = new PIXI.Graphics();
+    this.scrollContainer = new PIXI.Container();
 
-    this.initBackground(height);
+    this.initializeBackground();
+    this.updateMask();
     this.initStateVector();
 
-    this.scrollContainer.y = 0; // スクロールコンテナの初期位置を設定
-
-    this.addChildAt(this.background, 0); // 背景を一番下のレイヤーに追加
-    this.addChild(this.scrollContainer); // スクロール用コンテナを追加
-    this.scrollContainer.addChild(this.stateVector); // 状態ベクトルをスクロールコンテナに追加
-    this.addChild(this.maskGraphics); // マスク用グラフィックを追加
-    this.scrollContainer.mask = this.maskGraphics; // マスクを設定
-
-    // console.log(`this.scrollContainer.x = ${this.scrollContainer.x}`);
-    // console.log(`this.scrollContainer.y = ${this.scrollContainer.y}`);
-    // console.log(`this.scrollContainer.width = ${this.scrollContainer.width}`);
-    // console.log(`this.scrollContainer.height = ${this.scrollContainer.height}`);
-
-    // console.log(`this.stateVector.x = ${this.stateVector.x}`);
-    // console.log(`this.stateVector.y = ${this.stateVector.y}`);
-    // console.log(`this.stateVector.width = ${this.stateVector.width}`);
-    // console.log(`this.stateVector.height = ${this.stateVector.height}`);
-
-    // console.log(`this.maskGraphics.x = ${this.maskGraphics.x}`);
-    // console.log(`this.maskGraphics.y = ${this.maskGraphics.y}`);
-    // console.log(`this.maskGraphics.width = ${this.maskGraphics.width}`);
-    // console.log(`this.maskGraphics.height = ${this.maskGraphics.height}`);
-
-    this.initScrollEvents(); // スクロールイベントの初期化
+    this.addChildAt(this.background, 0);
+    this.addChild(this.scrollContainer);
+    this.scrollContainer.addChild(this.stateVector);
+    this.addChild(this.maskGraphics);
+    this.scrollContainer.mask = this.maskGraphics;
 
     this.updateStateVectorPosition();
+    this.initializeScrollEvents();
   }
 
-  update(y: number, height: number) {
-    this.background.clear();
-
+  private initializeBackground() {
     this.background.beginFill(Colors["bg-component"]);
-    this.background.drawRect(0, 0, this.app.screen.width, height);
+    this.background.drawRect(0, 0, this.frameWidth, this.frameHeight);
     this.background.endFill();
-
-    this.y = y;
-
-    this.updateStateVectorPosition();
-    this.updateMask(height);
   }
 
-  private updateStateVectorPosition() {
-    if (
-      this.stateVector.width > this.app.screen.width ||
-      this.stateVector.height > this.height
-    ) {
-      this.scrollContainer.x = 0;
-      this.scrollContainer.y = 0;
-    } else {
-      this.scrollContainer.x =
-        (this.app.screen.width - this.stateVector.bodyWidth) / 2;
-      this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
-    }
-  }
-
-  private initBackground(height: number) {
-    this.background.beginFill(Colors["bg-component"]);
-    this.background.drawRect(0, 0, this.app.screen.width, height);
-    this.background.endFill();
-
-    this.updateMask(height);
+  private updateMask(): void {
+    this.maskGraphics.clear();
+    this.maskGraphics.beginFill(0xffffff);
+    this.maskGraphics.drawRect(0, 0, this.frameWidth, this.frameHeight);
+    this.maskGraphics.endFill();
   }
 
   private initStateVector() {
-    // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると
-    // シミュレータ呼び出しで遅くなるので、決め打ちで初期化しておく
-    if (this.stateVector.qubitCircles.length !== 2) {
-      throw new Error("qubitCircles.length !== 2");
-    }
-
-    this.stateVector.qubitCircles[0].probability = 100;
-    this.stateVector.qubitCircles[0].phase = 0;
-    this.stateVector.qubitCircles[1].probability = 0;
-
     this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
       this.updateStateVectorPosition();
     });
   }
 
   /**
-   * スクロールイベントの初期化
+   * 状態ベクトルの位置とサイズを更新する
    */
-  private initScrollEvents(): void {
-    this.interactive = true;
-    this.on("wheel", throttle(this.handleScroll, 100), this);
+  repositionAndResize(y: number, width: number, height: number) {
+    this.y = y;
+    this.frameWidth = width;
+    this.frameHeight = height;
+
+    this.background.clear();
+    this.background.beginFill(Colors["bg-component"]);
+    this.background.drawRect(0, 0, this.frameWidth, this.frameHeight);
+    this.background.endFill();
+
+    this.updateStateVectorPosition();
+    this.updateMask();
+  }
+
+  private updateStateVectorPosition() {
+    if (
+      this.stateVector.width > this.width ||
+      this.stateVector.height > this.height
+    ) {
+      this.scrollContainer.x = 0;
+      this.scrollContainer.y = 0;
+    } else {
+      this.scrollContainer.x = (this.width - this.stateVector.bodyWidth) / 2;
+      this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
+    }
   }
 
   /**
-   * マスクの更新
-   * @param height - 新しいマスクの高さ
+   * スクロールイベントの初期化
    */
-  private updateMask(height: number): void {
-    this.maskGraphics.clear();
-    this.maskGraphics.beginFill(0xffffff);
-    this.maskGraphics.drawRect(0, 0, this.app.screen.width, height);
-    this.maskGraphics.endFill();
+  private initializeScrollEvents(): void {
+    this.interactive = true;
+    this.on("wheel", throttle(this.adjustScrollPosition, 100), this);
   }
 
   /**
    * スクロール処理
-   * @param event - ホイールイベント
    */
-  private handleScroll(event: WheelEvent): void {
-    // stateVector の高さがフレームの高さより小さい場合は縦スクロールを禁止
-    if (this.stateVector.height > this.maskGraphics.height) {
-      const deltaY = event.deltaY;
-      this.scrollContainer.y -= deltaY;
+  private adjustScrollPosition(event: WheelEvent): void {
+    this.adjustScrollPositionXY(
+      "y",
+      event.deltaY,
+      this.stateVector.height,
+      this.height
+    );
+    this.adjustScrollPositionXY(
+      "x",
+      event.deltaX,
+      this.stateVector.width,
+      this.width
+    );
+  }
 
-      // 縦スクロール範囲の制限
-      if (this.scrollContainer.y > 0) {
-        this.scrollContainer.y = 0;
-      }
+  /**
+   * 指定された方向にスクロール位置を調整する
+   */
+  private adjustScrollPositionXY(
+    scrollDirection: "x" | "y",
+    delta: number,
+    stateVectorSize: number,
+    frameSize: number
+  ): void {
+    const qubitCircleSize: number =
+      Spacing.size.qubitCircle[this.stateVector.qubitCircleSize];
+    const padding: number = qubitCircleSize;
 
-      const maxScrollY =
-        this.stateVector.height + // 状態ベクトルの高さを取得
-        32 - // 固定の余白や追加の高さ
-        this.maskGraphics.height;
+    if (this.isScrollingNeeded(stateVectorSize, frameSize)) {
+      // スクロールの方向:
+      // - vertical: 上方向へのスクロールでdeltaが正、下方向で負
+      // - horizontal: 左方向へのスクロールでdeltaが正、右方向で負
+      this.scrollContainer[scrollDirection] -= delta;
 
-      if (this.scrollContainer.y < -maxScrollY) {
-        this.scrollContainer.y = -maxScrollY;
-      }
+      const scrollableDistance = this.calculateScrollableDistance(
+        stateVectorSize,
+        frameSize,
+        padding
+      );
+
+      this.scrollContainer[scrollDirection] = this.limitScrollPosition(
+        this.scrollContainer[scrollDirection],
+        scrollableDistance
+      );
     }
+  }
 
-    // stateVector の幅がフレームの幅より小さい場合は横スクロールを禁止
-    if (this.stateVector.width > this.maskGraphics.width) {
-      const deltaX = event.deltaX;
-      this.scrollContainer.x -= deltaX;
+  /**
+   * 状態ベクトルとフレームのサイズに基づいてスクロールが必要かどうかを返す
+   */
+  private isScrollingNeeded(
+    stateVectorSize: number,
+    frameSize: number
+  ): boolean {
+    return stateVectorSize > frameSize;
+  }
 
-      // 横スクロール範囲の制限
-      if (this.scrollContainer.x > 0) {
-        this.scrollContainer.x = 0;
-      }
+  /**
+   * フレーム内のスクロール可能な距離を計算する
+   */
+  private calculateScrollableDistance(
+    stateVectorSize: number,
+    frameSize: number,
+    padding: number
+  ): number {
+    // scrollableDistance が正の値の場合、その値だけスクロール可能
+    // 0の場合、スクロールは不要（stateVectorがフレーム内に収まっている）
+    return Math.max(
+      0,
+      stateVectorSize +
+        padding * StateVectorFrame.PADDING_MULTIPLIER -
+        frameSize
+    );
+  }
 
-      const maxScrollX =
-        this.stateVector.width + // 状態ベクトルの幅を取得
-        32 - // 固定の余白や追加の幅
-        this.maskGraphics.width;
-      if (this.scrollContainer.x < -maxScrollX) {
-        this.scrollContainer.x = -maxScrollX;
-      }
+  /**
+   * 許容範囲内でスクロール位置を制限する
+   */
+  private limitScrollPosition(
+    position: number,
+    scrollableDistance: number
+  ): number {
+    // 上端または左端の制限
+    if (position > 0) {
+      return 0;
     }
+    // 下端または右端の制限
+    if (position < -scrollableDistance) {
+      return -scrollableDistance;
+    }
+    return position;
   }
 }
