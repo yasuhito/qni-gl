@@ -68,18 +68,6 @@ export class StateVectorFrame extends PIXI.Container {
   }
 
   private initStateVector() {
-    // ここで this.runSimulator() で状態ベクトルを |00> に初期化すると
-    // シミュレータ呼び出しで遅くなるので、決め打ちで初期化しておく
-    //
-    // FIXME: 別に遅くないのでこの処理を削除
-    if (this.stateVector.qubitCircles.length !== 2) {
-      throw new Error("qubitCircles.length !== 2");
-    }
-
-    this.stateVector.qubitCircles[0].probability = 100;
-    this.stateVector.qubitCircles[0].phase = 0;
-    this.stateVector.qubitCircles[1].probability = 0;
-
     this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
       this.updateStateVectorPosition();
     });
