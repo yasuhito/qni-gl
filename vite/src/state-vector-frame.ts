@@ -14,9 +14,10 @@ export class StateVectorFrame extends PIXI.Container {
   private static instance: StateVectorFrame | null = null;
   private static readonly PADDING_MULTIPLIER: number = 2;
 
-  frameWidth: number;
-  frameHeight: number;
   readonly stateVector: StateVectorComponent;
+
+  private frameWidth: number;
+  private frameHeight: number;
   private readonly background: PIXI.Graphics;
   private maskGraphics: PIXI.Graphics;
   private scrollContainer: PIXI.Container;
@@ -77,8 +78,9 @@ export class StateVectorFrame extends PIXI.Container {
   /**
    * 状態ベクトルの位置とサイズを更新する
    */
-  repositionAndResize(y: number, height: number) {
+  repositionAndResize(y: number, width: number, height: number) {
     this.y = y;
+    this.frameWidth = width;
     this.frameHeight = height;
 
     this.background.clear();
