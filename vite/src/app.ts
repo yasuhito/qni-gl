@@ -112,7 +112,7 @@ export class App {
     this.mainContainer.addChild(this.circuitFrame);
 
     this.stateVectorFrame = StateVectorFrame.getInstance(
-      this.pixiApp,
+      this.pixiApp.screen.width,
       this.pixiApp.screen.height * 0.4
     );
     this.mainContainer.addChild(this.stateVectorFrame);
@@ -134,7 +134,7 @@ export class App {
 
       // 上下フレームの更新
       this.circuitFrame.resize(this.frameDivider.y);
-      this.stateVectorFrame.update(
+      this.stateVectorFrame.updateSizeAndPosition(
         this.frameDivider.y + this.frameDivider.height,
         this.pixiApp.screen.height - this.frameDivider.y
       );
