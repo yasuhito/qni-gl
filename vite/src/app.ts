@@ -134,7 +134,7 @@ export class App {
 
       // 上下フレームの更新
       this.circuitFrame.resize(this.frameDivider.y);
-      this.stateVectorFrame.updateSizeAndPosition(
+      this.stateVectorFrame.repositionAndResize(
         this.frameDivider.y + this.frameDivider.height,
         this.pixiApp.screen.height - this.frameDivider.y
       );
