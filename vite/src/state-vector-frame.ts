@@ -5,7 +5,6 @@ import {
   StateVectorComponent,
 } from "./state-vector-component";
 import { throttle } from "lodash";
-import { Spacing } from "./spacing";
 
 /**
  * スクロール機能つきフレーム。状態ベクトルを表示する。
@@ -38,7 +37,10 @@ export class StateVectorFrame extends PIXI.Container {
     this.frameWidth = width;
     this.frameHeight = height;
     this.background = new PIXI.Graphics();
-    this.stateVector = new StateVectorComponent(1);
+    this.stateVector = new StateVectorComponent(
+      1,
+      new PIXI.Rectangle(0, 0, width, height)
+    );
     this.maskGraphics = new PIXI.Graphics();
     this.scrollContainer = new PIXI.Container();
 
@@ -51,6 +53,15 @@ export class StateVectorFrame extends PIXI.Container {
     this.scrollContainer.addChild(this.stateVector);
     this.addChild(this.maskGraphics);
     this.scrollContainer.mask = this.maskGraphics;
+
+    // StateVectorComponentにスクロール位置を伝える
+    const scrollRect = new PIXI.Rectangle(
+      -this.scrollContainer.x,
+      -this.scrollContainer.y,
+      this.frameWidth,
+      this.frameHeight
+    );
+    this.stateVector.adjustScroll(scrollRect);
 
     this.updateStateVectorPosition();
     this.initializeScrollEvents();
@@ -100,8 +111,8 @@ export class StateVectorFrame extends PIXI.Container {
       this.scrollContainer.x = 0;
       this.scrollContainer.y = 0;
     } else {
-      this.scrollContainer.x = (this.width - this.stateVector.bodyWidth) / 2;
-      this.scrollContainer.y = (this.height - this.stateVector.bodyHeight) / 2;
+      this.scrollContainer.x = (this.width - this.stateVector.width) / 2;
+      this.scrollContainer.y = (this.height - this.stateVector.height) / 2;
     }
   }
 
@@ -140,27 +151,31 @@ export class StateVectorFrame extends PIXI.Container {
     stateVectorSize: number,
     frameSize: number
   ): void {
-    const qubitCircleSize: number =
-      Spacing.size.qubitCircle[this.stateVector.qubitCircleSize];
-    const padding: number = qubitCircleSize;
+    if (!this.isScrollingNeeded(stateVectorSize, frameSize)) return;
 
-    if (this.isScrollingNeeded(stateVectorSize, frameSize)) {
-      // スクロールの方向:
-      // - vertical: 上方向へのスクロールでdeltaが正、下方向で負
-      // - horizontal: 左方向へのスクロールでdeltaが正、右方向で負
-      this.scrollContainer[scrollDirection] -= delta;
+    // スクロールの方向:
+    // - vertical: 上方向へのスクロールでdeltaが正、下方向で負
+    // - horizontal: 左方向へのスクロールでdeltaが正、右方向で負
+    this.scrollContainer[scrollDirection] -= delta;
 
-      const scrollableDistance = this.calculateScrollableDistance(
-        stateVectorSize,
-        frameSize,
-        padding
-      );
+    const scrollableDistance = this.calculateScrollableDistance(
+      stateVectorSize,
+      frameSize
+    );
 
-      this.scrollContainer[scrollDirection] = this.limitScrollPosition(
-        this.scrollContainer[scrollDirection],
-        scrollableDistance
-      );
-    }
+    this.scrollContainer[scrollDirection] = this.limitScrollPosition(
+      this.scrollContainer[scrollDirection],
+      scrollableDistance
+    );
+
+    // StateVectorComponentにスクロール位置を伝える
+    const scrollRect = new PIXI.Rectangle(
+      -this.scrollContainer.x,
+      -this.scrollContainer.y,
+      this.frameWidth,
+      this.frameHeight
+    );
+    this.stateVector.adjustScroll(scrollRect);
   }
 
   /**
@@ -178,17 +193,11 @@ export class StateVectorFrame extends PIXI.Container {
    */
   private calculateScrollableDistance(
     stateVectorSize: number,
-    frameSize: number,
-    padding: number
+    frameSize: number
   ): number {
     // scrollableDistance が正の値の場合、その値だけスクロール可能
     // 0の場合、スクロールは不要（stateVectorがフレーム内に収まっている）
-    return Math.max(
-      0,
-      stateVectorSize +
-        padding * StateVectorFrame.PADDING_MULTIPLIER -
-        frameSize
-    );
+    return Math.max(0, stateVectorSize - frameSize);
   }
 
   /**

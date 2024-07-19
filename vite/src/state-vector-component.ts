@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
-import { GridLayout } from "./grid-layout";
 import { QubitCircle } from "./qubit-circle";
 import { spacingInPx } from "./util";
 import { Size } from "./size";
+import { Spacing } from "./spacing";
 
 export const STATE_VECTOR_EVENTS = {
   CHANGE: "state-vector:change",
+  AMPLITUDES_VISIBLE: "state-vector:amplitudes-visible",
 };
 
 /**
@@ -17,49 +18,64 @@ export class StateVectorComponent extends Container {
   qubitCircleSize: Size = "xl";
 
   private _qubitCount = 1;
-  private body: PIXI.Graphics;
-  private qubitCirclesGridContainer: GridLayout;
+  private cols: number = 2;
+  private rows: number = 1;
+  private startIndexX: number = 0;
+  private startIndexY: number = 0;
+  private elementsMargin: number = spacingInPx(0.5);
+  private _padding: number = 0;
+  private backgroundGraphics: PIXI.Graphics;
+  private visibleAmplitudes: Set<number> = new Set();
 
   set qubitCount(value: number) {
     this._qubitCount = value;
 
     if (this.qubitCount == 1) {
       this.qubitCircleSize = "xl";
-      this.qubitCirclesGridContainer.cols = 2;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 2;
     } else if (this.qubitCount == 2) {
       this.qubitCircleSize = "xl";
-      this.qubitCirclesGridContainer.cols = 4;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 4;
     } else if (this.qubitCount == 3) {
       this.qubitCircleSize = "xl";
-      this.qubitCirclesGridContainer.cols = 4;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 4;
     } else if (this.qubitCount == 4) {
       this.qubitCircleSize = "lg";
-      this.qubitCirclesGridContainer.cols = 8;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 8;
     } else if (this.qubitCount == 5) {
       this.qubitCircleSize = "base";
-      this.qubitCirclesGridContainer.cols = 8;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 8;
     } else if (this.qubitCount == 6) {
       this.qubitCircleSize = "base";
-      this.qubitCirclesGridContainer.cols = 16;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 16;
     } else if (this.qubitCount == 7) {
       this.qubitCircleSize = "base";
-      this.qubitCirclesGridContainer.cols = 16;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 16;
     } else if (this.qubitCount == 8) {
       this.qubitCircleSize = "sm";
-      this.qubitCirclesGridContainer.cols = 32;
+      this.elementsMargin = spacingInPx(0.5);
+      this.cols = 32;
     } else if (this.qubitCount == 9) {
       this.qubitCircleSize = "xs";
-      this.qubitCirclesGridContainer.cols = 32;
-      this.qubitCirclesGridContainer.elementsMargin = spacingInPx(0.25);
+      this.cols = 32;
+      this.elementsMargin = spacingInPx(0.25);
     } else if (this.qubitCount == 10) {
       this.qubitCircleSize = "xs";
-      this.qubitCirclesGridContainer.cols = 64;
-      this.qubitCirclesGridContainer.elementsMargin = spacingInPx(0.25);
+      this.cols = 64;
+      this.elementsMargin = spacingInPx(0.25);
     }
+    this.rows = Math.ceil(this.qubitCircleCount / this.cols);
+    this.startIndexX = 0;
+    this.startIndexY = 0;
 
-    this.clear();
     this.draw();
-
     this.emit(STATE_VECTOR_EVENTS.CHANGE, this.qubitCount);
   }
 
@@ -71,61 +87,143 @@ export class StateVectorComponent extends Container {
     return Math.pow(2, this._qubitCount);
   }
 
-  get qubitCircles() {
-    return this.qubitCirclesGridContainer.children as Array<QubitCircle>;
-  }
-
-  get bodyWidth() {
-    return (
-      this.qubitCirclesGridContainer.width +
-      this.qubitCirclesGridContainer.horPadding * 2
-    );
-  }
-
-  get bodyHeight() {
-    return (
-      this.qubitCirclesGridContainer.height +
-      this.qubitCirclesGridContainer.vertPadding * 2
-    );
-  }
-
-  constructor(qubitCount: number) {
+  constructor(qubitCount: number, scrollRect: PIXI.Rectangle) {
     super();
-
-    this.body = new PIXI.Graphics();
-    this.addChild(this.body);
-
-    this.qubitCirclesGridContainer = new GridLayout({
-      cols: 2,
-      elementsMargin: spacingInPx(0.5),
-      vertPadding: spacingInPx(5),
-      horPadding: spacingInPx(4),
-    });
-    this.addChild(this.qubitCirclesGridContainer);
-
+    this.backgroundGraphics = new PIXI.Graphics();
+    this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
+    this.adjustScroll(scrollRect);
   }
 
   private draw() {
+    const startTime = performance.now();
+
+    this.drawBackground();
     this.drawQubitCircles();
+
+    const endTime = performance.now();
+    console.log(`Draw execution time: ${endTime - startTime} ms`);
   }
 
-  private clear() {
-    this.body.clear();
+  private drawBackground() {
+    const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
+    this._padding = qubitCircleSize;
 
-    this.qubitCircles.forEach((child) => {
-      child.destroy();
-    });
-    this.qubitCirclesGridContainer.removeChildren();
+    const contentWidth =
+      this.cols * (qubitCircleSize + this.elementsMargin) - this.elementsMargin;
+    const contentHeight =
+      this.rows * (qubitCircleSize + this.elementsMargin) - this.elementsMargin;
+
+    const totalWidth = contentWidth + this._padding * 2;
+    const totalHeight = contentHeight + this._padding * 2;
+
+    if (!this.backgroundGraphics) {
+      this.backgroundGraphics = new PIXI.Graphics();
+      this.addChildAt(this.backgroundGraphics, 0);
+    }
+
+    this.backgroundGraphics.clear();
+    this.backgroundGraphics.beginFill(0xffffff, 1);
+    this.backgroundGraphics.drawRect(0, 0, totalWidth, totalHeight);
+    this.backgroundGraphics.endFill();
   }
 
   private drawQubitCircles() {
-    for (let i = 0; i < this.qubitCircleCount; i++) {
-      this.qubitCirclesGridContainer.addChild(
-        new QubitCircle(0, 0, this.qubitCircleSize)
-      );
+    const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
+    const endIndexX = Math.min(this.startIndexX + this.cols, this.cols);
+    const endIndexY = Math.min(this.startIndexY + this.rows, this.rows);
+
+    // 現在の QubitCircle をマップに格納
+    const currentCircles = new Map<string, QubitCircle>();
+    this.children.forEach((child) => {
+      if (child instanceof QubitCircle) {
+        const key = `${child.x},${child.y}`;
+        currentCircles.set(key, child);
+      }
+    });
+
+    this.visibleAmplitudes.clear();
+
+    // 新しい円を追加または既存の円を更新
+    for (let y = this.startIndexY; y < endIndexY; y++) {
+      for (let x = this.startIndexX; x < endIndexX; x++) {
+        const posX =
+          this._padding + x * (qubitCircleSize + this.elementsMargin);
+        const posY =
+          this._padding + y * (qubitCircleSize + this.elementsMargin);
+        const key = `${posX},${posY}`;
+
+        let circle = currentCircles.get(key);
+        if (!circle) {
+          circle = new QubitCircle(0, 0, this.qubitCircleSize);
+          circle.x = posX;
+          circle.y = posY;
+          this.addChild(circle);
+        } else {
+          currentCircles.delete(key);
+        }
+
+        // 振幅のインデックスを計算して追加
+        const amplitudeIndex = y * this.cols + x;
+        this.visibleAmplitudes.add(amplitudeIndex);
+      }
     }
 
-    this.qubitCirclesGridContainer.arrangeChildren();
+    // 不要な QubitCircle を削除
+    currentCircles.forEach((circle) => {
+      this.removeChild(circle);
+      circle.destroy();
+    });
+
+    // 可視振幅が変更されたことをイベントで通知
+    this.emit(
+      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+      Array.from(this.visibleAmplitudes)
+    );
+  }
+
+  adjustScroll(scrollRect: PIXI.Rectangle) {
+    const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
+
+    const newStartIndexX = Math.floor(
+      (scrollRect.x - this._padding) / (qubitCircleSize + this.elementsMargin)
+    );
+    const newStartIndexY = Math.floor(
+      (scrollRect.y - this._padding) / (qubitCircleSize + this.elementsMargin)
+    );
+
+    if (
+      newStartIndexX !== this.startIndexX ||
+      newStartIndexY !== this.startIndexY
+    ) {
+      this.startIndexX = Math.max(0, newStartIndexX);
+      this.startIndexY = Math.max(0, newStartIndexY);
+
+      this.draw();
+
+      // スクロール後に可視振幅が変更されたことをイベントで通知
+      this.emit(
+        STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+        Array.from(this.visibleAmplitudes)
+      );
+    }
+  }
+
+  getQubitCircleAt(index: number): QubitCircle | undefined {
+    const x = index % this.cols;
+    const y = Math.floor(index / this.cols);
+    const posX =
+      this._padding +
+      x *
+        (Spacing.size.qubitCircle[this.qubitCircleSize] + this.elementsMargin);
+    const posY =
+      this._padding +
+      y *
+        (Spacing.size.qubitCircle[this.qubitCircleSize] + this.elementsMargin);
+
+    return this.children.find(
+      (child): child is QubitCircle =>
+        child instanceof QubitCircle && child.x === posX && child.y === posY
+    );
   }
 }
