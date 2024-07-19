@@ -32,8 +32,8 @@ self.addEventListener("message", (event) => {
         steps: JSON.stringify(steps),
       });
 
-      console.log("Sending request to backend with the following parameters:");
-      console.dir(Object.fromEntries(params.entries()));
+      // console.log("Sending request to backend with the following parameters:");
+      // console.dir(Object.fromEntries(params.entries()));
 
       const response = await fetch(`http://localhost:8000/backend.json`, {
         method: "POST",
