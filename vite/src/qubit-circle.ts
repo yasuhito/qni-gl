@@ -46,6 +46,10 @@ export class QubitCircle extends Container {
     this.updatePhaseRotation();
   }
 
+  get size(): Size {
+    return this._size;
+  }
+
   set size(newValue: Size) {
     if (this._size === newValue) return;
 
@@ -113,9 +117,9 @@ export class QubitCircle extends Container {
     this.phaseHand
       .beginFill(Colors["border.icon"], 1)
       .drawRect(
+        -Spacing.width.qubitCircle.phaseHand[this.size] / 2,
         0,
-        0,
-        Spacing.width.qubitCircle.phaseHand[this._size],
+        Spacing.width.qubitCircle.phaseHand[this.size],
         this.handLength
       )
       .endFill();
