@@ -185,12 +185,15 @@ export class StateVectorComponent extends Container {
 
   adjustScroll(scrollRect: PIXI.Rectangle) {
     const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
+    const cellSize = qubitCircleSize + this.elementsMargin;
 
-    const newStartIndexX = Math.floor(
-      (scrollRect.x - this._padding) / (qubitCircleSize + this.elementsMargin)
+    const newStartIndexX = Math.max(
+      0,
+      Math.floor((scrollRect.x - this._padding) / cellSize)
     );
-    const newStartIndexY = Math.floor(
-      (scrollRect.y - this._padding) / (qubitCircleSize + this.elementsMargin)
+    const newStartIndexY = Math.max(
+      0,
+      Math.floor((scrollRect.y - this._padding) / cellSize)
     );
 
     if (
