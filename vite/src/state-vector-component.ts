@@ -170,10 +170,10 @@ export class StateVectorComponent extends Container {
 
     this._visibleAmplitudes.clear();
 
-    console.log(`startIndexX: ${this.startIndexX}`);
-    console.log(`endIndexX: ${endIndexX}`);
-    console.log(`startIndexY: ${this.startIndexY}`);
-    console.log(`endIndexY: ${endIndexY}`);
+    // console.log(`startIndexX: ${this.startIndexX}`);
+    // console.log(`endIndexX: ${endIndexX}`);
+    // console.log(`startIndexY: ${this.startIndexY}`);
+    // console.log(`endIndexY: ${endIndexY}`);
 
     // 新しい円を追加または既存の円を更新
     for (let y = this.startIndexY; y < endIndexY; y++) {
