@@ -9,7 +9,10 @@ import { FrameDivider } from "./frame-divider";
 import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import { StateVectorComponent } from "./state-vector-component";
+import {
+  STATE_VECTOR_EVENTS,
+  StateVectorComponent,
+} from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 
@@ -168,6 +171,11 @@ export class App {
       this
     );
 
+    this.stateVector.on(
+      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+      this.handleVisibleAmplitudesChange.bind(this)
+    );
+
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
     this.circuit.stepAt(0).activate();
@@ -241,17 +249,8 @@ export class App {
     }
 
     const amplitudes = event.data.amplitudes;
-
-    for (const ket in amplitudes) {
-      const c = amplitudes[ket];
-      const amplifier = new Complex(c[0], c[1]);
-      const qubitCircle = this.stateVector.qubitCircles[ket];
-
-      // FIXME: qubitCircle が undefined になることがある
-      if (qubitCircle) {
-        qubitCircle.probability = Math.pow(amplifier.abs(), 2) * 100;
-        qubitCircle.phase = amplifier.phase();
-      }
+    if (amplitudes) {
+      this.updateStateVectorAmplitudes(amplitudes);
     }
 
     // ページの <div id="app" data-state="running"></div> を
@@ -259,6 +258,20 @@ export class App {
     const eventType = event.data.type;
     if (eventType === "finish") {
       this.element.dataset.state = "idle";
+    }
+  }
+
+  private updateStateVectorAmplitudes(amplitudes: {
+    [key: number]: [number, number];
+  }) {
+    for (const [index, [real, imag]] of Object.entries(amplitudes)) {
+      const qubitCircle = this.stateVector.getQubitCircleAt(parseInt(index));
+
+      if (qubitCircle) {
+        const amplitude = new Complex(real, imag);
+        qubitCircle.probability = Math.pow(amplitude.abs(), 2) * 100;
+        qubitCircle.phase = amplitude.phase();
+      }
     }
   }
 

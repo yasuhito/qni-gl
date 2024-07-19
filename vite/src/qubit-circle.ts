@@ -14,8 +14,8 @@ export class QubitCircle extends Container {
   private probabilityCircle: PIXI.Graphics;
   private border: PIXI.Graphics;
   private _phase = 0;
-  private phaseContainer: PIXI.Container; /* 位相の針を回転させるためのコンテナ */
-  private phaseHand: PIXI.Graphics; /* 位相の針 */
+  private phaseContainer: PIXI.Container;
+  private phaseHand: PIXI.Graphics;
 
   /**
    * 確率をセットする
@@ -55,8 +55,6 @@ export class QubitCircle extends Container {
   constructor(probability: number, phase: number, size: Size = "xl") {
     super();
 
-    this.size = size;
-
     this.probabilityCircle = new PIXI.Graphics();
     this.addChild(this.probabilityCircle);
 
@@ -73,9 +71,44 @@ export class QubitCircle extends Container {
     this.phaseContainer.addChild(this.phaseHand);
     this.addChild(this.phaseContainer);
 
+    this.resize(size);
     this.probability = probability;
-    this.drawBorder(probability);
     this.phase = phase;
+  }
+
+  public resize(newSize: Size): void {
+    if (this.size === newSize) return; // サイズが変わらない場合は何もしない
+
+    this.size = newSize;
+
+    // 中心座標を再計算
+    const newCenter = this.center;
+
+    // 確率円を再描画
+    this.probabilityCircle.clear();
+    if (this._probability > 0) {
+      this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
+      const radius =
+        (Spacing.size.qubitCircle[this.size] / 2 -
+          Spacing.borderWidth.qubitCircle[this.size]) *
+        Math.sqrt(this._probability * 0.01);
+      this.probabilityCircle.drawCircle(newCenter.x, newCenter.y, radius);
+      this.probabilityCircle.endFill();
+    }
+
+    // ボーダーを再描画
+    this.drawBorder(this._probability);
+
+    // 位相の針を再描画
+    this.phaseContainer.position.set(newCenter.x, newCenter.y);
+    // this.phaseContainer.pivot.set(
+    //   Spacing.width.qubitCircle.phaseHand[this.size] / 2,
+    //   0
+    // );
+    this.drawPhaseHand(this._probability, this._phase);
+
+    // コンテナのサイズを更新
+    this.width = this.height = Spacing.size.qubitCircle[this.size];
   }
 
   protected get center() {
@@ -90,6 +123,8 @@ export class QubitCircle extends Container {
   }
 
   protected drawBorder(probability: number) {
+    this.border.clear();
+
     this.border.lineStyle(
       Spacing.borderWidth.qubitCircle[this.size],
       this.borderColor(probability),
