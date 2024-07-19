@@ -45,18 +45,19 @@ def backend():
     id = request.form.get('id')
     qubit_count = int(request.form.get('qubitCount'))
     step_index = int(request.form.get('stepIndex'))
-    targets = request.form.get('targets')
+    # targets には "0,1,2" のようなカンマ区切り整数が入っているので、リストに変換する
+    targets = [int(x) for x in request.form.get('targets').split(",")]
     steps = json.loads(request.form.get('steps'))
 
-    app.logger.debug("circuit_id = %s", id)
+    # app.logger.debug("circuit_id = %s", id)
     app.logger.debug("qubit_count = %d", qubit_count)
     app.logger.debug("step_index = %d", step_index)
-    app.logger.debug("targets = %s", targets)
-    app.logger.debug("steps = %s", steps)
+    app.logger.debug("targets.size = %d", len(targets))
+    # app.logger.debug("steps = %s", steps)
 
     try:
-        step_results = run_cirq(qubit_count, step_index, steps)
-        app.logger.debug("step_results = %s", step_results)
+        step_results = run_cirq(qubit_count, step_index, steps, targets)
+        # app.logger.debug("step_results = %s", step_results)
 
         return jsonify(step_results)
     except Exception as e:
@@ -65,7 +66,7 @@ def backend():
         return "Internal Server Error ", 500
 
 
-def run_cirq(qubit_count, step_index, steps):
+def run_cirq(qubit_count, step_index, steps, targets):
     cirq_runner = CirqRunner(app.logger)
     circuit, measurement_moment = cirq_runner.build_circuit(qubit_count, steps)
 
@@ -73,13 +74,13 @@ def run_cirq(qubit_count, step_index, steps):
         app.logger.debug(each)
 
     result_list = cirq_runner.run_circuit_until_step_index(
-        circuit, measurement_moment, step_index, steps)
+        circuit, measurement_moment, step_index, steps, targets)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):
         res = {}
-        for i in range(amp.size):
-            res[i] = [float(amp[i].real), float(amp[i].imag)]
+        for i, c in amp.items():
+            res[i] = [float(c.real), float(c.imag)]
         return res
 
     def convert_item(item):

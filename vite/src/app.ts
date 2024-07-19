@@ -449,10 +449,7 @@ export class App {
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
       stepIndex: this.circuit.activeStepIndex,
-      targets: Array.from(
-        { length: Math.pow(2, this.circuit.qubitCountInUse) },
-        (_, i) => i
-      ),
+      targets: this.stateVector.visibleAmplitudes,
       steps: this.circuit.serialize(),
     });
   }

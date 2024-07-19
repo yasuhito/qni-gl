@@ -150,7 +150,7 @@ class CirqRunner:
 
         return c, measurement_moment
 
-    def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps):
+    def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps, targets):
         cirq_simulator = cirq.Simulator()
         _data = []
         counter = -1
@@ -208,6 +208,16 @@ class CirqRunner:
                             _data[i][':measuredBits'][_qubit] = _value
 #        print("_data ", _data)
 #        sys.stdout.flush()
+        # targets に必要な振幅のインデックスが入っているので、
+        # _data.amplitudes のうち、targets に含まれるインデックスのみを返す
+        # _data['amplitudes'] = {}
+
+        target_amplitudes = _data[step_index][':amplitude']
+        _data[step_index][':amplitude'] = {}
+
+        for _target in targets:
+            _data[step_index][':amplitude'][_target] = target_amplitudes[_target]
+
         return _data
 
     def _target_qubits(self, qubits, gate):

@@ -25,7 +25,8 @@ export class StateVectorComponent extends Container {
   private elementsMargin: number = spacingInPx(0.5);
   private _padding: number = 0;
   private backgroundGraphics: PIXI.Graphics;
-  private visibleAmplitudes: Set<number> = new Set();
+  private _visibleAmplitudes: Set<number> = new Set();
+  private currentScrollRect: PIXI.Rectangle;
 
   set qubitCount(value: number) {
     this._qubitCount = value;
@@ -87,8 +88,14 @@ export class StateVectorComponent extends Container {
     return Math.pow(2, this._qubitCount);
   }
 
+  get visibleAmplitudes() {
+    return Array.from(this._visibleAmplitudes);
+  }
+
   constructor(qubitCount: number, scrollRect: PIXI.Rectangle) {
     super();
+
+    this.currentScrollRect = scrollRect;
     this.backgroundGraphics = new PIXI.Graphics();
     this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
@@ -130,8 +137,27 @@ export class StateVectorComponent extends Container {
 
   private drawQubitCircles() {
     const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
-    const endIndexX = Math.min(this.startIndexX + this.cols, this.cols);
-    const endIndexY = Math.min(this.startIndexY + this.rows, this.rows);
+    const cellSize = qubitCircleSize + this.elementsMargin;
+
+    // scrollRect を使用して endIndexX と endIndexY を計算
+    const endIndexX = Math.min(
+      Math.ceil(
+        (this.currentScrollRect.x +
+          this.currentScrollRect.width -
+          this._padding) /
+          cellSize
+      ),
+      this.cols
+    );
+    const endIndexY = Math.min(
+      Math.ceil(
+        (this.currentScrollRect.y +
+          this.currentScrollRect.height -
+          this._padding) /
+          cellSize
+      ),
+      this.rows
+    );
 
     // 現在の QubitCircle をマップに格納
     const currentCircles = new Map<string, QubitCircle>();
@@ -142,7 +168,12 @@ export class StateVectorComponent extends Container {
       }
     });
 
-    this.visibleAmplitudes.clear();
+    this._visibleAmplitudes.clear();
+
+    console.log(`startIndexX: ${this.startIndexX}`);
+    console.log(`endIndexX: ${endIndexX}`);
+    console.log(`startIndexY: ${this.startIndexY}`);
+    console.log(`endIndexY: ${endIndexY}`);
 
     // 新しい円を追加または既存の円を更新
     for (let y = this.startIndexY; y < endIndexY; y++) {
@@ -166,7 +197,7 @@ export class StateVectorComponent extends Container {
 
         // 振幅のインデックスを計算して追加
         const amplitudeIndex = y * this.cols + x;
-        this.visibleAmplitudes.add(amplitudeIndex);
+        this._visibleAmplitudes.add(amplitudeIndex);
       }
     }
 
@@ -177,10 +208,7 @@ export class StateVectorComponent extends Container {
     });
 
     // 可視振幅が変更されたことをイベントで通知
-    this.emit(
-      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
-      Array.from(this.visibleAmplitudes)
-    );
+    this.emit(STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE, this.visibleAmplitudes);
   }
 
   adjustScroll(scrollRect: PIXI.Rectangle) {
@@ -202,13 +230,14 @@ export class StateVectorComponent extends Container {
     ) {
       this.startIndexX = Math.max(0, newStartIndexX);
       this.startIndexY = Math.max(0, newStartIndexY);
+      this.currentScrollRect = scrollRect.clone();
 
       this.draw();
 
       // スクロール後に可視振幅が変更されたことをイベントで通知
       this.emit(
         STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
-        Array.from(this.visibleAmplitudes)
+        Array.from(this._visibleAmplitudes)
       );
     }
   }
