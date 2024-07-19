@@ -160,6 +160,7 @@ export class StateVectorComponent extends Container {
           circle.y = posY;
           this.addChild(circle);
         } else {
+          circle.resize(this.qubitCircleSize); // 既存の円のサイズを更新
           currentCircles.delete(key);
         }
 
