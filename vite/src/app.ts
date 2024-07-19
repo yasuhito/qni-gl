@@ -16,6 +16,7 @@ import { GatePaletteComponent } from "./gate-palette-component";
 export class App {
   static elementId = "app";
   private static _instance: App;
+  private lastVisibleIndices: number[] = [];
 
   declare worker: Worker;
 
@@ -172,6 +173,30 @@ export class App {
     this.circuit.stepAt(0).activate();
 
     this.nameMap.set(this.pixiApp.stage, "stage");
+  }
+
+  private handleVisibleAmplitudesChange(visibleIndices: number[]) {
+    if (this.areArraysEqual(visibleIndices, this.lastVisibleIndices)) return;
+
+    this.lastVisibleIndices = visibleIndices;
+
+    // サービスワーカーに振幅計算を要求
+    this.worker.postMessage({
+      circuitJson: this.circuit.toCircuitJSON(),
+      qubitCount: this.circuit.qubitCountInUse,
+      steps: this.circuit.serialize(),
+      stepIndex: this.circuit.activeStepIndex,
+      targets: visibleIndices, // 表示されている振幅のインデックスのみを送信
+    });
+  }
+
+  private areArraysEqual(arr1: number[], arr2: number[]): boolean {
+    if (arr1.length !== arr2.length) return false;
+
+    const arr1Sorted = arr1.slice().sort();
+    const arr2Sorted = arr2.slice().sort();
+
+    return arr1Sorted.every((value, index) => value === arr2Sorted[index]);
   }
 
   private gateDiscarded(gate: GateComponent) {
