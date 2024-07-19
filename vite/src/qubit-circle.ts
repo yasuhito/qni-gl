@@ -8,48 +8,60 @@ import { Spacing } from "./spacing";
  * @noInheritDoc
  */
 export class QubitCircle extends Container {
-  size: Size = "xl";
-
   private _probability = 0;
+  private _phase = 0;
+  private _size: Size = "xs";
   private probabilityCircle: PIXI.Graphics;
   private border: PIXI.Graphics;
-  private _phase = 0;
   private phaseContainer: PIXI.Container;
   private phaseHand: PIXI.Graphics;
 
-  /**
-   * 確率をセットする
-   */
-  set probability(value: number) {
-    this._probability = value;
+  set probability(newValue: number) {
+    if (this._probability === newValue) return;
 
-    this.probabilityCircle.clear();
+    const oldProbability = this._probability;
+    this._probability = newValue;
 
-    if (this.probability > 0) {
-      this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
+    this.maybePaintProbabilityCircle();
+
+    // 確率が0から正の値、または正の値から0に変わった場合のみボーダーを更新
+    if (
+      (oldProbability === 0 && newValue > 0) ||
+      (oldProbability > 0 && newValue === 0)
+    ) {
+      this.drawBorder();
     }
 
-    const radius =
-      (Spacing.size.qubitCircle[this.size] / 2 -
-        Spacing.borderWidth.qubitCircle[this.size]) *
-      Math.sqrt(this.probability * 0.01);
-    this.probabilityCircle.drawCircle(this.center.x, this.center.y, radius);
-    this.probabilityCircle.endFill();
-
-    this.drawPhaseHand(this.probability, this._phase);
-    this.drawBorder(this.probability);
+    this.updatePhaseHand();
   }
 
   get probability() {
     return this._probability;
   }
 
-  /**
-   * 位相をセットする
-   */
-  set phase(value: number) {
-    this._phase = value;
-    this.drawPhaseHand(this.probability, value);
+  set phase(newValue: number) {
+    if (this._phase === newValue) return;
+
+    this._phase = newValue;
+    this.updatePhaseRotation();
+  }
+
+  get size(): Size {
+    return this._size;
+  }
+
+  set size(newValue: Size) {
+    if (this._size === newValue) return;
+
+    this._size = newValue;
+
+    // 各要素を更新
+    this.maybePaintProbabilityCircle();
+    this.drawBorder();
+    this.updatePhaseHand();
+
+    // phaseContainer の位置を更新
+    this.phaseContainer.position.set(this.sizeInPx / 2, this.sizeInPx / 2);
   }
 
   constructor(probability: number, phase: number, size: Size = "xl") {
@@ -63,104 +75,91 @@ export class QubitCircle extends Container {
 
     this.phaseContainer = new PIXI.Container();
     this.phaseContainer.pivot = new PIXI.Point(
-      Spacing.width.qubitCircle.phaseHand[this.size] / 2,
+      Spacing.width.qubitCircle.phaseHand[this._size] / 2,
       0
     );
-    this.phaseContainer.position.set(this.center.x, this.center.y);
+    this.phaseContainer.position.set(this.sizeInPx / 2, this.sizeInPx / 2);
     this.phaseHand = new PIXI.Graphics();
     this.phaseContainer.addChild(this.phaseHand);
     this.addChild(this.phaseContainer);
 
-    this.resize(size);
+    this.size = size;
     this.probability = probability;
     this.phase = phase;
+    this.drawBorder();
+    this.maybePaintProbabilityCircle();
+    this.updatePhaseRotation();
   }
 
-  public resize(newSize: Size): void {
-    if (this.size === newSize) return; // サイズが変わらない場合は何もしない
-
-    this.size = newSize;
-
-    // 中心座標を再計算
-    const newCenter = this.center;
-
-    // 確率円を再描画
+  private maybePaintProbabilityCircle() {
     this.probabilityCircle.clear();
-    if (this._probability > 0) {
-      this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
-      const radius =
-        (Spacing.size.qubitCircle[this.size] / 2 -
-          Spacing.borderWidth.qubitCircle[this.size]) *
-        Math.sqrt(this._probability * 0.01);
-      this.probabilityCircle.drawCircle(newCenter.x, newCenter.y, radius);
-      this.probabilityCircle.endFill();
-    }
 
-    // ボーダーを再描画
-    this.drawBorder(this._probability);
+    if (this.probability === 0) return;
 
-    // 位相の針を再描画
-    this.phaseContainer.position.set(newCenter.x, newCenter.y);
-    // this.phaseContainer.pivot.set(
-    //   Spacing.width.qubitCircle.phaseHand[this.size] / 2,
-    //   0
-    // );
-    this.drawPhaseHand(this._probability, this._phase);
-
-    // コンテナのサイズを更新
-    this.width = this.height = Spacing.size.qubitCircle[this.size];
-  }
-
-  protected get center() {
-    return new PIXI.Point(
-      Spacing.size.qubitCircle[this.size] / 2,
-      Spacing.size.qubitCircle[this.size] / 2
+    this.probabilityCircle.beginFill(Colors["bg-brand"], 1);
+    const probability_scale_factor = 0.01;
+    const radius =
+      (this.sizeInPx / 2 - Spacing.borderWidth.qubitCircle[this._size]) *
+      Math.sqrt(this.probability * probability_scale_factor);
+    this.probabilityCircle.drawCircle(
+      this.sizeInPx / 2,
+      this.sizeInPx / 2,
+      radius
     );
+    this.probabilityCircle.endFill();
   }
 
-  protected get handLength() {
+  private updatePhaseHand() {
+    this.phaseHand.clear();
+
+    if (this.probability === 0) return;
+
+    this.phaseHand
+      .beginFill(Colors["border.icon"], 1)
+      .drawRect(
+        -Spacing.width.qubitCircle.phaseHand[this.size] / 2,
+        0,
+        Spacing.width.qubitCircle.phaseHand[this.size],
+        this.handLength
+      )
+      .endFill();
+
+    this.updatePhaseRotation();
+  }
+
+  private get handLength() {
     return this.height / 2;
   }
 
-  protected drawBorder(probability: number) {
+  private drawBorder() {
     this.border.clear();
 
     this.border.lineStyle(
-      Spacing.borderWidth.qubitCircle[this.size],
-      this.borderColor(probability),
+      Spacing.borderWidth.qubitCircle[this._size],
+      this.borderColor(),
       1,
       0
     );
     this.border.drawCircle(
-      this.center.x,
-      this.center.y,
-      Spacing.size.qubitCircle[this.size] / 2
+      this.sizeInPx / 2,
+      this.sizeInPx / 2,
+      this.sizeInPx / 2
     );
   }
 
-  protected drawPhaseHand(probability: number, phase: number) {
-    this.phaseHand.clear();
-
-    if (probability > 0) {
-      this.phaseHand
-        .beginFill(Colors["border.icon"], 1)
-        .drawRect(
-          0,
-          0,
-          Spacing.width.qubitCircle.phaseHand[this.size],
-          this.handLength
-        )
-        .endFill();
-    }
-
-    this.phaseContainer.rotation = Math.PI - phase;
+  private updatePhaseRotation() {
+    this.phaseContainer.rotation = Math.PI - this._phase;
   }
 
-  protected borderColor(probability: number) {
-    if (probability === 0) {
+  private borderColor() {
+    if (this.probability === 0) {
       return Colors["border-component-strong-disabled"];
     }
 
     return Colors["border-component-strong"];
+  }
+
+  private get sizeInPx() {
+    return Spacing.size.qubitCircle[this._size];
   }
 }
