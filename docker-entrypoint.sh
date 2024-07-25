@@ -4,7 +4,7 @@
 set -e
 
 # Build the Vite project
-cd /qni-gl/vite
+cd /qni-gl/frontend
 yarn build
 
 # Start gunicorn
@@ -15,5 +15,5 @@ gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 nginx
 
 # Execute any passed command
-cd /qni-gl/vite
+cd /qni-gl/frontend
 exec "$@"

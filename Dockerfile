@@ -73,7 +73,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Install dependencies
-WORKDIR /qni-gl/vite
+WORKDIR /qni-gl/frontend
 RUN yarn
 
 CMD ["/bin/bash"]
