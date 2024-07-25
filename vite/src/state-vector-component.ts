@@ -38,7 +38,7 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 2) {
       this.qubitCircleSize = "xl";
       this.elementsMargin = spacingInPx(0.5);
-      this.cols = 4;
+      this.cols = 2;
     } else if (this.qubitCount == 3) {
       this.qubitCircleSize = "xl";
       this.elementsMargin = spacingInPx(0.5);
@@ -46,7 +46,7 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 4) {
       this.qubitCircleSize = "lg";
       this.elementsMargin = spacingInPx(0.5);
-      this.cols = 8;
+      this.cols = 4;
     } else if (this.qubitCount == 5) {
       this.qubitCircleSize = "base";
       this.elementsMargin = spacingInPx(0.5);
@@ -54,7 +54,7 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 6) {
       this.qubitCircleSize = "base";
       this.elementsMargin = spacingInPx(0.5);
-      this.cols = 16;
+      this.cols = 8;
     } else if (this.qubitCount == 7) {
       this.qubitCircleSize = "base";
       this.elementsMargin = spacingInPx(0.5);
@@ -62,16 +62,25 @@ export class StateVectorComponent extends Container {
     } else if (this.qubitCount == 8) {
       this.qubitCircleSize = "sm";
       this.elementsMargin = spacingInPx(0.5);
-      this.cols = 32;
+      this.cols = 16;
     } else if (this.qubitCount == 9) {
       this.qubitCircleSize = "xs";
-      this.cols = 32;
       this.elementsMargin = spacingInPx(0.25);
+      this.cols = 32;
     } else if (this.qubitCount == 10) {
       this.qubitCircleSize = "xs";
-      this.cols = 64;
       this.elementsMargin = spacingInPx(0.25);
+      this.cols = 32;
+    } else if (this.qubitCount == 11) {
+      this.qubitCircleSize = "xs";
+      this.elementsMargin = spacingInPx(0.25);
+      this.cols = 64;
+    } else if (this.qubitCount == 12) {
+      this.qubitCircleSize = "xs";
+      this.elementsMargin = spacingInPx(0.25);
+      this.cols = 64;
     }
+
     this.rows = Math.ceil(this.qubitCircleCount / this.cols);
     this.startIndexX = 0;
     this.startIndexY = 0;
@@ -170,11 +179,6 @@ export class StateVectorComponent extends Container {
 
     this._visibleAmplitudes.clear();
 
-    // console.log(`startIndexX: ${this.startIndexX}`);
-    // console.log(`endIndexX: ${endIndexX}`);
-    // console.log(`startIndexY: ${this.startIndexY}`);
-    // console.log(`endIndexY: ${endIndexY}`);
-
     // 新しい円を追加または既存の円を更新
     for (let y = this.startIndexY; y < endIndexY; y++) {
       for (let x = this.startIndexX; x < endIndexX; x++) {
@@ -186,9 +190,12 @@ export class StateVectorComponent extends Container {
 
         let circle = currentCircles.get(key);
         if (!circle) {
-          circle = new QubitCircle(0, 0, this.qubitCircleSize);
+          circle = new QubitCircle(this.qubitCircleSize);
           circle.x = posX;
           circle.y = posY;
+          console.log(
+            `new qubitCircle: size=${this.qubitCircleSize}, x=${posX}, y=${posY}`
+          );
           this.addChild(circle);
         } else {
           circle.size = this.qubitCircleSize; // 既存の円のサイズを更新
