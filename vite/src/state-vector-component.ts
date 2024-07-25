@@ -4,10 +4,41 @@ import { QubitCircle } from "./qubit-circle";
 import { spacingInPx } from "./util";
 import { Size } from "./size";
 import { Spacing } from "./spacing";
+import { need, logger } from "./util";
 
 export const STATE_VECTOR_EVENTS = {
   CHANGE: "state-vector:change",
   AMPLITUDES_VISIBLE: "state-vector:amplitudes-visible",
+};
+
+const QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
+  1: "xl",
+  2: "xl",
+  3: "xl",
+  4: "lg",
+  5: "base",
+  6: "base",
+  7: "base",
+  8: "sm",
+  9: "sm",
+  10: "xs",
+  11: "xs",
+  12: "xs",
+};
+
+const STATE_VECTOR_COLS_MAP: { [key: number]: number } = {
+  1: 2,
+  2: 2,
+  3: 4,
+  4: 4,
+  5: 8,
+  6: 8,
+  7: 16,
+  8: 16,
+  9: 32,
+  10: 32,
+  11: 64,
+  12: 64,
 };
 
 /**
@@ -30,37 +61,13 @@ export class StateVectorComponent extends Container {
   private currentScrollRect: PIXI.Rectangle;
 
   set qubitCount(value: number) {
+    need(
+      value <= this.maxQubitCount,
+      "qubitCount must not exceed maxQubitCount. Attempted to set {qubitCount}, but maxQubitCount is {maxQubitCount}.",
+      { value, maxQubitCount: this.maxQubitCount }
+    );
+
     this._qubitCount = value;
-
-    const sizeMap: { [key: number]: Size } = {
-      1: "xl",
-      2: "xl",
-      3: "xl",
-      4: "lg",
-      5: "base",
-      6: "base",
-      7: "base",
-      8: "sm",
-      9: "xs",
-      10: "xs",
-      11: "xs",
-      12: "xs",
-    };
-
-    const colsMap: { [key: number]: number } = {
-      1: 2,
-      2: 2,
-      3: 4,
-      4: 4,
-      5: 8,
-      6: 8,
-      7: 16,
-      8: 16,
-      9: 32,
-      10: 32,
-      11: 64,
-      12: 64,
-    };
 
     // 13 qubit 以上の場合のデフォルト値
     this.qubitCircleSize = "xs";
@@ -69,8 +76,8 @@ export class StateVectorComponent extends Container {
 
     // マッピングに基づいてサイズと列数を設定
     if (value <= 12) {
-      this.qubitCircleSize = sizeMap[value];
-      this.cols = colsMap[value];
+      this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[value];
+      this.cols = STATE_VECTOR_COLS_MAP[value];
       this.elementsMargin = value <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
     } else if (value <= this.maxQubitCount) {
       // 13-32 qubit の場合、列数を動的に調整
@@ -104,11 +111,11 @@ export class StateVectorComponent extends Container {
   ) {
     super();
 
+    this.maxQubitCount = maxQubitCount;
     this.currentScrollRect = scrollRect;
     this.backgroundGraphics = new PIXI.Graphics();
     this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
-    this.maxQubitCount = maxQubitCount;
     this.adjustScroll(scrollRect);
   }
 
@@ -119,7 +126,7 @@ export class StateVectorComponent extends Container {
     this.drawQubitCircles();
 
     const endTime = performance.now();
-    console.log(`Draw execution time: ${endTime - startTime} ms`);
+    logger.log(`Draw execution time: ${endTime - startTime} ms`);
   }
 
   private drawBackground() {

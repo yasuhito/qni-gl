@@ -39,3 +39,25 @@ export function rectIntersect(
   }
   return true;
 }
+
+export function need(
+  condition: boolean,
+  message: string,
+  errorInfo?: Record<string, unknown>
+): asserts condition {
+  if (!condition) {
+    const errorMessage = Object.entries(errorInfo || {}).reduce(
+      (msg, [key, value]) => msg.replace(`{${key}}`, String(value)),
+      message
+    );
+    throw new Error(errorMessage);
+  }
+}
+
+export const logger = {
+  log: (message: string) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log(message);
+    }
+  },
+};
