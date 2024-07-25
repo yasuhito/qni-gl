@@ -24,7 +24,7 @@ function need(
 export class QubitCircle extends Container {
   private _probability = 0;
   private _phase = 0;
-  private _size: Size = "xs";
+  private _size: Size = "xl";
   private probabilityCircle: PIXI.Graphics;
   private border: PIXI.Graphics;
   private phaseContainer: PIXI.Container;
@@ -37,6 +37,7 @@ export class QubitCircle extends Container {
     this.phaseContainer = new PIXI.Container();
     this.border = new PIXI.Graphics();
     this.phaseHand = new PIXI.Graphics();
+
     this.size = size;
 
     this.initializeGraphics();
@@ -152,6 +153,8 @@ export class QubitCircle extends Container {
   private hideProbabilityCircle(): void {
     this.probabilityCircle.alpha = 0.01;
   }
+
+  // border methods
 
   private updateBorder(): void {
     this.border
