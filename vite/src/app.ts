@@ -311,6 +311,7 @@ export class App {
 
     // TODO: メソッドに切り出す
     this.element.dataset.app = JSON.stringify(this);
+
     this.updateStateVectorComponentQubitCount();
 
     for (const circuitStep of this.circuit.steps) {

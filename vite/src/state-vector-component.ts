@@ -68,28 +68,21 @@ export class StateVectorComponent extends Container {
     );
 
     this._qubitCount = value;
+    this.updateQubitSettings();
+    this.draw();
+    this.emit(STATE_VECTOR_EVENTS.CHANGE, this.qubitCount);
+  }
 
-    // 13 qubit 以上の場合のデフォルト値
-    this.qubitCircleSize = "xs";
-    this.elementsMargin = spacingInPx(0.25);
-    this.cols = 64;
-
-    // マッピングに基づいてサイズと列数を設定
-    if (value <= 12) {
-      this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[value];
-      this.cols = STATE_VECTOR_COLS_MAP[value];
-      this.elementsMargin = value <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
-    } else if (value <= this.maxQubitCount) {
-      // 13-32 qubit の場合、列数を動的に調整
-      this.cols = Math.pow(2, Math.ceil(value / 2));
-    }
-
+  private updateQubitSettings(): void {
+    this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[this._qubitCount] || "xs";
+    this.elementsMargin =
+      this._qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
+    this.cols =
+      STATE_VECTOR_COLS_MAP[this._qubitCount] ||
+      Math.pow(2, Math.ceil(this._qubitCount / 2));
     this.rows = Math.ceil(this.qubitCircleCount / this.cols);
     this.startIndexX = 0;
     this.startIndexY = 0;
-
-    this.draw();
-    this.emit(STATE_VECTOR_EVENTS.CHANGE, this.qubitCount);
   }
 
   get qubitCount() {
@@ -152,48 +145,63 @@ export class StateVectorComponent extends Container {
     this.backgroundGraphics.endFill();
   }
 
-  private drawQubitCircles() {
+  private drawQubitCircles(): void {
     const qubitCircleSize = Spacing.size.qubitCircle[this.qubitCircleSize];
     const cellSize = qubitCircleSize + this.elementsMargin;
-
-    // scrollRect を使用して endIndexX と endIndexY を計算
-    const endIndexX = Math.min(
-      Math.ceil(
-        (this.currentScrollRect.x +
-          this.currentScrollRect.width -
-          this._padding) /
-          cellSize
-      ),
+    const endIndexX = this.calculateEndIndex(
+      this.currentScrollRect.x,
+      this.currentScrollRect.width,
+      cellSize,
       this.cols
     );
-    const endIndexY = Math.min(
-      Math.ceil(
-        (this.currentScrollRect.y +
-          this.currentScrollRect.height -
-          this._padding) /
-          cellSize
-      ),
+    const endIndexY = this.calculateEndIndex(
+      this.currentScrollRect.y,
+      this.currentScrollRect.height,
+      cellSize,
       this.rows
     );
 
-    // 現在の QubitCircle をマップに格納
-    const currentCircles = new Map<string, QubitCircle>();
-    this.children.forEach((child) => {
-      if (child instanceof QubitCircle) {
-        const key = `${child.x},${child.y}`;
-        currentCircles.set(key, child);
-      }
-    });
+    const currentCircles = this.mapCurrentQubitCircles();
 
     this._visibleAmplitudes.clear();
 
-    // 新しい円を追加または既存の円を更新
+    this.updateQubitCircles(endIndexX, endIndexY, cellSize, currentCircles);
+
+    this.removeUnusedQubitCircles(currentCircles);
+
+    this.emit(STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE, this.visibleAmplitudes);
+  }
+
+  private calculateEndIndex(
+    start: number,
+    size: number,
+    cellSize: number,
+    max: number
+  ): number {
+    return Math.min(Math.ceil((start + size - this._padding) / cellSize), max);
+  }
+
+  private mapCurrentQubitCircles(): Map<string, QubitCircle> {
+    const currentCircles = new Map<string, QubitCircle>();
+    this.children.forEach((each) => {
+      if (each instanceof QubitCircle) {
+        const key = `${each.x},${each.y}`;
+        currentCircles.set(key, each);
+      }
+    });
+    return currentCircles;
+  }
+
+  private updateQubitCircles(
+    endIndexX: number,
+    endIndexY: number,
+    cellSize: number,
+    currentCircles: Map<string, QubitCircle>
+  ): void {
     for (let y = this.startIndexY; y < endIndexY; y++) {
       for (let x = this.startIndexX; x < endIndexX; x++) {
-        const posX =
-          this._padding + x * (qubitCircleSize + this.elementsMargin);
-        const posY =
-          this._padding + y * (qubitCircleSize + this.elementsMargin);
+        const posX = this._padding + x * cellSize;
+        const posY = this._padding + y * cellSize;
         const key = `${posX},${posY}`;
 
         let circle = currentCircles.get(key);
@@ -203,24 +211,23 @@ export class StateVectorComponent extends Container {
           circle.y = posY;
           this.addChild(circle);
         } else {
-          circle.size = this.qubitCircleSize; // 既存の円のサイズを更新
+          circle.size = this.qubitCircleSize;
           currentCircles.delete(key);
         }
 
-        // 振幅のインデックスを計算して追加
         const amplitudeIndex = y * this.cols + x;
         this._visibleAmplitudes.add(amplitudeIndex);
       }
     }
+  }
 
-    // 不要な QubitCircle を削除
-    currentCircles.forEach((circle) => {
-      this.removeChild(circle);
-      circle.destroy();
+  private removeUnusedQubitCircles(
+    currentCircles: Map<string, QubitCircle>
+  ): void {
+    currentCircles.forEach((each) => {
+      this.removeChild(each);
+      each.destroy();
     });
-
-    // 可視振幅が変更されたことをイベントで通知
-    this.emit(STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE, this.visibleAmplitudes);
   }
 
   adjustScroll(scrollRect: PIXI.Rectangle) {
