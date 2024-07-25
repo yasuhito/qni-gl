@@ -19,7 +19,7 @@ jobs:
         working-directory: backend/
       - name: Install dependencies (yarn)
         run: yarn
-        working-directory: frontnend/
+        working-directory: ./frontnend
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps
         working-directory: frontend/
