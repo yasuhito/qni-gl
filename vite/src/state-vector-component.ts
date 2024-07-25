@@ -18,6 +18,7 @@ export class StateVectorComponent extends Container {
   qubitCircleSize: Size = "xl";
 
   private _qubitCount = 1;
+  private maxQubitCount: number;
   private cols: number = 2;
   private rows: number = 1;
   private startIndexX: number = 0;
@@ -31,54 +32,49 @@ export class StateVectorComponent extends Container {
   set qubitCount(value: number) {
     this._qubitCount = value;
 
-    if (this.qubitCount == 1) {
-      this.qubitCircleSize = "xl";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 2;
-    } else if (this.qubitCount == 2) {
-      this.qubitCircleSize = "xl";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 2;
-    } else if (this.qubitCount == 3) {
-      this.qubitCircleSize = "xl";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 4;
-    } else if (this.qubitCount == 4) {
-      this.qubitCircleSize = "lg";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 4;
-    } else if (this.qubitCount == 5) {
-      this.qubitCircleSize = "base";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 8;
-    } else if (this.qubitCount == 6) {
-      this.qubitCircleSize = "base";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 8;
-    } else if (this.qubitCount == 7) {
-      this.qubitCircleSize = "base";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 16;
-    } else if (this.qubitCount == 8) {
-      this.qubitCircleSize = "sm";
-      this.elementsMargin = spacingInPx(0.5);
-      this.cols = 16;
-    } else if (this.qubitCount == 9) {
-      this.qubitCircleSize = "xs";
-      this.elementsMargin = spacingInPx(0.25);
-      this.cols = 32;
-    } else if (this.qubitCount == 10) {
-      this.qubitCircleSize = "xs";
-      this.elementsMargin = spacingInPx(0.25);
-      this.cols = 32;
-    } else if (this.qubitCount == 11) {
-      this.qubitCircleSize = "xs";
-      this.elementsMargin = spacingInPx(0.25);
-      this.cols = 64;
-    } else if (this.qubitCount == 12) {
-      this.qubitCircleSize = "xs";
-      this.elementsMargin = spacingInPx(0.25);
-      this.cols = 64;
+    const sizeMap: { [key: number]: Size } = {
+      1: "xl",
+      2: "xl",
+      3: "xl",
+      4: "lg",
+      5: "base",
+      6: "base",
+      7: "base",
+      8: "sm",
+      9: "xs",
+      10: "xs",
+      11: "xs",
+      12: "xs",
+    };
+
+    const colsMap: { [key: number]: number } = {
+      1: 2,
+      2: 2,
+      3: 4,
+      4: 4,
+      5: 8,
+      6: 8,
+      7: 16,
+      8: 16,
+      9: 32,
+      10: 32,
+      11: 64,
+      12: 64,
+    };
+
+    // 13 qubit 以上の場合のデフォルト値
+    this.qubitCircleSize = "xs";
+    this.elementsMargin = spacingInPx(0.25);
+    this.cols = 64;
+
+    // マッピングに基づいてサイズと列数を設定
+    if (value <= 12) {
+      this.qubitCircleSize = sizeMap[value];
+      this.cols = colsMap[value];
+      this.elementsMargin = value <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
+    } else if (value <= this.maxQubitCount) {
+      // 13-32 qubit の場合、列数を動的に調整
+      this.cols = Math.pow(2, Math.ceil(value / 2));
     }
 
     this.rows = Math.ceil(this.qubitCircleCount / this.cols);
@@ -101,13 +97,18 @@ export class StateVectorComponent extends Container {
     return Array.from(this._visibleAmplitudes);
   }
 
-  constructor(qubitCount: number, scrollRect: PIXI.Rectangle) {
+  constructor(
+    qubitCount: number,
+    maxQubitCount: number,
+    scrollRect: PIXI.Rectangle
+  ) {
     super();
 
     this.currentScrollRect = scrollRect;
     this.backgroundGraphics = new PIXI.Graphics();
     this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
+    this.maxQubitCount = maxQubitCount;
     this.adjustScroll(scrollRect);
   }
 
@@ -193,9 +194,6 @@ export class StateVectorComponent extends Container {
           circle = new QubitCircle(this.qubitCircleSize);
           circle.x = posX;
           circle.y = posY;
-          console.log(
-            `new qubitCircle: size=${this.qubitCircleSize}, x=${posX}, y=${posY}`
-          );
           this.addChild(circle);
         } else {
           circle.size = this.qubitCircleSize; // 既存の円のサイズを更新
