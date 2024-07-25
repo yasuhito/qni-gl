@@ -1,22 +1,22 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
-import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { viteStaticCopy } from "vite-plugin-static-copy";
 
 export default defineConfig({
   build: {
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
+          if (id.includes("node_modules")) {
             return id
               .toString()
-              .split('node_modules/')[1]
-              .split('/')[0]
+              .split("node_modules/")[1]
+              .split("/")[0]
               .toString();
           }
-        }
-      }
-    }
+        },
+      },
+    },
   },
   plugins: [
     VitePWA({
@@ -31,16 +31,20 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'assets',
-          dest: ''
-        }
-      ]
-    })
+          src: "assets",
+          dest: "",
+        },
+      ],
+    }),
   ],
   test: {
     browser: {
-      enabled: false,
-      name: "chrome", // browser name is required
+      provider: "playwright", // or 'webdriverio'
+      enabled: true,
+      name: "chromium", // browser name is required
     },
+  },
+  optimizeDeps: {
+    exclude: ["fsevents"],
   },
 });

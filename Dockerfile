@@ -26,7 +26,7 @@
 #    - This will start the Vite server using the code copied into the container during the build.
 
 # Use the official Playwright Docker image
-FROM mcr.microsoft.com/playwright:v1.44.1-jammy
+FROM mcr.microsoft.com/playwright:v1.45.3-jammy
 
 # Set the timezone
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime

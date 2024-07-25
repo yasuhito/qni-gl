@@ -1,4 +1,8 @@
-import * as tailwindColors from "tailwindcss/colors";
+import resolveConfig from "tailwindcss/resolveConfig";
+import { Config } from "tailwindcss/types/config";
+
+const tailwindConfig = resolveConfig({} as Config);
+const tailwindColors = tailwindConfig.theme.colors;
 
 // 色の命名規則については以下の動画を参照:
 // The hardest part about building dark mode is that people think it’s easy - Figma team (Config 2022)
