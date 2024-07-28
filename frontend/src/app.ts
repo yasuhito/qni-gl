@@ -15,6 +15,7 @@ import {
 } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
+import { rectIntersect } from "./util";
 
 export class App {
   static elementId = "app";
@@ -317,12 +318,13 @@ export class App {
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
         if (
-          each.isSnappable(
+          this.isSnappable(
             gate,
             pointerPosition.x,
             pointerPosition.y,
             gate.width,
-            gate.height
+            gate.height,
+            each
           )
         ) {
           dropzone = each;
@@ -341,6 +343,74 @@ export class App {
     this.pixiApp.stage.cursor = "grabbing";
 
     this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
+  }
+
+  /**
+   * 指定したゲートがドロップゾーンにスナップできるかどうかを返す。
+   *
+   *        x+size/4+((1-snapRatio)*size)/2,
+   *        y+size/4+((1-snapRatio)*size)/2
+   *                  │
+   *        x+size/4  │
+   *              │   │
+   *     x,y      ▼   │
+   *       ┌──────┬───┼──────────────────────────┬──────┐  ┬
+   *       │      │   ▼                          │      │  │
+   *       │      │   ┏━━━━━━━━━━━━━━━━━━━━━━━┓  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃       snapzone        ┃  │      │  │  size
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┃                       ┃  │      │  │
+   *       │      │   ┗━━━━━━━━━━━━━━━━━━━━━━━┛  │      │  │
+   *       │      │                              │      │  │
+   *       └──────┴──────────────────────────────┴──────┘  ┴
+   *
+   *              ├──────────────────────────────┤
+   *                            size
+   *
+   * @param gateCenterX ゲート中心の x 座標
+   * @param gateCenterY ゲート中心の y 座標
+   * @param gateWidth ゲートの幅
+   * @param gateHeight ゲートの高さ
+   */
+  private isSnappable(
+    gate: GateComponent,
+    gateCenterX: number,
+    gateCenterY: number,
+    gateWidth: number,
+    gateHeight: number,
+    dropzone: DropzoneComponent
+  ) {
+    if (dropzone.operation !== null && dropzone.operation !== gate) {
+      return false;
+    }
+
+    const snapRatio = 0.5;
+    const gateX = gateCenterX - gateWidth / 2;
+    const gateY = gateCenterY - gateHeight / 2;
+    const dropboxPosition = dropzone.getGlobalPosition();
+    const snapzoneX =
+      dropboxPosition.x +
+      dropzone.size / 4 +
+      ((1 - snapRatio) * dropzone.size) / 2;
+    const snapzoneY = dropboxPosition.y + ((1 - snapRatio) * dropzone.size) / 2;
+    const snapzoneWidth = dropzone.size * snapRatio;
+    const snapzoneHeight = dropzone.size * snapRatio;
+
+    return rectIntersect(
+      gateX,
+      gateY,
+      gateWidth,
+      gateHeight,
+      snapzoneX,
+      snapzoneY,
+      snapzoneWidth,
+      snapzoneHeight
+    );
   }
 
   toJSON() {
@@ -370,12 +440,13 @@ export class App {
     for (const circuitStep of this.circuit.steps) {
       for (const dropzone of circuitStep.dropzones) {
         if (
-          dropzone.isSnappable(
+          this.isSnappable(
             gate,
             pointerPosition.x,
             pointerPosition.y,
             gate.width,
-            gate.height
+            gate.height,
+            dropzone
           )
         ) {
           snapDropzone = dropzone;
