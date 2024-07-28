@@ -86,7 +86,7 @@ export class StateVectorFrame extends PIXI.Container {
   }
 
   private initStateVector() {
-    this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
+    this.stateVector.on(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, () => {
       this.updateStateVectorPosition();
     });
   }

@@ -173,7 +173,7 @@ export class App {
     );
 
     this.stateVector.on(
-      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
       this.handleVisibleAmplitudesChange.bind(this)
     );
 
@@ -522,7 +522,7 @@ export class App {
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
       stepIndex: this.circuit.activeStepIndex,
-      targets: this.stateVector.visibleAmplitudes,
+      targets: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
     });
   }

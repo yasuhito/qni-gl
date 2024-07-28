@@ -14,7 +14,7 @@ describe("StateVectorComponent", () => {
   it("should initialize with correct default values", () => {
     expect(stateVector.qubitCount).toBe(1);
     expect(stateVector.qubitCircleCount).toBe(2);
-    expect(stateVector.visibleAmplitudes).toEqual([0, 1]);
+    expect(stateVector.visibleQubitCircleIndices).toEqual([0, 1]);
   });
 
   it("should update qubit count correctly", () => {
@@ -32,7 +32,10 @@ describe("StateVectorComponent", () => {
   it("should emit CHANGE event when qubit count changes", () => {
     const mockEmit = vi.spyOn(stateVector, "emit");
     stateVector.qubitCount = 2;
-    expect(mockEmit).toHaveBeenCalledWith(STATE_VECTOR_EVENTS.CHANGE, 2);
+    expect(mockEmit).toHaveBeenCalledWith(
+      STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED,
+      2
+    );
   });
 
   it("should adjust scroll correctly", () => {
@@ -40,7 +43,7 @@ describe("StateVectorComponent", () => {
     const mockEmit = vi.spyOn(stateVector, "emit");
     stateVector.adjustScroll(newScrollRect);
     expect(mockEmit).toHaveBeenCalledWith(
-      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
       expect.any(Array)
     );
   });
@@ -55,7 +58,7 @@ describe("StateVectorComponent", () => {
     stateVector.qubitCount = 4; // 16個のQubitCircleを作成
     const newScrollRect = new PIXI.Rectangle(100, 100, 100, 100);
     stateVector.adjustScroll(newScrollRect);
-    expect(stateVector.visibleAmplitudes.length).toBeLessThan(16);
+    expect(stateVector.visibleQubitCircleIndices.length).toBeLessThan(16);
   });
 
   it("should update QubitCircle size when qubit count changes", () => {

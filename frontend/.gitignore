@@ -13,6 +13,7 @@ yarn-error.log*
 *.tsbuildinfo
 .npm
 .eslintcache
+.vite/
 /test-results/
 /playwright-report/
 /playwright/.cache/
