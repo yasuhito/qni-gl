@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { StateVectorFrame } from "../../src/state-vector-frame";
+import { FederatedWheelEvent } from "pixi.js";
 
 describe("StateVectorFrame", () => {
   beforeEach(() => {
@@ -23,16 +24,16 @@ describe("StateVectorFrame", () => {
     expect(frame.height).toBe(150);
   });
 
-  // it("should handle scroll events", () => {
-  //   const frame = StateVectorFrame.getInstance(100, 100, 5);
-  //   const scrollEvent = new WheelEvent("wheel", { deltaY: 10, deltaX: 5 });
+  it("should handle scroll events", () => {
+    const frame = StateVectorFrame.getInstance(100, 100, 5);
+    const scrollEvent: FederatedWheelEvent = new WheelEvent("wheel", {
+      deltaY: 10,
+      deltaX: 5,
+    }) as FederatedWheelEvent;
+    const adjustScrollSpy = vi.spyOn(frame.stateVector, "adjustScroll");
 
-  //   // スクロールイベントをエミュレート
-  //   frame.emit("wheel", scrollEvent);
+    frame.emit("wheel", scrollEvent);
 
-  //   // スクロール後の状態を検証
-  //   // 注意: 実際の動作はStateVectorComponentの実装に依存します
-  //   // ここでは、スクロールイベントがエラーなく処理されることのみを確認しています
-  //   expect(() => frame.emit("wheel", scrollEvent)).not.toThrow();
-  // });
+    expect(adjustScrollSpy).toHaveBeenCalled();
+  });
 });
