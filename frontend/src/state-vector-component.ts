@@ -1,18 +1,16 @@
 import * as PIXI from "pixi.js";
+import { Colors } from "./colors";
 import { Container } from "pixi.js";
 import { QubitCircle } from "./qubit-circle";
-import { spacingInPx } from "./util";
 import { Size } from "./size";
 import { Spacing } from "./spacing";
-import { need, logger } from "./util";
+import { logger, need, spacingInPx } from "./util";
 
-// StateVectorComponent が発生させるイベント
 export const STATE_VECTOR_EVENTS = {
   QUBIT_COUNT_CHANGED: "state-vector:qubit-count-changed",
   VISIBLE_QUBIT_CIRCLES_CHANGED: "state-vector:visible-qubit-circles-changed",
 };
 
-// 量子ビット数に応じた QubitCircle のサイズ
 const QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
   1: "xl",
   2: "xl",
@@ -90,16 +88,16 @@ export class StateVectorComponent extends Container {
   constructor(
     qubitCount: number,
     maxQubitCount: number,
-    scrollRect: PIXI.Rectangle
+    viewport: PIXI.Rectangle
   ) {
     super();
 
     this.maxQubitCount = maxQubitCount;
-    this.currentViewport = scrollRect;
+    this.currentViewport = viewport;
     this.backgroundGraphics = new PIXI.Graphics();
     this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
-    this.updateVisibleQubitCircles(scrollRect);
+    this.updateVisibleQubitCircles(viewport);
   }
 
   private draw() {
@@ -129,7 +127,7 @@ export class StateVectorComponent extends Container {
     }
 
     this.backgroundGraphics.clear();
-    this.backgroundGraphics.beginFill(0xffffff, 1);
+    this.backgroundGraphics.beginFill(Colors["bg-component"], 1);
     this.backgroundGraphics.drawRect(0, 0, totalWidth, totalHeight);
     this.backgroundGraphics.endFill();
   }
@@ -153,7 +151,7 @@ export class StateVectorComponent extends Container {
 
     this._visibleQubitCircleIndices.clear();
 
-    this.updateQubitCircles(endIndexX, endIndexY, cellSize, currentCircles);
+    this.updateQubitCircles(endIndexX, endIndexY, currentCircles);
 
     this.removeUnusedQubitCircles(currentCircles);
 
@@ -174,21 +172,24 @@ export class StateVectorComponent extends Container {
 
   private mapCurrentQubitCircles(): Map<string, QubitCircle> {
     const currentCircles = new Map<string, QubitCircle>();
+
     this.children.forEach((each) => {
       if (each instanceof QubitCircle) {
         const key = `${each.x},${each.y}`;
         currentCircles.set(key, each);
       }
     });
+
     return currentCircles;
   }
 
   private updateQubitCircles(
     endIndexX: number,
     endIndexY: number,
-    cellSize: number,
     currentCircles: Map<string, QubitCircle>
   ): void {
+    const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
+
     for (let y = this.visibleQubitCirclesStartIndexY; y < endIndexY; y++) {
       for (let x = this.visibleQubitCirclesStartIndexX; x < endIndexX; x++) {
         const posX = this._padding + x * cellSize;
