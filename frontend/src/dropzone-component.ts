@@ -3,7 +3,6 @@ import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
 import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
-import { rectIntersect } from "./util";
 import { spacingInPx } from "./util";
 
 export enum WireType {
@@ -86,71 +85,6 @@ export class DropzoneComponent extends Container {
 
     this.redrawWires();
     this.redrawConnections();
-  }
-
-  /**
-   * 指定したゲートがこのドロップゾーンにスナップできるかどうかを返す。
-   *
-   *        x+size/4+((1-snapRatio)*size)/2,
-   *        y+size/4+((1-snapRatio)*size)/2
-   *                  │
-   *        x+size/4  │
-   *              │   │
-   *     x,y      ▼   │
-   *       ┌──────┬───┼──────────────────────────┬──────┐  ┬
-   *       │      │   ▼                          │      │  │
-   *       │      │   ┏━━━━━━━━━━━━━━━━━━━━━━━┓  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃       snapzone        ┃  │      │  │  size
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┃                       ┃  │      │  │
-   *       │      │   ┗━━━━━━━━━━━━━━━━━━━━━━━┛  │      │  │
-   *       │      │                              │      │  │
-   *       └──────┴──────────────────────────────┴──────┘  ┴
-   *
-   *              ├──────────────────────────────┤
-   *                            size
-   *
-   * @param gateCenterX ゲート中心の x 座標
-   * @param gateCenterY ゲート中心の y 座標
-   * @param gateWidth ゲートの幅
-   * @param gateHeight ゲートの高さ
-   */
-  isSnappable(
-    gate: GateComponent,
-    gateCenterX: number,
-    gateCenterY: number,
-    gateWidth: number,
-    gateHeight: number
-  ) {
-    if (this.operation !== null && this.operation !== gate) {
-      return false;
-    }
-
-    const snapRatio = 0.5;
-    const gateX = gateCenterX - gateWidth / 2;
-    const gateY = gateCenterY - gateHeight / 2;
-    const dropboxPosition = this.getGlobalPosition();
-    const snapzoneX =
-      dropboxPosition.x + this.size / 4 + ((1 - snapRatio) * this.size) / 2;
-    const snapzoneY = dropboxPosition.y + ((1 - snapRatio) * this.size) / 2;
-    const snapzoneWidth = this.size * snapRatio;
-    const snapzoneHeight = this.size * snapRatio;
-
-    return rectIntersect(
-      gateX,
-      gateY,
-      gateWidth,
-      gateHeight,
-      snapzoneX,
-      snapzoneY,
-      snapzoneWidth,
-      snapzoneHeight
-    );
   }
 
   snap(gate: GateComponent) {
