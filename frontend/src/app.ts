@@ -253,7 +253,7 @@ export class App {
     [key: number]: [number, number];
   }) {
     for (const [index, [real, imag]] of Object.entries(amplitudes)) {
-      const qubitCircle = this.stateVector.getQubitCircleAt(parseInt(index));
+      const qubitCircle = this.stateVector.qubitCircleAt(parseInt(index));
 
       if (qubitCircle) {
         const amplitude = new Complex(real, imag);

@@ -28,22 +28,6 @@ const QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
   12: "xs",
 };
 
-// 量子ビット数に応じた列数
-const STATE_VECTOR_COLS_MAP: { [key: number]: number } = {
-  1: 2,
-  2: 2,
-  3: 4,
-  4: 4,
-  5: 8,
-  6: 8,
-  7: 16,
-  8: 16,
-  9: 32,
-  10: 32,
-  11: 64,
-  12: 64,
-};
-
 /**
  * Represents a component that visualizes the state vector.
  * @noInheritDoc
@@ -61,7 +45,7 @@ export class StateVectorComponent extends Container {
   private _padding: number = 0;
   private backgroundGraphics: PIXI.Graphics;
   private _visibleQubitCircleIndices: Set<number> = new Set();
-  private currentScrollRect: PIXI.Rectangle;
+  private currentViewport: PIXI.Rectangle;
 
   // 量子ビット数をセット
   set qubitCount(value: number) {
@@ -82,9 +66,7 @@ export class StateVectorComponent extends Container {
     this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[this._qubitCount] || "xs";
     this.elementsMargin =
       this._qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
-    this.cols =
-      STATE_VECTOR_COLS_MAP[this._qubitCount] ||
-      Math.pow(2, Math.ceil(this._qubitCount / 2));
+    this.cols = Math.pow(2, Math.ceil(this._qubitCount / 2));
     this.rows = Math.ceil(this.qubitCircleCount / this.cols);
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
@@ -113,11 +95,11 @@ export class StateVectorComponent extends Container {
     super();
 
     this.maxQubitCount = maxQubitCount;
-    this.currentScrollRect = scrollRect;
+    this.currentViewport = scrollRect;
     this.backgroundGraphics = new PIXI.Graphics();
     this.addChild(this.backgroundGraphics);
     this.qubitCount = qubitCount;
-    this.adjustScroll(scrollRect);
+    this.updateVisibleQubitCircles(scrollRect);
   }
 
   private draw() {
@@ -155,14 +137,14 @@ export class StateVectorComponent extends Container {
   private drawQubitCircles(): void {
     const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
     const endIndexX = this.calculateEndIndex(
-      this.currentScrollRect.x,
-      this.currentScrollRect.width,
+      this.currentViewport.x,
+      this.currentViewport.width,
       cellSize,
       this.cols
     );
     const endIndexY = this.calculateEndIndex(
-      this.currentScrollRect.y,
-      this.currentScrollRect.height,
+      this.currentViewport.y,
+      this.currentViewport.height,
       cellSize,
       this.rows
     );
@@ -224,8 +206,8 @@ export class StateVectorComponent extends Container {
           currentCircles.delete(key);
         }
 
-        const amplitudeIndex = y * this.cols + x;
-        this._visibleQubitCircleIndices.add(amplitudeIndex);
+        const index = y * this.cols + x;
+        this._visibleQubitCircleIndices.add(index);
       }
     }
   }
@@ -239,21 +221,17 @@ export class StateVectorComponent extends Container {
     });
   }
 
-  private get qubitCircleSizeInPx(): number {
-    return Spacing.size.qubitCircle[this.qubitCircleSize];
-  }
-
-  // スクロール位置 (scrollRect) に基いて表示される QubitCircle を調整
-  adjustScroll(scrollRect: PIXI.Rectangle) {
+  // 表示範囲 (viewport) に基いて表示される QubitCircle を更新
+  updateVisibleQubitCircles(viewport: PIXI.Rectangle) {
     const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
 
     const newVisibleQubitCirclesStartIndexX = Math.max(
       0,
-      Math.floor((scrollRect.x - this._padding) / cellSize)
+      Math.floor((viewport.x - this._padding) / cellSize)
     );
     const newVisibleQubitCirclesStartIndexY = Math.max(
       0,
-      Math.floor((scrollRect.y - this._padding) / cellSize)
+      Math.floor((viewport.y - this._padding) / cellSize)
     );
 
     if (
@@ -263,7 +241,7 @@ export class StateVectorComponent extends Container {
     ) {
       this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
-      this.currentScrollRect = scrollRect.clone();
+      this.currentViewport = viewport.clone();
 
       this.draw();
 
@@ -274,7 +252,7 @@ export class StateVectorComponent extends Container {
     }
   }
 
-  getQubitCircleAt(index: number): QubitCircle | undefined {
+  qubitCircleAt(index: number): QubitCircle | undefined {
     const x = index % this.cols;
     const y = Math.floor(index / this.cols);
     const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
@@ -285,5 +263,9 @@ export class StateVectorComponent extends Container {
       (child): child is QubitCircle =>
         child instanceof QubitCircle && child.x === posX && child.y === posY
     );
+  }
+
+  private get qubitCircleSizeInPx(): number {
+    return Spacing.size.qubitCircle[this.qubitCircleSize];
   }
 }

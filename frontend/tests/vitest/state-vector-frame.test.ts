@@ -30,7 +30,10 @@ describe("StateVectorFrame", () => {
       deltaY: 10,
       deltaX: 5,
     }) as FederatedWheelEvent;
-    const adjustScrollSpy = vi.spyOn(frame.stateVector, "adjustScroll");
+    const adjustScrollSpy = vi.spyOn(
+      frame.stateVector,
+      "updateVisibleQubitCircles"
+    );
 
     frame.emit("wheel", scrollEvent);
 
