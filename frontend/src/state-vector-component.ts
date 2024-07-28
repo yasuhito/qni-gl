@@ -44,7 +44,7 @@ export class StateVectorComponent extends Container {
   private backgroundGraphics: PIXI.Graphics;
   private _visibleQubitCircleIndices: Set<number> = new Set();
   private currentViewport: PIXI.Rectangle;
-  private _changed: boolean = true;
+  private _visibleQubitCirclesNeedUpdate: boolean = true;
   private visibleQubitCirclesCache: Map<string, QubitCircle>;
 
   // 量子ビット数をセット
@@ -57,7 +57,7 @@ export class StateVectorComponent extends Container {
 
     if (this._qubitCount === value) return;
 
-    this._changed = true;
+    this._visibleQubitCirclesNeedUpdate = true;
     this._qubitCount = value;
     this.updateQubitSettings();
     this.draw();
@@ -143,7 +143,7 @@ export class StateVectorComponent extends Container {
 
     if (unusedQubitCircles.size === 0) return;
 
-    this._changed = true;
+    this._visibleQubitCirclesNeedUpdate = true;
     this.emit(
       STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
       this.visibleQubitCircleIndices
@@ -157,7 +157,7 @@ export class StateVectorComponent extends Container {
   }
 
   private getVisibleQubitCirclesMap(): Map<string, QubitCircle> {
-    if (!this._changed && this.visibleQubitCirclesCache) {
+    if (!this._visibleQubitCirclesNeedUpdate && this.visibleQubitCirclesCache) {
       return this.visibleQubitCirclesCache;
     }
 
@@ -170,7 +170,7 @@ export class StateVectorComponent extends Container {
     }
 
     this.visibleQubitCirclesCache = visibleCircles;
-    this._changed = false;
+    this._visibleQubitCirclesNeedUpdate = false;
 
     return visibleCircles;
   }
@@ -246,7 +246,7 @@ export class StateVectorComponent extends Container {
         this.visibleQubitCirclesStartIndexX ||
       newVisibleQubitCirclesStartIndexY !== this.visibleQubitCirclesStartIndexY
     ) {
-      this._changed = true;
+      this._visibleQubitCirclesNeedUpdate = true;
       this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
