@@ -133,17 +133,14 @@ export class StateVectorComponent extends Container {
   }
 
   private drawQubitCircles(): void {
-    const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
     const endIndexX = this.calculateEndIndex(
       this.currentViewport.x,
       this.currentViewport.width,
-      cellSize,
       this.cols
     );
     const endIndexY = this.calculateEndIndex(
       this.currentViewport.y,
       this.currentViewport.height,
-      cellSize,
       this.rows
     );
 
@@ -161,12 +158,9 @@ export class StateVectorComponent extends Container {
     );
   }
 
-  private calculateEndIndex(
-    start: number,
-    size: number,
-    cellSize: number,
-    max: number
-  ): number {
+  private calculateEndIndex(start: number, size: number, max: number): number {
+    const cellSize = this.qubitCircleSizeInPx + this.elementsMargin;
+
     return Math.min(Math.ceil((start + size - this._padding) / cellSize), max);
   }
 
