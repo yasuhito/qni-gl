@@ -11,22 +11,22 @@ export const STATE_VECTOR_EVENTS = {
   VISIBLE_QUBIT_CIRCLES_CHANGED: "state-vector:visible-qubit-circles-changed",
 };
 
-const QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
-  1: "xl",
-  2: "xl",
-  3: "xl",
-  4: "lg",
-  5: "base",
-  6: "base",
-  7: "base",
-  8: "sm",
-  9: "sm",
-  10: "xs",
-  11: "xs",
-  12: "xs",
-};
-
 class StateVectorLayout {
+  private static QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
+    1: "xl",
+    2: "xl",
+    3: "xl",
+    4: "lg",
+    5: "base",
+    6: "base",
+    7: "base",
+    8: "sm",
+    9: "sm",
+    10: "xs",
+    11: "xs",
+    12: "xs",
+  };
+
   private _qubitCount: number = 0;
   private _cols: number;
   private _rows: number;
@@ -61,9 +61,12 @@ class StateVectorLayout {
     return this._padding;
   }
 
+  get qubitCircleSize(): Size {
+    return StateVectorLayout.QUBIT_CIRCLE_SIZE_MAP[this.qubitCount] || "xs";
+  }
+
   get qubitCircleSizeInPx(): number {
-    const qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[this.qubitCount] || "xs";
-    return Spacing.size.qubitCircle[qubitCircleSize];
+    return Spacing.size.qubitCircle[this.qubitCircleSize];
   }
 
   get qubitCircleMargin(): number {
@@ -138,8 +141,6 @@ class StateVectorLayout {
 }
 
 class StateVectorRenderer {
-  qubitCircleSize: Size = "xl";
-
   private layout: StateVectorLayout;
   private backgroundGraphics: PIXI.Graphics;
   private container: StateVectorComponent;
@@ -204,7 +205,7 @@ class StateVectorRenderer {
   }
 
   drawQubitCircle(x: number, y: number): QubitCircle {
-    const circle = new QubitCircle(this.qubitCircleSize);
+    const circle = new QubitCircle(this.layout.qubitCircleSize);
     circle.x = x;
     circle.y = y;
     this.container.addChild(circle);
@@ -217,7 +218,7 @@ class StateVectorRenderer {
   }
 
   updateQubitCircleSize(circle: QubitCircle): void {
-    circle.size = this.qubitCircleSize;
+    circle.size = this.layout.qubitCircleSize;
   }
 
   getVisibleQubitCirclesMap(): Map<string, QubitCircle> {
@@ -288,10 +289,9 @@ class StateVectorRenderer {
   }
 
   updateQubitCircleLayout(qubitCount: number): void {
-    this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[qubitCount] || "xs";
+    this.layout.qubitCount = qubitCount;
     this.layout.qubitCircleMargin =
       qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
-    this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
   }
