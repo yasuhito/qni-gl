@@ -73,8 +73,9 @@ class StateVectorLayout {
     return this._qubitCircleMargin;
   }
 
-  set qubitCircleMargin(value: number) {
-    this._qubitCircleMargin = value;
+  private updateQubitCircleMargin(): void {
+    this._qubitCircleMargin =
+      this.qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
   }
 
   get totalWidth(): number {
@@ -137,6 +138,7 @@ class StateVectorLayout {
     this._cols = Math.pow(2, Math.ceil(this.qubitCount / 2));
     this._rows = Math.ceil(Math.pow(2, this.qubitCount) / this._cols);
     this._padding = this.qubitCircleSizeInPx;
+    this.updateQubitCircleMargin();
   }
 }
 
@@ -290,8 +292,6 @@ class StateVectorRenderer {
 
   updateQubitCircleLayout(qubitCount: number): void {
     this.layout.qubitCount = qubitCount;
-    this.layout.qubitCircleMargin =
-      qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
   }
