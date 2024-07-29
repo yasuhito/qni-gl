@@ -27,21 +27,25 @@ const QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
 };
 
 class StateVectorLayout {
+  private _qubitCount: number = 0;
   private _cols: number;
   private _rows: number;
   private _padding: number = 0;
 
   constructor(qubitCount: number) {
-    this.update(qubitCount);
+    this._qubitCount = qubitCount;
+    this.update();
   }
 
-  update(qubitCount: number): void {
-    const qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[qubitCount] || "xs";
-    const qubitCircleSizeInPx = Spacing.size.qubitCircle[qubitCircleSize];
+  get qubitCount(): number {
+    return this._qubitCount;
+  }
 
-    this._cols = Math.pow(2, Math.ceil(qubitCount / 2));
-    this._rows = Math.ceil(Math.pow(2, qubitCount) / this._cols);
-    this._padding = qubitCircleSizeInPx;
+  set qubitCount(newValue: number) {
+    if (this._qubitCount !== newValue) {
+      this._qubitCount = newValue;
+      this.update();
+    }
   }
 
   get cols(): number {
@@ -54,6 +58,17 @@ class StateVectorLayout {
 
   get padding(): number {
     return this._padding;
+  }
+
+  get qubitCircleSizeInPx(): number {
+    const qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[this.qubitCount] || "xs";
+    return Spacing.size.qubitCircle[qubitCircleSize];
+  }
+
+  private update(): void {
+    this._cols = Math.pow(2, Math.ceil(this.qubitCount / 2));
+    this._rows = Math.ceil(Math.pow(2, this.qubitCount) / this._cols);
+    this._padding = this.qubitCircleSizeInPx;
   }
 }
 
@@ -247,7 +262,7 @@ class StateVectorRenderer {
     this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[qubitCount] || "xs";
     this.qubitCircleMargin =
       qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
-    this.layout.update(qubitCount);
+    this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
   }
