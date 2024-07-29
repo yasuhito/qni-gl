@@ -231,7 +231,10 @@ class StateVectorRenderer {
       this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
+      return true;
     }
+
+    return false;
   }
 
   private circleKeyAt(x: number, y: number): string {
@@ -305,14 +308,17 @@ export class StateVectorComponent extends Container {
 
   // 表示範囲 (viewport) に基いて表示される QubitCircle を更新
   updateVisibleQubitCircles(viewport: PIXI.Rectangle) {
-    this.renderer.updateVisibleQubitCircles(viewport);
+    const visibleQubitCirclesChanged =
+      this.renderer.updateVisibleQubitCircles(viewport);
 
     this.draw();
 
-    this.emit(
-      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-      Array.from(this._visibleQubitCircleIndices)
-    );
+    if (visibleQubitCirclesChanged) {
+      this.emit(
+        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+        Array.from(this._visibleQubitCircleIndices)
+      );
+    }
   }
 
   qubitCircleAt(index: number): QubitCircle | undefined {
