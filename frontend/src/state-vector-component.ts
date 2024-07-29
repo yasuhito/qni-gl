@@ -151,15 +151,106 @@ class StateVectorLayout {
   }
 }
 
+class QubitCircleManager {
+  private circles: Map<string, QubitCircle> = new Map();
+  private layout: StateVectorLayout;
+  private container: PIXI.Container;
+  private _visibleQubitCircleIndices: Set<number> = new Set();
+
+  constructor(layout: StateVectorLayout, container: PIXI.Container) {
+    this.layout = layout;
+    this.container = container;
+  }
+
+  updateVisibleQubitCircles(
+    startIndexX: number,
+    startIndexY: number,
+    endIndexX: number,
+    endIndexY: number
+  ): Set<number> {
+    const visibleIndices = new Set<number>();
+    const unusedCircles = new Set(this.circles.keys());
+
+    const visiblePositions = this.layout.visibleQubitCirclePositionsAndIndices(
+      startIndexX,
+      startIndexY,
+      endIndexX,
+      endIndexY
+    );
+
+    for (const { position, index } of visiblePositions) {
+      const key = this.circleKeyAt(position);
+      let circle = this.circles.get(key);
+
+      if (!circle) {
+        circle = this.createQubitCircle(position);
+        this.circles.set(key, circle);
+      } else {
+        this.updateQubitCircle(circle, position);
+        unusedCircles.delete(key);
+      }
+
+      visibleIndices.add(index);
+    }
+
+    this.removeUnusedCircles(unusedCircles);
+    this._visibleQubitCircleIndices = visibleIndices;
+
+    return visibleIndices;
+  }
+
+  get visibleQubitCircleIndices(): number[] {
+    return Array.from(this._visibleQubitCircleIndices);
+  }
+
+  qubitCircleAt(index: number): QubitCircle | undefined {
+    const position = this.layout.qubitCirclePositionAt(index);
+    const key = this.circleKeyAt(position);
+    return this.circles.get(key);
+  }
+
+  updateQubitCircleSize(size: Size): void {
+    this.circles.forEach((circle) => {
+      circle.size = size;
+    });
+  }
+
+  private createQubitCircle(position: PIXI.Point): QubitCircle {
+    const circle = new QubitCircle(this.layout.qubitCircleSize);
+    circle.position.copyFrom(position);
+    this.container.addChild(circle);
+    return circle;
+  }
+
+  private updateQubitCircle(circle: QubitCircle, position: PIXI.Point): void {
+    circle.position.copyFrom(position);
+    circle.size = this.layout.qubitCircleSize;
+  }
+
+  private removeUnusedCircles(unusedKeys: Set<string>): void {
+    unusedKeys.forEach((key) => {
+      const circle = this.circles.get(key);
+      if (circle) {
+        this.container.removeChild(circle);
+        circle.destroy();
+        this.circles.delete(key);
+      }
+    });
+  }
+
+  private circleKeyAt(position: PIXI.Point): string {
+    return `${position.x},${position.y}`;
+  }
+}
+
 class StateVectorRenderer {
   private layout: StateVectorLayout;
+  private qubitCircleManager: QubitCircleManager;
   private backgroundGraphics: PIXI.Graphics;
   private container: StateVectorComponent;
   private currentViewport: PIXI.Rectangle;
   private visibleQubitCirclesStartIndexX: number = 0;
   private visibleQubitCirclesStartIndexY: number = 0;
-  private _visibleQubitCircleIndices: Set<number> = new Set();
-  private visibleQubitCirclesCache: Map<string, QubitCircle>;
 
   constructor(container: StateVectorComponent, viewport: PIXI.Rectangle) {
     this.container = container;
@@ -167,11 +258,15 @@ class StateVectorRenderer {
     this.currentViewport = viewport;
     this.backgroundGraphics = new PIXI.Graphics();
     this.container.addChildAt(this.backgroundGraphics, 0);
+    this.qubitCircleManager = new QubitCircleManager(
+      this.layout,
+      this.container
+    );
   }
 
   // 表示されている QubitCircle のインデックスを返す
-  get visibleQubitCircleIndices() {
-    return Array.from(this._visibleQubitCircleIndices);
+  get visibleQubitCircleIndices(): number[] {
+    return this.qubitCircleManager.visibleQubitCircleIndices;
   }
 
   drawBackground(): void {
@@ -198,101 +293,11 @@ class StateVectorRenderer {
       this.layout.rows
     );
 
-    const { unusedQubitCircles, visibleIndices } = this.updateQubitCircles(
-      endIndexX,
-      endIndexY
-    );
-
-    this.removeUnusedQubitCircles(unusedQubitCircles);
-
-    if (unusedQubitCircles.size > 0) {
-      this.container.emit(
-        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-        Array.from(visibleIndices)
-      );
-    }
-
-    return visibleIndices;
-  }
-
-  drawQubitCircle(position: PIXI.Point): QubitCircle {
-    const circle = new QubitCircle(this.layout.qubitCircleSize);
-    circle.x = position.x;
-    circle.y = position.y;
-    this.container.addChild(circle);
-    return circle;
-  }
-
-  removeQubitCircle(circle: QubitCircle): void {
-    this.container.removeChild(circle);
-    circle.destroy();
-  }
-
-  updateQubitCircleSize(circle: QubitCircle): void {
-    circle.size = this.layout.qubitCircleSize;
-  }
-
-  getVisibleQubitCirclesMap(): Map<string, QubitCircle> {
-    const visibleCircles = new Map<string, QubitCircle>();
-
-    for (let i = 1; i < this.container.children.length; i++) {
-      const child = this.container.children[i] as QubitCircle;
-      const key = this.circleKeyAt(new PIXI.Point(child.x, child.y));
-      visibleCircles.set(key, child);
-    }
-
-    this.visibleQubitCirclesCache = visibleCircles;
-    return visibleCircles;
-  }
-
-  updateQubitCircles(
-    endIndexX: number,
-    endIndexY: number
-  ): {
-    unusedQubitCircles: Map<string, QubitCircle>;
-    visibleIndices: Set<number>;
-  } {
-    const unusedQubitCircles = this.getVisibleQubitCirclesMap();
-    const visibleIndices = new Set<number>();
-
-    const visibleCircles = this.layout.visibleQubitCirclePositionsAndIndices(
+    return this.qubitCircleManager.updateVisibleQubitCircles(
       this.visibleQubitCirclesStartIndexX,
       this.visibleQubitCirclesStartIndexY,
       endIndexX,
       endIndexY
-    );
-
-    for (const { position, index } of visibleCircles) {
-      const key = this.circleKeyAt(position);
-      const circle = unusedQubitCircles.get(key);
-
-      if (!circle) {
-        this.drawQubitCircle(position);
-      } else {
-        this.updateQubitCircleSize(circle);
-        unusedQubitCircles.delete(key);
-      }
-
-      visibleIndices.add(index);
-    }
-
-    return { unusedQubitCircles, visibleIndices };
-  }
-
-  removeUnusedQubitCircles(currentCircles: Map<string, QubitCircle>): void {
-    currentCircles.forEach((circle) => {
-      this.removeQubitCircle(circle);
-    });
-  }
-
-  qubitCircleAt(index: number): QubitCircle | undefined {
-    const position = this.layout.qubitCirclePositionAt(index);
-
-    return this.container.children.find(
-      (child): child is QubitCircle =>
-        child instanceof QubitCircle &&
-        child.x === position.x &&
-        child.y === position.y
     );
   }
 
@@ -300,10 +305,10 @@ class StateVectorRenderer {
     this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
+    this.qubitCircleManager.updateQubitCircleSize(this.layout.qubitCircleSize);
   }
 
-  // 表示範囲 (viewport) に基いて表示される QubitCircle を更新
-  updateVisibleQubitCircles(viewport: PIXI.Rectangle) {
+  updateVisibleQubitCircles(viewport: PIXI.Rectangle): boolean {
     const newVisibleQubitCirclesStartIndexX =
       this.layout.visibleQubitCirclesStartIndex(viewport.x);
     const newVisibleQubitCirclesStartIndexY =
@@ -314,7 +319,6 @@ class StateVectorRenderer {
         this.visibleQubitCirclesStartIndexX ||
       newVisibleQubitCirclesStartIndexY !== this.visibleQubitCirclesStartIndexY
     ) {
-      // this._visibleQubitCirclesNeedUpdate = true;
       this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
@@ -328,14 +332,21 @@ class StateVectorRenderer {
     const startTime = performance.now();
 
     this.drawBackground();
-    this._visibleQubitCircleIndices = this.drawQubitCircles();
+    const visibleIndices = this.drawQubitCircles();
+
+    if (visibleIndices.size > 0) {
+      this.container.emit(
+        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+        Array.from(visibleIndices)
+      );
+    }
 
     const endTime = performance.now();
     logger.log(`Draw execution time: ${endTime - startTime} ms`);
   }
 
-  private circleKeyAt(position: PIXI.Point): string {
-    return `${position.x},${position.y}`;
+  qubitCircleAt(index: number): QubitCircle | undefined {
+    return this.qubitCircleManager.qubitCircleAt(index);
   }
 }
 
