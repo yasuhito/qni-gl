@@ -35,6 +35,8 @@ class StateVectorRenderer {
   private container: StateVectorComponent;
   private _padding: number = 0;
   private elementsMargin: number = spacingInPx(0.5);
+  visibleQubitCirclesStartIndexX: number = 0;
+  visibleQubitCirclesStartIndexY: number = 0;
   private visibleQubitCirclesCache: Map<string, QubitCircle>;
 
   constructor(container: StateVectorComponent) {
@@ -52,11 +54,7 @@ class StateVectorRenderer {
     this.backgroundGraphics.endFill();
   }
 
-  drawQubitCircles(
-    currentViewport: PIXI.Rectangle,
-    visibleQubitCirclesStartIndexX: number,
-    visibleQubitCirclesStartIndexY: number
-  ): Set<number> {
+  drawQubitCircles(currentViewport: PIXI.Rectangle): Set<number> {
     const endIndexX = this.calculateEndIndex(
       currentViewport.x,
       currentViewport.width,
@@ -69,8 +67,8 @@ class StateVectorRenderer {
     );
 
     const { unusedQubitCircles, visibleIndices } = this.updateQubitCircles(
-      visibleQubitCirclesStartIndexX,
-      visibleQubitCirclesStartIndexY,
+      this.visibleQubitCirclesStartIndexX,
+      this.visibleQubitCirclesStartIndexY,
       endIndexX,
       endIndexY,
       this.qubitCircleSize
@@ -216,6 +214,8 @@ class StateVectorRenderer {
       qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
     this.cols = Math.pow(2, Math.ceil(qubitCount / 2));
     this.rows = Math.ceil(Math.pow(2, qubitCount) / this.cols);
+    this.visibleQubitCirclesStartIndexX = 0;
+    this.visibleQubitCirclesStartIndexY = 0;
   }
 
   private circleKeyAt(x: number, y: number): string {
@@ -230,8 +230,8 @@ class StateVectorRenderer {
 export class StateVectorComponent extends Container {
   private _qubitCount = 0;
   private maxQubitCount: number;
-  private visibleQubitCirclesStartIndexX: number = 0;
-  private visibleQubitCirclesStartIndexY: number = 0;
+  // private visibleQubitCirclesStartIndexX: number = 0;
+  // private visibleQubitCirclesStartIndexY: number = 0;
   private _visibleQubitCircleIndices: Set<number> = new Set();
   private currentViewport: PIXI.Rectangle;
   private renderer: StateVectorRenderer;
@@ -247,16 +247,9 @@ export class StateVectorComponent extends Container {
     if (this._qubitCount === value) return;
 
     this._qubitCount = value;
-    this.updateQubitSettings();
+    this.renderer.calculateQubitSettings(this._qubitCount);
     this.draw();
     this.emit(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, this.qubitCount);
-  }
-
-  // 状態ベクトル表示の各種設定を更新
-  private updateQubitSettings(): void {
-    this.renderer.calculateQubitSettings(this._qubitCount);
-    this.visibleQubitCirclesStartIndexX = 0;
-    this.visibleQubitCirclesStartIndexY = 0;
   }
 
   // 量子ビット数を返す
@@ -308,9 +301,7 @@ export class StateVectorComponent extends Container {
 
   private drawQubitCircles(): void {
     this._visibleQubitCircleIndices = this.renderer.drawQubitCircles(
-      this.currentViewport,
-      this.visibleQubitCirclesStartIndexX,
-      this.visibleQubitCirclesStartIndexY
+      this.currentViewport
     );
   }
 
@@ -323,12 +314,15 @@ export class StateVectorComponent extends Container {
 
     if (
       newVisibleQubitCirclesStartIndexX !==
-        this.visibleQubitCirclesStartIndexX ||
-      newVisibleQubitCirclesStartIndexY !== this.visibleQubitCirclesStartIndexY
+        this.renderer.visibleQubitCirclesStartIndexX ||
+      newVisibleQubitCirclesStartIndexY !==
+        this.renderer.visibleQubitCirclesStartIndexY
     ) {
       // this._visibleQubitCirclesNeedUpdate = true;
-      this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
-      this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
+      this.renderer.visibleQubitCirclesStartIndexX =
+        newVisibleQubitCirclesStartIndexX;
+      this.renderer.visibleQubitCirclesStartIndexY =
+        newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
 
       this.draw();

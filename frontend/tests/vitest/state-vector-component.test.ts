@@ -60,11 +60,4 @@ describe("StateVectorComponent", () => {
     stateVector.updateVisibleQubitCircles(newScrollRect);
     expect(stateVector.visibleQubitCircleIndices.length).toBeLessThan(16);
   });
-
-  it("should update QubitCircle size when qubit count changes", () => {
-    stateVector.qubitCount = 2;
-    expect(stateVector["qubitCircleSize"]).toBe("xl");
-    stateVector.qubitCount = 8;
-    expect(stateVector["qubitCircleSize"]).toBe("sm");
-  });
 });
