@@ -31,6 +31,7 @@ class StateVectorLayout {
   private _cols: number;
   private _rows: number;
   private _padding: number = 0;
+  private _qubitCircleMargin: number = spacingInPx(0.5);
 
   constructor(qubitCount: number) {
     this._qubitCount = qubitCount;
@@ -65,6 +66,30 @@ class StateVectorLayout {
     return Spacing.size.qubitCircle[qubitCircleSize];
   }
 
+  get qubitCircleMargin(): number {
+    return this._qubitCircleMargin;
+  }
+
+  set qubitCircleMargin(value: number) {
+    this._qubitCircleMargin = value;
+  }
+
+  get totalWidth(): number {
+    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const contentWidth = this.cols * cellSize - this.qubitCircleMargin;
+    const totalWidth = contentWidth + this.padding * 2;
+
+    return totalWidth;
+  }
+
+  get totalHeight(): number {
+    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const contentHeight = this.rows * cellSize - this.qubitCircleMargin;
+    const totalHeight = contentHeight + this.padding * 2;
+
+    return totalHeight;
+  }
+
   private update(): void {
     this._cols = Math.pow(2, Math.ceil(this.qubitCount / 2));
     this._rows = Math.ceil(Math.pow(2, this.qubitCount) / this._cols);
@@ -78,7 +103,6 @@ class StateVectorRenderer {
   private layout: StateVectorLayout;
   private backgroundGraphics: PIXI.Graphics;
   private container: StateVectorComponent;
-  private qubitCircleMargin: number = spacingInPx(0.5);
   private currentViewport: PIXI.Rectangle;
   private visibleQubitCirclesStartIndexX: number = 0;
   private visibleQubitCirclesStartIndexY: number = 0;
@@ -99,13 +123,14 @@ class StateVectorRenderer {
   }
 
   drawBackground(): void {
-    const qubitCircleSize = this.qubitCircleSizeInPx;
-    const totalWidth = this.calculateTotalWidth(qubitCircleSize);
-    const totalHeight = this.calculateTotalHeight(qubitCircleSize);
-
     this.backgroundGraphics.clear();
     this.backgroundGraphics.beginFill(Colors["bg-component"], 1);
-    this.backgroundGraphics.drawRect(0, 0, totalWidth, totalHeight);
+    this.backgroundGraphics.drawRect(
+      0,
+      0,
+      this.layout.totalWidth,
+      this.layout.totalHeight
+    );
     this.backgroundGraphics.endFill();
   }
 
@@ -181,7 +206,7 @@ class StateVectorRenderer {
   } {
     const unusedQubitCircles = this.getVisibleQubitCirclesMap();
     const visibleIndices = new Set<number>();
-    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const cellSize = this.qubitCircleSizeInPx + this.layout.qubitCircleMargin;
 
     for (let y = this.visibleQubitCirclesStartIndexY; y < endIndexY; y++) {
       for (let x = this.visibleQubitCirclesStartIndexX; x < endIndexX; x++) {
@@ -206,7 +231,7 @@ class StateVectorRenderer {
   }
 
   calculateEndIndex(start: number, size: number, max: number): number {
-    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const cellSize = this.qubitCircleSizeInPx + this.layout.qubitCircleMargin;
 
     return Math.min(
       Math.ceil((start + size - this.layout.padding) / cellSize),
@@ -223,7 +248,7 @@ class StateVectorRenderer {
   qubitCircleAt(index: number): QubitCircle | undefined {
     const x = index % this.layout.cols;
     const y = Math.floor(index / this.layout.cols);
-    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const cellSize = this.qubitCircleSizeInPx + this.layout.qubitCircleMargin;
     const posX = this.layout.padding + x * cellSize;
     const posY = this.layout.padding + y * cellSize;
 
@@ -233,24 +258,8 @@ class StateVectorRenderer {
     );
   }
 
-  calculateTotalWidth(qubitCircleSize: number): number {
-    const cellSize = qubitCircleSize + this.qubitCircleMargin;
-    const contentWidth = this.layout.cols * cellSize - this.qubitCircleMargin;
-    const totalWidth = contentWidth + this.layout.padding * 2;
-
-    return totalWidth;
-  }
-
-  calculateTotalHeight(qubitCircleSize: number): number {
-    const cellSize = qubitCircleSize + this.qubitCircleMargin;
-    const contentHeight = this.layout.rows * cellSize - this.qubitCircleMargin;
-    const totalHeight = contentHeight + this.layout.padding * 2;
-
-    return totalHeight;
-  }
-
   calculateVisibleQubitCirclesStartIndex(viewportPosition: number): number {
-    const cellSize = this.qubitCircleSizeInPx + this.qubitCircleMargin;
+    const cellSize = this.qubitCircleSizeInPx + this.layout.qubitCircleMargin;
 
     return Math.max(
       0,
@@ -260,7 +269,7 @@ class StateVectorRenderer {
 
   updateQubitCircleLayout(qubitCount: number): void {
     this.qubitCircleSize = QUBIT_CIRCLE_SIZE_MAP[qubitCount] || "xs";
-    this.qubitCircleMargin =
+    this.layout.qubitCircleMargin =
       qubitCount <= 8 ? spacingInPx(0.5) : spacingInPx(0.25);
     this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
