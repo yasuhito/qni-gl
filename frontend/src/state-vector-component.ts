@@ -33,6 +33,8 @@ class StateVectorLayout {
   private _padding: number = 0;
   private _qubitCircleMargin: number = spacingInPx(0.5);
   private _cellSize: number;
+  private _width: number;
+  private _height: number;
 
   constructor(qubitCount: number) {
     this._qubitCount = qubitCount;
@@ -44,6 +46,8 @@ class StateVectorLayout {
   }
 
   set qubitCount(newValue: number) {
+    need(newValue > 0, "qubitCount must be greater than 0.");
+
     if (this._qubitCount !== newValue) {
       this._qubitCount = newValue;
       this.update();
@@ -80,17 +84,11 @@ class StateVectorLayout {
   }
 
   get width(): number {
-    const contentWidth = this.cols * this._cellSize - this.qubitCircleMargin;
-    const totalWidth = contentWidth + this.padding * 2;
-
-    return totalWidth;
+    return this._width;
   }
 
   get height(): number {
-    const contentHeight = this.rows * this._cellSize - this.qubitCircleMargin;
-    const totalHeight = contentHeight + this.padding * 2;
-
-    return totalHeight;
+    return this._height;
   }
 
   visibleQubitCirclesStartIndex(viewportPosition: number): number {
@@ -116,28 +114,28 @@ class StateVectorLayout {
     startIndexY: number,
     endIndexX: number,
     endIndexY: number
-  ): { x: number; y: number; index: number }[] {
-    const circles: { x: number; y: number; index: number }[] = [];
+  ): { position: PIXI.Point; index: number }[] {
+    const circles: { position: PIXI.Point; index: number }[] = [];
 
     for (let y = startIndexY; y < endIndexY; y++) {
       for (let x = startIndexX; x < endIndexX; x++) {
         const posX = this.padding + x * this._cellSize;
         const posY = this.padding + y * this._cellSize;
         const index = y * this.cols + x;
-        circles.push({ x: posX, y: posY, index });
+        circles.push({ position: new PIXI.Point(posX, posY), index });
       }
     }
 
     return circles;
   }
 
-  qubitCirclePositionAt(index: number): { x: number; y: number } {
+  qubitCirclePositionAt(index: number): PIXI.Point {
     const x = index % this.cols;
     const y = Math.floor(index / this.cols);
     const posX = this.padding + x * this._cellSize;
     const posY = this.padding + y * this._cellSize;
 
-    return { x: posX, y: posY };
+    return new PIXI.Point(posX, posY);
   }
 
   private update(): void {
@@ -146,6 +144,10 @@ class StateVectorLayout {
     this._padding = this.qubitCircleSizeInPx;
     this.updateQubitCircleMargin();
     this._cellSize = this.qubitCircleSizeInPx + this._qubitCircleMargin;
+    const contentWidth = this._cols * this._cellSize - this._qubitCircleMargin;
+    this._width = contentWidth + this._padding * 2;
+    const contentHeight = this._rows * this._cellSize - this._qubitCircleMargin;
+    this._height = contentHeight + this._padding * 2;
   }
 }
 
@@ -213,10 +215,10 @@ class StateVectorRenderer {
     return visibleIndices;
   }
 
-  drawQubitCircle(x: number, y: number): QubitCircle {
+  drawQubitCircle(position: PIXI.Point): QubitCircle {
     const circle = new QubitCircle(this.layout.qubitCircleSize);
-    circle.x = x;
-    circle.y = y;
+    circle.x = position.x;
+    circle.y = position.y;
     this.container.addChild(circle);
     return circle;
   }
@@ -235,7 +237,7 @@ class StateVectorRenderer {
 
     for (let i = 1; i < this.container.children.length; i++) {
       const child = this.container.children[i] as QubitCircle;
-      const key = this.circleKeyAt(child.x, child.y);
+      const key = this.circleKeyAt(new PIXI.Point(child.x, child.y));
       visibleCircles.set(key, child);
     }
 
@@ -260,12 +262,12 @@ class StateVectorRenderer {
       endIndexY
     );
 
-    for (const { x, y, index } of visibleCircles) {
-      const key = this.circleKeyAt(x, y);
+    for (const { position, index } of visibleCircles) {
+      const key = this.circleKeyAt(position);
       const circle = unusedQubitCircles.get(key);
 
       if (!circle) {
-        this.drawQubitCircle(x, y);
+        this.drawQubitCircle(position);
       } else {
         this.updateQubitCircleSize(circle);
         unusedQubitCircles.delete(key);
@@ -284,11 +286,13 @@ class StateVectorRenderer {
   }
 
   qubitCircleAt(index: number): QubitCircle | undefined {
-    const { x, y } = this.layout.qubitCirclePositionAt(index);
+    const position = this.layout.qubitCirclePositionAt(index);
 
     return this.container.children.find(
       (child): child is QubitCircle =>
-        child instanceof QubitCircle && child.x === x && child.y === y
+        child instanceof QubitCircle &&
+        child.x === position.x &&
+        child.y === position.y
     );
   }
 
@@ -330,8 +334,8 @@ class StateVectorRenderer {
     logger.log(`Draw execution time: ${endTime - startTime} ms`);
   }
 
-  private circleKeyAt(x: number, y: number): string {
-    return `${x},${y}`;
+  private circleKeyAt(position: PIXI.Point): string {
+    return `${position.x},${position.y}`;
   }
 }
 
