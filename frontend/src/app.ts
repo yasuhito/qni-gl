@@ -120,10 +120,8 @@ export class App {
     this.mainContainer.addChild(this.stateVectorFrame);
 
     // 量子回路と状態ベクトルの境界線
-    this.frameDivider = FrameDivider.getInstance(
-      this.pixiApp,
-      this.circuitFrame.height
-    );
+    FrameDivider.initialize(this.pixiApp, this.circuitFrame.height);
+    this.frameDivider = FrameDivider.getInstance();
     this.pixiApp.stage.addChild(this.frameDivider);
 
     this.pixiApp.stage.on("pointermove", (event) => {
