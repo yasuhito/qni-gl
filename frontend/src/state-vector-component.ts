@@ -109,7 +109,7 @@ class StateVectorLayout {
     );
   }
 
-  visibleQubitCirclePositionsAndIndices(
+  visibleQubitCirclePositions(
     startIndexX: number,
     startIndexY: number,
     endIndexX: number,
@@ -168,35 +168,34 @@ class QubitCircleManager {
     endIndexX: number,
     endIndexY: number
   ): Set<number> {
-    const visibleIndices = new Set<number>();
+    const visibleQubitCircleIndices = new Set<number>();
     const unusedCircles = new Set(this.circles.keys());
 
-    const visiblePositions = this.layout.visibleQubitCirclePositionsAndIndices(
-      startIndexX,
-      startIndexY,
-      endIndexX,
-      endIndexY
-    );
+    this.layout
+      .visibleQubitCirclePositions(
+        startIndexX,
+        startIndexY,
+        endIndexX,
+        endIndexY
+      )
+      .forEach(({ position, index }) => {
+        const key = this.circleKeyAt(position);
+        const circle = this.circles.get(key);
 
-    for (const { position, index } of visiblePositions) {
-      const key = this.circleKeyAt(position);
-      let circle = this.circles.get(key);
+        if (!circle) {
+          this.createQubitCircle(position);
+        } else {
+          this.updateQubitCirclePositionAndSize(circle, position);
+          unusedCircles.delete(key);
+        }
 
-      if (!circle) {
-        circle = this.createQubitCircle(position);
-        this.circles.set(key, circle);
-      } else {
-        this.updateQubitCircle(circle, position);
-        unusedCircles.delete(key);
-      }
+        visibleQubitCircleIndices.add(index);
+      });
 
-      visibleIndices.add(index);
-    }
+    this.removeUnusedQubitCircles(unusedCircles);
+    this._visibleQubitCircleIndices = visibleQubitCircleIndices;
 
-    this.removeUnusedCircles(unusedCircles);
-    this._visibleQubitCircleIndices = visibleIndices;
-
-    return visibleIndices;
+    return visibleQubitCircleIndices;
   }
 
   get visibleQubitCircleIndices(): number[] {
@@ -206,29 +205,35 @@ class QubitCircleManager {
   qubitCircleAt(index: number): QubitCircle | undefined {
     const position = this.layout.qubitCirclePositionAt(index);
     const key = this.circleKeyAt(position);
+
     return this.circles.get(key);
   }
 
-  updateQubitCircleSize(size: Size): void {
+  resizeAllQubitCircles(size: Size): void {
     this.circles.forEach((circle) => {
       circle.size = size;
     });
   }
 
-  private createQubitCircle(position: PIXI.Point): QubitCircle {
+  private createQubitCircle(position: PIXI.Point): void {
     const circle = new QubitCircle(this.layout.qubitCircleSize);
+    const key = this.circleKeyAt(position);
+
+    this.circles.set(key, circle);
     circle.position.copyFrom(position);
     this.container.addChild(circle);
-    return circle;
   }
 
-  private updateQubitCircle(circle: QubitCircle, position: PIXI.Point): void {
+  private updateQubitCirclePositionAndSize(
+    circle: QubitCircle,
+    position: PIXI.Point
+  ): void {
     circle.position.copyFrom(position);
     circle.size = this.layout.qubitCircleSize;
   }
 
-  private removeUnusedCircles(unusedKeys: Set<string>): void {
-    unusedKeys.forEach((key) => {
+  private removeUnusedQubitCircles(qubitCircleKeys: Set<string>): void {
+    qubitCircleKeys.forEach((key) => {
       const circle = this.circles.get(key);
       if (circle) {
         this.container.removeChild(circle);
@@ -264,7 +269,6 @@ class StateVectorRenderer {
     );
   }
 
-  // 表示されている QubitCircle のインデックスを返す
   get visibleQubitCircleIndices(): number[] {
     return this.qubitCircleManager.visibleQubitCircleIndices;
   }
@@ -305,7 +309,7 @@ class StateVectorRenderer {
     this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;
-    this.qubitCircleManager.updateQubitCircleSize(this.layout.qubitCircleSize);
+    this.qubitCircleManager.resizeAllQubitCircles(this.layout.qubitCircleSize);
   }
 
   updateVisibleQubitCircles(viewport: PIXI.Rectangle): boolean {
