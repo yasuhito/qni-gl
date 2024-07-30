@@ -74,7 +74,7 @@ export class StateVectorRenderer {
     this.qubitCircleManager.resizeAllQubitCircles(this.layout.qubitCircleSize);
   }
 
-  updateVisibleQubitCircles(viewport: PIXI.Rectangle): boolean {
+  setViewport(viewport: PIXI.Rectangle): boolean {
     const newVisibleQubitCirclesStartIndexX =
       this.layout.visibleQubitCirclesStartIndex(viewport.x);
     const newVisibleQubitCirclesStartIndexY =
@@ -88,6 +88,9 @@ export class StateVectorRenderer {
       this.visibleQubitCirclesStartIndexX = newVisibleQubitCirclesStartIndexX;
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
+
+      this.draw();
+
       return true;
     }
 

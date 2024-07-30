@@ -42,7 +42,7 @@ describe("StateVectorComponent", () => {
   it("should adjust scroll correctly", () => {
     const newScrollRect = new PIXI.Rectangle(500, 500, 1500, 1500);
     const mockEmit = vi.spyOn(stateVector, "emit");
-    stateVector.updateVisibleQubitCircles(newScrollRect);
+    stateVector.setViewport(newScrollRect);
     expect(mockEmit).toHaveBeenCalledWith(
       STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
       expect.any(Array)
@@ -58,7 +58,7 @@ describe("StateVectorComponent", () => {
   it("should update visible amplitudes when scrolling", () => {
     stateVector.qubitCount = 4; // 16個のQubitCircleを作成
     const newScrollRect = new PIXI.Rectangle(100, 100, 100, 100);
-    stateVector.updateVisibleQubitCircles(newScrollRect);
+    stateVector.setViewport(newScrollRect);
     expect(stateVector.visibleQubitCircleIndices.length).toBeLessThan(16);
   });
 });

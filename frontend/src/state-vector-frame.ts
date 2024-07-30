@@ -64,7 +64,7 @@ export class StateVectorFrame extends PIXI.Container {
       this.frameWidth,
       this.frameHeight
     );
-    this.stateVector.updateVisibleQubitCircles(scrollRect);
+    this.stateVector.setViewport(scrollRect);
 
     this.updateStateVectorPosition();
     this.initializeScrollEvents();
@@ -178,7 +178,7 @@ export class StateVectorFrame extends PIXI.Container {
       this.frameWidth,
       this.frameHeight
     );
-    this.stateVector.updateVisibleQubitCircles(scrollRect);
+    this.stateVector.setViewport(scrollRect);
   }
 
   /**

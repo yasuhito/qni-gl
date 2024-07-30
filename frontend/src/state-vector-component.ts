@@ -14,7 +14,6 @@ export class StateVectorComponent extends Container {
   private maxQubitCount: number;
   private renderer: StateVectorRenderer;
 
-  // 量子ビット数をセット
   set qubitCount(value: number) {
     need(
       value <= this.maxQubitCount,
@@ -25,22 +24,17 @@ export class StateVectorComponent extends Container {
     if (this._qubitCount === value) return;
 
     this._qubitCount = value;
-    this.renderer.updateQubitCircleLayout(this._qubitCount);
-    this.renderer.draw();
-    this.emit(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, this.qubitCount);
+    this.updateStateVector();
   }
 
-  // 量子ビット数を返す
   get qubitCount() {
     return this._qubitCount;
   }
 
-  // QubitCircle の総数 (振幅の数) を返す
   get qubitCircleCount() {
-    return Math.pow(2, this._qubitCount);
+    return Math.pow(2, this.qubitCount);
   }
 
-  // 表示されている QubitCircle のインデックスを返す
   get visibleQubitCircleIndices() {
     return this.renderer.visibleQubitCircleIndices;
   }
@@ -55,15 +49,11 @@ export class StateVectorComponent extends Container {
     this.renderer = new StateVectorRenderer(this, qubitCount, viewport);
     this.maxQubitCount = maxQubitCount;
     this.qubitCount = qubitCount;
-    this.updateVisibleQubitCircles(viewport);
+    this.setViewport(viewport);
   }
 
-  // 表示範囲 (viewport) に基いて表示される QubitCircle を更新
-  updateVisibleQubitCircles(viewport: PIXI.Rectangle) {
-    const visibleQubitCirclesChanged =
-      this.renderer.updateVisibleQubitCircles(viewport);
-
-    this.renderer.draw();
+  setViewport(viewport: PIXI.Rectangle) {
+    const visibleQubitCirclesChanged = this.renderer.setViewport(viewport);
 
     if (visibleQubitCirclesChanged) {
       this.emit(
@@ -75,5 +65,11 @@ export class StateVectorComponent extends Container {
 
   qubitCircleAt(index: number): QubitCircle | undefined {
     return this.renderer.qubitCircleAt(index);
+  }
+
+  private updateStateVector() {
+    this.renderer.updateQubitCircleLayout(this.qubitCount);
+    this.renderer.draw();
+    this.emit(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, this.qubitCount);
   }
 }
