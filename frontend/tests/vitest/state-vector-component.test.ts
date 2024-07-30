@@ -1,7 +1,8 @@
 import * as PIXI from "pixi.js";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { QubitCircle } from "../../src/qubit-circle";
-import { StateVectorComponent, STATE_VECTOR_EVENTS } from "../../src";
+import { StateVectorComponent } from "../../src";
+import { STATE_VECTOR_EVENTS } from "../../src/state-vector-events";
 
 describe("StateVectorComponent", () => {
   let stateVector: StateVectorComponent;

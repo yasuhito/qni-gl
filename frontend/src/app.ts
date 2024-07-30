@@ -9,13 +9,11 @@ import { FrameDivider } from "./frame-divider";
 import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import {
-  STATE_VECTOR_EVENTS,
-  StateVectorComponent,
-} from "./state-vector-component";
+import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { rectIntersect } from "./util";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 export class App {
   static elementId = "app";

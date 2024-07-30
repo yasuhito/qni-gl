@@ -1,10 +1,8 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import {
-  STATE_VECTOR_EVENTS,
-  StateVectorComponent,
-} from "./state-vector-component";
+import { StateVectorComponent } from "./state-vector-component";
 import { throttle } from "lodash";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 /**
  * スクロール機能つきフレーム。状態ベクトルを表示する。
