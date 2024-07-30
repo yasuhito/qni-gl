@@ -2,6 +2,8 @@ import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
 import { DropzoneComponent, WireType } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
+import { QubitCount } from "./types";
+import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
@@ -22,12 +24,10 @@ export const CIRCUIT_EVENTS = {
  * @noInheritDoc
  */
 export class CircuitComponent extends Container {
-  /** Minimum number of qubits. */
-  minQubitCount = 1;
   /** Minimum number of wires. */
   minWireCount = 1;
   /** Maximum number of wires. */
-  maxWireCount = 32;
+  maxWireCount: QubitCount = MAX_QUBIT_COUNT;
 
   minStepCount = 5;
 
@@ -52,7 +52,7 @@ export class CircuitComponent extends Container {
     return wireCount;
   }
 
-  get qubitCountInUse() {
+  get qubitCountInUse(): QubitCount {
     const qubitCount = Math.max(
       ...this.steps.map((each) => {
         return each.qubitCountInUse;
@@ -60,10 +60,10 @@ export class CircuitComponent extends Container {
     );
 
     if (qubitCount == 0) {
-      return this.minQubitCount;
+      return MIN_QUBIT_COUNT;
     }
 
-    return qubitCount;
+    return qubitCount as QubitCount;
   }
 
   /**
@@ -245,9 +245,6 @@ export class CircuitComponent extends Container {
       each.updateControlledUConnections();
       each.updateFreeDropzoneConnections();
     });
-
-    // デバッグ
-    // console.log(this.toString());
   }
 
   private isLastWireUnused() {

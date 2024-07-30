@@ -22,18 +22,14 @@ export class StateVectorFrame extends PIXI.Container {
   /**
    * インスタンスを取得
    */
-  static getInstance(
-    width: number,
-    height: number,
-    maxQubitCount: number
-  ): StateVectorFrame {
+  static getInstance(width: number, height: number): StateVectorFrame {
     if (this.instance === null) {
-      this.instance = new StateVectorFrame(width, height, maxQubitCount);
+      this.instance = new StateVectorFrame(width, height);
     }
     return this.instance;
   }
 
-  private constructor(width: number, height: number, maxQubitCount: number) {
+  private constructor(width: number, height: number) {
     super();
 
     this.frameWidth = width;
@@ -41,7 +37,6 @@ export class StateVectorFrame extends PIXI.Container {
     this.background = new PIXI.Graphics();
     this.stateVector = new StateVectorComponent({
       initialQubitCount: 1,
-      maxQubitCount: maxQubitCount,
       viewport: new PIXI.Rectangle(0, 0, width, height),
     });
     this.maskGraphics = new PIXI.Graphics();

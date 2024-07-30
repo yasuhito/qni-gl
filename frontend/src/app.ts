@@ -115,8 +115,7 @@ export class App {
 
     this.stateVectorFrame = StateVectorFrame.getInstance(
       this.pixiApp.screen.width,
-      this.pixiApp.screen.height * 0.4,
-      this.circuit.maxWireCount
+      this.pixiApp.screen.height * 0.4
     );
     this.mainContainer.addChild(this.stateVectorFrame);
 

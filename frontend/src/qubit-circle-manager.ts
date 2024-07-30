@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
-import { Size } from "./size";
 import { QubitCircle } from "./qubit-circle";
+import { Size } from "./size";
 import { StateVectorLayout } from "./state-vector-layout";
 
 export class QubitCircleManager {

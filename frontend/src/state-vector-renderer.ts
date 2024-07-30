@@ -1,10 +1,11 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import { QubitCircleManager } from "./qubit-circle-manager";
-import { StateVectorLayout } from "./state-vector-layout";
 import { QubitCircle } from "./qubit-circle";
-import { logger } from "./util";
+import { QubitCircleManager } from "./qubit-circle-manager";
+import { QubitCount } from "./types";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
+import { StateVectorLayout } from "./state-vector-layout";
+import { logger } from "./util";
 
 export class StateVectorRenderer {
   private layout: StateVectorLayout;
@@ -17,7 +18,7 @@ export class StateVectorRenderer {
 
   constructor(
     container: PIXI.Container,
-    qubitCount: number,
+    qubitCount: QubitCount,
     viewport: PIXI.Rectangle
   ) {
     this.container = container;
@@ -67,7 +68,7 @@ export class StateVectorRenderer {
     );
   }
 
-  updateQubitCircleLayout(qubitCount: number): void {
+  updateQubitCircleLayout(qubitCount: QubitCount): void {
     this.layout.qubitCount = qubitCount;
     this.visibleQubitCirclesStartIndexX = 0;
     this.visibleQubitCirclesStartIndexY = 0;

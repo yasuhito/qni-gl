@@ -1,7 +1,9 @@
 import * as PIXI from "pixi.js";
+import { QubitCount } from "./types";
 import { Size } from "./size";
-import { need, spacingInPx } from "./util";
 import { Spacing } from "./spacing";
+import { need, spacingInPx } from "./util";
+import { MIN_QUBIT_COUNT } from "./constants";
 
 export class StateVectorLayout {
   private static QUBIT_CIRCLE_SIZE_MAP: { [key: number]: Size } = {
@@ -19,7 +21,7 @@ export class StateVectorLayout {
     12: "xs",
   };
 
-  private _qubitCount: number = 0;
+  private _qubitCount: QubitCount = MIN_QUBIT_COUNT;
   private _cols: number;
   private _rows: number;
   private _padding: number = 0;
@@ -28,19 +30,19 @@ export class StateVectorLayout {
   private _width: number;
   private _height: number;
 
-  constructor(qubitCount: number) {
+  constructor(qubitCount: QubitCount) {
     this._qubitCount = qubitCount;
     this.update();
   }
 
-  get qubitCount(): number {
+  get qubitCount(): QubitCount {
     return this._qubitCount;
   }
 
-  set qubitCount(newValue: number) {
+  set qubitCount(newValue: QubitCount) {
     need(newValue > 0, "qubitCount must be greater than 0.");
 
-    if (this._qubitCount !== newValue) {
+    if (this._qubitCount !== newValue || newValue === MIN_QUBIT_COUNT) {
       this._qubitCount = newValue;
       this.update();
     }

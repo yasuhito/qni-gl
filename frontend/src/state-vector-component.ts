@@ -1,21 +1,20 @@
 import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
 import { QubitCircle } from "./qubit-circle";
-import { StateVectorRenderer } from "./state-vector-renderer";
+import { QubitCount } from "./types";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
-
-type QubitCount = number;
+import { StateVectorRenderer } from "./state-vector-renderer";
+import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 
 class InvalidQubitCountError extends Error {
-  constructor(value: QubitCount, maxQubitCount: QubitCount) {
-    super(`Invalid qubit count: ${value}. Must not exceed ${maxQubitCount}.`);
+  constructor(value: QubitCount) {
+    super(`Invalid qubit count: ${value}. Must not exceed ${MAX_QUBIT_COUNT}.`);
     this.name = "InvalidQubitCountError";
   }
 }
 
 interface StateVectorConfig {
   initialQubitCount: QubitCount;
-  maxQubitCount: QubitCount;
   viewport: PIXI.Rectangle;
 }
 
@@ -24,17 +23,16 @@ interface StateVectorConfig {
  * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
-  private _qubitCount: QubitCount = 0;
-  private maxQubitCount: QubitCount;
+  private _qubitCount: QubitCount = MIN_QUBIT_COUNT;
   private renderer: StateVectorRenderer;
 
   set qubitCount(newValue: QubitCount) {
     const validatedCount = this.validateQubitCount(newValue);
 
-    if (this._qubitCount === validatedCount) return;
-
-    this._qubitCount = validatedCount;
-    this.updateStateVector();
+    if (this._qubitCount !== validatedCount || newValue === MIN_QUBIT_COUNT) {
+      this._qubitCount = validatedCount;
+      this.updateStateVector();
+    }
   }
 
   get qubitCount() {
@@ -52,7 +50,6 @@ export class StateVectorComponent extends Container {
   constructor(config: StateVectorConfig) {
     super();
 
-    this.maxQubitCount = config.maxQubitCount;
     this.renderer = new StateVectorRenderer(
       this,
       config.initialQubitCount,
@@ -75,8 +72,8 @@ export class StateVectorComponent extends Container {
   }
 
   private validateQubitCount(value: QubitCount): QubitCount {
-    if (value < 0 || value > this.maxQubitCount) {
-      throw new InvalidQubitCountError(value, this.maxQubitCount);
+    if (value < MIN_QUBIT_COUNT || value > MAX_QUBIT_COUNT) {
+      throw new InvalidQubitCountError(value);
     }
     return value;
   }

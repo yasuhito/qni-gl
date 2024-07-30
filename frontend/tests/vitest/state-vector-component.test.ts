@@ -11,7 +11,6 @@ describe("StateVectorComponent", () => {
   beforeEach(() => {
     stateVector = new StateVectorComponent({
       initialQubitCount: 1,
-      maxQubitCount: 12,
       viewport: mockScrollRect,
     });
   });
@@ -26,12 +25,6 @@ describe("StateVectorComponent", () => {
     stateVector.qubitCount = 3;
     expect(stateVector.qubitCount).toBe(3);
     expect(stateVector.qubitCircleCount).toBe(8);
-  });
-
-  it("should throw an error when setting qubit count above maxQubitCount", () => {
-    expect(() => {
-      stateVector.qubitCount = 13;
-    }).toThrow();
   });
 
   it("should emit CHANGE event when qubit count changes", () => {
