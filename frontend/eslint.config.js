@@ -7,6 +7,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["backend/*", "dist/*", "docs/*", "public/*"]
+    ignores: [".vite/*", "dist/*", "docs/*", "public/*"]
   }
 );

@@ -1,10 +1,8 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import {
-  STATE_VECTOR_EVENTS,
-  StateVectorComponent,
-} from "./state-vector-component";
+import { StateVectorComponent } from "./state-vector-component";
 import { throttle } from "lodash";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 /**
  * スクロール機能つきフレーム。状態ベクトルを表示する。
@@ -24,28 +22,23 @@ export class StateVectorFrame extends PIXI.Container {
   /**
    * インスタンスを取得
    */
-  static getInstance(
-    width: number,
-    height: number,
-    maxQubitCount: number
-  ): StateVectorFrame {
+  static getInstance(width: number, height: number): StateVectorFrame {
     if (this.instance === null) {
-      this.instance = new StateVectorFrame(width, height, maxQubitCount);
+      this.instance = new StateVectorFrame(width, height);
     }
     return this.instance;
   }
 
-  private constructor(width: number, height: number, maxQubitCount: number) {
+  private constructor(width: number, height: number) {
     super();
 
     this.frameWidth = width;
     this.frameHeight = height;
     this.background = new PIXI.Graphics();
-    this.stateVector = new StateVectorComponent(
-      1,
-      maxQubitCount,
-      new PIXI.Rectangle(0, 0, width, height)
-    );
+    this.stateVector = new StateVectorComponent({
+      initialQubitCount: 1,
+      viewport: new PIXI.Rectangle(0, 0, width, height),
+    });
     this.maskGraphics = new PIXI.Graphics();
     this.scrollContainer = new PIXI.Container();
 
@@ -66,7 +59,7 @@ export class StateVectorFrame extends PIXI.Container {
       this.frameWidth,
       this.frameHeight
     );
-    this.stateVector.adjustScroll(scrollRect);
+    this.stateVector.setViewport(scrollRect);
 
     this.updateStateVectorPosition();
     this.initializeScrollEvents();
@@ -86,7 +79,7 @@ export class StateVectorFrame extends PIXI.Container {
   }
 
   private initStateVector() {
-    this.stateVector.on(STATE_VECTOR_EVENTS.CHANGE, () => {
+    this.stateVector.on(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, () => {
       this.updateStateVectorPosition();
     });
   }
@@ -180,7 +173,7 @@ export class StateVectorFrame extends PIXI.Container {
       this.frameWidth,
       this.frameHeight
     );
-    this.stateVector.adjustScroll(scrollRect);
+    this.stateVector.setViewport(scrollRect);
   }
 
   /**

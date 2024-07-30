@@ -8,14 +8,14 @@ describe("StateVectorFrame", () => {
   });
 
   it("should create a singleton instance", () => {
-    const instance1 = StateVectorFrame.getInstance(100, 100, 5);
-    const instance2 = StateVectorFrame.getInstance(100, 100, 5);
+    const instance1 = StateVectorFrame.getInstance(100, 100);
+    const instance2 = StateVectorFrame.getInstance(100, 100);
 
     expect(instance1).toBe(instance2);
   });
 
   it("should reposition and resize correctly", () => {
-    const frame = StateVectorFrame.getInstance(100, 100, 5);
+    const frame = StateVectorFrame.getInstance(100, 100);
 
     frame.repositionAndResize(50, 200, 150);
 
@@ -25,12 +25,12 @@ describe("StateVectorFrame", () => {
   });
 
   it("should handle scroll events", () => {
-    const frame = StateVectorFrame.getInstance(100, 100, 5);
+    const frame = StateVectorFrame.getInstance(100, 100);
     const scrollEvent: FederatedWheelEvent = new WheelEvent("wheel", {
       deltaY: 10,
       deltaX: 5,
     }) as FederatedWheelEvent;
-    const adjustScrollSpy = vi.spyOn(frame.stateVector, "adjustScroll");
+    const adjustScrollSpy = vi.spyOn(frame.stateVector, "setViewport");
 
     frame.emit("wheel", scrollEvent);
 

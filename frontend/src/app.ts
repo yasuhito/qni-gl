@@ -9,13 +9,11 @@ import { FrameDivider } from "./frame-divider";
 import { GateComponent } from "./gate-component";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import {
-  STATE_VECTOR_EVENTS,
-  StateVectorComponent,
-} from "./state-vector-component";
+import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { rectIntersect } from "./util";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 export class App {
   static elementId = "app";
@@ -117,8 +115,7 @@ export class App {
 
     this.stateVectorFrame = StateVectorFrame.getInstance(
       this.pixiApp.screen.width,
-      this.pixiApp.screen.height * 0.4,
-      this.circuit.maxWireCount
+      this.pixiApp.screen.height * 0.4
     );
     this.mainContainer.addChild(this.stateVectorFrame);
 
@@ -173,7 +170,7 @@ export class App {
     );
 
     this.stateVector.on(
-      STATE_VECTOR_EVENTS.AMPLITUDES_VISIBLE,
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
       this.handleVisibleAmplitudesChange.bind(this)
     );
 
@@ -253,7 +250,7 @@ export class App {
     [key: number]: [number, number];
   }) {
     for (const [index, [real, imag]] of Object.entries(amplitudes)) {
-      const qubitCircle = this.stateVector.getQubitCircleAt(parseInt(index));
+      const qubitCircle = this.stateVector.qubitCircleAt(parseInt(index));
 
       if (qubitCircle) {
         const amplitude = new Complex(real, imag);
@@ -522,7 +519,7 @@ export class App {
       circuitJson: this.circuit.toCircuitJSON(),
       qubitCount: this.circuit.qubitCountInUse,
       stepIndex: this.circuit.activeStepIndex,
-      targets: this.stateVector.visibleAmplitudes,
+      targets: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
     });
   }
