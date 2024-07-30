@@ -1,7 +1,11 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 
-const FrameDividerConfig = {
+const FrameDividerConfig: {
+  DIVIDER_HEIGHT: number;
+  CURSOR_STYLE: string;
+  DEFAULT_CURSOR: string;
+} = {
   DIVIDER_HEIGHT: 2,
   CURSOR_STYLE: "ns-resize",
   DEFAULT_CURSOR: "default",
@@ -13,9 +17,9 @@ const FrameDividerConfig = {
 export class FrameDivider extends PIXI.Graphics {
   private static instance: FrameDivider | null = null;
 
-  app: PIXI.Application;
-  dragging = false;
-  dragStartY = 0;
+  private readonly app: PIXI.Application;
+  private _isDragging = false;
+  private dragStartY = 0;
 
   static initialize(app: PIXI.Application, initialY: number): void {
     if (this.instance === null) {
@@ -47,12 +51,12 @@ export class FrameDivider extends PIXI.Graphics {
   }
 
   private setupEventListeners(): void {
-    this.on("pointerdown", this.startDragging);
-    this.on("pointerup", this.endDragging);
-    this.on("pointerupoutside", this.endDragging);
+    this.on("pointerdown", this.startDragging.bind(this));
+    this.on("pointerup", this.endDragging.bind(this));
+    this.on("pointerupoutside", this.endDragging.bind(this));
   }
 
-  private drawDivider() {
+  private drawDivider(): void {
     this.clear();
     this.beginFill(Colors["border-component"]);
     this.drawRect(
@@ -65,32 +69,39 @@ export class FrameDivider extends PIXI.Graphics {
   }
 
   // 新しく追加するメソッド
-  public updateWidth() {
+  public updateWidth(): void {
     this.drawDivider();
   }
 
-  private startDragging(event: PIXI.FederatedPointerEvent) {
-    this.dragging = true;
+  get isDragging(): boolean {
+    return this._isDragging;
+  }
+
+  private startDragging(event: PIXI.FederatedPointerEvent): void {
+    this._isDragging = true;
     this.dragStartY = event.global.y - this.y;
     this.app.stage.cursor = FrameDividerConfig.CURSOR_STYLE;
   }
 
-  private endDragging() {
-    if (!this.dragging) return;
+  private endDragging(): void {
+    if (!this._isDragging) return;
 
-    this.dragging = false;
+    this._isDragging = false;
     this.app.stage.cursor = FrameDividerConfig.DEFAULT_CURSOR;
   }
 
-  move(event: PIXI.FederatedPointerEvent) {
-    if (!this.dragging) return;
+  move(event: PIXI.FederatedPointerEvent): void {
+    if (!this._isDragging) return;
 
-    let borderPosition = event.global.y - this.dragStartY;
+    const newPosition = event.global.y - this.dragStartY;
+    this.y = this.clampPosition(newPosition);
+  }
 
-    if (borderPosition < 0) borderPosition = 0;
-    if (borderPosition > this.app.screen.height)
-      borderPosition = this.app.screen.height;
+  private clampPosition(position: number): number {
+    const minPosition = 0;
+    const maxPosition =
+      this.app.screen.height - FrameDividerConfig.DIVIDER_HEIGHT;
 
-    this.y = borderPosition;
+    return Math.max(minPosition, Math.min(position, maxPosition));
   }
 }

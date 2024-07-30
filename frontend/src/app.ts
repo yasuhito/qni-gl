@@ -125,7 +125,7 @@ export class App {
     this.pixiApp.stage.addChild(this.frameDivider);
 
     this.pixiApp.stage.on("pointermove", (event) => {
-      if (!this.frameDivider.dragging) return;
+      if (!this.frameDivider.isDragging) return;
 
       this.frameDivider.move(event);
 
