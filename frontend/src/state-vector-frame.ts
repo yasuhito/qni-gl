@@ -39,11 +39,11 @@ export class StateVectorFrame extends PIXI.Container {
     this.frameWidth = width;
     this.frameHeight = height;
     this.background = new PIXI.Graphics();
-    this.stateVector = new StateVectorComponent(
-      1,
-      maxQubitCount,
-      new PIXI.Rectangle(0, 0, width, height)
-    );
+    this.stateVector = new StateVectorComponent({
+      initialQubitCount: 1,
+      maxQubitCount: maxQubitCount,
+      viewport: new PIXI.Rectangle(0, 0, width, height),
+    });
     this.maskGraphics = new PIXI.Graphics();
     this.scrollContainer = new PIXI.Container();
 

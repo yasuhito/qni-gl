@@ -1,29 +1,39 @@
 import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
 import { QubitCircle } from "./qubit-circle";
-import { need } from "./util";
 import { StateVectorRenderer } from "./state-vector-renderer";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
+
+type QubitCount = number;
+
+class InvalidQubitCountError extends Error {
+  constructor(value: QubitCount, maxQubitCount: QubitCount) {
+    super(`Invalid qubit count: ${value}. Must not exceed ${maxQubitCount}.`);
+    this.name = "InvalidQubitCountError";
+  }
+}
+
+interface StateVectorConfig {
+  initialQubitCount: QubitCount;
+  maxQubitCount: QubitCount;
+  viewport: PIXI.Rectangle;
+}
 
 /**
  * Represents a component that visualizes the state vector.
  * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
-  private _qubitCount = 0;
-  private maxQubitCount: number;
+  private _qubitCount: QubitCount = 0;
+  private maxQubitCount: QubitCount;
   private renderer: StateVectorRenderer;
 
-  set qubitCount(value: number) {
-    need(
-      value <= this.maxQubitCount,
-      "qubitCount must not exceed maxQubitCount. Attempted to set {qubitCount}, but maxQubitCount is {maxQubitCount}.",
-      { value, maxQubitCount: this.maxQubitCount }
-    );
+  set qubitCount(newValue: QubitCount) {
+    const validatedCount = this.validateQubitCount(newValue);
 
-    if (this._qubitCount === value) return;
+    if (this._qubitCount === validatedCount) return;
 
-    this._qubitCount = value;
+    this._qubitCount = validatedCount;
     this.updateStateVector();
   }
 
@@ -39,27 +49,24 @@ export class StateVectorComponent extends Container {
     return this.renderer.visibleQubitCircleIndices;
   }
 
-  constructor(
-    qubitCount: number,
-    maxQubitCount: number,
-    viewport: PIXI.Rectangle
-  ) {
+  constructor(config: StateVectorConfig) {
     super();
 
-    this.renderer = new StateVectorRenderer(this, qubitCount, viewport);
-    this.maxQubitCount = maxQubitCount;
-    this.qubitCount = qubitCount;
-    this.setViewport(viewport);
+    this.maxQubitCount = config.maxQubitCount;
+    this.renderer = new StateVectorRenderer(
+      this,
+      config.initialQubitCount,
+      config.viewport
+    );
+    this.qubitCount = config.initialQubitCount;
+    this.setViewport(config.viewport);
   }
 
   setViewport(viewport: PIXI.Rectangle) {
     const visibleQubitCirclesChanged = this.renderer.setViewport(viewport);
 
     if (visibleQubitCirclesChanged) {
-      this.emit(
-        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-        this.renderer.visibleQubitCircleIndices
-      );
+      this.emitVisibleQubitCirclesChanged();
     }
   }
 
@@ -67,9 +74,35 @@ export class StateVectorComponent extends Container {
     return this.renderer.qubitCircleAt(index);
   }
 
-  private updateStateVector() {
-    this.renderer.updateQubitCircleLayout(this.qubitCount);
+  private validateQubitCount(value: QubitCount): QubitCount {
+    if (value < 0 || value > this.maxQubitCount) {
+      throw new InvalidQubitCountError(value, this.maxQubitCount);
+    }
+    return value;
+  }
+
+  private updateStateVector(): void {
+    this.updateRendererLayout();
+    this.redrawStateVector();
+    this.notifyQubitCountChange();
+  }
+
+  private updateRendererLayout(): void {
+    this.renderer.updateQubitCircleLayout(this._qubitCount);
+  }
+
+  private redrawStateVector(): void {
     this.renderer.draw();
+  }
+
+  private notifyQubitCountChange(): void {
     this.emit(STATE_VECTOR_EVENTS.QUBIT_COUNT_CHANGED, this.qubitCount);
+  }
+
+  private emitVisibleQubitCirclesChanged() {
+    this.emit(
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+      this.visibleQubitCircleIndices
+    );
   }
 }

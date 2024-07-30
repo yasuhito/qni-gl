@@ -9,7 +9,11 @@ describe("StateVectorComponent", () => {
   const mockScrollRect = new PIXI.Rectangle(0, 0, 1000, 1000);
 
   beforeEach(() => {
-    stateVector = new StateVectorComponent(1, 12, mockScrollRect);
+    stateVector = new StateVectorComponent({
+      initialQubitCount: 1,
+      maxQubitCount: 12,
+      viewport: mockScrollRect,
+    });
   });
 
   it("should initialize with correct default values", () => {
