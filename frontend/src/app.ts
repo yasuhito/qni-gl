@@ -273,6 +273,11 @@ export class App {
     const height = window.innerHeight;
 
     this.pixiApp.renderer.resize(width, height);
+
+    if (this.frameDivider) {
+      this.frameDivider.updateWidth();
+    }
+
     if (this.stateVectorFrame) {
       this.stateVectorFrame.repositionAndResize(
         this.frameDivider.y + this.frameDivider.height,
