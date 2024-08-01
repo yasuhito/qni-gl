@@ -9,7 +9,7 @@ import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
-import { CIRCUIT_STEP_EVENTS } from "./circuit-step-events";
+import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
 
 /**
  * @noInheritDoc
@@ -106,8 +106,8 @@ export class CircuitStepComponent extends Container {
    */
   appendNewDropzone() {
     const dropzone = new DropzoneComponent();
-    dropzone.on("snap", this.onDropzoneSnap, this);
-    dropzone.on("grabGate", (gate, globalPosition) => {
+    dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
+    dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
     this._dropzones.addChild(dropzone);

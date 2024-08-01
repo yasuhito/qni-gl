@@ -4,6 +4,7 @@ import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
 import { WireType } from "./types";
 import { spacingInPx } from "./util";
+import { DROPZONE_EVENTS } from "./events";
 
 export class DropzoneComponent extends Container {
   static size = spacingInPx(8);
@@ -109,7 +110,7 @@ export class DropzoneComponent extends Container {
     }
     this.operation.on("grab", this.emitGrabGateEvent, this);
     this.redrawWires();
-    this.emit("snap", this);
+    this.emit(DROPZONE_EVENTS.GATE_SNAPPED, this);
   }
 
   unsnap() {
@@ -121,7 +122,7 @@ export class DropzoneComponent extends Container {
   }
 
   private emitGrabGateEvent(gate, globalPosition) {
-    this.emit("grabGate", gate, globalPosition);
+    this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
   }
 
   redrawWires() {

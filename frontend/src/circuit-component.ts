@@ -3,7 +3,7 @@ import { Container } from "pixi.js";
 import { List as ListContainer } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import { CIRCUIT_STEP_EVENTS } from "./circuit-step-events";
+import { CIRCUIT_STEP_EVENTS } from "./events";
 
 /**
  * Represents the options for a {@link CircuitComponent}.

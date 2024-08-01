@@ -1,5 +1,6 @@
 import { DropzoneComponent } from "../../src/dropzone-component";
 import { DropzoneRenderer } from "../../src/dropzone-renderer";
+import { DROPZONE_EVENTS } from "../../src/events";
 import { HGate } from "../../src/h-gate";
 import { MeasurementGate } from "../../src/measurement-gate";
 import { WireType } from "../../src/types";
@@ -48,7 +49,10 @@ describe("DropzoneComponent", () => {
         dropzone
       );
       expect(dropzone["renderer"].drawWires).toHaveBeenCalled();
-      expect(emitSpy).toHaveBeenCalledWith("snap", dropzone);
+      expect(emitSpy).toHaveBeenCalledWith(
+        DROPZONE_EVENTS.GATE_SNAPPED,
+        dropzone
+      );
     });
 
     it("should remove gate listener when unsnapping", () => {
