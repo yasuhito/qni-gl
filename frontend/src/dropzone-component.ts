@@ -1,34 +1,27 @@
-import * as PIXI from "pixi.js";
-import { Colors, FULL_OPACITY, WireColor } from "./colors";
 import { Container } from "pixi.js";
+import { DropzoneRenderer } from "./dropzone-renderer";
 import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
+import { WireType } from "./types";
 import { spacingInPx } from "./util";
 
-export enum WireType {
-  Quantum = "quantum",
-  Classical = "classical",
-}
-
-const LINE_ALIGNMENT_MIDDLE = 0.5;
-
-/**
- * @noInheritDoc
- */
 export class DropzoneComponent extends Container {
   static size = spacingInPx(8);
-  static wireWidth = 2;
-  static connectionWidth = 4;
 
-  // operation: Operation | null = null;
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
-  _connectTop = false;
-  _connectBottom = false;
+  private _connectTop = false;
+  private _connectBottom = false;
 
-  protected wire: PIXI.Graphics;
-  protected connection: PIXI.Graphics;
+  private renderer: DropzoneRenderer;
+
+  constructor() {
+    super();
+    this.renderer = new DropzoneRenderer(this);
+    this.redrawWires();
+    this.redrawConnections();
+  }
 
   get size(): number {
     return DropzoneComponent.size;
@@ -48,7 +41,6 @@ export class DropzoneComponent extends Container {
         return each as Operation;
       }
     }
-
     return null;
   }
 
@@ -74,28 +66,12 @@ export class DropzoneComponent extends Container {
     return this._connectBottom;
   }
 
-  constructor() {
-    super();
-
-    this.wire = new PIXI.Graphics();
-    this.addChild(this.wire);
-
-    this.connection = new PIXI.Graphics();
-    this.addChild(this.connection);
-
-    this.redrawWires();
-    this.redrawConnections();
-  }
-
   snap(gate: GateComponent) {
     this.addChild(gate);
-
     if (this.operation === null) {
       throw new Error("Operation is null");
     }
-
     this.operation.on("grab", this.emitGrabGateEvent, this);
-
     this.redrawWires();
     this.emit("snap", this);
   }
@@ -104,7 +80,6 @@ export class DropzoneComponent extends Container {
     if (this.operation === null) {
       throw new Error("Operation is null");
     }
-
     this.operation.off("grab", this.emitGrabGateEvent, this);
     this.redrawWires();
   }
@@ -114,34 +89,24 @@ export class DropzoneComponent extends Container {
   }
 
   redrawWires() {
-    this.wire.clear();
-
-    this.drawWire(
-      this.inputWireStartX,
-      this.inputWireEndX,
-      this.inputWireColor
-    );
-    this.drawWire(
-      this.outputWireStartX,
-      this.outputWireEndX,
-      this.outputWireColor
+    this.renderer.drawWires(
+      this.inputWireType,
+      this.outputWireType,
+      this.size,
+      this.isIconGate(this.operation)
     );
   }
 
   redrawConnections() {
-    this.connection.clear();
-
-    if (this.connectTop) {
-      this.drawConnection(this.lowerConnectionStartY, this.lowerConnectionEndY);
-    }
-    if (this.connectBottom) {
-      this.drawConnection(this.upperConnectionStartY, this.upperConnectionEndY);
-    }
+    this.renderer.drawConnections(
+      this.connectTop,
+      this.connectBottom,
+      this.size
+    );
   }
 
   toJSON() {
     const pos = this.getGlobalPosition();
-
     return {
       x: pos.x + this.width / 2,
       y: pos.y + this.height / 2,
@@ -152,7 +117,6 @@ export class DropzoneComponent extends Container {
     if (this.operation === null) {
       return "1";
     }
-
     return this.operation.toCircuitJSON();
   }
 
@@ -166,116 +130,10 @@ export class DropzoneComponent extends Container {
     return this.operation?.gateType() === "MeasurementGate";
   }
 
-  protected drawWire(startX: number, endX: number, color: WireColor) {
-    this.wire
-      .lineStyle(this.wireWidth, color, this.wireAlpha, this.wireAlignment)
-      .moveTo(startX, this.wireY)
-      .lineTo(endX, this.wireY);
-  }
-
-  protected drawConnection(startY: number, endY: number) {
-    this.connection
-      .lineStyle(
-        this.connectionWidth,
-        Colors["bg-brand"],
-        this.wireAlpha,
-        this.wireAlignment
-      )
-      .moveTo(this.connectionX, startY)
-      .lineTo(this.connectionX, endY);
-  }
-
-  protected get wireWidth() {
-    return DropzoneComponent.wireWidth;
-  }
-
-  protected get connectionWidth() {
-    return DropzoneComponent.connectionWidth;
-  }
-
-  protected get inputWireColor() {
-    if (this.inputWireType === WireType.Quantum) {
-      return Colors["text"];
-    }
-
-    return Colors["text-inverse"];
-  }
-
-  protected get outputWireColor() {
-    if (this.outputWireType === WireType.Quantum) {
-      return Colors["text"];
-    }
-
-    return Colors["text-inverse"];
-  }
-
-  protected get inputWireStartX() {
-    return 0;
-  }
-
-  protected get inputWireEndX() {
-    if (this.isIconGate(this.operation)) {
-      return DropzoneComponent.size / 4;
-    }
-    return DropzoneComponent.size * 0.75;
-  }
-
-  protected get outputWireStartX() {
-    if (this.isIconGate(this.operation)) {
-      return (DropzoneComponent.size * 5) / 4;
-    }
-    return DropzoneComponent.size * 0.75;
-  }
-
-  protected get outputWireEndX() {
-    return DropzoneComponent.size * 1.5;
-  }
-
-  protected get wireY() {
-    const center = new PIXI.Point(
-      DropzoneComponent.size / 2,
-      DropzoneComponent.size / 2
-    );
-    return center.y;
-  }
-
-  protected get wireAlpha() {
-    return FULL_OPACITY;
-  }
-
-  protected get wireAlignment() {
-    return LINE_ALIGNMENT_MIDDLE;
-  }
-
-  protected get connectionX() {
-    const center = new PIXI.Point(
-      DropzoneComponent.size * 0.75,
-      DropzoneComponent.size / 2
-    );
-    return center.x;
-  }
-
-  protected get lowerConnectionStartY() {
-    return DropzoneComponent.size * -0.25;
-  }
-
-  protected get lowerConnectionEndY() {
-    return DropzoneComponent.size * 0.5;
-  }
-
-  protected get upperConnectionStartY() {
-    return DropzoneComponent.size * 0.5;
-  }
-
-  protected get upperConnectionEndY() {
-    return DropzoneComponent.size * 1.25;
-  }
-
-  protected isIconGate(gate: GateComponent | null) {
+  private isIconGate(gate: GateComponent | null) {
     if (gate === null) {
       return false;
     }
-
     return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
       (type) => gate.gateType() === type
     );

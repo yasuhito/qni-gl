@@ -12,3 +12,8 @@ type ValidQubitCount =
   | typeof MAX_QUBIT_COUNT;
 
 export type QubitCount = ValidQubitCount;
+
+export enum WireType {
+  Quantum = "quantum",
+  Classical = "classical",
+}
