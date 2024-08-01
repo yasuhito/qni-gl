@@ -116,16 +116,37 @@ export class DropzoneComponent extends Container {
   redrawWires() {
     this.wire.clear();
 
-    this.drawWire(
+    this.drawWireSegment(
       this.inputWireStartX,
       this.inputWireEndX,
-      this.inputWireColor
+      this.inputWireColor,
+      this.inputWireType
     );
-    this.drawWire(
+    this.drawWireSegment(
       this.outputWireStartX,
       this.outputWireEndX,
-      this.outputWireColor
+      this.outputWireColor,
+      this.outputWireType
     );
+  }
+
+  private drawWireSegment(
+    startX: number,
+    endX: number,
+    color: WireColor,
+    wireType: WireType
+  ) {
+    this.wire
+      .lineStyle(this.wireWidth, color, this.wireAlpha, this.wireAlignment)
+      .moveTo(startX, this.wireY)
+      .lineTo(endX, this.wireY);
+
+    // Add any additional styling for quantum wires if needed
+    if (wireType === WireType.Quantum) {
+      // For example, you could add a dashed line effect for quantum wires
+      // This is just a placeholder - implement as needed
+      // this.drawQuantumWireEffect(startX, endX);
+    }
   }
 
   redrawConnections() {
@@ -194,19 +215,17 @@ export class DropzoneComponent extends Container {
   }
 
   protected get inputWireColor() {
-    if (this.inputWireType === WireType.Quantum) {
-      return Colors["text"];
-    }
-
-    return Colors["text-inverse"];
+    return this.getWireColor(this.inputWireType);
   }
 
   protected get outputWireColor() {
-    if (this.outputWireType === WireType.Quantum) {
-      return Colors["text"];
-    }
+    return this.getWireColor(this.outputWireType);
+  }
 
-    return Colors["text-inverse"];
+  private getWireColor(wireType: WireType): WireColor {
+    return wireType === WireType.Quantum
+      ? Colors["text"]
+      : Colors["text-inverse"];
   }
 
   protected get inputWireStartX() {
