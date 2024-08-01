@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { WriteGate } from "./write-gate";
+import { SerializedGate } from "./types";
 
 /**
  * @noInheritDoc
@@ -24,6 +25,10 @@ export class Write1Gate extends WriteGate {
     "./assets/Write1_grabbed_dropzone.svg"
   );
   static iconActive = PIXI.Texture.from("./assets/Write1_active.svg");
+
+  static serialize(targetBits: number[]): SerializedGate {
+    return { type: "|1>", targets: targetBits };
+  }
 
   toCircuitJSON() {
     return '"|1>"';

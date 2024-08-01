@@ -429,18 +429,16 @@ export class CircuitStepComponent extends Container {
         }
         case Write0Gate: {
           const write0Gates = sameOps as Write0Gate[];
-
           const targetBits = write0Gates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "|0>", targets: targetBits };
+          const serializedGate = Write0Gate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
         }
         case Write1Gate: {
           const write1Gates = sameOps as Write1Gate[];
-
           const targetBits = write1Gates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "|1>", targets: targetBits };
+          const serializedGate = Write1Gate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
