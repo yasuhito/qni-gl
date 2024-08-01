@@ -12,7 +12,7 @@ import { TGate } from "../../src/t-gate";
 import { TDaggerGate } from "../../src/t-dagger-gate";
 import { Write0Gate } from "../../src/write0-gate";
 import { Write1Gate } from "../../src/write1-gate";
-import { SwapGate } from "../../src";
+import { MeasurementGate, SwapGate } from "../../src";
 
 describe("CircuitStepComponent", () => {
   let circuitStep: CircuitStepComponent;
@@ -362,6 +362,30 @@ describe("CircuitStepComponent", () => {
 
         expect(circuitStep.serialize()).toEqual([
           { type: "•", targets: [0, 2] },
+        ]);
+      });
+    });
+
+    describe("Measurement Gate", () => {
+      it("should serialize a single measurement gate", () => {
+        const measurementGate = new MeasurementGate();
+
+        circuitStep.dropzoneAt(1).addChild(measurementGate);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "Measure", targets: [1] },
+        ]);
+      });
+
+      it("should serialize multiple measurement gates", () => {
+        const measurementGate1 = new MeasurementGate();
+        const measurementGate2 = new MeasurementGate();
+
+        circuitStep.dropzoneAt(0).addChild(measurementGate1);
+        circuitStep.dropzoneAt(2).addChild(measurementGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "Measure", targets: [0, 2] },
         ]);
       });
     });

@@ -3,6 +3,7 @@ import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Colors } from "./colors";
+import { SerializedGate } from "./types";
 
 /**
  * @noInheritDoc
@@ -43,6 +44,11 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
 
     cornerRadius: 4,
   };
+
+  static serialize(targetBits: number[]): SerializedGate {
+    return { type: "Measure", targets: targetBits };
+  }
+
   _value: "" | 0 | 1 = "";
 
   set value(newValue) {

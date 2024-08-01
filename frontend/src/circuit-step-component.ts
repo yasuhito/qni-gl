@@ -466,9 +466,8 @@ export class CircuitStepComponent extends Container {
         }
         case MeasurementGate: {
           const measurementGates = sameOps as MeasurementGate[];
-
           const targetBits = measurementGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "Measure", targets: targetBits };
+          const serializedGate = MeasurementGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
