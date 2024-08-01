@@ -1,8 +1,8 @@
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
-import { DropzoneComponent, WireType } from "./dropzone-component";
+import { DropzoneComponent } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
-import { QubitCount } from "./types";
+import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 
 /**
