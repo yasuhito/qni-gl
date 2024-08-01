@@ -10,6 +10,7 @@ import { XGate } from "./x-gate";
 import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
 import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
+import { CircuitStepState } from "./circuit-step-state";
 
 /**
  * @noInheritDoc
@@ -20,7 +21,7 @@ export class CircuitStepComponent extends Container {
   static activeLineColor = Colors["bg-brand"];
 
   private _dropzones: List;
-  private _state: "idle" | "hover" | "active" = "idle";
+  private _state: CircuitStepState;
   private _currentStepMarker: PIXI.Graphics;
 
   static get gapBetweenGates(): number {
@@ -139,6 +140,8 @@ export class CircuitStepComponent extends Container {
 
   constructor(qubitCount: number) {
     super();
+
+    this._state = new CircuitStepState();
 
     this._dropzones = new List({
       type: "vertical",
@@ -289,16 +292,8 @@ export class CircuitStepComponent extends Container {
     );
   }
 
-  isIdle(): boolean {
-    return this._state === "idle";
-  }
-
-  isHover(): boolean {
-    return this._state === "hover";
-  }
-
   isActive(): boolean {
-    return this._state === "active";
+    return this._state.isActive();
   }
 
   serialize() {
@@ -374,28 +369,28 @@ export class CircuitStepComponent extends Container {
       return;
     }
 
-    this._state = "active";
+    this._state.setActive();
     this.redrawLine();
     this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
   deactivate() {
-    this._state = "idle";
+    this._state.setIdle();
 
     this.hideCurrentStepMarker();
   }
 
   protected onPointerOver() {
-    if (this.isIdle()) {
+    if (this._state.isIdle()) {
       this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
-      this._state = "hover";
+      this._state.setHover();
       this.redrawLine();
     }
   }
 
   protected onPointerOut() {
-    if (this.isHover()) {
-      this._state = "idle";
+    if (this._state.isHover()) {
+      this._state.setIdle();
 
       this.hideCurrentStepMarker();
     }
@@ -408,7 +403,7 @@ export class CircuitStepComponent extends Container {
   }
 
   protected redrawLine() {
-    if (this.isHover()) {
+    if (this._state.isHover()) {
       this.showCurrentStepMarker();
       this.drawHoverLine();
     } else if (this.isActive()) {
