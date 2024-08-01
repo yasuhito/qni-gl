@@ -191,36 +191,20 @@ export class CircuitStepComponent extends Container {
 
     if (swapDropzones.length !== 2) {
       for (const dropzone of this.dropzones) {
-        const minBit = Math.min(...swapBits);
-        const maxBit = Math.max(...swapBits);
-
-        if (minBit <= this.bit(dropzone) && this.bit(dropzone) <= maxBit) {
-          dropzone.connectTop = false;
-          dropzone.connectBottom = false;
-        }
+        dropzone.swapConnectTop = false;
+        dropzone.swapConnectBottom = false;
       }
     } else {
-      for (const swap of swapDropzones) {
-        // TODO: つながっていない Swap ゲートは disabled (灰色表示) にする
-        // const swapGate = swap.operation as SwapGate
-        // swapGate.enable()
-        swap.connectTop = swapDropzones.some(
-          (each) => this.bit(each) < this.bit(swap)
-        );
-        swap.connectBottom = swapDropzones.some(
-          (each) => this.bit(each) > this.bit(swap)
-        );
-      }
+      const [minBit, maxBit] = [Math.min(...swapBits), Math.max(...swapBits)];
 
-      for (const dropzone of this.freeDropzones) {
-        const minBit = Math.min(...swapBits);
-        const maxBit = Math.max(...swapBits);
-        if (minBit < this.bit(dropzone) && this.bit(dropzone) < maxBit) {
-          dropzone.connectTop = true;
-          dropzone.connectBottom = true;
-        }
+      for (const dropzone of this.dropzones) {
+        const bit = this.bit(dropzone);
+        dropzone.swapConnectTop = bit > minBit && bit <= maxBit;
+        dropzone.swapConnectBottom = bit >= minBit && bit < maxBit;
       }
     }
+
+    this.updateConnections();
   }
 
   updateControlledUConnections(): void {
@@ -228,61 +212,44 @@ export class CircuitStepComponent extends Container {
     const controlDropzones = this.controlGateDropzones();
     const allControlBits = controlDropzones.map((dz) => this.bit(dz));
 
-    // すべての • のうち、有効なゲートのビット配列
-    const activeControlBits =
-      controlDropzones.length == 0
-        ? allControlBits
-        : allControlBits.slice(0, controlDropzones.length);
+    const activeControlBits = allControlBits.slice(0, controlDropzones.length);
     const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
     const activeOperationBits = activeControlBits.concat(controllableBits);
 
-    // コントロールゲートの上下接続をセット
-    controlDropzones.forEach((each) => {
-      each.connectBottom = activeOperationBits.some((other) => {
-        return this.bit(each) < other;
-      });
-      each.connectTop = activeOperationBits.some((other) => {
-        return this.bit(each) > other;
-      });
-    });
+    if (activeOperationBits.length > 0) {
+      const [minBit, maxBit] = [
+        Math.min(...activeOperationBits),
+        Math.max(...activeOperationBits),
+      ];
 
-    // コントロールされるゲートの上下接続をセット
-    for (const each of controllableDropzones) {
-      if (!(each.operation instanceof XGate)) {
-        throw new Error(`${each.operation} isn't controllable.`);
+      for (const dropzone of this.dropzones) {
+        const bit = this.bit(dropzone);
+        dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
+        dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
       }
 
-      each.operation.controls = allControlBits;
-
-      each.connectTop = activeOperationBits.some((other) => {
-        return other < this.bit(each);
-      });
-      each.connectBottom = activeOperationBits.some((other) => {
-        return other > this.bit(each);
-      });
+      // Set controls for XGates
+      for (const each of controllableDropzones) {
+        if (each.operation instanceof XGate) {
+          each.operation.controls = allControlBits;
+        }
+      }
+    } else {
+      for (const dropzone of this.dropzones) {
+        dropzone.controlConnectTop = false;
+        dropzone.controlConnectBottom = false;
+      }
     }
+
+    this.updateConnections();
   }
 
-  updateFreeDropzoneConnections(): void {
-    const controllableDropzones = this.controllableDropzones();
-    const activeControlBits = this.controlGateDropzones().map((each) =>
-      this.bit(each)
-    );
-    const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
-    const activeOperationBits = activeControlBits.concat(controllableBits);
-    const minBit =
-      activeOperationBits.length == 0 ? 0 : Math.min(...activeOperationBits);
-    const maxBit =
-      activeOperationBits.length == 0 ? 0 : Math.max(...activeOperationBits);
-
-    for (const each of this.freeDropzones) {
-      if (minBit < this.bit(each) && this.bit(each) < maxBit) {
-        each.connectTop = true;
-        each.connectBottom = true;
-      } else {
-        each.connectTop = false;
-        each.connectBottom = false;
-      }
+  private updateConnections(): void {
+    for (const dropzone of this.dropzones) {
+      dropzone.connectTop =
+        dropzone.swapConnectTop || dropzone.controlConnectTop;
+      dropzone.connectBottom =
+        dropzone.swapConnectBottom || dropzone.controlConnectBottom;
     }
   }
 

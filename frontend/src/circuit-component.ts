@@ -128,6 +128,7 @@ export class CircuitComponent extends Container {
     dropzone: DropzoneComponent
   ) {
     this.redrawDropzoneInputAndOutputWires(circuitStep, dropzone);
+    this.updateSwapConnections();
     this.updateGateConnections();
   }
 
@@ -243,7 +244,6 @@ export class CircuitComponent extends Container {
   private updateGateConnections() {
     this.steps.forEach((each) => {
       each.updateControlledUConnections();
-      each.updateFreeDropzoneConnections();
     });
   }
 

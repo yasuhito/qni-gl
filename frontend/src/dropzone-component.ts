@@ -13,6 +13,10 @@ export class DropzoneComponent extends Container {
 
   private _connectTop = false;
   private _connectBottom = false;
+  private _swapConnectTop = false;
+  private _swapConnectBottom = false;
+  private _controlConnectTop = false;
+  private _controlConnectBottom = false;
 
   private renderer: DropzoneRenderer;
 
@@ -51,6 +55,38 @@ export class DropzoneComponent extends Container {
   set connectTop(value) {
     this._connectTop = value;
     this.redrawConnections();
+  }
+
+  set swapConnectTop(value) {
+    this._swapConnectTop = value;
+  }
+
+  get swapConnectTop() {
+    return this._swapConnectTop;
+  }
+
+  set swapConnectBottom(value) {
+    this._swapConnectBottom = value;
+  }
+
+  get swapConnectBottom() {
+    return this._swapConnectBottom;
+  }
+
+  set controlConnectTop(value) {
+    this._controlConnectTop = value;
+  }
+
+  get controlConnectTop() {
+    return this._controlConnectTop;
+  }
+
+  set controlConnectBottom(value) {
+    this._controlConnectBottom = value;
+  }
+
+  get controlConnectBottom() {
+    return this._controlConnectBottom;
   }
 
   get connectTop() {
