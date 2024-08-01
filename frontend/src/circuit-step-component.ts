@@ -3,21 +3,10 @@ import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
-import { HGate } from "./h-gate";
 import { List } from "@pixi/ui";
-import { MeasurementGate } from "./measurement-gate";
 import { Operation } from "./operation";
-import { RnotGate } from "./rnot-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { SGate } from "./s-gate";
 import { SwapGate } from "./swap-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { TGate } from "./t-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
 import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
 
@@ -345,133 +334,41 @@ export class CircuitStepComponent extends Container {
   }
 
   serialize() {
-    const result: { type: string; targets: number[] }[] = [];
+    const result: { type: string; targets: number[]; controls?: number[] }[] =
+      [];
+    const controlBits = this.controlGateDropzones().map((each) =>
+      this.bit(each)
+    );
 
-    for (const [klass, sameOps] of groupBy(
+    for (const [GateClass, sameOps] of groupBy(
       this.operations,
       (op) => op.constructor
     )) {
-      switch (klass) {
-        case HGate: {
-          const hGates = sameOps as HGate[];
-          const targetBits = hGates.map((each) => this.indexOf(each));
-          const serializedGate = HGate.serialize(targetBits);
+      if (
+        GateClass === ControlGate &&
+        this.operations.some((op) => op instanceof XGate)
+      ) {
+        continue; // X ゲートがある場合は ControlGate をスキップ
+      }
 
-          result.push(serializedGate);
-          break;
-        }
-        case XGate: {
-          const xGates = sameOps as XGate[];
-          const targetBits = xGates.map((each) => this.indexOf(each));
-          const controlBits = this.controlGateDropzones().map((each) =>
-            this.bit(each)
-          );
-          const serializedGate = XGate.serialize(targetBits, controlBits);
+      const gates = sameOps as Operation[];
+      const targetBits = gates.map((each) => this.indexOf(each));
+      const gateInstance = gates[0];
 
-          result.push(serializedGate);
-          break;
-        }
-        case YGate: {
-          const yGates = sameOps as YGate[];
-          const targetBits = yGates.map((each) => this.indexOf(each));
-          const serializedGate = YGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case ZGate: {
-          const zGates = sameOps as ZGate[];
-          const targetBits = zGates.map((each) => this.indexOf(each));
-          const serializedGate = ZGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case RnotGate: {
-          const rnotGates = sameOps as RnotGate[];
-          const targetBits = rnotGates.map((each) => this.indexOf(each));
-          const serializedGate = RnotGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case SGate: {
-          const sGates = sameOps as SGate[];
-          const targetBits = sGates.map((each) => this.indexOf(each));
-          const serializedGate = SGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case SDaggerGate: {
-          const sdaggerGates = sameOps as SDaggerGate[];
-          const targetBits = sdaggerGates.map((each) => this.indexOf(each));
-          const serializedGate = SDaggerGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case TGate: {
-          const tGates = sameOps as TGate[];
-          const targetBits = tGates.map((each) => this.indexOf(each));
-          const serializedGate = TGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case TDaggerGate: {
-          const tdaggerGates = sameOps as TGate[];
-          const targetBits = tdaggerGates.map((each) => this.indexOf(each));
-          const serializedGate = TDaggerGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case Write0Gate: {
-          const write0Gates = sameOps as Write0Gate[];
-          const targetBits = write0Gates.map((each) => this.indexOf(each));
-          const serializedGate = Write0Gate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case Write1Gate: {
-          const write1Gates = sameOps as Write1Gate[];
-          const targetBits = write1Gates.map((each) => this.indexOf(each));
-          const serializedGate = Write1Gate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case SwapGate: {
-          const swapGates = sameOps as SwapGate[];
-          const targetBits = swapGates.map((each) => this.indexOf(each));
-          const serializedGate = SwapGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case ControlGate: {
-          // もし同じステップに X ゲートがある場合、X ゲート側でシリアライズするのでここでは何もしない
-          if (this.operations.some((op) => op instanceof XGate)) {
-            break;
-          }
-
-          const controlGates = sameOps as ControlGate[];
-          const targetBits = controlGates.map((each) => this.indexOf(each));
-          const serializedGate = ControlGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
-        case MeasurementGate: {
-          const measurementGates = sameOps as MeasurementGate[];
-          const targetBits = measurementGates.map((each) => this.indexOf(each));
-          const serializedGate = MeasurementGate.serialize(targetBits);
-
-          result.push(serializedGate);
-          break;
-        }
+      if (
+        "serialize" in GateClass &&
+        typeof GateClass["serialize"] === "function"
+      ) {
+        const serializeMethod = GateClass["serialize"];
+        const serializedGate =
+          gateInstance instanceof XGate
+            ? serializeMethod(targetBits, controlBits)
+            : serializeMethod(targetBits);
+        result.push(serializedGate);
+      } else {
+        console.warn(
+          `Serialization method not found for gate type: ${gateInstance.constructor.name}`
+        );
       }
     }
 
