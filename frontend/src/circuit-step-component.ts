@@ -405,9 +405,8 @@ export class CircuitStepComponent extends Container {
         }
         case SDaggerGate: {
           const sdaggerGates = sameOps as SDaggerGate[];
-
           const targetBits = sdaggerGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "S†", targets: targetBits };
+          const serializedGate = SDaggerGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;

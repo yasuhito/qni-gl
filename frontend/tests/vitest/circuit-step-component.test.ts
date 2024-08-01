@@ -7,6 +7,7 @@ import { YGate } from "../../src/y-gate";
 import { ZGate } from "../../src/z-gate";
 import { RnotGate } from "../../src/rnot-gate";
 import { SGate } from "../../src/s-gate";
+import { SDaggerGate } from "../../src/s-dagger-gate";
 
 describe("CircuitStepComponent", () => {
   let circuitStep: CircuitStepComponent;
@@ -196,6 +197,28 @@ describe("CircuitStepComponent", () => {
 
         expect(circuitStep.serialize()).toEqual([
           { type: "S", targets: [0, 2] },
+        ]);
+      });
+    });
+
+    describe("S† Gate", () => {
+      it("should serialize a single S† gate", () => {
+        const sDaggerGate = new SDaggerGate();
+
+        circuitStep.dropzoneAt(1).addChild(sDaggerGate);
+
+        expect(circuitStep.serialize()).toEqual([{ type: "S†", targets: [1] }]);
+      });
+
+      it("should serialize multiple S† gates", () => {
+        const sDaggerGate1 = new SDaggerGate();
+        const sDaggerGate2 = new SDaggerGate();
+
+        circuitStep.dropzoneAt(0).addChild(sDaggerGate1);
+        circuitStep.dropzoneAt(2).addChild(sDaggerGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "S†", targets: [0, 2] },
         ]);
       });
     });
