@@ -354,34 +354,27 @@ export class CircuitStepComponent extends Container {
       switch (klass) {
         case HGate: {
           const hGates = sameOps as HGate[];
-
           const targetBits = hGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "H", targets: targetBits };
+          const serializedGate = HGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
         }
         case XGate: {
           const xGates = sameOps as XGate[];
-
           const targetBits = xGates.map((each) => this.indexOf(each));
           const controlBits = this.controlGateDropzones().map((each) =>
             this.bit(each)
           );
-          const serializedGate = { type: "X", targets: targetBits };
-
-          if (controlBits.length > 0) {
-            serializedGate["controls"] = controlBits;
-          }
+          const serializedGate = XGate.serialize(targetBits, controlBits);
 
           result.push(serializedGate);
           break;
         }
         case YGate: {
           const yGates = sameOps as YGate[];
-
           const targetBits = yGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "Y", targets: targetBits };
+          const serializedGate = YGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
