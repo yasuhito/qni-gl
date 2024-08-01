@@ -389,9 +389,8 @@ export class CircuitStepComponent extends Container {
         }
         case RnotGate: {
           const rnotGates = sameOps as RnotGate[];
-
           const targetBits = rnotGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "X^½", targets: targetBits };
+          const serializedGate = RnotGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
