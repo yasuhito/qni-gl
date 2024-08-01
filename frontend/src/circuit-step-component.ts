@@ -445,9 +445,8 @@ export class CircuitStepComponent extends Container {
         }
         case SwapGate: {
           const swapGates = sameOps as SwapGate[];
-
           const targetBits = swapGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "Swap", targets: targetBits };
+          const serializedGate = SwapGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
