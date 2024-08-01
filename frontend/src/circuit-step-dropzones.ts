@@ -1,23 +1,23 @@
 import { DropzoneComponent } from "./dropzone-component";
 import { List } from "@pixi/ui";
 import { GateComponent } from "./gate-component";
+import { Operation } from "./operation";
 
 export class CircuitStepDropzones {
-  private static readonly PADDING_Y = DropzoneComponent.size;
+  private static readonly PADDING = DropzoneComponent.size;
   private static readonly MARGIN = DropzoneComponent.size / 2;
-
   private _dropzones: List;
 
   constructor() {
     this._dropzones = new List({
       type: "vertical",
       elementsMargin: CircuitStepDropzones.MARGIN,
-      vertPadding: CircuitStepDropzones.PADDING_Y,
+      vertPadding: CircuitStepDropzones.PADDING,
     });
     this._dropzones.eventMode = "static";
   }
 
-  get container() {
+  get container(): List {
     return this._dropzones;
   }
 
@@ -29,26 +29,37 @@ export class CircuitStepDropzones {
     return this.occupied.filter((each) => each.operation instanceof gateType);
   }
 
-  get length() {
+  findIndexOf(operation: Operation): number {
+    return this.all.findIndex((dropzone) => dropzone.operation === operation);
+  }
+
+  get length(): number {
     return this._dropzones.children.length;
   }
 
-  get occupied() {
+  get occupied(): DropzoneComponent[] {
     return this.all.filter((each) => each.isOccupied());
   }
 
-  at(index: number) {
+  at(index: number): DropzoneComponent | undefined {
+    if (index < 0 || index >= this.length) {
+      return undefined;
+    }
+
     return this.all[index];
   }
 
-  append() {
+  append(): DropzoneComponent {
     const dropzone = new DropzoneComponent();
     this._dropzones.addChild(dropzone);
     return dropzone;
   }
 
-  deleteLast() {
+  removeLast(): void {
     const dropzone = this.at(this.length - 1);
+    if (!dropzone) {
+      return;
+    }
     this._dropzones.removeChildAt(this.length - 1);
     dropzone.destroy();
   }
@@ -61,7 +72,7 @@ export class CircuitStepDropzones {
     return (
       DropzoneComponent.size * this.length +
       (this.length - 1) * CircuitStepDropzones.MARGIN +
-      CircuitStepDropzones.PADDING_Y * 2
+      CircuitStepDropzones.PADDING * 2
     );
   }
 }

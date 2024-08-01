@@ -23,18 +23,6 @@ export class CircuitStepComponent extends Container {
   private _state: CircuitStepState;
   private _currentStepMarker: PIXI.Graphics;
 
-  static get gapBetweenGates(): number {
-    return DropzoneComponent.size / 2;
-  }
-
-  static get paddingX(): number {
-    return DropzoneComponent.size;
-  }
-
-  static get paddingY(): number {
-    return DropzoneComponent.size;
-  }
-
   /**
    * ステップ内のワイヤ数 (ビット数) を返す
    */
@@ -83,14 +71,22 @@ export class CircuitStepComponent extends Container {
   }
 
   dropzoneAt(index: number) {
-    return this._dropzones.at(index);
+    const dropzone = this._dropzones.at(index);
+    if (!dropzone) {
+      throw new Error(`Dropzone not found at index ${index}`);
+    }
+    return dropzone;
   }
 
   /**
    * 指定した量子ビットにゲートが置かれているかどうかを返す
    */
   hasGateAt(qubitIndex: number) {
-    return this.dropzoneAt(qubitIndex).isOccupied();
+    const dropzone = this.dropzoneAt(qubitIndex);
+    if (!dropzone) {
+      throw new Error(`Dropzone not found at index ${qubitIndex}`);
+    }
+    return dropzone.isOccupied();
   }
 
   /**
@@ -118,7 +114,7 @@ export class CircuitStepComponent extends Container {
    * 末尾の Dropzone を削除する
    */
   deleteLastDropzone() {
-    this._dropzones.deleteLast();
+    this._dropzones.removeLast();
     this.redrawLine();
     this.updateHitArea();
   }
@@ -270,7 +266,7 @@ export class CircuitStepComponent extends Container {
       }
 
       const gates = sameOps as Operation[];
-      const targetBits = gates.map((each) => this.indexOf(each));
+      const targetBits = gates.map((each) => this._dropzones.findIndexOf(each));
       const gateInstance = gates[0];
 
       if (
@@ -291,17 +287,6 @@ export class CircuitStepComponent extends Container {
     }
 
     return result;
-  }
-
-  indexOf(operation: Operation) {
-    for (let i = 0; i < this.dropzones.length; i++) {
-      if (this.dropzoneAt(i).operation === operation) {
-        return i;
-      }
-    }
-
-    // ???: -1 ではなく例外を投げる?
-    return -1;
   }
 
   toJSON() {
