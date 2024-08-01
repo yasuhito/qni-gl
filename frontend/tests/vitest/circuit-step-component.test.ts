@@ -4,6 +4,7 @@ import { HGate } from "../../src/h-gate";
 import { XGate } from "../../src/x-gate";
 import { ControlGate } from "../../src/control-gate";
 import { YGate } from "../../src/y-gate";
+import { ZGate } from "../../src/z-gate";
 
 describe("CircuitStepComponent", () => {
   let circuitStep: CircuitStepComponent;
@@ -125,6 +126,28 @@ describe("CircuitStepComponent", () => {
 
         expect(circuitStep.serialize()).toEqual([
           { type: "Y", targets: [2], controls: [0, 1] },
+        ]);
+      });
+    });
+
+    describe("Z Gate", () => {
+      it("should serialize a single Z gate", () => {
+        const zGate = new ZGate();
+
+        circuitStep.dropzoneAt(1).addChild(zGate);
+
+        expect(circuitStep.serialize()).toEqual([{ type: "Z", targets: [1] }]);
+      });
+
+      it("should serialize multiple Z gates", () => {
+        const zGate1 = new ZGate();
+        const zGate2 = new ZGate();
+
+        circuitStep.dropzoneAt(0).addChild(zGate1);
+        circuitStep.dropzoneAt(2).addChild(zGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "Z", targets: [0, 2] },
         ]);
       });
     });

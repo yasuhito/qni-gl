@@ -381,9 +381,8 @@ export class CircuitStepComponent extends Container {
         }
         case ZGate: {
           const zGates = sameOps as ZGate[];
-
           const targetBits = zGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "Z", targets: targetBits };
+          const serializedGate = ZGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
