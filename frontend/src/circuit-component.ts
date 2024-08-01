@@ -1,9 +1,9 @@
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Container } from "pixi.js";
-import { DropzoneComponent } from "./dropzone-component";
 import { List as ListContainer } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
+import { CIRCUIT_STEP_EVENTS } from "./circuit-step-events";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
@@ -111,31 +111,33 @@ export class CircuitComponent extends Container {
     const circuitStep = new CircuitStepComponent(wireCount);
     this.circuitStepsContainer.addChild(circuitStep);
 
-    circuitStep.on("gateSnapToDropzone", this.onGateSnapToDropzone, this);
-    circuitStep.on("circuit-step.hover", this.emitOnStepHoverSignal, this);
     circuitStep.on(
-      "circuit-step.activated",
+      CIRCUIT_STEP_EVENTS.GATE_SNAPPED,
+      this.onGateSnapToDropzone,
+      this
+    );
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.HOVERED,
+      this.emitOnStepHoverSignal,
+      this
+    );
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.deactivateAllOtherSteps,
       this
     );
-    circuitStep.on("grabGate", (gate, globalPosition) => {
+    circuitStep.on(CIRCUIT_STEP_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_EVENTS.GRAB_GATE, gate, globalPosition);
     });
   }
 
-  private onGateSnapToDropzone(
-    circuitStep: CircuitStepComponent,
-    dropzone: DropzoneComponent
-  ) {
-    this.redrawDropzoneInputAndOutputWires(circuitStep, dropzone);
+  private onGateSnapToDropzone() {
+    this.redrawDropzoneInputAndOutputWires();
     this.updateSwapConnections();
     this.updateGateConnections();
   }
 
-  private redrawDropzoneInputAndOutputWires(
-    circuitStep: CircuitStepComponent,
-    dropzone: DropzoneComponent
-  ) {
+  private redrawDropzoneInputAndOutputWires() {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
@@ -160,7 +162,7 @@ export class CircuitComponent extends Container {
       });
     }
 
-    this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
+    // this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
   }
 
   /**

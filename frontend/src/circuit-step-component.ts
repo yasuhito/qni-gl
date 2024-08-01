@@ -9,6 +9,7 @@ import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
+import { CIRCUIT_STEP_EVENTS } from "./circuit-step-events";
 
 /**
  * @noInheritDoc
@@ -107,7 +108,7 @@ export class CircuitStepComponent extends Container {
     const dropzone = new DropzoneComponent();
     dropzone.on("snap", this.onDropzoneSnap, this);
     dropzone.on("grabGate", (gate, globalPosition) => {
-      this.emit("grabGate", gate, globalPosition);
+      this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
     this._dropzones.addChild(dropzone);
 
@@ -119,7 +120,7 @@ export class CircuitStepComponent extends Container {
   }
 
   protected onDropzoneSnap(dropzone: DropzoneComponent) {
-    this.emit("gateSnapToDropzone", this, dropzone);
+    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
   /**
@@ -375,7 +376,7 @@ export class CircuitStepComponent extends Container {
 
     this._state = "active";
     this.redrawLine();
-    this.emit("circuit-step.activated", this);
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
   deactivate() {
@@ -386,7 +387,7 @@ export class CircuitStepComponent extends Container {
 
   protected onPointerOver() {
     if (this.isIdle()) {
-      this.emit("circuit-step.hover", this);
+      this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
       this._state = "hover";
       this.redrawLine();
     }
