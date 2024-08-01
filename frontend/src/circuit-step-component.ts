@@ -18,25 +18,8 @@ import { Write1Gate } from "./write1-gate";
 import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
-import { spacingInPx } from "./util";
+import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
-
-const groupBy = <K, V>(
-  array: readonly V[],
-  getKey: (current: V, index: number, orig: readonly V[]) => K
-): Array<[K, V[]]> =>
-  Array.from(
-    array.reduce((map, current, index, orig) => {
-      const key = getKey(current, index, orig);
-      const list = map.get(key);
-      if (list) {
-        list.push(current);
-      } else {
-        map.set(key, [current]);
-      }
-      return map;
-    }, new Map<K, V[]>())
-  );
 
 /**
  * @noInheritDoc
