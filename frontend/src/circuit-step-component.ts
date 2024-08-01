@@ -459,7 +459,7 @@ export class CircuitStepComponent extends Container {
 
           const controlGates = sameOps as ControlGate[];
           const targetBits = controlGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "•", targets: targetBits };
+          const serializedGate = ControlGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;

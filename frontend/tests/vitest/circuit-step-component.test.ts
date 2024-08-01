@@ -344,6 +344,28 @@ describe("CircuitStepComponent", () => {
       });
     });
 
+    describe("Control Gate", () => {
+      it("should serialize a single control gate", () => {
+        const controlGate = new ControlGate();
+
+        circuitStep.dropzoneAt(1).addChild(controlGate);
+
+        expect(circuitStep.serialize()).toEqual([{ type: "•", targets: [1] }]);
+      });
+
+      it("should serialize multiple control gates", () => {
+        const controlGate1 = new ControlGate();
+        const controlGate2 = new ControlGate();
+
+        circuitStep.dropzoneAt(0).addChild(controlGate1);
+        circuitStep.dropzoneAt(2).addChild(controlGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "•", targets: [0, 2] },
+        ]);
+      });
+    });
+
     describe("Multiple Gate Types", () => {
       it("should serialize a circuit step with multiple gates", () => {
         const hGate = new HGate();
