@@ -8,6 +8,8 @@ import { ZGate } from "../../src/z-gate";
 import { RnotGate } from "../../src/rnot-gate";
 import { SGate } from "../../src/s-gate";
 import { SDaggerGate } from "../../src/s-dagger-gate";
+import { TGate } from "../../src/t-gate";
+import { TDaggerGate } from "../../src/t-dagger-gate";
 
 describe("CircuitStepComponent", () => {
   let circuitStep: CircuitStepComponent;
@@ -219,6 +221,50 @@ describe("CircuitStepComponent", () => {
 
         expect(circuitStep.serialize()).toEqual([
           { type: "S†", targets: [0, 2] },
+        ]);
+      });
+    });
+
+    describe("T Gate", () => {
+      it("should serialize a single T gate", () => {
+        const tGate = new TGate();
+
+        circuitStep.dropzoneAt(1).addChild(tGate);
+
+        expect(circuitStep.serialize()).toEqual([{ type: "T", targets: [1] }]);
+      });
+
+      it("should serialize multiple T gates", () => {
+        const tGate1 = new TGate();
+        const tGate2 = new TGate();
+
+        circuitStep.dropzoneAt(0).addChild(tGate1);
+        circuitStep.dropzoneAt(2).addChild(tGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "T", targets: [0, 2] },
+        ]);
+      });
+    });
+
+    describe("T† Gate", () => {
+      it("should serialize a single T† gate", () => {
+        const tDaggerGate = new TDaggerGate();
+
+        circuitStep.dropzoneAt(1).addChild(tDaggerGate);
+
+        expect(circuitStep.serialize()).toEqual([{ type: "T†", targets: [1] }]);
+      });
+
+      it("should serialize multiple T† gates", () => {
+        const tDaggerGate1 = new TDaggerGate();
+        const tDaggerGate2 = new TDaggerGate();
+
+        circuitStep.dropzoneAt(0).addChild(tDaggerGate1);
+        circuitStep.dropzoneAt(2).addChild(tDaggerGate2);
+
+        expect(circuitStep.serialize()).toEqual([
+          { type: "T†", targets: [0, 2] },
         ]);
       });
     });

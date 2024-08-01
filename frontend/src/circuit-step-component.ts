@@ -413,18 +413,16 @@ export class CircuitStepComponent extends Container {
         }
         case TGate: {
           const tGates = sameOps as TGate[];
-
           const targetBits = tGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "T", targets: targetBits };
+          const serializedGate = TGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
         }
         case TDaggerGate: {
           const tdaggerGates = sameOps as TGate[];
-
           const targetBits = tdaggerGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "T†", targets: targetBits };
+          const serializedGate = TDaggerGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
