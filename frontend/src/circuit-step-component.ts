@@ -397,9 +397,8 @@ export class CircuitStepComponent extends Container {
         }
         case SGate: {
           const sGates = sameOps as SGate[];
-
           const targetBits = sGates.map((each) => this.indexOf(each));
-          const serializedGate = { type: "S", targets: targetBits };
+          const serializedGate = SGate.serialize(targetBits);
 
           result.push(serializedGate);
           break;
