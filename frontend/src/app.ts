@@ -97,9 +97,9 @@ export class App {
     this.pixiApp.stage.hitArea = this.pixiApp.screen;
     this.pixiApp.stage.sortableChildren = true;
     this.pixiApp.stage
-      .on("pointerup", this.releaseGate.bind(this)) // マウスでクリックを離した、タッチパネルでタッチを離した
-      .on("pointerupoutside", this.releaseGate.bind(this)) // 描画オブジェクトの外側でクリック、タッチを離した
-      .on("pointerdown", this.maybeDeactivateGate.bind(this));
+      .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
+      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
+      .on("pointerdown", this.maybeDeactivateGate, this);
 
     this.mainContainer = new List({
       type: "vertical",
@@ -120,16 +120,14 @@ export class App {
     this.mainContainer.addChild(this.stateVectorFrame);
 
     // 量子回路と状態ベクトルの境界線
-    this.frameDivider = FrameDivider.getInstance(
+    this.frameDivider = FrameDivider.initialize(
       this.pixiApp,
       this.circuitFrame.height
     );
     this.pixiApp.stage.addChild(this.frameDivider);
 
-    this.pixiApp.stage.on("pointermove", (event) => {
-      if (!this.frameDivider.dragging) return;
-
-      this.frameDivider.move(event);
+    this.pixiApp.stage.on("pointermove", () => {
+      if (!this.frameDivider.isDragging) return;
 
       // 上下フレームの更新
       this.circuitFrame.resize(this.frameDivider.y);
@@ -344,7 +342,7 @@ export class App {
     // TODO: メソッド化
     this.pixiApp.stage.cursor = "grabbing";
 
-    this.pixiApp.stage.on("pointermove", this.maybeMoveGate.bind(this));
+    this.pixiApp.stage.on("pointermove", this.maybeMoveGate, this);
   }
 
   /**

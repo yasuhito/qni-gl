@@ -1,24 +1,36 @@
 import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
 
+const FrameDividerConfig = {
+  DIVIDER_HEIGHT: 2,
+  CURSOR_STYLE: "ns-resize",
+  DEFAULT_CURSOR: "default",
+} as const;
+
 /**
  * 量子回路フレームと状態ベクトルフレーム間のドラッグ可能な分割線を表すクラス。
+ *
+ * @noInheritDoc
  */
 export class FrameDivider extends PIXI.Graphics {
   private static instance: FrameDivider | null = null;
 
-  app: PIXI.Application;
-  dragging = false;
-  dragStartY = 0;
+  private readonly app: PIXI.Application;
+  private _isDragging = false;
+  private dragStartY = 0;
 
-  /**
-   * インスタンスを取得するメソッド
-   * @param app - PIXI アプリケーションインスタンス
-   * @param initialY - 初期 Y 座標
-   */
-  static getInstance(app: PIXI.Application, initialY: number): FrameDivider {
-    if (this.instance === null) {
+  static initialize(app: PIXI.Application, initialY: number): FrameDivider {
+    if (!this.instance) {
       this.instance = new FrameDivider(app, initialY);
+    }
+    return this.instance;
+  }
+
+  static getInstance(): FrameDivider {
+    if (this.instance === null) {
+      throw new Error(
+        "FrameDivider is not initialized. Call initialize() first."
+      );
     }
     return this.instance;
   }
@@ -30,47 +42,63 @@ export class FrameDivider extends PIXI.Graphics {
     this.y = initialY;
     this.drawDivider();
     this.interactive = true;
-    this.cursor = "ns-resize";
+    this.cursor = FrameDividerConfig.CURSOR_STYLE;
 
-    this.on("pointerdown", this.startDragging.bind(this));
-    this.on("pointerup", this.endDragging.bind(this));
-    this.on("pointerupoutside", this.endDragging.bind(this));
+    this.setupEventListeners();
   }
 
-  private drawDivider() {
+  private setupEventListeners(): void {
+    this.on("pointerdown", this.startDragging, this);
+    this.app.stage.on("pointermove", this.move, this);
+    this.app.stage.on("pointerup", this.endDragging, this);
+    this.app.stage.on("pointerupoutside", this.endDragging, this);
+  }
+
+  private drawDivider(): void {
     this.clear();
     this.beginFill(Colors["border-component"]);
-    this.drawRect(0, 0, this.app.screen.width, 2);
+    this.drawRect(
+      0,
+      0,
+      this.app.screen.width,
+      FrameDividerConfig.DIVIDER_HEIGHT
+    );
     this.endFill();
   }
 
-  // 新しく追加するメソッド
-  public updateWidth() {
+  public updateWidth(): void {
     this.drawDivider();
   }
 
-  private startDragging(event: PIXI.FederatedPointerEvent) {
-    this.dragging = true;
+  get isDragging(): boolean {
+    return this._isDragging;
+  }
+
+  private startDragging(event: PIXI.FederatedPointerEvent): void {
+    this._isDragging = true;
     this.dragStartY = event.global.y - this.y;
-    this.app.stage.cursor = "ns-resize";
+    this.app.stage.cursor = FrameDividerConfig.CURSOR_STYLE;
   }
 
-  private endDragging() {
-    if (!this.dragging) return;
+  private endDragging(): void {
+    if (!this.isDragging) return;
 
-    this.dragging = false;
-    this.app.stage.cursor = "default";
+    this._isDragging = false;
+    this.app.stage.cursor = FrameDividerConfig.DEFAULT_CURSOR;
   }
 
-  move(event: PIXI.FederatedPointerEvent) {
-    if (!this.dragging) return;
+  private move(event: PIXI.FederatedPointerEvent): void {
+    if (!this.isDragging) return;
 
-    let borderPosition = event.global.y - this.dragStartY;
+    const newPosition = event.global.y - this.dragStartY;
+    this.y = this.clampPosition(newPosition);
+  }
 
-    if (borderPosition < 0) borderPosition = 0;
-    if (borderPosition > this.app.screen.height)
-      borderPosition = this.app.screen.height;
+  private clampPosition(position: number): number {
+    const minPosition = 0;
+    const maxPosition =
+      this.app.screen.height - FrameDividerConfig.DIVIDER_HEIGHT;
 
-    this.y = borderPosition;
+    return Math.max(minPosition, Math.min(position, maxPosition));
   }
 }
