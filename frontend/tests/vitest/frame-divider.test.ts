@@ -21,7 +21,7 @@ describe("FrameDivider", () => {
   });
 
   afterEach(() => {
-    // vi.clearAllMocks();
+    vi.clearAllMocks();
     FrameDivider["instance"] = null;
   });
 
