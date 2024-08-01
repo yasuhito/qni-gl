@@ -2,8 +2,6 @@ import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
-import { GateComponent } from "./gate-component";
-import { List } from "@pixi/ui";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
@@ -11,6 +9,7 @@ import { groupBy, spacingInPx } from "./util";
 import { Colors } from "./colors";
 import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
 import { CircuitStepState } from "./circuit-step-state";
+import { CircuitStepDropzones } from "./circuit-step-dropzones";
 
 /**
  * @noInheritDoc
@@ -20,7 +19,7 @@ export class CircuitStepComponent extends Container {
   static hoverLineColor = Colors["bg-brand-hover"];
   static activeLineColor = Colors["bg-brand"];
 
-  private _dropzones: List;
+  private _dropzones: CircuitStepDropzones;
   private _state: CircuitStepState;
   private _currentStepMarker: PIXI.Graphics;
 
@@ -40,7 +39,7 @@ export class CircuitStepComponent extends Container {
    * ステップ内のワイヤ数 (ビット数) を返す
    */
   get wireCount() {
-    return this.dropzones.length;
+    return this._dropzones.length;
   }
 
   get isEmpty(): boolean {
@@ -67,22 +66,14 @@ export class CircuitStepComponent extends Container {
    * ステップ内のすべての {@link DropzoneComponent} を返す
    */
   get dropzones(): DropzoneComponent[] {
-    return this._dropzones.children as DropzoneComponent[];
+    return this._dropzones.all;
   }
 
   /**
    * ステップ内のすべての {@link DropzoneComponent} のうち、ゲートが置かれたものを返す
    */
-  get occupiedDropzones() {
-    return this.dropzones.filter((each) => {
-      return each.isOccupied();
-    });
-  }
-
-  get freeDropzones() {
-    return this.dropzones.filter((each) => {
-      return !each.isOccupied();
-    });
+  private get occupiedDropzones() {
+    return this._dropzones.occupied;
   }
 
   private get operations(): Operation[] {
@@ -92,7 +83,7 @@ export class CircuitStepComponent extends Container {
   }
 
   dropzoneAt(index: number) {
-    return this.dropzones[index];
+    return this._dropzones.at(index);
   }
 
   /**
@@ -106,12 +97,11 @@ export class CircuitStepComponent extends Container {
    * Dropzone を末尾に追加する
    */
   appendNewDropzone() {
-    const dropzone = new DropzoneComponent();
+    const dropzone = this._dropzones.append();
     dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
     dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
-    this._dropzones.addChild(dropzone);
 
     if (this._currentStepMarker) {
       this.redrawLine();
@@ -128,12 +118,7 @@ export class CircuitStepComponent extends Container {
    * 末尾の Dropzone を削除する
    */
   deleteLastDropzone() {
-    const dropzone = this._dropzones.getChildAt(
-      this._dropzones.children.length - 1
-    ) as DropzoneComponent;
-    this._dropzones.removeChildAt(this._dropzones.children.length - 1);
-    dropzone.destroy();
-
+    this._dropzones.deleteLast();
     this.redrawLine();
     this.updateHitArea();
   }
@@ -143,16 +128,9 @@ export class CircuitStepComponent extends Container {
 
     this._state = new CircuitStepState();
 
-    this._dropzones = new List({
-      type: "vertical",
-      elementsMargin: DropzoneComponent.size / 2,
-      vertPadding: CircuitStepComponent.paddingY,
-    });
+    this._dropzones = new CircuitStepDropzones();
 
-    this._dropzones.x = 0;
-    this._dropzones.y = 0;
-    this.addChild(this._dropzones);
-    this._dropzones.eventMode = "static";
+    this.addChild(this._dropzones.container);
 
     for (let i = 0; i < qubitCount; i++) {
       this.appendNewDropzone();
@@ -190,7 +168,7 @@ export class CircuitStepComponent extends Container {
   }
 
   updateSwapConnections(): void {
-    const swapDropzones = this.swapGateDropzones;
+    const swapDropzones = this._dropzones.filterByOperationType(SwapGate);
     const swapBits = swapDropzones.map((each) => this.bit(each));
 
     if (swapDropzones.length !== 2) {
@@ -213,7 +191,7 @@ export class CircuitStepComponent extends Container {
 
   updateControlledUConnections(): void {
     const controllableDropzones = this.controllableDropzones();
-    const controlDropzones = this.controlGateDropzones();
+    const controlDropzones = this._dropzones.filterByOperationType(ControlGate);
     const allControlBits = controlDropzones.map((dz) => this.bit(dz));
 
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
@@ -258,38 +236,15 @@ export class CircuitStepComponent extends Container {
   }
 
   private controllableDropzones(): DropzoneComponent[] {
-    return this.occupiedDropzones.filter((each) => {
-      if (each.operation instanceof XGate) {
-        return true;
-      }
-
-      return false;
-    });
-  }
-
-  private controlGateDropzones(): DropzoneComponent[] {
-    return this.occupiedDropzones.filter(
-      (each) => each.operation instanceof ControlGate
-    );
-  }
-
-  private get swapGateDropzones(): DropzoneComponent[] {
-    return this.occupiedDropzones.filter(
-      (each) => each.operation instanceof SwapGate
-    );
+    return this._dropzones.filterByOperationType(XGate);
   }
 
   private get componentWidth(): number {
-    return GateComponent.sizeInPx.base * 1.5;
+    return this._dropzones.width;
   }
 
   private get componentHeight(): number {
-    return (
-      GateComponent.sizeInPx.base * this._dropzones.children.length +
-      (this._dropzones.children.length - 1) *
-        (GateComponent.sizeInPx.base / 2) +
-      CircuitStepComponent.paddingY * 2
-    );
+    return this._dropzones.height;
   }
 
   isActive(): boolean {
@@ -299,9 +254,9 @@ export class CircuitStepComponent extends Container {
   serialize() {
     const result: { type: string; targets: number[]; controls?: number[] }[] =
       [];
-    const controlBits = this.controlGateDropzones().map((each) =>
-      this.bit(each)
-    );
+    const controlBits = this._dropzones
+      .filterByOperationType(ControlGate)
+      .map((each) => this.bit(each));
 
     for (const [GateClass, sameOps] of groupBy(
       this.operations,
