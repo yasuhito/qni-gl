@@ -103,20 +103,24 @@ export class StateVectorLayout {
     );
   }
 
-  visibleQubitCirclePositions(
-    startIndexX: number,
-    startIndexY: number,
-    endIndexX: number,
-    endIndexY: number
-  ): { position: PIXI.Point; index: number }[] {
+  visibleQubitCirclePositions(startIndexX, startIndexY, endIndexX, endIndexY) {
     const circles: { position: PIXI.Point; index: number }[] = [];
+    const maxVisibleCircles =
+      Math.ceil(this.width / this._cellSize) *
+      Math.ceil(this.height / this._cellSize);
+    let count = 0;
 
-    for (let y = startIndexY; y < endIndexY; y++) {
-      for (let x = startIndexX; x < endIndexX; x++) {
+    for (let y = startIndexY; y < endIndexY && count < maxVisibleCircles; y++) {
+      for (
+        let x = startIndexX;
+        x < endIndexX && count < maxVisibleCircles;
+        x++
+      ) {
         const posX = this.padding + x * this._cellSize;
         const posY = this.padding + y * this._cellSize;
         const index = y * this.cols + x;
         circles.push({ position: new PIXI.Point(posX, posY), index });
+        count++;
       }
     }
 
