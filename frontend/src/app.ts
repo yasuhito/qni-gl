@@ -13,7 +13,6 @@ import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { rectIntersect } from "./util";
-import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 export class App {
   static elementId = "app";
@@ -167,27 +166,11 @@ export class App {
       this
     );
 
-    this.stateVector.on(
-      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-      this.handleVisibleAmplitudesChange.bind(this)
-    );
-
     // 回路の最初のステップをアクティブにする
     // これによって、最初のステップの状態ベクトルが表示される
     this.circuit.stepAt(0).activate();
 
     this.nameMap.set(this.pixiApp.stage, "stage");
-  }
-
-  private handleVisibleAmplitudesChange(visibleIndices: number[]) {
-    // サービスワーカーに振幅計算を要求
-    this.worker.postMessage({
-      circuitJson: this.circuit.toCircuitJSON(),
-      qubitCount: this.circuit.qubitCountInUse,
-      steps: this.circuit.serialize(),
-      stepIndex: this.circuit.activeStepIndex,
-      targets: visibleIndices, // 表示されている振幅のインデックスのみを送信
-    });
   }
 
   private gateDiscarded(gate: GateComponent) {

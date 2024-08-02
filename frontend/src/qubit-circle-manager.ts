@@ -64,6 +64,7 @@ export class QubitCircleManager {
   resizeAllQubitCircles(size: Size): void {
     this.circles.forEach((circle) => {
       circle.size = size;
+      circle.probability = 0;
     });
   }
 
