@@ -13,6 +13,7 @@ import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { rectIntersect } from "./util";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 export class App {
   static elementId = "app";
@@ -163,6 +164,12 @@ export class App {
     this.circuitFrame.on(
       CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE,
       this.grabGate,
+      this
+    );
+
+    this.stateVector.on(
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+      this.runSimulator,
       this
     );
 
