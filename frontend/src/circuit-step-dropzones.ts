@@ -49,6 +49,15 @@ export class CircuitStepDropzones {
     return this.all[index];
   }
 
+  fetch(index: number): DropzoneComponent {
+    const dropzone = this.at(index);
+    if (!dropzone) {
+      throw new Error(`Dropzone at index ${index} not found`);
+    }
+
+    return dropzone;
+  }
+
   append(): DropzoneComponent {
     const dropzone = new DropzoneComponent();
     this._dropzones.addChild(dropzone);
@@ -56,10 +65,7 @@ export class CircuitStepDropzones {
   }
 
   removeLast(): void {
-    const dropzone = this.at(this.length - 1);
-    if (!dropzone) {
-      return;
-    }
+    const dropzone = this.fetch(this.length - 1);
     this._dropzones.removeChildAt(this.length - 1);
     dropzone.destroy();
   }
