@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { SerializedGate } from "./types";
 
 /**
  * @noInheritDoc
@@ -16,6 +17,18 @@ export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
   });
 
   private _controls: number[] = [];
+
+  static serialize(
+    targetBits: number[],
+    controlBits?: number[]
+  ): SerializedGate {
+    const serialized: SerializedGate = { type: "X", targets: targetBits };
+
+    if (controlBits && controlBits.length > 0) {
+      serialized.controls = controlBits;
+    }
+    return serialized;
+  }
 
   get controls() {
     return this._controls;

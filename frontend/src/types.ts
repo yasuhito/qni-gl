@@ -17,3 +17,9 @@ export enum WireType {
   Quantum = "quantum",
   Classical = "classical",
 }
+
+export interface SerializedGate {
+  type: string;
+  targets: number[];
+  controls?: number[];
+}

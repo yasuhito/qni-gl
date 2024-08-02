@@ -4,6 +4,7 @@ import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
 import { WireType } from "./types";
 import { spacingInPx } from "./util";
+import { DROPZONE_EVENTS } from "./events";
 
 export class DropzoneComponent extends Container {
   static size = spacingInPx(8);
@@ -13,6 +14,10 @@ export class DropzoneComponent extends Container {
 
   private _connectTop = false;
   private _connectBottom = false;
+  private _swapConnectTop = false;
+  private _swapConnectBottom = false;
+  private _controlConnectTop = false;
+  private _controlConnectBottom = false;
 
   private renderer: DropzoneRenderer;
 
@@ -53,6 +58,38 @@ export class DropzoneComponent extends Container {
     this.redrawConnections();
   }
 
+  set swapConnectTop(value) {
+    this._swapConnectTop = value;
+  }
+
+  get swapConnectTop() {
+    return this._swapConnectTop;
+  }
+
+  set swapConnectBottom(value) {
+    this._swapConnectBottom = value;
+  }
+
+  get swapConnectBottom() {
+    return this._swapConnectBottom;
+  }
+
+  set controlConnectTop(value) {
+    this._controlConnectTop = value;
+  }
+
+  get controlConnectTop() {
+    return this._controlConnectTop;
+  }
+
+  set controlConnectBottom(value) {
+    this._controlConnectBottom = value;
+  }
+
+  get controlConnectBottom() {
+    return this._controlConnectBottom;
+  }
+
   get connectTop() {
     return this._connectTop;
   }
@@ -73,7 +110,7 @@ export class DropzoneComponent extends Container {
     }
     this.operation.on("grab", this.emitGrabGateEvent, this);
     this.redrawWires();
-    this.emit("snap", this);
+    this.emit(DROPZONE_EVENTS.GATE_SNAPPED, this);
   }
 
   unsnap() {
@@ -85,7 +122,7 @@ export class DropzoneComponent extends Container {
   }
 
   private emitGrabGateEvent(gate, globalPosition) {
-    this.emit("grabGate", gate, globalPosition);
+    this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
   }
 
   redrawWires() {

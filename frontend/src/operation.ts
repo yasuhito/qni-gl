@@ -1,11 +1,7 @@
 import { AntiControlGate } from "./anti-control-gate";
-import { BlochSphere } from "./bloch-sphere";
 import { ControlGate } from "./control-gate";
 import { HGate } from "./h-gate";
 import { MeasurementGate } from "./measurement-gate";
-import { PhaseGate } from "./phase-gate";
-import { QFTDaggerGate } from "./qft-dagger-gate";
-import { QFTGate } from "./qft-gate";
 import { RnotGate } from "./rnot-gate";
 import { RxGate } from "./rx-gate";
 import { RyGate } from "./ry-gate";
@@ -31,7 +27,6 @@ export type Operation =
   | SDaggerGate
   | TGate
   | TDaggerGate
-  | PhaseGate
   | RxGate
   | RyGate
   | RzGate
@@ -40,7 +35,4 @@ export type Operation =
   | AntiControlGate
   | Write0Gate
   | Write1Gate
-  | MeasurementGate
-  | BlochSphere
-  | QFTGate
-  | QFTDaggerGate;
+  | MeasurementGate;

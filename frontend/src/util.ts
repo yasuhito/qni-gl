@@ -11,19 +11,23 @@ export const spacingInPx = function (value: number): number {
   }
 };
 
-/**
- * 2つの矩形が重なっているかどうかを返す。
- *
- * @param x1
- * @param y1
- * @param w1
- * @param h1
- * @param x2
- * @param y2
- * @param w2
- * @param h2
- * @returns
- */
+export const groupBy = <K, V>(
+  array: readonly V[],
+  getKey: (current: V, index: number, orig: readonly V[]) => K
+): Array<[K, V[]]> =>
+  Array.from(
+    array.reduce((map, current, index, orig) => {
+      const key = getKey(current, index, orig);
+      const list = map.get(key);
+      if (list) {
+        list.push(current);
+      } else {
+        map.set(key, [current]);
+      }
+      return map;
+    }, new Map<K, V[]>())
+  );
+
 export function rectIntersect(
   x1: number,
   y1: number,

@@ -3,6 +3,7 @@ import { Colors } from "./colors";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Spacing } from "./spacing";
+import { SerializedGate } from "./types";
 
 /**
  * @noInheritDoc
@@ -15,6 +16,10 @@ export class ControlGate extends JsonableMixin(GateComponent) {
       scale: window.devicePixelRatio,
     },
   });
+
+  static serialize(targetBits: number[]): SerializedGate {
+    return { type: "•", targets: targetBits };
+  }
 
   applyIdleStyle() {
     this._shape.clear();
