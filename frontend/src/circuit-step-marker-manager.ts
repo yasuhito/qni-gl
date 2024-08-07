@@ -11,54 +11,54 @@ export class CircuitStepMarkerManager extends Container {
   private static readonly COLOR_DEFAULT = 0x000000;
 
   private markers: PIXI.Graphics[] = [];
-  private stepCount: number;
-  private stepWidth: number;
-  private stepHeight: number;
+  private _steps: CircuitStepComponent[];
 
   constructor(steps: CircuitStepComponent[]) {
     super();
 
-    this.initializeFromSteps(steps);
+    this.steps = steps;
     this.initMarkers();
   }
 
-  private initializeFromSteps(steps: CircuitStepComponent[]) {
-    this.stepCount = steps.length;
-    const firstStep = this.firstStep(steps);
-    this.stepWidth = firstStep.dropzonesWidth;
-    this.stepHeight = firstStep.dropzonesHeight;
+  update(steps: CircuitStepComponent[]): void {
+    this.steps = steps;
+    this.updateMarkerPositions();
+    this.updateMarkerVisibility();
   }
 
-  private firstStep(steps: CircuitStepComponent[]): CircuitStepComponent {
+  private get steps() {
+    return this._steps;
+  }
+
+  private set steps(steps: CircuitStepComponent[]) {
     if (steps.length === 0) {
       throw new Error("Steps array is empty");
     }
-    return steps[0];
+
+    this._steps = steps;
+  }
+
+  private get stepCount() {
+    return this._steps.length;
+  }
+
+  private get stepWidth() {
+    return this.stepAt(0).dropzonesWidth;
+  }
+
+  private get stepHeight() {
+    return this.stepAt(0).dropzonesHeight;
   }
 
   private initMarkers() {
     for (let i = 0; i < this.stepCount; i++) {
       const marker = new PIXI.Graphics();
-      marker.position.x = this.markerXPosition(i);
       this.drawMarker(marker, CircuitStepMarkerManager.COLOR_DEFAULT, 0);
       this.addChild(marker);
       this.markers.push(marker);
     }
-  }
-
-  update(steps: CircuitStepComponent[]) {
-    this.initializeFromSteps(steps);
     this.updateMarkerPositions();
-    steps.forEach((step, index) => {
-      this.hideMarker(index);
-
-      if (step.isActive()) {
-        this.showActiveStepMarker(index);
-      }
-      if (step.isHovered()) {
-        this.showHoveredStepMarker(index);
-      }
-    });
+    this.updateMarkerVisibility();
   }
 
   private updateMarkerPositions() {
@@ -73,19 +73,50 @@ export class CircuitStepMarkerManager extends Container {
     );
   }
 
-  private showActiveStepMarker(index: number) {
-    this.drawMarker(this.markers[index], CircuitStepMarkerManager.COLOR_ACTIVE);
+  private updateMarkerVisibility() {
+    this.steps.forEach((step, index) => {
+      this.hideMarker(index);
+
+      if (step.isActive()) {
+        this.drawActiveStepMarker(index);
+      }
+      if (step.isHovered()) {
+        this.drawHoveredStepMarker(index);
+      }
+    });
   }
 
-  private showHoveredStepMarker(index: number) {
-    this.drawMarker(this.markers[index], CircuitStepMarkerManager.COLOR_HOVER);
+  private drawActiveStepMarker(index: number) {
+    this.drawMarker(
+      this.markerAt(index),
+      CircuitStepMarkerManager.COLOR_ACTIVE
+    );
+  }
+
+  private drawHoveredStepMarker(index: number) {
+    this.drawMarker(this.markerAt(index), CircuitStepMarkerManager.COLOR_HOVER);
   }
 
   private hideMarker(index: number) {
-    if (!this.markers[index]) {
+    this.markerAt(index).alpha = 0;
+  }
+
+  private stepAt(index: number): CircuitStepComponent {
+    const step = this._steps[index];
+    if (!step) {
+      throw new Error(`Step not found at index ${index}`);
+    }
+
+    return step;
+  }
+
+  private markerAt(index: number): PIXI.Graphics {
+    const marker = this.markers[index];
+    if (!marker) {
       throw new Error(`Marker not found at index ${index}`);
     }
-    this.markers[index].alpha = 0;
+
+    return marker;
   }
 
   private drawMarker(
