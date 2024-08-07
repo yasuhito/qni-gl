@@ -68,7 +68,6 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private markerXPosition(index: number): number {
-    console.log(CircuitStepMarkerManager.MARKER_WIDTH / 2);
     return (
       (index + 1) * this.stepWidth - CircuitStepMarkerManager.MARKER_WIDTH / 2
     );
