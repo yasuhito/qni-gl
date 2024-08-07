@@ -4,6 +4,7 @@ import { List as ListContainer } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 import { CIRCUIT_STEP_EVENTS } from "./events";
+import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 
 /**
  * Represents the options for a {@link CircuitComponent}.
@@ -14,7 +15,7 @@ export interface CircuitOptions {
 }
 
 export const CIRCUIT_EVENTS = {
-  GRAB_GATE: "circuit:grab-gate",
+  GATE_GRABBED: "circuit:grab-gate",
   ACTIVATE_STEP: "circuit:activate-step",
 };
 
@@ -33,6 +34,7 @@ export class CircuitComponent extends Container {
 
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
   private circuitStepsContainer: ListContainer;
+  private markerManager: CircuitStepMarkerManager;
 
   /**
    * Returns the number of wires (bits) in the {@link CircuitComponent}.
@@ -98,13 +100,18 @@ export class CircuitComponent extends Container {
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.circuitStepsContainer = new ListContainer({
       type: "horizontal",
-      elementsMargin: -CircuitStepComponent.currentStepMarkerWidth / 2,
     });
     this.addChild(this.circuitStepsContainer);
 
     for (let i = 0; i < options.stepCount; i++) {
       this.appendStep();
     }
+
+    this.markerManager = new CircuitStepMarkerManager(this.steps);
+    this.addChild(this.markerManager);
+
+    this.markerManager.zIndex = 1;
+    this.sortableChildren = true;
   }
 
   private appendStep(wireCount = this.minWireCount) {
@@ -121,13 +128,9 @@ export class CircuitComponent extends Container {
       this.emitOnStepHoverSignal,
       this
     );
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.ACTIVATED,
-      this.deactivateAllOtherSteps,
-      this
-    );
+    circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_EVENTS.GRAB_GATE, gate, globalPosition);
+      this.emit(CIRCUIT_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
   }
 
@@ -189,6 +192,7 @@ export class CircuitComponent extends Container {
     this.updateGateConnections();
 
     this.stepAt(activeStepIndex).activate();
+    this.markerManager.update(this.steps);
   }
 
   private removeEmptySteps(): void {
@@ -235,6 +239,8 @@ export class CircuitComponent extends Container {
         each.appendNewDropzone();
       }
     });
+
+    this.markerManager.update(this.steps);
   }
 
   private updateSwapConnections() {
@@ -305,18 +311,29 @@ export class CircuitComponent extends Container {
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
+    // const stepIndex = this.steps.indexOf(circuitStep);
+    // if (stepIndex !== -1) {
+    //   this.markerManager.hoverMarker(stepIndex, this.steps);
+    // }
+    this.markerManager.update(this.steps);
     this.emit("stepHover", this, circuitStep);
   }
 
   /**
    * Deactivates all other {@link CircuitStepComponent}s except for the specified {@link CircuitStepComponent}.
    */
-  private deactivateAllOtherSteps(circuitStep: CircuitStepComponent) {
+  private activateStep(circuitStep: CircuitStepComponent) {
     this.steps.forEach((each: CircuitStepComponent) => {
-      if (each !== circuitStep && each.isActive()) {
-        each.deactivate();
+      if (each !== circuitStep) {
+        if (each.isActive()) {
+          each.deactivate();
+        }
+        // this.markerManager.hideMarker(index);
+      } else {
+        // this.markerManager.activateMarker(index);
       }
     });
+    this.markerManager.update(this.steps);
 
     this.emit(CIRCUIT_EVENTS.ACTIVATE_STEP, circuitStep);
   }
