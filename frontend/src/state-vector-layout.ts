@@ -22,13 +22,13 @@ export class StateVectorLayout {
   };
 
   private _qubitCount: QubitCount = MIN_QUBIT_COUNT;
-  private _cols: number;
-  private _rows: number;
+  private _cols: number = 0;
+  private _rows: number = 0;
   private _padding: number = 0;
   private _qubitCircleMargin: number = spacingInPx(0.5);
-  private _cellSize: number;
-  private _width: number;
-  private _height: number;
+  private _cellSize: number = 0;
+  private _width: number = 0;
+  private _height: number = 0;
 
   constructor(qubitCount: QubitCount) {
     this._qubitCount = qubitCount;
@@ -103,7 +103,12 @@ export class StateVectorLayout {
     );
   }
 
-  visibleQubitCirclePositions(startIndexX, startIndexY, endIndexX, endIndexY) {
+  visibleQubitCirclePositions(
+    startIndexX: number,
+    startIndexY: number,
+    endIndexX: number,
+    endIndexY: number
+  ) {
     const circles: { position: PIXI.Point; index: number }[] = [];
     const maxVisibleCircles =
       Math.ceil(this.width / this._cellSize) *

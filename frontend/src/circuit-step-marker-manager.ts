@@ -11,7 +11,7 @@ export class CircuitStepMarkerManager extends Container {
   private static readonly COLOR_DEFAULT = 0x000000;
 
   private markers: PIXI.Graphics[] = [];
-  private _steps: CircuitStepComponent[];
+  private _steps: CircuitStepComponent[] = [];
 
   constructor(steps: CircuitStepComponent[]) {
     super();

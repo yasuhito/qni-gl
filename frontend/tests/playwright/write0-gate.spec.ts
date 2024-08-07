@@ -6,14 +6,14 @@ import { test, expect, Locator } from "@playwright/test";
 test.describe("|0> gate", () => {
   let app: App;
   let idle: Locator;
-  let write0Gate: GateComponent | null;
+  let write0Gate: GateComponent;
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    write0Gate = app.gatePalette.gates.Write0Gate;
+    write0Gate = app.gatePalette.gates.Write0Gate as GateComponent;
 
     await idle.waitFor();
   });

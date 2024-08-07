@@ -4,7 +4,11 @@ export const spacingInPx = function (value: number): number {
   if (value === 0.25) {
     return 1;
   } else {
-    const remValue = parseFloat(defaultTheme.spacing[value]);
+    const remValue = parseFloat(
+      defaultTheme.spacing[
+        value.toString() as keyof typeof defaultTheme.spacing
+      ]
+    );
     const pxValue = remValue * 16; // 1rem = 16px
 
     return parseInt(pxValue.toFixed(0));

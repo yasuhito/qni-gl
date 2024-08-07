@@ -6,14 +6,14 @@ import { test, expect, Locator } from "@playwright/test";
 test.describe("S† gate", () => {
   let app: App;
   let idle: Locator;
-  let sDaggerGate: GateComponent | null;
+  let sDaggerGate: GateComponent;
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    sDaggerGate = app.gatePalette.gates.SDaggerGate;
+    sDaggerGate = app.gatePalette.gates.SDaggerGate as GateComponent;
 
     await idle.waitFor();
   });
@@ -67,7 +67,7 @@ test.describe("S† gate", () => {
 
   test("Apply an S† gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
-    const xGate = app.gatePalette.gates.XGate;
+    const xGate = app.gatePalette.gates.XGate as GateComponent;
 
     await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
     await page.mouse.down();

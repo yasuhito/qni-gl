@@ -1,3 +1,4 @@
+import { GateComponent } from "../../src";
 import { GatePaletteComponent } from "../../src/gate-palette-component";
 import { appData, centerPosition } from "./test-helpers";
 import { test, expect, Locator } from "@playwright/test";
@@ -15,7 +16,7 @@ test.describe("Discard gates", () => {
   });
 
   test("Discard H gate", async ({ page }) => {
-    const gate = gatePalette.gates.HGate;
+    const gate = gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
     await page.mouse.down();

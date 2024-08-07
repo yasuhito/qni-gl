@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CircuitStepMarkerManager } from "../../src/circuit-step-marker-manager";
+import { CircuitStepComponent } from "../../src";
 
 describe("CircuitStepMarkerManager", () => {
-  let mockSteps;
+  let mockSteps: unknown[];
 
   beforeEach(() => {
     mockSteps = [
@@ -28,7 +29,9 @@ describe("CircuitStepMarkerManager", () => {
   });
 
   it("should position markers correctly", () => {
-    const manager = new CircuitStepMarkerManager(mockSteps);
+    const manager = new CircuitStepMarkerManager(
+      mockSteps as CircuitStepComponent[]
+    );
     const markers = manager["markers"];
 
     expect(markers[0].position.x).toBe(98); // 100 - markerWidth/2
