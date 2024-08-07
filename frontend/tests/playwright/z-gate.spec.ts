@@ -6,14 +6,14 @@ import { test, expect, Locator } from "@playwright/test";
 test.describe("Z gate", () => {
   let app: App;
   let idle: Locator;
-  let zGate: GateComponent | null;
+  let zGate: GateComponent;
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
     app = await appData(page);
     idle = page.locator('#app[data-state="idle"]');
-    zGate = app.gatePalette.gates.ZGate;
+    zGate = app.gatePalette.gates.ZGate as GateComponent;
 
     await idle.waitFor();
   });
@@ -58,7 +58,7 @@ test.describe("Z gate", () => {
 
   test("Apply a Z-gate to state |1>.", async ({ page }) => {
     const dropzone00 = app.circuit.steps[0].dropzones[0];
-    const xGate = app.gatePalette.gates.XGate;
+    const xGate = app.gatePalette.gates.XGate as GateComponent;
 
     await page.mouse.move(centerPosition(xGate).x, centerPosition(xGate).y);
     await page.mouse.down();

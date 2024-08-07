@@ -139,7 +139,7 @@ export class App {
     });
 
     this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.GRAB_PALETTE_GATE,
+      CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED,
       this.grabGate,
       this
     );
@@ -281,8 +281,6 @@ export class App {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
-
-    // this.circuitFrame.addChild(gate);
 
     // the reason for this is because of multitouch
     // we want to track the movement of this particular touch

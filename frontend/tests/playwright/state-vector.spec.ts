@@ -1,3 +1,4 @@
+import { GateComponent } from "../../src";
 import { App } from "../../src/app";
 import { appData, centerPosition } from "./test-helpers";
 import { test, expect, Locator } from "@playwright/test";
@@ -16,7 +17,7 @@ test.describe("Dropzone", () => {
   });
 
   test("1 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
     const dropzone = app.circuit.steps[0].dropzones[0];
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -29,7 +30,7 @@ test.describe("Dropzone", () => {
   });
 
   test("2 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
     const dropzone = app.circuit.steps[0].dropzones[1];
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
@@ -42,7 +43,7 @@ test.describe("Dropzone", () => {
   });
 
   test("3 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -58,7 +59,7 @@ test.describe("Dropzone", () => {
   });
 
   test("4 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -84,7 +85,7 @@ test.describe("Dropzone", () => {
   });
 
   test("5 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -119,7 +120,7 @@ test.describe("Dropzone", () => {
   });
 
   test.skip("6 qubit", async ({ page }) => {
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -165,7 +166,7 @@ test.describe("Dropzone", () => {
   test.skip("7 qubit", async ({ page }) => {
     test.setTimeout(60000);
 
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -220,7 +221,7 @@ test.describe("Dropzone", () => {
   test.skip("8 qubit", async ({ page }) => {
     test.setTimeout(60000);
 
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -284,7 +285,7 @@ test.describe("Dropzone", () => {
   test.skip("9 qubit", async ({ page }) => {
     test.setTimeout(60000);
 
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();
@@ -357,7 +358,7 @@ test.describe("Dropzone", () => {
   test.skip("10 qubit", async ({ page }) => {
     test.setTimeout(60000);
 
-    const hGate = app.gatePalette.gates.HGate;
+    const hGate = app.gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(hGate).x, centerPosition(hGate).y);
     await page.mouse.down();

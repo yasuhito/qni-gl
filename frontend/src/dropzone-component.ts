@@ -1,4 +1,4 @@
-import { Container } from "pixi.js";
+import { Container, Point } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
@@ -121,7 +121,7 @@ export class DropzoneComponent extends Container {
     this.redrawWires();
   }
 
-  private emitGrabGateEvent(gate, globalPosition) {
+  private emitGrabGateEvent(gate: GateComponent, globalPosition: Point) {
     this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
   }
 

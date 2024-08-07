@@ -197,7 +197,7 @@ export class QubitCircle extends Container {
 
     this.phaseHand
       .clear()
-      .beginFill(Colors["border.icon"])
+      .beginFill(Colors["text"])
       .drawRect(0, 0, thickness, this.handLength)
       .endFill();
     this.phaseHand.x = this.sizeInPx / 2 - thickness / 2;

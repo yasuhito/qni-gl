@@ -23,7 +23,7 @@ import { CIRCUIT_EVENTS, CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 
 export const CIRCUIT_FRAME_EVENTS = {
-  GRAB_PALETTE_GATE: "circuit-frame:grab-palette-gate",
+  PALETTE_GATE_GRABBED: "circuit-frame:grab-palette-gate",
   GRAB_CIRCUIT_GATE: "circuit-frame:grab-circuit-gate",
   MOUSE_LEAVE_PALETTE_GATE: "circuit-frame:mouse-leave-palette-gate",
   DISCARD_PALETTE_GATE: "circuit-frame:discard-palette-gate",
@@ -161,7 +161,7 @@ export class CircuitFrame extends PIXI.Container {
       this.emitStepActivatedEvent,
       this
     );
-    this.circuit.on(CIRCUIT_EVENTS.GRAB_GATE, this.grabCircuitGate, this);
+    this.circuit.on(CIRCUIT_EVENTS.GATE_GRABBED, this.grabCircuitGate, this);
   }
 
   /**
@@ -174,7 +174,7 @@ export class CircuitFrame extends PIXI.Container {
     pointerPosition: PIXI.Point
   ): void {
     this.addChild(gate);
-    this.emit(CIRCUIT_FRAME_EVENTS.GRAB_PALETTE_GATE, gate, pointerPosition);
+    this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED, gate, pointerPosition);
   }
 
   /**

@@ -1,8 +1,9 @@
+import { GateComponent, GatePaletteComponent } from "../../src";
 import { appData, centerPosition } from "./test-helpers";
 import { test, expect } from "@playwright/test";
 
 test.describe("Gate Palette", () => {
-  let gatePalette;
+  let gatePalette: GatePaletteComponent;
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -13,7 +14,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("H Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.HGate;
+      const gate = gatePalette.gates.HGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -23,7 +24,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("X Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.XGate;
+      const gate = gatePalette.gates.XGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -33,7 +34,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("Y Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.YGate;
+      const gate = gatePalette.gates.YGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -43,7 +44,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("Z Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.ZGate;
+      const gate = gatePalette.gates.ZGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -53,7 +54,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("√X Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.RnotGate;
+      const gate = gatePalette.gates.RnotGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -63,7 +64,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("S Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.SGate;
+      const gate = gatePalette.gates.SGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -73,7 +74,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("S† Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.SDaggerGate;
+      const gate = gatePalette.gates.SDaggerGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -83,7 +84,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("T Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.TGate;
+      const gate = gatePalette.gates.TGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -93,7 +94,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("T† Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.TDaggerGate;
+      const gate = gatePalette.gates.TDaggerGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -143,7 +144,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("Swap Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.SwapGate;
+      const gate = gatePalette.gates.SwapGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -153,7 +154,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("Control Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.ControlGate;
+      const gate = gatePalette.gates.ControlGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -173,7 +174,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("|0> Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.Write0Gate;
+      const gate = gatePalette.gates.Write0Gate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -183,7 +184,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("|1> Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.Write1Gate;
+      const gate = gatePalette.gates.Write1Gate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
@@ -193,7 +194,7 @@ test.describe("Gate Palette", () => {
 
   test.describe("Measurement Gate", () => {
     test("changes style when mouseover", async ({ page }) => {
-      const gate = gatePalette.gates.MeasurementGate;
+      const gate = gatePalette.gates.MeasurementGate as GateComponent;
 
       await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
 
