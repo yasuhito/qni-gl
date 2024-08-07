@@ -24,8 +24,16 @@ export class CircuitStepMarkerManager extends Container {
 
   private initializeFromSteps(steps: CircuitStepComponent[]) {
     this.stepCount = steps.length;
-    this.stepWidth = steps[0].dropzonesWidth;
-    this.stepHeight = steps[0].dropzonesHeight;
+    const firstStep = this.firstStep(steps);
+    this.stepWidth = firstStep.dropzonesWidth;
+    this.stepHeight = firstStep.dropzonesHeight;
+  }
+
+  private firstStep(steps: CircuitStepComponent[]): CircuitStepComponent {
+    if (steps.length === 0) {
+      throw new Error("Steps array is empty");
+    }
+    return steps[0];
   }
 
   private initMarkers() {
@@ -60,6 +68,7 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private markerXPosition(index: number): number {
+    console.log(CircuitStepMarkerManager.MARKER_WIDTH / 2);
     return (
       (index + 1) * this.stepWidth - CircuitStepMarkerManager.MARKER_WIDTH / 2
     );
@@ -74,6 +83,9 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private hideMarker(index: number) {
+    if (!this.markers[index]) {
+      throw new Error(`Marker not found at index ${index}`);
+    }
     this.markers[index].alpha = 0;
   }
 
