@@ -1,7 +1,9 @@
 import { Colors } from "./colors";
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
+import { GateShapeConfig, GateState, GateStyleOptions } from "./types";
 import { Spacing } from "./spacing";
+import { need } from "./util";
 
 export declare class CircularGate {
   applyIdleStyle(): void;
@@ -14,98 +16,106 @@ export function CircularGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<CircularGate> & TBase {
   class CircularGateMixinClass extends Base {
-    static cornerRadius = Spacing.cornerRadius.full;
+    private static readonly SHAPE_CONFIG: GateShapeConfig = {
+      cornerRadius: Spacing.cornerRadius.full,
+      strokeAlignment: 0.5,
+    };
 
-    applyIdleStyle() {
-      this._shape.clear();
+    private readonly styleMap: Record<GateState, GateStyleOptions> = {
+      idle: {
+        cursor: "default",
+        fillColor: Colors["bg-brand"],
+        borderColor: Colors["border-onbrand"],
+      },
+      hover: {
+        cursor: "grab",
+        fillColor: Colors["bg-brand-hover"],
+        borderColor: Colors["border-hover"],
+      },
+      grabbed: {
+        cursor: "grabbing",
+        fillColor: Colors["bg-active"],
+        borderColor: Colors["border-pressed"],
+      },
+      active: {
+        cursor: "grab",
+        fillColor: Colors["bg-brand"],
+        borderColor: Colors["border-active"],
+      },
+    };
 
-      this._shape.zIndex = 0;
-      this._shape.cursor = "default";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-onbrand"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-brand"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        CircularGateMixinClass.cornerRadius
-      );
-      this._shape.endFill();
+    applyIdleStyle(): void {
+      this.applyStyleForState("idle");
     }
 
-    applyHoverStyle() {
-      this._shape.clear();
-
-      this._shape.zIndex = 0;
-      this._shape.cursor = "grab";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-hover"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-brand-hover"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        CircularGateMixinClass.cornerRadius
-      );
-      this._shape.endFill();
+    applyHoverStyle(): void {
+      this.applyStyleForState("hover");
     }
 
-    applyGrabbedStyle() {
-      this._shape.clear();
-
-      this._shape.zIndex = 10;
-      this._shape.cursor = "grabbing";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-pressed"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-active"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        CircularGateMixinClass.cornerRadius
-      );
-      this._shape.endFill();
+    applyGrabbedStyle(): void {
+      this.applyStyleForState("grabbed");
     }
 
-    applyActiveStyle() {
-      this._shape.clear();
+    applyActiveStyle(): void {
+      this.applyStyleForState("active");
+    }
 
-      this._shape.zIndex = 0;
-      this._shape.cursor = "grab";
+    private applyStyleForState(state: GateState): void {
+      this.applyStyle(this.styleMap[state]);
+    }
 
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-active"],
-        1,
-        0
+    private applyStyle(options: GateStyleOptions): void {
+      this.setCursor(options.cursor);
+      this.drawShape(options.fillColor, options.borderColor);
+      this.validateBounds();
+    }
+
+    private setCursor(cursor: string): void {
+      this._shape.cursor = cursor;
+    }
+
+    private drawShape(fillColor: string, borderColor: string): void {
+      const { cornerRadius, strokeAlignment } =
+        CircularGateMixinClass.SHAPE_CONFIG;
+
+      this._shape
+        .clear()
+        .roundRect(
+          this.borderWidth / 2,
+          this.borderWidth / 2,
+          this.adjustedSize,
+          this.adjustedSize,
+          cornerRadius
+        )
+        .fill(fillColor)
+        .stroke({
+          color: borderColor,
+          width: this.borderWidth,
+          alignment: strokeAlignment,
+        });
+    }
+
+    private validateBounds(): void {
+      this.validateSize();
+    }
+
+    private get adjustedSize(): number {
+      return this.sizeInPx - this.borderWidth;
+    }
+
+    private get borderWidth(): number {
+      return Spacing.borderWidth.gate[this.size];
+    }
+
+    private validateSize(): void {
+      need(
+        this.width === this.sizeInPx,
+        `Width is incorrect: ${this.width}, expected: ${this.sizeInPx}`
       );
-      this._shape.beginFill(Colors["bg-brand"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        CircularGateMixinClass.cornerRadius
+      need(
+        this.height === this.sizeInPx,
+        `Height is incorrect: ${this.height}, expected: ${this.sizeInPx}`
       );
-      this._shape.endFill();
     }
   }
 
