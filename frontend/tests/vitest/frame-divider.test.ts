@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import * as PIXI from "pixi.js";
 import { FrameDivider } from "../../src/frame-divider";
+import { Application, FederatedPointerEvent } from "pixi.js";
 
 describe("FrameDivider", () => {
-  let app: PIXI.Application;
+  let app: Application;
   let frameDivider: FrameDivider;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe("FrameDivider", () => {
         on: vi.fn(),
         cursor: "default",
       },
-    } as unknown as PIXI.Application;
+    } as unknown as Application;
 
     // FrameDividerのインスタンスを初期化
     frameDivider = FrameDivider.initialize(app, 300);
@@ -41,15 +41,19 @@ describe("FrameDivider", () => {
   });
 
   it("should update width correctly", () => {
-    const drawRectSpy = vi.spyOn(frameDivider, "drawRect");
+    const clearSpy = vi.spyOn(frameDivider, "clear");
+    const rectSpy = vi.spyOn(frameDivider, "rect");
+    const fillSpy = vi.spyOn(frameDivider, "fill");
 
     frameDivider.updateWidth();
 
-    expect(drawRectSpy).toHaveBeenCalledWith(0, 0, 800, 2);
+    expect(clearSpy).toHaveBeenCalled();
+    expect(rectSpy).toHaveBeenCalledWith(0, 0, 800, 2);
+    expect(fillSpy).toHaveBeenCalled();
   });
 
   it("should start dragging on pointerdown", () => {
-    const event = { global: { y: 350 } } as PIXI.FederatedPointerEvent;
+    const event = { global: { y: 350 } } as FederatedPointerEvent;
 
     frameDivider["startDragging"](event);
 
@@ -70,7 +74,7 @@ describe("FrameDivider", () => {
     frameDivider["_isDragging"] = true;
     frameDivider["dragStartY"] = 50;
 
-    const event = { global: { y: 400 } } as PIXI.FederatedPointerEvent;
+    const event = { global: { y: 400 } } as FederatedPointerEvent;
     frameDivider["move"](event);
 
     expect(frameDivider.y).toBe(350);
@@ -80,7 +84,7 @@ describe("FrameDivider", () => {
     frameDivider["_isDragging"] = false;
 
     const initialY = frameDivider.y;
-    const event = { global: { y: 400 } } as PIXI.FederatedPointerEvent;
+    const event = { global: { y: 400 } } as FederatedPointerEvent;
     frameDivider["move"](event);
 
     expect(frameDivider.y).toBe(initialY);
