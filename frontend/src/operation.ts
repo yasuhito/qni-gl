@@ -1,11 +1,7 @@
-import { AntiControlGate } from "./anti-control-gate";
 import { ControlGate } from "./control-gate";
 import { HGate } from "./h-gate";
 import { MeasurementGate } from "./measurement-gate";
 import { RnotGate } from "./rnot-gate";
-import { RxGate } from "./rx-gate";
-import { RyGate } from "./ry-gate";
-import { RzGate } from "./rz-gate";
 import { SDaggerGate } from "./s-dagger-gate";
 import { SGate } from "./s-gate";
 import { SwapGate } from "./swap-gate";
@@ -27,12 +23,8 @@ export type Operation =
   | SDaggerGate
   | TGate
   | TDaggerGate
-  | RxGate
-  | RyGate
-  | RzGate
   | SwapGate
   | ControlGate
-  | AntiControlGate
   | Write0Gate
   | Write1Gate
   | MeasurementGate;
