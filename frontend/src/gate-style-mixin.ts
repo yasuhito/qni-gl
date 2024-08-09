@@ -2,7 +2,7 @@ import { Colors } from "./colors";
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
 import { Spacing } from "./spacing";
-import { GateShapeConfig } from "./types";
+import { GateShapeConfig, GateState, GateStyleOptions } from "./types";
 import { need } from "./util";
 
 export declare class GateStyle {
@@ -16,14 +16,6 @@ export interface GateStyleConstructor {
   SHAPE_CONFIG: GateShapeConfig;
 }
 
-type GateStyleOptions = {
-  cursor: string;
-  fillColor: string;
-  borderColor: string;
-};
-
-type GateState = "idle" | "hover" | "grabbed" | "active";
-
 export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<GateStyle> & TBase & GateStyleConstructor {
@@ -31,23 +23,31 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
     protected readonly styleMap: Record<GateState, GateStyleOptions> = {
       idle: {
         cursor: "default",
+        iconColor: Colors["icon-onbrand"],
         fillColor: Colors["bg-brand"],
         borderColor: Colors["border-onbrand"],
+        borderAlpha: 1,
       },
       hover: {
         cursor: "grab",
+        iconColor: Colors["icon-onbrand"],
         fillColor: Colors["bg-brand-hover"],
         borderColor: Colors["border-hover"],
+        borderAlpha: 1,
       },
       grabbed: {
         cursor: "grabbing",
+        iconColor: Colors["icon-onbrand"],
         fillColor: Colors["bg-active"],
         borderColor: Colors["border-pressed"],
+        borderAlpha: 1,
       },
       active: {
         cursor: "grab",
+        iconColor: Colors["icon-onbrand"],
         fillColor: Colors["bg-brand"],
         borderColor: Colors["border-active"],
+        borderAlpha: 1,
       },
     };
 
@@ -78,7 +78,12 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
 
     protected applyStyle(options: GateStyleOptions): void {
       this.setCursor(options.cursor);
-      this.drawShape(options.fillColor, options.borderColor);
+      this.drawShape(
+        options.iconColor,
+        options.fillColor,
+        options.borderColor,
+        options.borderAlpha
+      );
       this.validateBounds();
     }
 
@@ -86,7 +91,12 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
       this._shape.cursor = cursor;
     }
 
-    protected drawShape(fillColor: string, borderColor: string): void {
+    protected drawShape(
+      iconColor: string,
+      fillColor: string,
+      borderColor: string,
+      borderAlpha: number
+    ): void {
       const constructor = this.constructor as typeof GateStyleMixinClass;
       const { cornerRadius, strokeAlignment } = constructor.SHAPE_CONFIG;
 
@@ -104,7 +114,10 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
           color: borderColor,
           width: this.borderWidth,
           alignment: strokeAlignment,
+          alpha: borderAlpha,
         });
+
+      this._sprite.tint = iconColor;
     }
 
     protected get borderSize(): number {
