@@ -7,12 +7,8 @@ import { SerializedGate } from "./types";
  */
 export class Write1Gate extends WriteGate {
   static gateType = "Write1Gate";
-  static icon = PIXI.Texture.from("./assets/Write1.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
+  static readonly iconPath = "./assets/Write1.png";
+
   static iconIdleDropzone = PIXI.Texture.from(
     "./assets/Write1_idle_dropzone.svg"
   );

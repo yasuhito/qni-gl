@@ -8,7 +8,7 @@ import { SerializedGate } from "./types";
  */
 export class SwapGate extends JsonableMixin(OutlinedGateMixin(GateComponent)) {
   static gateType = "SwapGate";
-  static readonly iconPath = "./assets/Swap.svg";
+  static readonly iconPath = "./assets/Swap.png";
 
   static serialize(targetBits: number[]): SerializedGate {
     return { type: "Swap", targets: targetBits };

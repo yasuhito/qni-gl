@@ -123,13 +123,13 @@ export class GatePaletteComponent extends Container {
         offset: { x: 0, y: 4 },
         blur: 3,
         alpha: 0.07,
-        resolution: 2,
+        resolution: window.devicePixelRatio,
       }),
       new DropShadowFilter({
         offset: { x: 0, y: 2 },
         blur: 2,
         alpha: 0.06,
-        resolution: 2,
+        resolution: window.devicePixelRatio,
       }),
     ];
   }

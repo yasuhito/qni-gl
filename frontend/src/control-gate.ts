@@ -10,7 +10,7 @@ export class ControlGate extends JsonableMixin(
   OutlinedGateMixin(GateComponent)
 ) {
   static gateType = "ControlGate";
-  static readonly iconPath = "./assets/Control.svg";
+  static readonly iconPath = "./assets/Control.png";
 
   static serialize(targetBits: number[]): SerializedGate {
     return { type: "•", targets: targetBits };
