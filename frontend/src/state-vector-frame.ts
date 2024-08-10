@@ -66,16 +66,16 @@ export class StateVectorFrame extends PIXI.Container {
   }
 
   private initializeBackground() {
-    this.background.beginFill(Colors["bg-component"]);
-    this.background.drawRect(0, 0, this.frameWidth, this.frameHeight);
-    this.background.endFill();
+    this.background
+      .rect(0, 0, this.frameWidth, this.frameHeight)
+      .fill(Colors["bg-component"]);
   }
 
   private updateMask(): void {
-    this.maskGraphics.clear();
-    this.maskGraphics.beginFill(0xffffff);
-    this.maskGraphics.drawRect(0, 0, this.frameWidth, this.frameHeight);
-    this.maskGraphics.endFill();
+    this.maskGraphics
+      .clear()
+      .rect(0, 0, this.frameWidth, this.frameHeight)
+      .fill(0xffffff);
   }
 
   private initStateVector() {
@@ -92,10 +92,10 @@ export class StateVectorFrame extends PIXI.Container {
     this.frameWidth = width;
     this.frameHeight = height;
 
-    this.background.clear();
-    this.background.beginFill(Colors["bg-component"]);
-    this.background.drawRect(0, 0, this.frameWidth, this.frameHeight);
-    this.background.endFill();
+    this.background
+      .clear()
+      .rect(0, 0, this.frameWidth, this.frameHeight)
+      .fill(Colors["bg-component"]);
 
     this.updateStateVectorPosition();
     this.updateMask();

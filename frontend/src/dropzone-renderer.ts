@@ -1,14 +1,17 @@
-import * as PIXI from "pixi.js";
-import { Colors, FULL_OPACITY, WireColor } from "./colors";
+import { Container, Graphics } from "pixi.js";
+import { Colors, WireColor } from "./colors";
 import { WireType } from "./types";
 
 export class DropzoneRenderer {
-  private wire: PIXI.Graphics;
-  private connection: PIXI.Graphics;
+  private static readonly wireWidth = 2;
 
-  constructor(container: PIXI.Container) {
-    this.wire = new PIXI.Graphics();
-    this.connection = new PIXI.Graphics();
+  private wire: Graphics;
+  private connection: Graphics;
+
+  constructor(container: Container) {
+    this.wire = new Graphics();
+    this.connection = new Graphics();
+
     container.addChild(this.wire);
     container.addChild(this.connection);
   }
@@ -56,9 +59,13 @@ export class DropzoneRenderer {
     size: number
   ) {
     this.wire
-      .lineStyle(2, color, FULL_OPACITY, 0.5)
-      .moveTo(startX, size / 2)
-      .lineTo(endX, size / 2);
+      .rect(
+        startX,
+        size / 2 - DropzoneRenderer.wireWidth / 2,
+        endX - startX,
+        DropzoneRenderer.wireWidth
+      )
+      .fill(color);
 
     if (wireType === WireType.Quantum) {
       // Add quantum wire specific rendering if needed
@@ -67,9 +74,9 @@ export class DropzoneRenderer {
 
   private drawConnection(startY: number, endY: number, size: number) {
     this.connection
-      .lineStyle(4, Colors["bg-brand"], FULL_OPACITY, 0.5)
       .moveTo(size * 0.75, startY)
-      .lineTo(size * 0.75, endY);
+      .lineTo(size * 0.75, endY)
+      .stroke({ color: Colors["bg-brand"], width: 4 });
   }
 
   private getWireColor(wireType: WireType): WireColor {
