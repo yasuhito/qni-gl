@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
 import { dragAndDrop, getCircuitInfo } from "./test-helpers";
 
-test.describe("H Gate", () => {
+test.describe("H gate", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
