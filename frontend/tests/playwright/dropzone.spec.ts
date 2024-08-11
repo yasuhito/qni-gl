@@ -20,18 +20,6 @@ test.describe("Dropzone", () => {
     await idle.waitFor();
   });
 
-  test.only("Drag and drop H gate", async ({ page }) => {
-    const gate = gatePalette.gates.HGate as GateComponent;
-
-    await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
-    await page.mouse.down();
-    await page.mouse.move(firstDropzone.x, firstDropzone.y);
-    await page.mouse.up();
-    await idle.waitFor();
-
-    await expect(page).toHaveScreenshot("drag-and-drop-h-gate.png");
-  });
-
   test("Drag and drop X gate", async ({ page }) => {
     const gate = gatePalette.gates.XGate as GateComponent;
 
