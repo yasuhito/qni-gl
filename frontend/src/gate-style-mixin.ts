@@ -58,18 +58,22 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
 
     applyIdleStyle(): void {
       this.applyStyleForState("idle");
+      this.zIndex = 0;
     }
 
     applyHoverStyle(): void {
       this.applyStyleForState("hover");
+      this.zIndex = 0;
     }
 
     applyGrabbedStyle(): void {
       this.applyStyleForState("grabbed");
+      this.zIndex = 10;
     }
 
     applyActiveStyle(): void {
       this.applyStyleForState("active");
+      this.zIndex = 0;
     }
 
     protected applyStyleForState(state: GateState): void {
