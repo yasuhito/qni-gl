@@ -28,6 +28,7 @@ interface CircuitInfo {
     sGate: { x: number; y: number };
     sDaggerGate: { x: number; y: number };
     tGate: { x: number; y: number };
+    tDaggerGate: { x: number; y: number };
   };
   steps: { x: number; y: number }[][];
 }
@@ -49,6 +50,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         SGate: sGate,
         SDaggerGate: sDaggerGate,
         TGate: tGate,
+        TDaggerGate: tDaggerGate,
       } = gatePalette?.gates ?? {};
 
       if (
@@ -61,7 +63,8 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         !rnotGate ||
         !sGate ||
         !sDaggerGate ||
-        !tGate
+        !tGate ||
+        !tDaggerGate
       ) {
         throw new Error("Required components are not initialized");
       }
@@ -84,6 +87,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
           sGate: getBounds(sGate),
           sDaggerGate: getBounds(sDaggerGate),
           tGate: getBounds(tGate),
+          tDaggerGate: getBounds(tDaggerGate),
         },
         steps: circuit.steps.map((step) =>
           step.dropzones.map((dropzone) => getBounds(dropzone))
@@ -92,10 +96,27 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
     };
 
     // 複数回試行する
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       try {
         const info = getInfo();
-        if (info.gatePalette.hGate.x !== 0 || info.gatePalette.hGate.y !== 0) {
+        if (
+          info.gatePalette.hGate.x !== 0 &&
+          info.gatePalette.hGate.y !== 0 &&
+          info.gatePalette.yGate.x !== 0 &&
+          info.gatePalette.yGate.y !== 0 &&
+          info.gatePalette.zGate.x !== 0 &&
+          info.gatePalette.zGate.y !== 0 &&
+          info.gatePalette.rnotGate.x !== 0 &&
+          info.gatePalette.rnotGate.y !== 0 &&
+          info.gatePalette.sGate.x !== 0 &&
+          info.gatePalette.sGate.y !== 0 &&
+          info.gatePalette.sDaggerGate.x !== 0 &&
+          info.gatePalette.sDaggerGate.y !== 0 &&
+          info.gatePalette.tGate.x !== 0 &&
+          info.gatePalette.tGate.y !== 0 &&
+          info.gatePalette.tDaggerGate.x !== 0 &&
+          info.gatePalette.tDaggerGate.y !== 0
+        ) {
           return info;
         }
       } catch (error) {
