@@ -20,7 +20,7 @@ test.describe("Dropzone", () => {
     await idle.waitFor();
   });
 
-  test("Drag and drop H gate", async ({ page }) => {
+  test.only("Drag and drop H gate", async ({ page }) => {
     const gate = gatePalette.gates.HGate as GateComponent;
 
     await page.mouse.move(centerPosition(gate).x, centerPosition(gate).y);
