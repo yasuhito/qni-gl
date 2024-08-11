@@ -296,17 +296,6 @@ export class GateComponent extends Container {
 
   applyActiveStyle() {}
 
-  toJSON() {
-    const pos = this.getGlobalPosition();
-
-    return {
-      x: pos.x,
-      y: pos.y,
-      width: this.width,
-      height: this.height,
-    };
-  }
-
   private onPointerOver() {
     this.actor.send({ type: "Mouse enter" });
     this.cursor = "grab";

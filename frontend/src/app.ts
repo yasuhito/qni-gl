@@ -161,8 +161,6 @@ export class App {
         this
       );
 
-      this.element.dataset.app = JSON.stringify(this);
-
       this.circuitFrame.on(
         CIRCUIT_FRAME_EVENTS.ACTIVATE_CIRCUIT_STEP,
         this.runSimulator,
@@ -327,9 +325,6 @@ export class App {
 
     this.circuit.maybeAppendWire();
 
-    // TODO: メソッドに切り出す
-    this.element.dataset.app = JSON.stringify(this);
-
     this.updateStateVectorComponentQubitCount();
 
     for (const circuitStep of this.circuit.steps) {
@@ -428,13 +423,6 @@ export class App {
       snapzoneWidth,
       snapzoneHeight
     );
-  }
-
-  toJSON() {
-    return {
-      gatePalette: this.gatePalette,
-      circuit: this.circuit || "",
-    };
   }
 
   private maybeMoveGate(event: FederatedPointerEvent) {

@@ -133,12 +133,4 @@ export class GatePaletteComponent extends Container {
       }),
     ];
   }
-
-  toJSON() {
-    return {
-      x: this.x,
-      y: this.y,
-      gates: this.gates,
-    };
-  }
 }
