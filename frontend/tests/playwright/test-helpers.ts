@@ -25,6 +25,7 @@ interface CircuitInfo {
     yGate: { x: number; y: number };
     zGate: { x: number; y: number };
     rnotGate: { x: number; y: number };
+    sGate: { x: number; y: number };
   };
   steps: { x: number; y: number }[][];
 }
@@ -43,6 +44,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         YGate: yGate,
         ZGate: zGate,
         RnotGate: rnotGate,
+        SGate: sGate,
       } = gatePalette?.gates ?? {};
 
       if (
@@ -52,7 +54,8 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         !xGate ||
         !yGate ||
         !zGate ||
-        !rnotGate
+        !rnotGate ||
+        !sGate
       ) {
         throw new Error("Required components are not initialized");
       }
@@ -72,6 +75,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
           yGate: getBounds(yGate),
           zGate: getBounds(zGate),
           rnotGate: getBounds(rnotGate),
+          sGate: getBounds(sGate),
         },
         steps: circuit.steps.map((step) =>
           step.dropzones.map((dropzone) => getBounds(dropzone))
