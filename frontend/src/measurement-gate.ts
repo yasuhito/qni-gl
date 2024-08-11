@@ -10,6 +10,8 @@ import { SerializedGate } from "./types";
  */
 export class MeasurementGate extends JsonableMixin(GateComponent) {
   static gateType = "MeasurementGate";
+  static readonly iconPath = "./assets/Measurement.png";
+
   static idleIcon = {
     "": PIXI.Texture.from("./assets/Measurement.svg"),
     0: PIXI.Texture.from("./assets/Measurement_value0.svg"),
@@ -76,17 +78,16 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
   }
 
   applyIdleStyle() {
-    if (this.dropzone) {
-      this._sprite.texture = MeasurementGate.idleIcon[this.value];
-    } else {
-      this._sprite.texture = MeasurementGate.idleIcon[""];
-    }
-
-    this._shape.clear();
-    this._shape.zIndex = 0;
+    // if (this.dropzone) {
+    //   this._sprite.texture = MeasurementGate.idleIcon[this.value];
+    // } else {
+    //   this._sprite.texture = MeasurementGate.idleIcon[""];
+    // }
     this._shape.cursor = "default";
 
-    this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
+    this._shape.clear();
+
+    // this.updateGraphics(null, this.style.idleBorderColor);
   }
 
   applyHoverStyle() {
@@ -144,20 +145,20 @@ export class MeasurementGate extends JsonableMixin(GateComponent) {
     borderColor: string | null,
     borderWidth: number | null = null
   ) {
-    if (borderWidth !== null && borderColor !== null) {
-      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
-    }
-    if (bodyColor !== null) {
-      this._shape.beginFill(bodyColor, 1);
-    }
-    this._shape.drawRoundedRect(
+    this._shape.roundRect(
       0,
       0,
       this.sizeInPx,
       this.sizeInPx,
       this.style.cornerRadius
     );
-    this._shape.endFill();
+    if (borderWidth !== null && borderColor !== null) {
+      this._shape.stroke({ color: borderColor, width: borderWidth });
+      // this._shape.lineStyle(borderWidth, borderColor, 1, 0);
+    }
+    if (bodyColor !== null) {
+      this._shape.fill(bodyColor);
+    }
   }
 
   toCircuitJSON() {
