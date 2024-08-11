@@ -22,6 +22,7 @@ interface CircuitInfo {
   gatePalette: {
     hGate: { x: number; y: number };
     xGate: { x: number; y: number };
+    yGate: { x: number; y: number };
   };
   steps: { x: number; y: number }[][];
 }
@@ -34,9 +35,13 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
     const getInfo = (): CircuitInfo => {
       const { circuitFrame, gatePalette } = window.pixiApp ?? {};
       const { circuit } = circuitFrame ?? {};
-      const { HGate: hGate, XGate: xGate } = gatePalette?.gates ?? {};
+      const {
+        HGate: hGate,
+        XGate: xGate,
+        YGate: yGate,
+      } = gatePalette?.gates ?? {};
 
-      if (!circuit || !gatePalette || !hGate || !xGate) {
+      if (!circuit || !gatePalette || !hGate || !xGate || !yGate) {
         throw new Error("Required components are not initialized");
       }
 
@@ -52,6 +57,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         gatePalette: {
           hGate: getBounds(hGate),
           xGate: getBounds(xGate),
+          yGate: getBounds(yGate),
         },
         steps: circuit.steps.map((step) =>
           step.dropzones.map((dropzone) => getBounds(dropzone))
