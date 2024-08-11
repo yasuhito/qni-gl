@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "@pixi/events": "^7.3.1",
-    "@pixi/filter-drop-shadow": "^5.2.0",
-    "@pixi/layout": "^0.3.2",
+    "@pixi/layout": "~2.0",
     "@pixi/sprite": "^7.4.2",
-    "@pixi/ui": "~0.10",
+    "@pixi/ui": "~2.1",
     "@qni/simulator": "^0.0.86",
     "lodash": "^4.17.21",
-    "pixi.js": "^7.2.4",
+    "pixi-filters": "^6.0.4",
+    "pixi.js": "~8.3",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.4.5",
     "xstate": "~5.4"
