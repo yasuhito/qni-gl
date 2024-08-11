@@ -23,3 +23,18 @@ export interface SerializedGate {
   targets: number[];
   controls?: number[];
 }
+
+export type GateShapeConfig = {
+  cornerRadius: number;
+  strokeAlignment: number;
+};
+
+export type GateState = "idle" | "hover" | "grabbed" | "active";
+
+export type GateStyleOptions = {
+  cursor: string;
+  iconColor: string;
+  fillColor: string;
+  borderColor: string;
+  borderAlpha: number;
+};

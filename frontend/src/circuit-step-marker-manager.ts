@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
-import { Colors } from "./colors";
+import { Colors, FULL_OPACITY } from "./colors";
 import { spacingInPx } from "./util";
 import { CircuitStepComponent } from "./circuit-step-component";
 
@@ -53,7 +53,6 @@ export class CircuitStepMarkerManager extends Container {
   private initMarkers() {
     for (let i = 0; i < this.stepCount; i++) {
       const marker = new PIXI.Graphics();
-      this.drawMarker(marker, CircuitStepMarkerManager.COLOR_DEFAULT, 0);
       this.addChild(marker);
       this.markers.push(marker);
     }
@@ -119,16 +118,15 @@ export class CircuitStepMarkerManager extends Container {
     return marker;
   }
 
-  private drawMarker(
-    marker: PIXI.Graphics,
-    color: PIXI.ColorSource,
-    alpha: number = 1
-  ) {
+  private drawMarker(marker: PIXI.Graphics, color: PIXI.ColorSource) {
     marker
       .clear()
-      .beginFill(color)
-      .drawRect(0, 0, CircuitStepMarkerManager.MARKER_WIDTH, this.stepHeight)
-      .endFill();
-    marker.alpha = alpha;
+      .moveTo(CircuitStepMarkerManager.MARKER_WIDTH / 2, 0)
+      .lineTo(CircuitStepMarkerManager.MARKER_WIDTH / 2, this.stepHeight)
+      .stroke({
+        color: color,
+        width: CircuitStepMarkerManager.MARKER_WIDTH,
+      });
+    marker.alpha = FULL_OPACITY;
   }
 }

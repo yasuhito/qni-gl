@@ -33,7 +33,7 @@ export class CircuitComponent extends Container {
   minStepCount = 5;
 
   /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
-  private circuitStepsContainer: ListContainer;
+  circuitStepsContainer: ListContainer;
   private markerManager: CircuitStepMarkerManager;
 
   /**

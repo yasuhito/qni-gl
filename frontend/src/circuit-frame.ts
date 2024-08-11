@@ -153,7 +153,10 @@ export class CircuitFrame extends PIXI.Container {
       this
     );
 
-    PALETTE_FIRST_ROW_GATES.forEach((gate) => this.gatePalette.addGate(gate));
+    PALETTE_FIRST_ROW_GATES.forEach((gate) => {
+      this.gatePalette.addGate(gate);
+      console.dir(gate);
+    });
     this.gatePalette.newRow();
     PALETTE_SECOND_ROW_GATES.forEach((gate) => this.gatePalette.addGate(gate));
   }
