@@ -4912,10 +4912,25 @@ pixi-filters@^6.0.4:
   dependencies:
     "@types/gradient-parser" "^0.1.2"
 
-pixi.js@^8.0.4, pixi.js@~8.3:
+pixi.js@^8.0.4:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-8.3.0.tgz#b53d98f069206dfb5cec55f0bd35e73ad54a875a"
   integrity sha512-aY8UqhYwTYETGA68/pWqORpeNRi1eT0l1tSLV6WTUQkwcKPyMlZTLUpc8ZzdsWHqDJ3Sx9Z/BZ1kQfRiQa0dQg==
+  dependencies:
+    "@pixi/colord" "^2.9.6"
+    "@types/css-font-loading-module" "^0.0.12"
+    "@types/earcut" "^2.1.4"
+    "@webgpu/types" "^0.1.40"
+    "@xmldom/xmldom" "^0.8.10"
+    earcut "^2.2.4"
+    eventemitter3 "^5.0.1"
+    ismobilejs "^1.1.1"
+    parse-svg-path "^0.1.2"
+
+pixi.js@~8.3:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-8.3.2.tgz#1e3f7a6ff95d927fd29d79624560f9b631b0eb64"
+  integrity sha512-z9/aADIGV8IqCD/pd1WuzNQWAnNG229Uj/EvMrVtJMMGOzGGN5Qr6seMdjzoOJtTQsR+eKu8Ftr5KNFEfCsriw==
   dependencies:
     "@pixi/colord" "^2.9.6"
     "@types/css-font-loading-module" "^0.0.12"
