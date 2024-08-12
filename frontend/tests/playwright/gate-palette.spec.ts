@@ -136,7 +136,7 @@ test.describe("Gate Palette", () => {
   });
 
   test.describe("Measurement Gate", () => {
-    test.skip("changes style when mouseover", async ({ page, circuitInfo }) => {
+    test("changes style when mouseover", async ({ page, circuitInfo }) => {
       const gate = circuitInfo.gatePalette.measurementGate;
 
       await page.mouse.move(gate.x, gate.y);
