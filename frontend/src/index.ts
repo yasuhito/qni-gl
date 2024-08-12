@@ -25,6 +25,7 @@ export * from "./state-vector-frame";
 export * from "./swap-gate";
 export * from "./t-dagger-gate";
 export * from "./t-gate";
+export * from "./types";
 export * from "./util";
 export * from "./write-gate";
 export * from "./write0-gate";
