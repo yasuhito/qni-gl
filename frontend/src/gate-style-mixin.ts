@@ -84,6 +84,7 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
       this.setCursor(options.cursor);
       this.drawShape(
         options.iconColor,
+        options.iconInverse || false,
         options.fillColor,
         options.borderColor,
         options.borderAlpha
@@ -97,6 +98,7 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
 
     protected drawShape(
       iconColor: string | undefined,
+      iconInverse: boolean,
       fillColor: string,
       borderColor: string,
       borderAlpha: number
@@ -123,6 +125,14 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
 
       if (iconColor) {
         this._sprite.tint = iconColor;
+      }
+
+      if (iconInverse) {
+        this._sprite.visible = false;
+        this._whiteSprite.visible = true;
+      } else {
+        this._sprite.visible = true;
+        this._whiteSprite.visible = false;
       }
     }
 

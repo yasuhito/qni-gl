@@ -37,7 +37,7 @@ export function WriteGateMixin<TBase extends Constructor<GateComponent>>(
       },
       grabbed: {
         cursor: "grabbing",
-        iconColor: Colors["icon-onbrand"],
+        iconInverse: true,
         fillColor: Colors["bg-active"],
         borderColor: Colors["border-pressed"],
         borderAlpha: 1,

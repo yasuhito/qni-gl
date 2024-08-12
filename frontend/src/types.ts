@@ -33,6 +33,7 @@ export type GateState = "idle" | "hover" | "grabbed" | "active";
 
 export type GateStyleOptions = {
   cursor: string;
+  iconInverse?: boolean;
   iconColor?: string;
   fillColor: string;
   borderColor: string;

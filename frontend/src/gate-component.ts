@@ -6,6 +6,7 @@ import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
 import {
   Assets,
+  ColorMatrixFilter,
   Container,
   FederatedPointerEvent,
   Graphics,
@@ -62,6 +63,7 @@ export class GateComponent extends Container {
 
   protected _shape!: Graphics;
   protected _sprite!: Sprite;
+  protected _whiteSprite!: Sprite;
 
   protected stateMachine = createMachine(
     {
@@ -206,6 +208,17 @@ export class GateComponent extends Container {
       this.addChild(this._sprite);
       this._sprite.width = this.sizeInPx;
       this._sprite.height = this.sizeInPx;
+
+      const whiteFilter = new ColorMatrixFilter();
+      whiteFilter.matrix = [
+        0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+      ];
+      this._whiteSprite = Sprite.from(texture);
+      this.addChild(this._whiteSprite);
+      this._whiteSprite.visible = false;
+      this._whiteSprite.filters = [whiteFilter];
+      this._whiteSprite.width = this.sizeInPx;
+      this._whiteSprite.height = this.sizeInPx;
 
       // enable the gate to be interactive...
       // this will allow it to respond to mouse and touch events
