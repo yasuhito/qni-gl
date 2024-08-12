@@ -96,7 +96,7 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
     }
 
     protected drawShape(
-      iconColor: string,
+      iconColor: string | undefined,
       fillColor: string,
       borderColor: string,
       borderAlpha: number
@@ -121,7 +121,9 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
           alpha: borderAlpha,
         });
 
-      this._sprite.tint = iconColor;
+      if (iconColor) {
+        this._sprite.tint = iconColor;
+      }
     }
 
     protected get borderSize(): number {
