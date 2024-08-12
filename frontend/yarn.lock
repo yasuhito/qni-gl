@@ -1369,22 +1369,12 @@
   resolved "https://registry.yarnpkg.com/@pixi/colord/-/colord-2.9.6.tgz#7e4e7851480da6fd3cef4e331f008d60be7e1204"
   integrity sha512-nezytU2pw587fQstUu1AsJZDVEynjskwOL+kibwcdxsMBFqPsFFNA7xl0ii/gXuDi6M0xj3mfRJj8pBSc2jCfA==
 
-"@pixi/events@^7.3.1":
-  version "7.4.2"
-  resolved "https://registry.yarnpkg.com/@pixi/events/-/events-7.4.2.tgz#efd3361f7a78161aa0dffb484ea4ce3b7a0043c4"
-  integrity sha512-Jw/w57heZjzZShIXL0bxOvKB+XgGIevyezhGtfF2ZSzQoSBWo+Fj1uE0QwKd0RIaXegZw/DhSmiMJSbNmcjifA==
-
 "@pixi/layout@~2.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@pixi/layout/-/layout-2.0.1.tgz#a20f9f0cd5dcaee335041194436b1e0034d63fee"
   integrity sha512-xQj/w44FKLaRn71iEQACxRTYgEVU4c8SXTJKcSIDm/uXgKm3JKRylEOpQ9u6x3gWIFeV5d3gx/oHBJHdZhqAoQ==
   dependencies:
     pixi.js "^8.0.4"
-
-"@pixi/sprite@^7.4.2":
-  version "7.4.2"
-  resolved "https://registry.yarnpkg.com/@pixi/sprite/-/sprite-7.4.2.tgz#beed8c2fd2e00a02e340eaba9844b180bf1f1b24"
-  integrity sha512-Ccf/OVQsB+HQV0Fyf5lwD+jk1jeU7uSIqEjbxenNNssmEdB7S5qlkTBV2EJTHT83+T6Z9OMOHsreJZerydpjeg==
 
 "@pixi/ui@~2.1":
   version "2.1.3"

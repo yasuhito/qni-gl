@@ -41,9 +41,7 @@
     "wrap-ansi": "~9.0"
   },
   "dependencies": {
-    "@pixi/events": "^7.3.1",
     "@pixi/layout": "~2.0",
-    "@pixi/sprite": "^7.4.2",
     "@pixi/ui": "~2.1",
     "@qni/simulator": "^0.0.86",
     "lodash": "^4.17.21",
