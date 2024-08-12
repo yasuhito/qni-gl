@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "test": "yarn lint && vitest run --dir tests/vitest && playwright test",
     "lint": "eslint .",
-    "doc": "typedoc"
+    "doc": "typedoc --blockTags @param --blockTags @memberof"
   },
   "devDependencies": {
     "@eslint/js": "^9.5.0",
