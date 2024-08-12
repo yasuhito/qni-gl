@@ -1,6 +1,5 @@
-import * as PIXI from "pixi.js";
 import { Colors } from "./colors";
-import { Container } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 import { Size } from "./size";
 import { Spacing } from "./spacing";
 
@@ -25,18 +24,18 @@ export class QubitCircle extends Container {
   private _probability = 0;
   private _phase = 0;
   private _size: Size = "xl";
-  private probabilityCircle: PIXI.Graphics;
-  private border: PIXI.Graphics;
-  private phaseContainer: PIXI.Container;
-  private phaseHand: PIXI.Graphics;
+  private probabilityCircle: Graphics;
+  private border: Graphics;
+  private phaseContainer: Container;
+  private phaseHand: Graphics;
 
   constructor(size: Size = "xl") {
     super();
 
-    this.probabilityCircle = new PIXI.Graphics();
-    this.phaseContainer = new PIXI.Container();
-    this.border = new PIXI.Graphics();
-    this.phaseHand = new PIXI.Graphics();
+    this.probabilityCircle = new Graphics();
+    this.phaseContainer = new Container();
+    this.border = new Graphics();
+    this.phaseHand = new Graphics();
 
     this.size = size;
 
@@ -124,9 +123,8 @@ export class QubitCircle extends Container {
 
     this.probabilityCircle
       .clear()
-      .beginFill(Colors["bg-brand"])
-      .drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, radius)
-      .endFill();
+      .circle(this.sizeInPx / 2, this.sizeInPx / 2, radius)
+      .fill(Colors["bg-brand"]);
 
     this.showProbabilityCircle();
   }
@@ -159,13 +157,12 @@ export class QubitCircle extends Container {
   private updateBorder(): void {
     this.border
       .clear()
-      .lineStyle(
-        Spacing.borderWidth.qubitCircle[this._size],
-        this.borderColor(),
-        1,
-        0
-      )
-      .drawCircle(this.sizeInPx / 2, this.sizeInPx / 2, this.sizeInPx / 2);
+      .circle(this.sizeInPx / 2, this.sizeInPx / 2, this.sizeInPx / 2)
+      .stroke({
+        width: Spacing.borderWidth.qubitCircle[this._size],
+        color: this.borderColor(),
+        alignment: 1,
+      });
   }
 
   private borderColor(): string {
@@ -197,9 +194,8 @@ export class QubitCircle extends Container {
 
     this.phaseHand
       .clear()
-      .beginFill(Colors["text"])
-      .drawRect(0, 0, thickness, this.handLength)
-      .endFill();
+      .rect(0, 0, thickness, this.handLength)
+      .fill(Colors["text"]);
     this.phaseHand.x = this.sizeInPx / 2 - thickness / 2;
     this.phaseHand.y = 0;
 

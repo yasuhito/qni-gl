@@ -55,15 +55,9 @@ export class FrameDivider extends PIXI.Graphics {
   }
 
   private drawDivider(): void {
-    this.clear();
-    this.beginFill(Colors["border-component"]);
-    this.drawRect(
-      0,
-      0,
-      this.app.screen.width,
-      FrameDividerConfig.DIVIDER_HEIGHT
-    );
-    this.endFill();
+    this.clear()
+      .rect(0, 0, this.app.screen.width, FrameDividerConfig.DIVIDER_HEIGHT)
+      .fill(Colors["border-component"]);
   }
 
   public updateWidth(): void {

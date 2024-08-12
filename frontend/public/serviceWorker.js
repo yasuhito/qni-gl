@@ -15,8 +15,6 @@
     OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
     PERFORMANCE OF THIS SOFTWARE.
     ***************************************************************************** */
-    /* global Reflect, Promise, SuppressedError, Symbol */
-
 
     function __awaiter(thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -62,12 +60,6 @@
     };
 
     // -------------------------------------------------------------------------------------
-    // refinements
-    // -------------------------------------------------------------------------------------
-    /**
-     * @category refinements
-     * @since 2.11.0
-     */
     // -------------------------------------------------------------------------------------
     // instances
     // -------------------------------------------------------------------------------------

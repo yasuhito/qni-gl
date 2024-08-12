@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
@@ -8,13 +7,8 @@ import { SerializedGate } from "./types";
  * @noInheritDoc
  */
 export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
-  static gateType = "XGate";
-  static icon = PIXI.Texture.from("./assets/X.svg", {
-    resolution: window.devicePixelRatio,
-    resourceOptions: {
-      scale: window.devicePixelRatio,
-    },
-  });
+  static readonly gateType = "XGate";
+  static readonly iconPath = "./assets/X.png";
 
   private _controls: number[] = [];
 

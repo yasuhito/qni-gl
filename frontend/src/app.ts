@@ -1,4 +1,3 @@
-import * as PIXI from "pixi.js";
 import { CircuitComponent } from "./circuit-component";
 import { CIRCUIT_FRAME_EVENTS, CircuitFrame } from "./circuit-frame";
 import { CircuitStepComponent } from "./circuit-step-component";
@@ -14,6 +13,19 @@ import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
 import { rectIntersect } from "./util";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
+import {
+  Application,
+  Assets,
+  FederatedPointerEvent,
+  Point,
+  Renderer,
+} from "pixi.js";
+
+declare global {
+  interface Window {
+    pixiApp?: App;
+  }
+}
 
 export class App {
   static elementId = "app";
@@ -22,14 +34,16 @@ export class App {
   declare worker: Worker;
 
   element: HTMLElement;
-  mainContainer: List;
-  circuitFrame: CircuitFrame;
-  stateVectorFrame: StateVectorFrame;
-  frameDivider: FrameDivider;
+  mainContainer: List = new List({
+    type: "vertical",
+  });
+  circuitFrame!: CircuitFrame;
+  stateVectorFrame: StateVectorFrame | null = null;
+  frameDivider: FrameDivider | null = null;
 
   activeGate: GateComponent | null = null;
   grabbedGate: GateComponent | null = null;
-  pixiApp: PIXI.Application<HTMLCanvasElement>;
+  pixiApp: Application;
   circuitSteps: CircuitStepComponent[] = [];
   nameMap = new Map();
 
@@ -43,15 +57,15 @@ export class App {
   }
 
   get gatePalette(): GatePaletteComponent {
-    return this.circuitFrame.gatePalette;
+    return this.circuitFrame!.gatePalette;
   }
 
   get circuit(): CircuitComponent {
-    return this.circuitFrame.circuit;
+    return this.circuitFrame!.circuit;
   }
 
   get stateVector(): StateVectorComponent {
-    return this.stateVectorFrame.stateVector;
+    return this.stateVectorFrame!.stateVector;
   }
 
   constructor(elementId: string) {
@@ -76,114 +90,125 @@ export class App {
     );
 
     // view, stage などをまとめた application を作成
-    this.pixiApp = new PIXI.Application<HTMLCanvasElement>({
-      width: 800,
-      height: 600,
-      resolution: window.devicePixelRatio || 1,
+    this.pixiApp = new Application<Renderer<HTMLCanvasElement>>();
+    this.initApp().then(() => {
+      // this.pixiApp.stage = new Stage();
+
+      window.addEventListener("resize", this.resize.bind(this), false);
+      this.resize();
+
+      el.appendChild(this.pixiApp.canvas);
+
+      // stage: 画面に表示するオブジェクトたちの入れ物
+      this.pixiApp.stage.eventMode = "static";
+      this.pixiApp.stage.hitArea = this.pixiApp.screen;
+      this.pixiApp.stage.sortableChildren = true;
+      this.pixiApp.stage
+        .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
+        .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
+        .on("pointerdown", this.maybeDeactivateGate, this);
+
+      this.mainContainer = new List({
+        type: "vertical",
+      });
+      this.mainContainer.sortableChildren = true;
+      this.pixiApp.stage.addChild(this.mainContainer);
+
+      this.circuitFrame = CircuitFrame.getInstance(
+        this.pixiApp,
+        this.pixiApp.screen.height * 0.6
+      );
+      this.mainContainer.addChild(this.circuitFrame);
+
+      this.stateVectorFrame = StateVectorFrame.getInstance(
+        this.pixiApp.screen.width,
+        this.pixiApp.screen.height * 0.4
+      );
+      this.mainContainer.addChild(this.stateVectorFrame);
+
+      // 量子回路と状態ベクトルの境界線
+      this.frameDivider = FrameDivider.initialize(
+        this.pixiApp,
+        this.circuitFrame.height
+      );
+      this.pixiApp.stage.addChild(this.frameDivider);
+
+      this.pixiApp.stage.on("pointermove", () => {
+        if (!this.frameDivider!.isDragging) return;
+
+        // 上下フレームの更新
+        this.circuitFrame!.resize(this.frameDivider!.y);
+        this.stateVectorFrame!.repositionAndResize(
+          this.frameDivider!.y + this.frameDivider!.height,
+          this.pixiApp.screen.width,
+          this.pixiApp.screen.height - this.frameDivider!.y
+        );
+      });
+
+      this.circuitFrame.on(
+        CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED,
+        this.grabGate,
+        this
+      );
+      this.circuitFrame.on(
+        CIRCUIT_FRAME_EVENTS.MOUSE_LEAVE_PALETTE_GATE,
+        this.resetCursor,
+        this
+      );
+      this.circuitFrame.on(
+        CIRCUIT_FRAME_EVENTS.DISCARD_PALETTE_GATE,
+        this.gateDiscarded,
+        this
+      );
+
+      this.circuitFrame.on(
+        CIRCUIT_FRAME_EVENTS.ACTIVATE_CIRCUIT_STEP,
+        this.runSimulator,
+        this
+      );
+      this.circuitFrame.on(
+        CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE,
+        this.grabGate,
+        this
+      );
+
+      this.stateVector.on(
+        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+        this.runSimulator,
+        this
+      );
+
+      // 回路の最初のステップをアクティブにする
+      // これによって、最初のステップの状態ベクトルが表示される
+      this.circuit.stepAt(0).activate();
+
+      this.nameMap.set(this.pixiApp.stage, "stage");
+
+      // テスト用
+      window.pixiApp = this;
+    });
+  }
+
+  private async initApp() {
+    await this.pixiApp.init({
+      resizeTo: window,
+      resolution: window.devicePixelRatio,
+      preference: "webgpu",
       antialias: true,
       autoDensity: true,
       backgroundColor: Colors["bg"],
       preserveDrawingBuffer: true,
     });
-    // this.pixiApp.stage = new Stage();
 
-    window.addEventListener("resize", this.resize.bind(this), false);
-    this.resize();
-
-    el.appendChild(this.pixiApp.view);
-
-    // stage: 画面に表示するオブジェクトたちの入れ物
-    this.pixiApp.stage.eventMode = "static";
-    this.pixiApp.stage.hitArea = this.pixiApp.screen;
-    this.pixiApp.stage.sortableChildren = true;
-    this.pixiApp.stage
-      .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
-      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
-      .on("pointerdown", this.maybeDeactivateGate, this);
-
-    this.mainContainer = new List({
-      type: "vertical",
+    await Assets.init({
+      texturePreference: { resolution: window.devicePixelRatio },
     });
-    this.mainContainer.sortableChildren = true;
-    this.pixiApp.stage.addChild(this.mainContainer);
-
-    this.circuitFrame = CircuitFrame.getInstance(
-      this.pixiApp,
-      this.pixiApp.screen.height * 0.6
-    );
-    this.mainContainer.addChild(this.circuitFrame);
-
-    this.stateVectorFrame = StateVectorFrame.getInstance(
-      this.pixiApp.screen.width,
-      this.pixiApp.screen.height * 0.4
-    );
-    this.mainContainer.addChild(this.stateVectorFrame);
-
-    // 量子回路と状態ベクトルの境界線
-    this.frameDivider = FrameDivider.initialize(
-      this.pixiApp,
-      this.circuitFrame.height
-    );
-    this.pixiApp.stage.addChild(this.frameDivider);
-
-    this.pixiApp.stage.on("pointermove", () => {
-      if (!this.frameDivider.isDragging) return;
-
-      // 上下フレームの更新
-      this.circuitFrame.resize(this.frameDivider.y);
-      this.stateVectorFrame.repositionAndResize(
-        this.frameDivider.y + this.frameDivider.height,
-        this.pixiApp.screen.width,
-        this.pixiApp.screen.height - this.frameDivider.y
-      );
-    });
-
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED,
-      this.grabGate,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.MOUSE_LEAVE_PALETTE_GATE,
-      this.resetCursor,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.DISCARD_PALETTE_GATE,
-      this.gateDiscarded,
-      this
-    );
-
-    this.element.dataset.app = JSON.stringify(this);
-
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.ACTIVATE_CIRCUIT_STEP,
-      this.runSimulator,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE,
-      this.grabGate,
-      this
-    );
-
-    this.stateVector.on(
-      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-      this.runSimulator,
-      this
-    );
-
-    // 回路の最初のステップをアクティブにする
-    // これによって、最初のステップの状態ベクトルが表示される
-    this.circuit.stepAt(0).activate();
-
-    this.nameMap.set(this.pixiApp.stage, "stage");
   }
 
   private gateDiscarded(gate: GateComponent) {
     this.activeGate = null;
     this.grabbedGate = null;
-    this.circuitFrame.removeChild(gate);
+    this.circuitFrame!.removeChild(gate);
     this.circuit.update();
     if (this.circuit.activeStepIndex === null) {
       this.circuit.stepAt(0).activate();
@@ -270,14 +295,14 @@ export class App {
 
     if (this.stateVectorFrame) {
       this.stateVectorFrame.repositionAndResize(
-        this.frameDivider.y + this.frameDivider.height,
+        this.frameDivider!.y + this.frameDivider!.height,
         this.pixiApp.screen.width,
-        this.pixiApp.screen.height - this.frameDivider.y
+        this.pixiApp.screen.height - this.frameDivider!.y
       );
     }
   }
 
-  private grabGate(gate: GateComponent, pointerPosition: PIXI.Point) {
+  private grabGate(gate: GateComponent, pointerPosition: Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
@@ -290,7 +315,7 @@ export class App {
     this.grabbedGate.on("discarded", (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
-      this.circuitFrame.removeChild(gate);
+      this.circuitFrame!.removeChild(gate);
       // this.pixiApp.stage.removeChild(gate);
     });
 
@@ -299,9 +324,6 @@ export class App {
     let dropzone;
 
     this.circuit.maybeAppendWire();
-
-    // TODO: メソッドに切り出す
-    this.element.dataset.app = JSON.stringify(this);
 
     this.updateStateVectorComponentQubitCount();
 
@@ -403,14 +425,7 @@ export class App {
     );
   }
 
-  toJSON() {
-    return {
-      gatePalette: this.gatePalette,
-      circuit: this.circuit || "",
-    };
-  }
-
-  private maybeMoveGate(event: PIXI.FederatedPointerEvent) {
+  private maybeMoveGate(event: FederatedPointerEvent) {
     if (this.grabbedGate === null) {
       return;
     }
@@ -424,7 +439,7 @@ export class App {
    * @param gate ゲート
    * @param pointerPosition マウス/タッチの位置
    */
-  private moveGate(gate: GateComponent, pointerPosition: PIXI.Point) {
+  private moveGate(gate: GateComponent, pointerPosition: Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
     for (const circuitStep of this.circuit.steps) {
@@ -467,7 +482,7 @@ export class App {
 
   private unsnapGateFromDropzone(gate: GateComponent) {
     gate.unsnap();
-    this.circuitFrame.addChild(gate);
+    this.circuitFrame!.addChild(gate);
     // this.pixiApp.stage.addChild(gate);
   }
 
@@ -497,7 +512,7 @@ export class App {
     this.stateVector.qubitCount = this.circuit.qubitCountInUse;
   }
 
-  private maybeDeactivateGate(event: PIXI.FederatedPointerEvent) {
+  private maybeDeactivateGate(event: FederatedPointerEvent) {
     if (event.target === this.pixiApp.stage) {
       this.activeGate?.deactivate();
     }

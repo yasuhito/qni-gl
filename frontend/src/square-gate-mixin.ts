@@ -1,111 +1,24 @@
-import { Colors } from "./colors";
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
+import { GateShapeConfig } from "./types";
 import { Spacing } from "./spacing";
+import {
+  GateStyleMixin,
+  GateStyle,
+  GateStyleConstructor,
+} from "./gate-style-mixin";
 
-export declare class SquareGate {
-  applyIdleStyle(): void;
-  applyHoverStyle(): void;
-  applyGrabbedStyle(): void;
-  applyActiveStyle(): void;
-}
+export declare class SquareGate extends GateStyle {}
 
 export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
-): Constructor<SquareGate> & TBase {
-  class SquareGateMixinClass extends Base {
-    applyIdleStyle() {
-      this._shape.clear();
+): Constructor<SquareGate> & TBase & GateStyleConstructor {
+  const GateStyleBase = GateStyleMixin(Base);
 
-      this._shape.zIndex = 0;
-      this._shape.cursor = "default";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-onbrand"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-brand"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        Spacing.cornerRadius.gate
-      );
-      this._shape.endFill();
-    }
-
-    applyHoverStyle() {
-      this._shape.clear();
-
-      this._shape.zIndex = 0;
-      this._shape.cursor = "grab";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-hover"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-brand-hover"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        Spacing.cornerRadius.gate
-      );
-      this._shape.endFill();
-    }
-
-    applyGrabbedStyle() {
-      this._shape.clear();
-
-      this._shape.zIndex = 10;
-      this._shape.cursor = "grabbing";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-pressed"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-active"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        Spacing.cornerRadius.gate
-      );
-      this._shape.endFill();
-    }
-
-    applyActiveStyle() {
-      this._shape.clear();
-
-      this._shape.zIndex = 0;
-      this._shape.cursor = "grab";
-
-      this._shape.lineStyle(
-        Spacing.borderWidth.gate[this.size],
-        Colors["border-active"],
-        1,
-        0
-      );
-      this._shape.beginFill(Colors["bg-brand"], 1);
-      this._shape.drawRoundedRect(
-        0,
-        0,
-        this.sizeInPx,
-        this.sizeInPx,
-        Spacing.cornerRadius.gate
-      );
-      this._shape.endFill();
-    }
-  }
-
-  return SquareGateMixinClass as Constructor<SquareGate> & TBase;
+  return class SquareGateMixinClass extends GateStyleBase {
+    static SHAPE_CONFIG: GateShapeConfig = {
+      cornerRadius: Spacing.cornerRadius.gate,
+      strokeAlignment: 1,
+    };
+  };
 }

@@ -144,17 +144,7 @@ describe("DropzoneComponent", () => {
     });
   });
 
-  describe("toJSON and toCircuitJSON", () => {
-    it("should return correct JSON representation", () => {
-      dropzone.getGlobalPosition = vi.fn().mockReturnValue({ x: 10, y: 20 });
-      const json = dropzone.toJSON();
-
-      expect(json).toEqual({
-        x: 10 + dropzone.width / 2,
-        y: 20 + dropzone.height / 2,
-      });
-    });
-
+  describe("toCircuitJSON", () => {
     it('should return "1" when there is no operation', () => {
       expect(dropzone.toCircuitJSON()).toBe("1");
     });

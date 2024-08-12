@@ -1,18 +1,26 @@
-import * as PIXI from "pixi.js";
 import { ActorRefFrom, createActor, createMachine } from "xstate";
-import { Container } from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
+import {
+  Assets,
+  ColorMatrixFilter,
+  Container,
+  FederatedPointerEvent,
+  Graphics,
+  Point,
+  Sprite,
+  Texture,
+} from "pixi.js";
 
 /**
  * ゲートのクリックイベント
  */
 export type ClickEvent = {
   type: "Click";
-  globalPosition: PIXI.Point;
+  globalPosition: Point;
   dropzone: DropzoneComponent | null;
 };
 
@@ -21,7 +29,7 @@ export type ClickEvent = {
  */
 export type DragEvent = {
   type: "Drag";
-  globalPosition: PIXI.Point;
+  globalPosition: Point;
   dropzone: DropzoneComponent | null;
 };
 
@@ -44,15 +52,18 @@ export class GateComponent extends Container {
   };
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
-  static icon = PIXI.Texture.from("./assets/Placeholder.svg");
+  static texture = Texture.EMPTY;
+  static iconPath = "./assets/Placeholder.svg";
+  static iconImage = new Image();
 
   size: Size = "base";
   sizeInPx = GateComponent.sizeInPx[this.size];
 
   debug = false;
 
-  protected _shape: PIXI.Graphics;
-  protected _sprite: PIXI.Sprite;
+  protected _shape!: Graphics;
+  protected _sprite!: Sprite;
+  protected _whiteSprite!: Sprite;
 
   protected stateMachine = createMachine(
     {
@@ -154,7 +165,7 @@ export class GateComponent extends Container {
       },
     }
   );
-  private actor: ActorRefFrom<typeof this.stateMachine>;
+  private actor!: ActorRefFrom<typeof this.stateMachine>;
 
   /**
    * Returns the gate type of the component.
@@ -189,38 +200,55 @@ export class GateComponent extends Container {
   constructor() {
     super();
 
-    const klass = this.constructor as typeof GateComponent;
+    this.loadTexture().then((texture) => {
+      this._shape = new Graphics();
+      this.addChild(this._shape);
 
-    this._shape = new PIXI.Graphics();
-    this.addChild(this._shape);
+      this._sprite = new Sprite(texture);
+      this.addChild(this._sprite);
+      this._sprite.width = this.sizeInPx;
+      this._sprite.height = this.sizeInPx;
 
-    // enable the gate to be interactive...
-    // this will allow it to respond to mouse and touch events
-    this.eventMode = "static";
+      const whiteFilter = new ColorMatrixFilter();
+      whiteFilter.matrix = [
+        0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+      ];
+      this._whiteSprite = Sprite.from(texture);
+      this.addChild(this._whiteSprite);
+      this._whiteSprite.visible = false;
+      this._whiteSprite.filters = [whiteFilter];
+      this._whiteSprite.width = this.sizeInPx;
+      this._whiteSprite.height = this.sizeInPx;
 
-    // Scale mode for pixelation
-    klass.icon.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      // enable the gate to be interactive...
+      // this will allow it to respond to mouse and touch events
+      this.eventMode = "static";
 
-    this._sprite = new PIXI.Sprite(klass.icon);
-    this.addChild(this._sprite);
+      // setup events for mouse + touch using
+      // the pointer events
+      this.on("pointerover", this.onPointerOver, this)
+        .on("pointerout", this.onPointerOut, this)
+        .on("pointerdown", this.onPointerDown, this)
+        .on("pointerup", this.onPointerUp, this);
 
-    // setup events for mouse + touch using
-    // the pointer events
-    this.on("pointerover", this.onPointerOver, this)
-      .on("pointerout", this.onPointerOut, this)
-      .on("pointerdown", this.onPointerDown, this)
-      .on("pointerup", this.onPointerUp, this);
-
-    this.actor = createActor(this.stateMachine);
-    this.actor.subscribe((state) => {
-      if (this.debug) {
-        console.log(`${this.gateType()}: ${state.value} state`);
-      }
+      this.actor = createActor(this.stateMachine);
+      this.actor.subscribe((state) => {
+        if (this.debug) {
+          console.log(`${this.gateType()}: ${state.value} state`);
+        }
+      });
+      this.actor.start();
     });
-    this.actor.start();
   }
 
-  click(globalPosition: PIXI.Point, dropzone: DropzoneComponent | null) {
+  private async loadTexture() {
+    const klass = this.constructor as typeof GateComponent;
+    const texture = await Assets.load(klass.iconPath);
+
+    return texture;
+  }
+
+  click(globalPosition: Point, dropzone: DropzoneComponent | null) {
     this.actor.send({
       type: "Click",
       globalPosition: globalPosition,
@@ -236,7 +264,7 @@ export class GateComponent extends Container {
     this.actor.send({ type: "Deactivate" });
   }
 
-  move(globalPosition: PIXI.Point) {
+  move(globalPosition: Point) {
     this.actor.send({
       type: "Drag",
       globalPosition: globalPosition,
@@ -244,7 +272,7 @@ export class GateComponent extends Container {
     });
   }
 
-  snapToDropzone(dropzone: DropzoneComponent, globalPosition: PIXI.Point) {
+  snapToDropzone(dropzone: DropzoneComponent, globalPosition: Point) {
     if (this.dropzone && this.dropzone !== dropzone) {
       this.unsnap();
     }
@@ -281,17 +309,6 @@ export class GateComponent extends Container {
 
   applyActiveStyle() {}
 
-  toJSON() {
-    const pos = this.getGlobalPosition();
-
-    return {
-      x: pos.x,
-      y: pos.y,
-      width: this.width,
-      height: this.height,
-    };
-  }
-
   private onPointerOver() {
     this.actor.send({ type: "Mouse enter" });
     this.cursor = "grab";
@@ -302,7 +319,7 @@ export class GateComponent extends Container {
     this.emit("mouseLeave", this);
   }
 
-  private onPointerDown(event: PIXI.FederatedPointerEvent) {
+  private onPointerDown(event: FederatedPointerEvent) {
     this.emit("grab", this, event.global);
   }
 

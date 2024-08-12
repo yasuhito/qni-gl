@@ -112,30 +112,6 @@ describe("CircuitStepComponent", () => {
           { type: "Y", targets: [0, 2] },
         ]);
       });
-
-      it.skip("should serialize a controlled Y gate", () => {
-        const yGate = new YGate();
-        const controlGate = new ControlGate();
-        circuitStep.fetchDropzoneByIndex(0).addChild(controlGate);
-        circuitStep.fetchDropzoneByIndex(2).addChild(yGate);
-        expect(circuitStep.serialize()).toEqual([
-          { type: "Y", targets: [2], controls: [0] },
-        ]);
-      });
-
-      it.skip("should serialize a multi-controlled Y gate", () => {
-        const yGate = new YGate();
-        const controlGate1 = new ControlGate();
-        const controlGate2 = new ControlGate();
-
-        circuitStep.fetchDropzoneByIndex(0).addChild(controlGate1);
-        circuitStep.fetchDropzoneByIndex(1).addChild(controlGate2);
-        circuitStep.fetchDropzoneByIndex(2).addChild(yGate);
-
-        expect(circuitStep.serialize()).toEqual([
-          { type: "Y", targets: [2], controls: [0, 1] },
-        ]);
-      });
     });
 
     describe("Z Gate", () => {

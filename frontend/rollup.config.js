@@ -1,5 +1,5 @@
-import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
+import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 
 export default {
@@ -17,6 +17,6 @@ export default {
   ],
   onwarn: (warning, defaultHandler) => {
     if (warning.loc.file.includes("/node_modules/")) return;
-    defaultHandler(warning)
-  }
+    defaultHandler(warning);
+  },
 };

@@ -1,19 +1,19 @@
-import * as PIXI from "pixi.js";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { Colors } from "./colors";
+import { Texture } from "pixi.js";
 
 /**
  * @noInheritDoc
  */
 export class WriteGate extends JsonableMixin(GateComponent) {
-  static iconIdleDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
-  static iconHover = PIXI.Texture.from("./assets/Placeholder.svg");
-  static iconHoverDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
-  static iconGrabbed = PIXI.Texture.from("./assets/Placeholder.svg");
-  static iconGrabbedDropzone = PIXI.Texture.from("./assets/Placeholder.svg");
-  static iconActive = PIXI.Texture.from("./assets/Placeholder.svg");
+  static iconIdleDropzone = Texture.from("./assets/Placeholder.svg");
+  static iconHover = Texture.from("./assets/Placeholder.svg");
+  static iconHoverDropzone = Texture.from("./assets/Placeholder.svg");
+  static iconGrabbed = Texture.from("./assets/Placeholder.svg");
+  static iconGrabbedDropzone = Texture.from("./assets/Placeholder.svg");
+  static iconActive = Texture.from("./assets/Placeholder.svg");
 
   static style = {
     idleBodyColor: null,
@@ -51,17 +51,18 @@ export class WriteGate extends JsonableMixin(GateComponent) {
   }
 
   applyIdleStyle() {
-    const klass = this.constructor as typeof WriteGate;
+    this._shape.cursor = "default";
 
-    if (this.dropzone) {
-      this._sprite.texture = klass.iconIdleDropzone;
-    } else {
-      this._sprite.texture = klass.icon;
-    }
+    // const klass = this.constructor as typeof WriteGate;
+
+    // if (this.dropzone) {
+    //   this._sprite.texture = klass.iconIdleDropzone;
+    // } else {
+    //   this._sprite.texture = klass.icon;
+    // }
 
     this._shape.clear();
-    this._shape.zIndex = 0;
-    // this._shape.cursor = "default";
+    // this._shape.zIndex = 0;
 
     this.updateGraphics(this.style.idleBodyColor, this.style.idleBorderColor);
   }
@@ -127,19 +128,18 @@ export class WriteGate extends JsonableMixin(GateComponent) {
     borderColor: string | null,
     borderWidth: number | null = null
   ) {
-    if (borderWidth !== null && borderColor !== null) {
-      this._shape.lineStyle(borderWidth, borderColor, 1, 0);
-    }
-    if (bodyColor !== null) {
-      this._shape.beginFill(bodyColor, 1);
-    }
-    this._shape.drawRoundedRect(
+    this._shape.roundRect(
       0,
       0,
       this.sizeInPx,
       this.sizeInPx,
       this.style.cornerRadius
     );
-    this._shape.endFill();
+    if (borderWidth !== null && borderColor !== null) {
+      this._shape.stroke({ color: borderColor, width: borderWidth, alpha: 1 });
+    }
+    if (bodyColor !== null) {
+      this._shape.fill(bodyColor);
+    }
   }
 }

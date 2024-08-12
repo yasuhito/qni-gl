@@ -37,15 +37,10 @@ export class StateVectorRenderer {
   }
 
   drawBackground(): void {
-    this.backgroundGraphics.clear();
-    this.backgroundGraphics.beginFill(Colors["bg-component"], 1);
-    this.backgroundGraphics.drawRect(
-      0,
-      0,
-      this.layout.width,
-      this.layout.height
-    );
-    this.backgroundGraphics.endFill();
+    this.backgroundGraphics
+      .clear()
+      .rect(0, 0, this.layout.width, this.layout.height)
+      .fill(Colors["bg-component"]);
   }
 
   drawQubitCircles(): Set<number> {

@@ -142,14 +142,6 @@ export class DropzoneComponent extends Container {
     );
   }
 
-  toJSON() {
-    const pos = this.getGlobalPosition();
-    return {
-      x: pos.x + this.width / 2,
-      y: pos.y + this.height / 2,
-    };
-  }
-
   toCircuitJSON() {
     if (this.operation === null) {
       return "1";

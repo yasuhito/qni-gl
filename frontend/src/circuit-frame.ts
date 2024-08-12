@@ -63,7 +63,8 @@ export class CircuitFrame extends PIXI.Container {
   readonly background: PIXI.Graphics;
   readonly gatePalette: GatePaletteComponent;
   readonly circuit: CircuitComponent;
-  private maskGraphics: PIXI.Graphics;
+  // private maskGraphics: PIXI.Graphics;
+  private maskSprite: PIXI.Sprite;
   private scrollContainer: PIXI.Container;
 
   /**
@@ -85,19 +86,25 @@ export class CircuitFrame extends PIXI.Container {
     this.background = new PIXI.Graphics();
     this.gatePalette = new GatePaletteComponent();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    this.maskGraphics = new PIXI.Graphics();
+    // this.maskGraphics = new PIXI.Graphics();
     this.scrollContainer = new PIXI.Container();
-
-    this.initBackground(height);
-    this.initGatePalette();
-    this.initCircuit();
 
     this.addChildAt(this.background, 0);
     this.addChild(this.scrollContainer);
     this.addChild(this.gatePalette);
+    this.gatePalette.zIndex = 2;
     this.scrollContainer.addChild(this.circuit);
-    this.addChild(this.maskGraphics);
-    this.scrollContainer.mask = this.maskGraphics;
+    this.scrollContainer.zIndex = 1;
+
+    // マスクの設定を変更
+    this.maskSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+    this.updateMask(height);
+    this.scrollContainer.mask = this.maskSprite;
+    this.addChild(this.maskSprite); // マスクをシーンに追加
+
+    this.initBackground(height);
+    this.initGatePalette();
+    this.initCircuit();
 
     this.initScrollEvents();
   }
@@ -107,11 +114,10 @@ export class CircuitFrame extends PIXI.Container {
    * @param height - 新しいフレームの高さ
    */
   resize(height: number): void {
-    this.background.clear();
-
-    this.background.beginFill(Colors["bg"]);
-    this.background.drawRect(0, 0, this.app.screen.width, height);
-    this.background.endFill();
+    this.background
+      .clear()
+      .rect(0, 0, this.app.screen.width, height)
+      .fill(Colors["bg"]);
 
     this.updateMask(height);
   }
@@ -132,7 +138,7 @@ export class CircuitFrame extends PIXI.Container {
     this.gatePalette.y = GATE_PALETTE_Y;
 
     this.gatePalette.on(
-      GATE_PALETTE_EVENTS.GRAB_GATE,
+      GATE_PALETTE_EVENTS.GATE_GRABBED,
       this.grabPaletteGate,
       this
     );
@@ -147,7 +153,9 @@ export class CircuitFrame extends PIXI.Container {
       this
     );
 
-    PALETTE_FIRST_ROW_GATES.forEach((gate) => this.gatePalette.addGate(gate));
+    PALETTE_FIRST_ROW_GATES.forEach((gate) => {
+      this.gatePalette.addGate(gate);
+    });
     this.gatePalette.newRow();
     PALETTE_SECOND_ROW_GATES.forEach((gate) => this.gatePalette.addGate(gate));
   }
@@ -230,10 +238,10 @@ export class CircuitFrame extends PIXI.Container {
    * @param height - 新しいマスクの高さ
    */
   private updateMask(height: number): void {
-    this.maskGraphics.clear();
-    this.maskGraphics.beginFill(0xffffff);
-    this.maskGraphics.drawRect(0, 0, this.app.screen.width, height);
-    this.maskGraphics.endFill();
+    this.maskSprite.width = this.app.screen.width;
+    this.maskSprite.height = height;
+    this.maskSprite.x = 0;
+    this.maskSprite.y = 0;
   }
 
   /**
@@ -241,10 +249,7 @@ export class CircuitFrame extends PIXI.Container {
    * @param event - ホイールイベント
    */
   private handleScroll(event: WheelEvent): void {
-    if (
-      this.circuit.y + this.circuit.height + 128 <=
-      this.maskGraphics.height
-    ) {
+    if (this.circuit.y + this.circuit.height + 128 <= this.maskSprite.height) {
       return;
     }
 
@@ -260,7 +265,7 @@ export class CircuitFrame extends PIXI.Container {
       this.circuit.height +
       this.gatePalette.height +
       256 -
-      this.maskGraphics.height;
+      this.maskSprite.height;
     if (this.scrollContainer.y < -maxScrollY) {
       this.scrollContainer.y = -maxScrollY;
     }

@@ -1,14 +1,13 @@
-import * as PIXI from "pixi.js";
-import { Container } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 import { Colors } from "./colors";
-import { DropShadowFilter } from "@pixi/filter-drop-shadow";
 import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
+import { DropShadowFilter } from "pixi-filters";
 
 export const GATE_PALETTE_EVENTS = {
-  GRAB_GATE: "gate-palette:grab-gate",
+  GATE_GRABBED: "gate-palette:grab-gate",
   MOUSE_LEAVE_GATE: "gate-palette:mouse-leave-gate",
   GATE_DISCARDED: "gate-palette:gate-discarded",
 };
@@ -29,14 +28,14 @@ export class GatePaletteComponent extends Container {
 
   gates: { [key: string]: GateComponent | null } = {};
 
-  protected graphics: PIXI.Graphics;
+  protected graphics: Graphics;
   protected gateClasses: typeof GateComponent[][] = [];
   protected gateRows: List;
 
   constructor() {
     super();
 
-    this.graphics = new PIXI.Graphics();
+    this.graphics = new Graphics();
     this.addChild(this.graphics);
 
     this.gateRows = new List({
@@ -45,7 +44,7 @@ export class GatePaletteComponent extends Container {
       vertPadding: GatePaletteComponent.verticalPadding,
       horPadding: GatePaletteComponent.horizontalPadding,
     });
-    this.graphics.addChild(this.gateRows);
+    this.addChild(this.gateRows);
 
     this.newRow();
     this.redraw();
@@ -92,45 +91,46 @@ export class GatePaletteComponent extends Container {
     const row = new List({
       type: "horizontal",
       elementsMargin: 8,
+      horPadding: 0,
+      vertPadding: 0,
     });
 
     this.gateRows.addChild(row);
   }
 
   protected redraw(): void {
-    this.graphics.clear();
-
     // this.gateRows のうち要素数が最も多いものの length を返す
     const maxRowLength = Math.max(
       ...this.gateRows.children.map((row) => row.children.length)
     );
 
-    this.graphics.lineStyle(1, Colors["border-component"], 1, 0);
-    this.graphics.beginFill(Colors["bg-component"]);
-    this.graphics.drawRoundedRect(
-      0,
-      0,
+    const width =
       GateComponent.sizeInPx.base * maxRowLength +
-        GatePaletteComponent.gapBetweenGates * maxRowLength +
-        GatePaletteComponent.horizontalPadding * 2 -
-        GatePaletteComponent.gapBetweenGates,
-      this.gateRows.height + GatePaletteComponent.verticalPadding * 2,
-      GatePaletteComponent.cornerRadius
-    );
-    this.graphics.endFill();
+      GatePaletteComponent.gapBetweenGates * (maxRowLength - 1) +
+      GatePaletteComponent.horizontalPadding * 2;
+    const height =
+      this.gateRows.height + GatePaletteComponent.verticalPadding * 2;
+
+    this.graphics
+      .clear()
+      .roundRect(0, 0, width, height, GatePaletteComponent.cornerRadius)
+      .fill(Colors["bg-component"])
+      .stroke({ color: Colors["border-component"], width: 1 });
 
     // TODO: dropshadow の定義を別ファイルに移動
     this.graphics.filters = [
-      new DropShadowFilter({ offset: { x: 0, y: 4 }, blur: 3, alpha: 0.07 }),
-      new DropShadowFilter({ offset: { x: 0, y: 2 }, blur: 2, alpha: 0.06 }),
+      new DropShadowFilter({
+        offset: { x: 0, y: 4 },
+        blur: 3,
+        alpha: 0.07,
+        resolution: window.devicePixelRatio,
+      }),
+      new DropShadowFilter({
+        offset: { x: 0, y: 2 },
+        blur: 2,
+        alpha: 0.06,
+        resolution: window.devicePixelRatio,
+      }),
     ];
-  }
-
-  toJSON() {
-    return {
-      x: this.x,
-      y: this.y,
-      gates: this.gates,
-    };
   }
 }
