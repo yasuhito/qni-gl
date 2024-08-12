@@ -14,7 +14,6 @@ export const GATE_PALETTE_EVENTS = {
 
 /**
  * 回路に配置できるゲートのパレット。ゲートは行単位で水平方向に並べられる。
- * @noInheritDoc
  */
 export class GatePaletteComponent extends Container {
   /** @ignore 水平方向のパディング */

@@ -9,8 +9,6 @@ const FrameDividerConfig = {
 
 /**
  * 量子回路フレームと状態ベクトルフレーム間のドラッグ可能な分割線を表すクラス。
- *
- * @noInheritDoc
  */
 export class FrameDivider extends PIXI.Graphics {
   private static instance: FrameDivider | null = null;

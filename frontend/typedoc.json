@@ -1,5 +1,7 @@
 {
   "entryPoints": ["src/index.ts"],
   "out": "docs",
-  "plugin": ["typedoc-plugin-no-inherit"]
+  "excludeExternals": true,
+  "externalPattern": ["**/node_modules/**"],
+  "exclude": ["**/node_modules/**"],
 }

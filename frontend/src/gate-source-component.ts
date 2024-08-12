@@ -4,9 +4,6 @@ import { GateComponent } from "./gate-component";
 import { need } from "./util";
 import { Spacing } from "./spacing";
 
-/**
- * @noInheritDoc
- */
 export class GateSourceComponent extends Container {
   static borderColor = Colors["border-inverse"];
   static borderWidth = 2;

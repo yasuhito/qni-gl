@@ -33,9 +33,6 @@ export type DragEvent = {
   dropzone: DropzoneComponent | null;
 };
 
-/**
- * @noInheritDoc
- */
 export class GateComponent extends Container {
   static gateType: string;
   static cornerRadius = Spacing.cornerRadius.gate;

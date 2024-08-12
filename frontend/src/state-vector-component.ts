@@ -13,14 +13,13 @@ class InvalidQubitCountError extends Error {
   }
 }
 
-interface StateVectorConfig {
+export interface StateVectorConfig {
   initialQubitCount: QubitCount;
   viewport: PIXI.Rectangle;
 }
 
 /**
  * Represents a component that visualizes the state vector.
- * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
   private _qubitCount: QubitCount = MIN_QUBIT_COUNT;

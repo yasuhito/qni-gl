@@ -8,16 +8,16 @@ const tailwindColors = tailwindConfig.theme.colors;
 // The hardest part about building dark mode is that people think it’s easy - Figma team (Config 2022)
 // https://www.youtube.com/watch?v=1DTnojio89Y
 
-type BgColorKey =
+export type BgColorKey =
   | "bg"
   | "bg-component"
   | "bg-brand"
   | "bg-brand-hover"
   | "bg-active";
 
-type TextColorKey = "text" | "text-inverse";
+export type TextColorKey = "text" | "text-inverse";
 
-type BorderColorKey =
+export type BorderColorKey =
   | "border-onbrand"
   | "border-hover"
   | "border-pressed"
@@ -27,15 +27,15 @@ type BorderColorKey =
   | "border-component-strong-disabled"
   | "border-inverse";
 
-type IconColorKey = "icon-brand" | "icon-onbrand";
+export type IconColorKey = "icon-brand" | "icon-onbrand";
 
-type ColorKey = BgColorKey | TextColorKey | BorderColorKey | IconColorKey;
+export type ColorKey =
+  | BgColorKey
+  | TextColorKey
+  | BorderColorKey
+  | IconColorKey;
 
-type Colors = {
-  [key in ColorKey]: string;
-};
-
-export const Colors: Colors = {
+export const Colors: { [key in ColorKey]: string } = {
   bg: tailwindColors.zinc["50"],
   "bg-component": tailwindColors.white,
   "bg-brand": tailwindColors.sky["500"],

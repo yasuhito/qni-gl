@@ -3,9 +3,6 @@ import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { SerializedGate } from "./types";
 
-/**
- * @noInheritDoc
- */
 export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
   static readonly gateType = "XGate";
   static readonly iconPath = "./assets/X.png";
