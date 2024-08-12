@@ -3,9 +3,6 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { OutlinedGateMixin } from "./outlined-gate-mixin";
 import { SerializedGate } from "./types";
 
-/**
- * @noInheritDoc
- */
 export class ControlGate extends JsonableMixin(
   OutlinedGateMixin(GateComponent)
 ) {

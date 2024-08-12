@@ -21,8 +21,6 @@ export const CIRCUIT_EVENTS = {
 
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
- *
- * @noInheritDoc
  */
 export class CircuitComponent extends Container {
   /** Minimum number of wires. */

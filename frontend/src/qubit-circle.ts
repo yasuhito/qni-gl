@@ -17,9 +17,6 @@ function need(
   }
 }
 
-/**
- * @noInheritDoc
- */
 export class QubitCircle extends Container {
   private _probability = 0;
   private _phase = 0;

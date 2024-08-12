@@ -20,7 +20,6 @@ interface StateVectorConfig {
 
 /**
  * Represents a component that visualizes the state vector.
- * @noInheritDoc
  */
 export class StateVectorComponent extends Container {
   private _qubitCount: QubitCount = MIN_QUBIT_COUNT;

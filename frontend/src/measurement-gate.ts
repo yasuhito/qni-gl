@@ -5,9 +5,6 @@ import { OutlinedGateMixin } from "./outlined-gate-mixin";
 import { Colors } from "./colors";
 import { Assets, Texture } from "pixi.js";
 
-/**
- * @noInheritDoc
- */
 export class MeasurementGate extends JsonableMixin(
   OutlinedGateMixin(GateComponent)
 ) {

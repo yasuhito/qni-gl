@@ -3,9 +3,6 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { SquareGateMixin } from "./square-gate-mixin";
 import { SerializedGate } from "./types";
 
-/**
- * @noInheritDoc
- */
 export class RnotGate extends JsonableMixin(SquareGateMixin(GateComponent)) {
   static gateType = "RnotGate";
   static readonly iconPath = "./assets/Rnot.png";

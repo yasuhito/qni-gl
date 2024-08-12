@@ -3,9 +3,6 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { SerializedGate } from "./types";
 import { WriteGateMixin } from "./write-gate-mixin";
 
-/**
- * @noInheritDoc
- */
 export class Write1Gate extends JsonableMixin(WriteGateMixin(GateComponent)) {
   static gateType = "Write1Gate";
   static readonly iconPath = "./assets/Write1.png";

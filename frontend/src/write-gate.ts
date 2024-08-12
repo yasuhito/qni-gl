@@ -4,9 +4,6 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { Colors } from "./colors";
 import { Texture } from "pixi.js";
 
-/**
- * @noInheritDoc
- */
 export class WriteGate extends JsonableMixin(GateComponent) {
   static iconIdleDropzone = Texture.from("./assets/Placeholder.svg");
   static iconHover = Texture.from("./assets/Placeholder.svg");
