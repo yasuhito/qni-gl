@@ -29,6 +29,11 @@ interface CircuitInfo {
     sDaggerGate: { x: number; y: number };
     tGate: { x: number; y: number };
     tDaggerGate: { x: number; y: number };
+    swapGate: { x: number; y: number };
+    controlGate: { x: number; y: number };
+    write0Gate: { x: number; y: number };
+    write1Gate: { x: number; y: number };
+    measurementGate: { x: number; y: number };
   };
   steps: { x: number; y: number }[][];
 }
@@ -51,6 +56,11 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         SDaggerGate: sDaggerGate,
         TGate: tGate,
         TDaggerGate: tDaggerGate,
+        SwapGate: swapGate,
+        ControlGate: controlGate,
+        Write0Gate: write0Gate,
+        Write1Gate: write1Gate,
+        MeasurementGate: measurementGate,
       } = gatePalette?.gates ?? {};
 
       if (
@@ -64,7 +74,12 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         !sGate ||
         !sDaggerGate ||
         !tGate ||
-        !tDaggerGate
+        !tDaggerGate ||
+        !swapGate ||
+        !controlGate ||
+        !write0Gate ||
+        !write1Gate ||
+        !measurementGate
       ) {
         throw new Error("Required components are not initialized");
       }
@@ -88,6 +103,11 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
           sDaggerGate: getBounds(sDaggerGate),
           tGate: getBounds(tGate),
           tDaggerGate: getBounds(tDaggerGate),
+          swapGate: getBounds(swapGate),
+          controlGate: getBounds(controlGate),
+          write0Gate: getBounds(write0Gate),
+          write1Gate: getBounds(write1Gate),
+          measurementGate: getBounds(measurementGate),
         },
         steps: circuit.steps.map((step) =>
           step.dropzones.map((dropzone) => getBounds(dropzone))
@@ -115,7 +135,17 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
           info.gatePalette.tGate.x !== 0 &&
           info.gatePalette.tGate.y !== 0 &&
           info.gatePalette.tDaggerGate.x !== 0 &&
-          info.gatePalette.tDaggerGate.y !== 0
+          info.gatePalette.tDaggerGate.y !== 0 &&
+          info.gatePalette.swapGate.x !== 0 &&
+          info.gatePalette.swapGate.y !== 0 &&
+          info.gatePalette.controlGate.x !== 0 &&
+          info.gatePalette.controlGate.y !== 0 &&
+          info.gatePalette.write0Gate.x !== 0 &&
+          info.gatePalette.write0Gate.y !== 0 &&
+          info.gatePalette.write1Gate.x !== 0 &&
+          info.gatePalette.write1Gate.y !== 0 &&
+          info.gatePalette.measurementGate.x !== 0 &&
+          info.gatePalette.measurementGate.y !== 0
         ) {
           return info;
         }
