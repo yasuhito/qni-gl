@@ -182,3 +182,24 @@ export async function dragAndDrop(
     timeout: 5000,
   });
 }
+
+export async function grab(page: Page, target: { x: number; y: number }) {
+  // ターゲット位置に移動
+  await page.mouse.move(target.x, target.y);
+
+  // マウスボタンを押下
+  await page.mouse.down();
+}
+
+export async function dropAt(page: Page, target: { x: number; y: number }) {
+  // ターゲット位置まで複数のステップで移動
+  await page.mouse.move(target.x, target.y);
+
+  // マウスボタンを離す
+  await page.mouse.up();
+
+  await page.waitForSelector('#app[data-state="idle"]', {
+    state: "attached",
+    timeout: 5000,
+  });
+}
