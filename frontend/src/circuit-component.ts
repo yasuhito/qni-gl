@@ -290,8 +290,14 @@ export class CircuitComponent extends Container {
           const gate = dropzone.operation;
 
           if (gate) {
-            const gateChar = dropzone.operation.gateChar();
-            output[qubitIndex * 2] += `${gateChar}───`;
+            const gateLabel = dropzone.operation.label;
+            // gateLabel は 1 文字または 2 文字になる。
+            // このため、1 文字の場合は 2 文字分のスペースを確保する。
+            if (gateLabel.length == 1) {
+              output[qubitIndex * 2] += `${gateLabel}────`;
+            } else {
+              output[qubitIndex * 2] += `${gateLabel}───`;
+            }
           } else {
             output[qubitIndex * 2] += `────`;
           }
