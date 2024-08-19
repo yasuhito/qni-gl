@@ -162,10 +162,6 @@ export class GateComponent extends Container {
   );
   private actor!: ActorRefFrom<typeof this.stateMachine>;
 
-  /**
-   * Returns the gate type of the component.
-   * If the gate type is not defined, it throws an error.
-   */
   get gateType(): string {
     return this.constructor.name;
   }
