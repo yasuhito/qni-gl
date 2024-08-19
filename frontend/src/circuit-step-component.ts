@@ -250,22 +250,12 @@ export class CircuitStepComponent extends Container {
       const gates = sameOps as Operation[];
       const targetBits = gates.map((each) => this._dropzones.findIndexOf(each));
       const gateInstance = gates[0];
+      const serializedGate =
+        gateInstance instanceof XGate
+          ? gateInstance.serialize(targetBits, controlBits)
+          : gateInstance.serialize(targetBits);
 
-      if (
-        "serialize" in GateClass &&
-        typeof GateClass["serialize"] === "function"
-      ) {
-        const serializeMethod = GateClass["serialize"];
-        const serializedGate =
-          gateInstance instanceof XGate
-            ? serializeMethod(targetBits, controlBits)
-            : serializeMethod(targetBits);
-        result.push(serializedGate);
-      } else {
-        console.warn(
-          `Serialization method not found for gate type: ${gateInstance.constructor.name}`
-        );
-      }
+      result.push(serializedGate);
     }
 
     return result;

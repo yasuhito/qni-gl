@@ -2,27 +2,16 @@ import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
+import { SerializeableMixin } from "./serializeable-mixin";
 import { SerializedGate } from "./types";
 
 export class XGate extends CircularGateMixin(
-  JsonableMixin(LabelableMixin(GateComponent))
+  SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
   static readonly gateType = "XGate";
   static readonly iconPath = "./assets/X.png";
 
   private _controls: number[] = [];
-
-  static serialize(
-    targetBits: number[],
-    controlBits?: number[]
-  ): SerializedGate {
-    const serialized: SerializedGate = { type: "X", targets: targetBits };
-
-    if (controlBits && controlBits.length > 0) {
-      serialized.controls = controlBits;
-    }
-    return serialized;
-  }
 
   get label(): string {
     return "X";
@@ -30,6 +19,27 @@ export class XGate extends CircularGateMixin(
 
   private get jsonLabel(): string {
     return "X";
+  }
+
+  protected get serializeType(): string {
+    return "X";
+  }
+
+  serialize(targetBits: number[], controlBits?: number[]): SerializedGate {
+    if (controlBits && controlBits.some((bit) => targetBits.includes(bit))) {
+      throw new Error("Overlap detected between target bits and control bits.");
+    }
+
+    const serialized: SerializedGate = {
+      type: this.serializeType,
+      targets: targetBits,
+    };
+
+    if (controlBits && controlBits.length > 0) {
+      serialized.controls = controlBits;
+    }
+
+    return serialized;
   }
 
   get controls() {

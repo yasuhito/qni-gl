@@ -17,4 +17,8 @@ describe("RnotGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"X^½"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "X^½", targets: [0] });
+  });
 });

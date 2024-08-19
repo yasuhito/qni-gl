@@ -1,24 +1,24 @@
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
-import { SerializedGate } from "./types";
+import { SerializeableMixin } from "./serializeable-mixin";
 import { WriteGateMixin } from "./write-gate-mixin";
 
 export class Write1Gate extends WriteGateMixin(
-  JsonableMixin(LabelableMixin(GateComponent))
+  SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
   static gateType = "Write1Gate";
   static readonly iconPath = "./assets/Write1.png";
-
-  static serialize(targetBits: number[]): SerializedGate {
-    return { type: "|1>", targets: targetBits };
-  }
 
   get label(): string {
     return "1";
   }
 
   private get jsonLabel(): string {
+    return "|1>";
+  }
+
+  protected get serializeType(): string {
     return "|1>";
   }
 }

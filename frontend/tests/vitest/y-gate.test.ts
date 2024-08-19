@@ -17,4 +17,8 @@ describe("YGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"Y"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "Y", targets: [0] });
+  });
 });

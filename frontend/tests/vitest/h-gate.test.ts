@@ -21,4 +21,8 @@ describe("HGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"H"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "H", targets: [0] });
+  });
 });

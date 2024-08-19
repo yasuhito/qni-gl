@@ -17,4 +17,8 @@ describe("ControlGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"•"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "•", targets: [0] });
+  });
 });

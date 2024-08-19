@@ -17,4 +17,8 @@ describe("TDaggerGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"T†"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "T†", targets: [0] });
+  });
 });

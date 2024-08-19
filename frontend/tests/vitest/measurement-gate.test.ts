@@ -17,4 +17,8 @@ describe("MeasurementGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"Measure"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "Measure", targets: [0] });
+  });
 });
