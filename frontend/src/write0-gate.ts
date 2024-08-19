@@ -17,8 +17,4 @@ export class Write0Gate extends WriteGateMixin(
   private get jsonLabel(): string {
     return "|0>";
   }
-
-  protected get serializeType(): string {
-    return "|0>";
-  }
 }

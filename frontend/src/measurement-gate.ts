@@ -27,10 +27,6 @@ export class MeasurementGate extends OutlinedGateMixin(
     return "Measure";
   }
 
-  protected get serializeType(): string {
-    return "Measure";
-  }
-
   set value(newValue) {
     this._value = newValue;
 

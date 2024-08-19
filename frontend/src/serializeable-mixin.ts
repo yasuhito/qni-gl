@@ -1,9 +1,9 @@
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
-import { NotImplementedError } from "./not-implemented-error";
 import { SerializedGate } from "./types";
 
 export declare class Serializeable {
+  get serializeType(): string;
   serialize(targetBits: number[]): SerializedGate;
 }
 
@@ -11,12 +11,16 @@ export function SerializeableMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<Serializeable> & TBase {
   return class SerializeableMixinClass extends Base {
-    serialize(targetBits: number[]): SerializedGate {
-      return { type: this.serializeType, targets: targetBits };
+    get serializeType(): string {
+      if (!("jsonLabel" in this) || typeof this.jsonLabel !== "string") {
+        throw new Error("SerializeableMixin must be used with JsonableMixin");
+      }
+
+      return this.jsonLabel;
     }
 
-    protected get serializeType(): string {
-      throw new NotImplementedError("serializeType", this.constructor.name);
+    serialize(targetBits: number[]): SerializedGate {
+      return { type: this.serializeType, targets: targetBits };
     }
   };
 }

@@ -17,8 +17,4 @@ export class SwapGate extends OutlinedGateMixin(
   private get jsonLabel(): string {
     return "Swap";
   }
-
-  protected get serializeType(): string {
-    return "Swap";
-  }
 }

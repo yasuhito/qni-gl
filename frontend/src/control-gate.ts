@@ -17,8 +17,4 @@ export class ControlGate extends OutlinedGateMixin(
   private get jsonLabel(): string {
     return "•";
   }
-
-  protected get serializeType(): string {
-    return "•";
-  }
 }

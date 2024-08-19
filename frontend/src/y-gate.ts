@@ -17,8 +17,4 @@ export class YGate extends SquareGateMixin(
   private get jsonLabel(): string {
     return "Y";
   }
-
-  protected get serializeType(): string {
-    return "Y";
-  }
 }

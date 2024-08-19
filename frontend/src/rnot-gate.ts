@@ -17,8 +17,4 @@ export class RnotGate extends SquareGateMixin(
   private get jsonLabel(): string {
     return "X^½";
   }
-
-  protected get serializeType(): string {
-    return "X^½";
-  }
 }
