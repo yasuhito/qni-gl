@@ -10,6 +10,10 @@ describe("RnotGate", () => {
     gate = new RnotGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("RnotGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("√X");
   });

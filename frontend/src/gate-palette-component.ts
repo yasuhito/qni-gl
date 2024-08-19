@@ -74,11 +74,11 @@ export class GatePaletteComponent extends Container {
       this.emit("gate-palette:mouse-leave-gate", gate);
     });
     gateSource.on("gateDiscarded", (gate) => {
-      this.gates[gate.gateType()] = null;
+      this.gates[gate.gateType] = null;
       this.emit("gate-palette:gate-discarded", gate);
     });
 
-    this.gates[gate.gateType()] = gate;
+    this.gates[gate.gateType] = gate;
 
     this.redraw();
   }

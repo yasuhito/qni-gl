@@ -10,6 +10,10 @@ describe("TDaggerGate", () => {
     gate = new TDaggerGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("TDaggerGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("T†");
   });

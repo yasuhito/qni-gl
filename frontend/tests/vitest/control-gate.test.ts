@@ -10,6 +10,10 @@ describe("ControlGate", () => {
     gate = new ControlGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("ControlGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("@");
   });

@@ -7,7 +7,6 @@ import { SerializeableMixin } from "./serializeable-mixin";
 export class ControlGate extends OutlinedGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static gateType = "ControlGate";
   static readonly iconPath = "./assets/Control.png";
 
   get label(): string {
