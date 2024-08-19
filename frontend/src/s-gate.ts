@@ -4,8 +4,8 @@ import { LabelableMixin } from "./labelable-mixin";
 import { SquareGateMixin } from "./square-gate-mixin";
 import { SerializedGate } from "./types";
 
-export class SGate extends JsonableMixin(
-  SquareGateMixin(LabelableMixin(GateComponent))
+export class SGate extends SquareGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "SGate";
   static readonly iconPath = "./assets/S.png";
@@ -18,7 +18,7 @@ export class SGate extends JsonableMixin(
     return "S";
   }
 
-  toCircuitJSON() {
-    return '"S"';
+  private get jsonLabel(): string {
+    return "S";
   }
 }

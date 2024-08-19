@@ -526,7 +526,7 @@ export class App {
     logger.log(this.circuit.toString());
 
     this.worker.postMessage({
-      circuitJson: this.circuit.toCircuitJSON(),
+      circuitJson: this.circuit.toJSON(),
       qubitCount: this.circuit.qubitCountInUse,
       stepIndex: this.circuit.activeStepIndex,
       targets: this.stateVector.visibleQubitCircleIndices,

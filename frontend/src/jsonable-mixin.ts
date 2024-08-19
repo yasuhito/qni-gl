@@ -1,21 +1,21 @@
 import { Constructor } from "./constructor";
 import { GateComponent } from "./gate-component";
+import { NotImplementedError } from "./not-implemented-error";
 
 export declare class Jsonable {
-  toCircuitJSON(): string;
-  gateChar(): string;
+  toJSON(): string;
 }
 
 export function JsonableMixin<TBase extends Constructor<GateComponent>>(
   Base: TBase
 ): Constructor<Jsonable> & TBase {
   class JsonableMixinClass extends Base {
-    toCircuitJSON() {
-      throw new Error("Not implemented");
+    private get jsonLabel(): string {
+      throw new NotImplementedError("jsonLabel", this.constructor.name);
     }
 
-    gateChar() {
-      return "?";
+    toJSON() {
+      return `"${this.jsonLabel}"`;
     }
   }
 

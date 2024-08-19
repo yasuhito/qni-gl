@@ -4,8 +4,8 @@ import { LabelableMixin } from "./labelable-mixin";
 import { SerializedGate } from "./types";
 import { WriteGateMixin } from "./write-gate-mixin";
 
-export class Write0Gate extends JsonableMixin(
-  WriteGateMixin(LabelableMixin(GateComponent))
+export class Write0Gate extends WriteGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "Write0Gate";
   static readonly iconPath = "./assets/Write0.png";
@@ -18,7 +18,7 @@ export class Write0Gate extends JsonableMixin(
     return "0";
   }
 
-  toCircuitJSON() {
-    return '"|0>"';
+  private get jsonLabel(): string {
+    return "|0>";
   }
 }

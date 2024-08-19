@@ -4,8 +4,8 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
 import { SerializedGate } from "./types";
 
-export class XGate extends JsonableMixin(
-  CircularGateMixin(LabelableMixin(GateComponent))
+export class XGate extends CircularGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static readonly gateType = "XGate";
   static readonly iconPath = "./assets/X.png";
@@ -28,15 +28,15 @@ export class XGate extends JsonableMixin(
     return "X";
   }
 
+  private get jsonLabel(): string {
+    return "X";
+  }
+
   get controls() {
     return this._controls;
   }
 
   set controls(value: number[]) {
     this._controls = value.sort();
-  }
-
-  toCircuitJSON() {
-    return '"X"';
   }
 }

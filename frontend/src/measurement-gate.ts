@@ -6,8 +6,8 @@ import { Colors } from "./colors";
 import { Assets, Texture } from "pixi.js";
 import { LabelableMixin } from "./labelable-mixin";
 
-export class MeasurementGate extends JsonableMixin(
-  OutlinedGateMixin(LabelableMixin(GateComponent))
+export class MeasurementGate extends OutlinedGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "MeasurementGate";
   static readonly iconPath = "./assets/Measurement.png";
@@ -24,6 +24,10 @@ export class MeasurementGate extends JsonableMixin(
 
   get label(): string {
     return "M";
+  }
+
+  private get jsonLabel(): string {
+    return "Measure";
   }
 
   set value(newValue) {
@@ -49,10 +53,6 @@ export class MeasurementGate extends JsonableMixin(
   private async loadExtraTextures() {
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);
-  }
-
-  toCircuitJSON() {
-    return '"Measure"';
   }
 
   // Override the styleMap from OutlinedGateMixin

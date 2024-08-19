@@ -4,8 +4,8 @@ import { LabelableMixin } from "./labelable-mixin";
 import { SquareGateMixin } from "./square-gate-mixin";
 import { SerializedGate } from "./types";
 
-export class RnotGate extends JsonableMixin(
-  SquareGateMixin(LabelableMixin(GateComponent))
+export class RnotGate extends SquareGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "RnotGate";
   static readonly iconPath = "./assets/Rnot.png";
@@ -18,7 +18,7 @@ export class RnotGate extends JsonableMixin(
     return "√X";
   }
 
-  toCircuitJSON() {
-    return '"X^½"';
+  private get jsonLabel(): string {
+    return "X^½";
   }
 }

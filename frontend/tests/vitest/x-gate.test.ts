@@ -13,4 +13,8 @@ describe("XGate", () => {
   test("label", () => {
     expect(gate.label).toBe("X");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"X"');
+  });
 });

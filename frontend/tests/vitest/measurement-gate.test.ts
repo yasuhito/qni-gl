@@ -13,4 +13,8 @@ describe("MeasurementGate", () => {
   test("label", () => {
     expect(gate.label).toBe("M");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"Measure"');
+  });
 });

@@ -13,4 +13,8 @@ describe("Write0Gate", () => {
   test("label", () => {
     expect(gate.label).toBe("0");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"|0>"');
+  });
 });

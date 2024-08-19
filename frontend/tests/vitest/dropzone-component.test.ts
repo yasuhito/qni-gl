@@ -144,16 +144,16 @@ describe("DropzoneComponent", () => {
     });
   });
 
-  describe("toCircuitJSON", () => {
+  describe("toJSON", () => {
     it('should return "1" when there is no operation', () => {
-      expect(dropzone.toCircuitJSON()).toBe("1");
+      expect(dropzone.toJSON()).toBe("1");
     });
 
     it("should return operation's circuit JSON when there is an operation", () => {
       const xGate = new XGate();
       dropzone.addChild(xGate);
 
-      expect(dropzone.toCircuitJSON()).toBe('"X"');
+      expect(dropzone.toJSON()).toBe('"X"');
     });
   });
 });

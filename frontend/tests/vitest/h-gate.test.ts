@@ -17,4 +17,8 @@ describe("HGate", () => {
   test("label", () => {
     expect(gate.label).toBe("H");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"H"');
+  });
 });

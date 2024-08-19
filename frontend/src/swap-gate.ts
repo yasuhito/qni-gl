@@ -4,8 +4,8 @@ import { LabelableMixin } from "./labelable-mixin";
 import { OutlinedGateMixin } from "./outlined-gate-mixin";
 import { SerializedGate } from "./types";
 
-export class SwapGate extends JsonableMixin(
-  OutlinedGateMixin(LabelableMixin(GateComponent))
+export class SwapGate extends OutlinedGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "SwapGate";
   static readonly iconPath = "./assets/Swap.png";
@@ -18,7 +18,7 @@ export class SwapGate extends JsonableMixin(
     return "×";
   }
 
-  toCircuitJSON() {
-    return '"Swap"';
+  private get jsonLabel(): string {
+    return "Swap";
   }
 }

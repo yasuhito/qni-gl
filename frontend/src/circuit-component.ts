@@ -265,10 +265,10 @@ export class CircuitComponent extends Container {
     return this.steps.map((each) => each.serialize());
   }
 
-  toCircuitJSON() {
+  toJSON() {
     const cols: string[] = [];
     for (const each of this.steps) {
-      cols.push(each.toCircuitJSON());
+      cols.push(each.toJSON());
     }
     return `{"cols":[${cols.join(",")}]}`;
   }

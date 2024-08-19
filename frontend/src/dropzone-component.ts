@@ -142,11 +142,11 @@ export class DropzoneComponent extends Container {
     );
   }
 
-  toCircuitJSON() {
+  toJSON() {
     if (this.operation === null) {
       return "1";
     }
-    return this.operation.toCircuitJSON();
+    return this.operation.toJSON();
   }
 
   hasWriteGate() {
