@@ -3,7 +3,7 @@ import { Colors } from "./colors";
 import { GateComponent } from "./gate-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { List } from "@pixi/ui";
-import { sizeInPx, spacingInPx } from "./util";
+import { spacingInPx } from "./util";
 import { DropShadowFilter } from "pixi-filters";
 
 export const GATE_PALETTE_EVENTS = {
@@ -104,7 +104,7 @@ export class GatePaletteComponent extends Container {
     );
 
     const width =
-      sizeInPx.base * maxRowLength +
+      GateComponent.sizeInPx.base * maxRowLength +
       GatePaletteComponent.gapBetweenGates * (maxRowLength - 1) +
       GatePaletteComponent.horizontalPadding * 2;
     const height =

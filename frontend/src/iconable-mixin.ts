@@ -26,17 +26,26 @@ export function IconableMixin<TBase extends Constructor<Container>>(
   return class IconableMixinClass extends Base {
     async createSprites(gateType: string) {
       const texture = await this.loadTexture(gateType);
-      const sprite = this.createSprite(texture);
-      const whiteSprite = this.createWhiteSprite(texture);
 
-      return { sprite: sprite, whiteSprite: whiteSprite };
+      return {
+        sprite: this.createSprite(texture),
+        whiteSprite: this.createWhiteSprite(texture),
+      };
     }
 
     private async loadTexture(gateType: string): Promise<Texture> {
-      const iconName = `${convertToKebabCase(gateType)}.png`;
-      const iconPath = `./assets/${iconName}`;
+      try {
+        const iconName = `${convertToKebabCase(gateType)}.png`;
+        const iconPath = `./assets/${iconName}`;
 
-      return await Assets.load(iconPath);
+        return await Assets.load(iconPath);
+      } catch (error) {
+        console.error(
+          `Failed to load texture for gate type: ${gateType}`,
+          error
+        );
+        throw new Error(`Failed to load texture for gate type: ${gateType}`);
+      }
     }
 
     private createSprite(texture: Texture): Sprite {

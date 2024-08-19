@@ -2,7 +2,7 @@ import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
-import { sizeInPx } from "./util";
+import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
 import {
   Container,
@@ -32,13 +32,20 @@ export type DragEvent = {
 };
 
 export class GateComponent extends IconableMixin(Container) {
+  static sizeInPx = {
+    xl: spacingInPx(12),
+    lg: spacingInPx(10),
+    base: spacingInPx(8),
+    sm: spacingInPx(6),
+    xs: spacingInPx(4),
+  };
   static cornerRadius = Spacing.cornerRadius.gate;
 
   sprite!: Sprite;
   whiteSprite!: Sprite;
 
   size: Size = "base";
-  sizeInPx = sizeInPx[this.size];
+  sizeInPx = GateComponent.sizeInPx[this.size];
 
   debug = false;
 
@@ -169,12 +176,22 @@ export class GateComponent extends IconableMixin(Container) {
   constructor() {
     super();
 
-    // enable the gate to be interactive...
-    // this will allow it to respond to mouse and touch events
-    this.eventMode = "static";
-
     this._shape = new Graphics();
     this.addChild(this._shape);
+
+    // setup events for mouse + touch using
+    // the pointer events
+    this.on("pointerover", this.onPointerOver, this)
+      .on("pointerout", this.onPointerOut, this)
+      .on("pointerdown", this.onPointerDown, this)
+      .on("pointerup", this.onPointerUp, this);
+
+    this.actor = createActor(this.stateMachine);
+    this.actor.subscribe((state) => {
+      if (this.debug) {
+        console.log(`${this.gateType}: ${state.value} state`);
+      }
+    });
 
     this.createSprites(this.gateType).then(({ sprite, whiteSprite }) => {
       this.sprite = sprite;
@@ -187,20 +204,11 @@ export class GateComponent extends IconableMixin(Container) {
       this.addChild(this.sprite);
       this.addChild(this.whiteSprite);
 
-      // setup events for mouse + touch using
-      // the pointer events
-      this.on("pointerover", this.onPointerOver, this)
-        .on("pointerout", this.onPointerOut, this)
-        .on("pointerdown", this.onPointerDown, this)
-        .on("pointerup", this.onPointerUp, this);
-
-      this.actor = createActor(this.stateMachine);
-      this.actor.subscribe((state) => {
-        if (this.debug) {
-          console.log(`${state.value} state`);
-        }
-      });
       this.actor.start();
+
+      // enable the gate to be interactive...
+      // this will allow it to respond to mouse and touch events
+      this.eventMode = "static";
     });
   }
 
