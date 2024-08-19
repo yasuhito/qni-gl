@@ -176,29 +176,32 @@ export class GateComponent extends IconableMixin(Container) {
     this._shape = new Graphics();
     this.addChild(this._shape);
 
-    this.createSprites(this.gateType, this.sizeInPx).then(
-      ({ sprite, whiteSprite }) => {
-        this.sprite = sprite;
-        this.whiteSprite = whiteSprite;
-        this.addChild(this.sprite);
-        this.addChild(this.whiteSprite);
+    this.createSprites(this.gateType).then(({ sprite, whiteSprite }) => {
+      this.sprite = sprite;
+      this.sprite.width = this.sizeInPx;
+      this.sprite.height = this.sizeInPx;
+      this.whiteSprite = whiteSprite;
+      this.whiteSprite.visible = false;
+      this.whiteSprite.width = this.sizeInPx;
+      this.whiteSprite.height = this.sizeInPx;
+      this.addChild(this.sprite);
+      this.addChild(this.whiteSprite);
 
-        // setup events for mouse + touch using
-        // the pointer events
-        this.on("pointerover", this.onPointerOver, this)
-          .on("pointerout", this.onPointerOut, this)
-          .on("pointerdown", this.onPointerDown, this)
-          .on("pointerup", this.onPointerUp, this);
+      // setup events for mouse + touch using
+      // the pointer events
+      this.on("pointerover", this.onPointerOver, this)
+        .on("pointerout", this.onPointerOut, this)
+        .on("pointerdown", this.onPointerDown, this)
+        .on("pointerup", this.onPointerUp, this);
 
-        this.actor = createActor(this.stateMachine);
-        this.actor.subscribe((state) => {
-          if (this.debug) {
-            console.log(`${state.value} state`);
-          }
-        });
-        this.actor.start();
-      }
-    );
+      this.actor = createActor(this.stateMachine);
+      this.actor.subscribe((state) => {
+        if (this.debug) {
+          console.log(`${state.value} state`);
+        }
+      });
+      this.actor.start();
+    });
   }
 
   click(globalPosition: Point, dropzone: DropzoneComponent | null) {

@@ -40,7 +40,7 @@ export class MeasurementGate extends OutlinedGateMixin(
   }
 
   async createSprites() {
-    const sprites = await super.createSprites(this.gateType, this.sizeInPx);
+    const sprites = await super.createSprites(this.gateType);
 
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);

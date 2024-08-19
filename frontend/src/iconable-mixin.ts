@@ -10,10 +10,7 @@ import { Constructor } from "./constructor";
 import { convertToKebabCase } from "./util";
 
 export declare class Iconable {
-  createSprites(
-    gateType: string,
-    sizeInPx: number
-  ): Promise<{
+  createSprites(gateType: string): Promise<{
     sprite: Sprite;
     whiteSprite: Sprite;
   }>;
@@ -27,13 +24,10 @@ export function IconableMixin<TBase extends Constructor<Container>>(
   Base: TBase
 ): Constructor<Iconable> & TBase {
   return class IconableMixinClass extends Base {
-    sprite!: Sprite;
-    whiteSprite!: Sprite;
-
-    async createSprites(gateType: string, sizeInPx: number) {
+    async createSprites(gateType: string) {
       const texture = await this.loadTexture(gateType);
-      const sprite = this.createSprite(texture, sizeInPx);
-      const whiteSprite = this.createWhiteSprite(texture, sizeInPx);
+      const sprite = this.createSprite(texture);
+      const whiteSprite = this.createWhiteSprite(texture);
 
       return { sprite: sprite, whiteSprite: whiteSprite };
     }
@@ -41,25 +35,22 @@ export function IconableMixin<TBase extends Constructor<Container>>(
     private async loadTexture(gateType: string): Promise<Texture> {
       const iconName = `${convertToKebabCase(gateType)}.png`;
       const iconPath = `./assets/${iconName}`;
+
       return await Assets.load(iconPath);
     }
 
-    private createSprite(texture: Texture, sizeInPx: number): Sprite {
-      const sprite = new Sprite(texture);
-      sprite.width = sizeInPx;
-      sprite.height = sizeInPx;
-      return sprite;
+    private createSprite(texture: Texture): Sprite {
+      return new Sprite(texture);
     }
 
-    private createWhiteSprite(texture: Texture, sizeInPx: number): Sprite {
-      const whiteSprite = new Sprite(texture);
+    private createWhiteSprite(texture: Texture): Sprite {
+      const sprite = new Sprite(texture);
       const whiteFilter = new ColorMatrixFilter();
+
       whiteFilter.matrix = WHITE_FILTER_MATRIX;
-      whiteSprite.visible = false;
-      whiteSprite.filters = [whiteFilter];
-      whiteSprite.width = sizeInPx;
-      whiteSprite.height = sizeInPx;
-      return whiteSprite;
+      sprite.filters = [whiteFilter];
+
+      return sprite;
     }
   };
 }
