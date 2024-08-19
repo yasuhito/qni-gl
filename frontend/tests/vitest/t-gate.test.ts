@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, test } from "vitest";
-import { XGate } from "../../src/x-gate";
+import { TGate } from "../../src/t-gate";
 
-describe("XGate", () => {
-  let gate: XGate;
+describe("TGate", () => {
+  let gate: TGate;
 
   beforeEach(() => {
-    gate = new XGate();
+    gate = new TGate();
   });
 
   test("label", () => {
-    expect(gate.label).toBe("X");
+    expect(gate.label).toBe("T");
   });
 });
