@@ -7,8 +7,6 @@ import { SquareGateMixin } from "./square-gate-mixin";
 export class RnotGate extends SquareGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly iconPath = "./assets/Rnot.png";
-
   get label(): string {
     return "√X";
   }

@@ -7,8 +7,6 @@ import { SquareGateMixin } from "./square-gate-mixin";
 export class TDaggerGate extends SquareGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly iconPath = "./assets/TDagger.png";
-
   get label(): string {
     return "T†";
   }

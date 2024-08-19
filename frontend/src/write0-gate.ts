@@ -7,8 +7,6 @@ import { WriteGateMixin } from "./write-gate-mixin";
 export class Write0Gate extends WriteGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly iconPath = "./assets/Write0.png";
-
   get label(): string {
     return "0";
   }

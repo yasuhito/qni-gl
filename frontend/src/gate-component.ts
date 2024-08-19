@@ -2,7 +2,7 @@ import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
-import { spacingInPx } from "./util";
+import { convertToKebabCase, spacingInPx } from "./util";
 import { Spacing } from "./spacing";
 import {
   Assets,
@@ -233,8 +233,9 @@ export class GateComponent extends Container {
   }
 
   private async loadTexture() {
-    const klass = this.constructor as typeof GateComponent;
-    const texture = await Assets.load(klass.iconPath);
+    const iconName = `${convertToKebabCase(this.gateType)}.png`;
+    const iconPath = `./assets/${iconName}`;
+    const texture = await Assets.load(iconPath);
 
     return texture;
   }

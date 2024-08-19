@@ -7,8 +7,6 @@ import { SerializeableMixin } from "./serializeable-mixin";
 export class SwapGate extends OutlinedGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly iconPath = "./assets/Swap.png";
-
   get label(): string {
     return "×";
   }
