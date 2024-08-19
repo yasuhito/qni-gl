@@ -17,4 +17,8 @@ describe("Write0Gate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"|0>"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "|0>", targets: [0] });
+  });
 });

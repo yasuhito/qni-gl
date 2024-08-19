@@ -17,4 +17,13 @@ describe("XGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"X"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "X", targets: [0] });
+    expect(gate.serialize([0, 1], [2, 3])).toEqual({
+      type: "X",
+      targets: [0, 1],
+      controls: [2, 3],
+    });
+  });
 });

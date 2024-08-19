@@ -17,4 +17,8 @@ describe("SwapGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"Swap"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0, 1])).toEqual({ type: "Swap", targets: [0, 1] });
+  });
 });

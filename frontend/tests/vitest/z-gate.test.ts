@@ -17,4 +17,8 @@ describe("ZGate", () => {
   test("toJSON", () => {
     expect(gate.toJSON()).toBe('"Z"');
   });
+
+  test("serialize", () => {
+    expect(gate.serialize([0])).toEqual({ type: "Z", targets: [0] });
+  });
 });

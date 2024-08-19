@@ -299,7 +299,7 @@ export class CircuitComponent extends Container {
               output[qubitIndex * 2] += `${gateLabel}───`;
             }
           } else {
-            output[qubitIndex * 2] += `────`;
+            output[qubitIndex * 2] += `─────`;
           }
         }
       });
