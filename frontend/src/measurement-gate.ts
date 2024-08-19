@@ -39,13 +39,9 @@ export class MeasurementGate extends OutlinedGateMixin(
     return this._value;
   }
 
-  constructor() {
-    super();
+  protected async loadTextures() {
+    super.loadTextures();
 
-    this.loadExtraTextures();
-  }
-
-  private async loadExtraTextures() {
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);
   }

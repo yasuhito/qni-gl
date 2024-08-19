@@ -12,7 +12,6 @@ import {
   Graphics,
   Point,
   Sprite,
-  Texture,
 } from "pixi.js";
 
 /**
@@ -46,10 +45,6 @@ export class GateComponent extends Container {
     sm: spacingInPx(6),
     xs: spacingInPx(4),
   };
-
-  /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
-  static texture = Texture.EMPTY;
-  static iconImage = new Image();
 
   size: Size = "base";
   sizeInPx = GateComponent.sizeInPx[this.size];
@@ -185,30 +180,14 @@ export class GateComponent extends Container {
   constructor() {
     super();
 
-    this.loadTexture().then((texture) => {
-      this._shape = new Graphics();
-      this.addChild(this._shape);
+    // enable the gate to be interactive...
+    // this will allow it to respond to mouse and touch events
+    this.eventMode = "static";
 
-      this._sprite = new Sprite(texture);
-      this.addChild(this._sprite);
-      this._sprite.width = this.sizeInPx;
-      this._sprite.height = this.sizeInPx;
+    this._shape = new Graphics();
+    this.addChild(this._shape);
 
-      const whiteFilter = new ColorMatrixFilter();
-      whiteFilter.matrix = [
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-      ];
-      this._whiteSprite = Sprite.from(texture);
-      this.addChild(this._whiteSprite);
-      this._whiteSprite.visible = false;
-      this._whiteSprite.filters = [whiteFilter];
-      this._whiteSprite.width = this.sizeInPx;
-      this._whiteSprite.height = this.sizeInPx;
-
-      // enable the gate to be interactive...
-      // this will allow it to respond to mouse and touch events
-      this.eventMode = "static";
-
+    this.loadTextures().then(() => {
       // setup events for mouse + touch using
       // the pointer events
       this.on("pointerover", this.onPointerOver, this)
@@ -226,12 +205,27 @@ export class GateComponent extends Container {
     });
   }
 
-  private async loadTexture() {
+  protected async loadTextures() {
     const iconName = `${convertToKebabCase(this.gateType)}.png`;
     const iconPath = `./assets/${iconName}`;
     const texture = await Assets.load(iconPath);
 
-    return texture;
+    this._sprite = new Sprite(texture);
+    this._whiteSprite = new Sprite(texture);
+
+    this.addChild(this._sprite);
+    this._sprite.width = this.sizeInPx;
+    this._sprite.height = this.sizeInPx;
+
+    const whiteFilter = new ColorMatrixFilter();
+    whiteFilter.matrix = [
+      0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+    ];
+    this.addChild(this._whiteSprite);
+    this._whiteSprite.visible = false;
+    this._whiteSprite.filters = [whiteFilter];
+    this._whiteSprite.width = this.sizeInPx;
+    this._whiteSprite.height = this.sizeInPx;
   }
 
   click(globalPosition: Point, dropzone: DropzoneComponent | null) {
