@@ -18,7 +18,7 @@ export class YGate extends JsonableMixin(
     return "Y";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"Y"';
   }
 }

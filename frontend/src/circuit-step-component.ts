@@ -271,8 +271,8 @@ export class CircuitStepComponent extends Container {
     return result;
   }
 
-  toCircuitJSON() {
-    const jsons = this.dropzones.map((each) => each.toCircuitJSON());
+  toJSON() {
+    const jsons = this.dropzones.map((each) => each.toJSON());
     return `[${jsons.join(",")}]`;
   }
 

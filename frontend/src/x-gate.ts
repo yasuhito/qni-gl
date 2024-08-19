@@ -36,7 +36,7 @@ export class XGate extends JsonableMixin(
     this._controls = value.sort();
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"X"';
   }
 }

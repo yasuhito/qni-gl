@@ -18,7 +18,7 @@ export class RnotGate extends JsonableMixin(
     return "√X";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"X^½"';
   }
 }

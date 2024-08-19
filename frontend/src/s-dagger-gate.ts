@@ -18,7 +18,7 @@ export class SDaggerGate extends JsonableMixin(
     return "S†";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"S†"';
   }
 }

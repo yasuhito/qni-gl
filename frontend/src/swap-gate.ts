@@ -18,7 +18,7 @@ export class SwapGate extends JsonableMixin(
     return "×";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"Swap"';
   }
 }

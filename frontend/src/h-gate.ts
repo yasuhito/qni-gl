@@ -4,8 +4,8 @@ import { LabelableMixin } from "./labelable-mixin";
 import { SquareGateMixin } from "./square-gate-mixin";
 import { SerializedGate } from "./types";
 
-export class HGate extends JsonableMixin(
-  SquareGateMixin(LabelableMixin(GateComponent))
+export class HGate extends SquareGateMixin(
+  JsonableMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "HGate";
   static iconPath = "./assets/H.png";
@@ -18,11 +18,11 @@ export class HGate extends JsonableMixin(
     return "H";
   }
 
-  serialize(targetBits: number[]): SerializedGate {
-    return { type: this.label, targets: targetBits };
+  get jsonLabel(): string {
+    return "H";
   }
 
-  toCircuitJSON() {
-    return `"${this.label}"`;
+  serialize(targetBits: number[]): SerializedGate {
+    return { type: this.label, targets: targetBits };
   }
 }

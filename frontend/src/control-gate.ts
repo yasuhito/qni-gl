@@ -18,7 +18,7 @@ export class ControlGate extends JsonableMixin(
     return "@";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return `"•"`;
   }
 }

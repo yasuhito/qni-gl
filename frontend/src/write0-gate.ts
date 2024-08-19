@@ -18,7 +18,7 @@ export class Write0Gate extends JsonableMixin(
     return "0";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"|0>"';
   }
 }

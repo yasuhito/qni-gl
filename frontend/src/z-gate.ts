@@ -18,7 +18,7 @@ export class ZGate extends JsonableMixin(
     return "Z";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"Z"';
   }
 }

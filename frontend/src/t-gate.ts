@@ -18,7 +18,7 @@ export class TGate extends JsonableMixin(
     return "T";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"T"';
   }
 }

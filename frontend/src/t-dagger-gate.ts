@@ -18,7 +18,7 @@ export class TDaggerGate extends JsonableMixin(
     return "T†";
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"T†"';
   }
 }

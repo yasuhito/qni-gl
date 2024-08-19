@@ -51,7 +51,7 @@ export class MeasurementGate extends JsonableMixin(
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);
   }
 
-  toCircuitJSON() {
+  toJSON() {
     return '"Measure"';
   }
 
