@@ -1,6 +1,6 @@
 import { DropzoneComponent } from "../../src/dropzone-component";
 import { DropzoneRenderer } from "../../src/dropzone-renderer";
-import { DROPZONE_EVENTS } from "../../src/events";
+import { DROPZONE_EVENTS, OPERATION_EVENTS } from "../../src/events";
 import { HGate } from "../../src/h-gate";
 import { MeasurementGate } from "../../src/measurement-gate";
 import { WireType } from "../../src/types";
@@ -44,7 +44,7 @@ describe("DropzoneComponent", () => {
 
       // expect(dropzone.addChild).toHaveBeenCalledWith(gate);
       expect(gate.on).toHaveBeenCalledWith(
-        "grab",
+        OPERATION_EVENTS.GRABBED,
         expect.any(Function),
         dropzone
       );
@@ -63,7 +63,7 @@ describe("DropzoneComponent", () => {
       dropzone.unsnap();
 
       expect(gate.off).toHaveBeenCalledWith(
-        "grab",
+        OPERATION_EVENTS.GRABBED,
         expect.any(Function),
         dropzone
       );

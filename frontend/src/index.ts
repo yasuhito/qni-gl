@@ -11,7 +11,7 @@ export * from "./dropzone-component";
 export * from "./frame-divider";
 export * from "./gate-component";
 export * from "./gate-palette-component";
-export * from "./gate-source-component";
+export * from "./operation-source-component";
 export * from "./gate-style-mixin";
 export * from "./h-gate";
 export * from "./measurement-gate";

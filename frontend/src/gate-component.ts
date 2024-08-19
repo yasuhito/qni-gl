@@ -1,6 +1,6 @@
 import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
-import { GateSourceComponent } from "./gate-source-component";
+import { OperationSourceComponent } from "./operation-source-component";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
@@ -12,6 +12,7 @@ import {
   Sprite,
 } from "pixi.js";
 import { IconableMixin } from "./iconable-mixin";
+import { OPERATION_EVENTS } from "./events";
 
 /**
  * ゲートのクリックイベント
@@ -157,8 +158,8 @@ export class GateComponent extends IconableMixin(Container) {
     return this.constructor.name;
   }
 
-  get gateSource(): GateSourceComponent | null {
-    if (this.parent instanceof GateSourceComponent) {
+  get gateSource(): OperationSourceComponent | null {
+    if (this.parent instanceof OperationSourceComponent) {
       return this.parent;
     }
 
@@ -250,7 +251,7 @@ export class GateComponent extends IconableMixin(Container) {
 
   snap(dropzone: DropzoneComponent) {
     dropzone.snap(this);
-    this.emit("snap", this, dropzone);
+    this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
   }
 
   unsnap() {
@@ -280,11 +281,11 @@ export class GateComponent extends IconableMixin(Container) {
 
   private onPointerOut() {
     this.mouseLeave();
-    this.emit("mouseLeave", this);
+    this.emit(OPERATION_EVENTS.MOUSE_LEFT, this);
   }
 
   private onPointerDown(event: FederatedPointerEvent) {
-    this.emit("grab", this, event.global);
+    this.emit(OPERATION_EVENTS.GRABBED, this, event.global);
   }
 
   private onPointerUp() {
@@ -292,7 +293,7 @@ export class GateComponent extends IconableMixin(Container) {
       return;
     }
 
-    this.emit("discarded", this);
+    this.emit(OPERATION_EVENTS.DISCARDED, this);
     this.destroy();
   }
 }

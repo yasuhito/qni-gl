@@ -13,6 +13,22 @@ import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
 import { ZGate } from "./z-gate";
 
+export type OperationClass =
+  | typeof HGate
+  | typeof XGate
+  | typeof YGate
+  | typeof ZGate
+  | typeof RnotGate
+  | typeof SGate
+  | typeof SDaggerGate
+  | typeof TGate
+  | typeof TDaggerGate
+  | typeof SwapGate
+  | typeof ControlGate
+  | typeof Write0Gate
+  | typeof Write1Gate
+  | typeof MeasurementGate;
+
 export type Operation =
   | HGate
   | XGate

@@ -20,6 +20,7 @@ import {
   Point,
   Renderer,
 } from "pixi.js";
+import { OPERATION_EVENTS } from "./events";
 
 declare global {
   interface Window {
@@ -312,7 +313,7 @@ export class App {
     this.activeGate = gate;
     this.grabbedGate = gate;
 
-    this.grabbedGate.on("discarded", (gate) => {
+    this.grabbedGate.on(OPERATION_EVENTS.DISCARDED, (gate) => {
       this.activeGate = null;
       this.grabbedGate = null;
       this.circuitFrame!.removeChild(gate);
