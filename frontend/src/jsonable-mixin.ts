@@ -4,7 +4,6 @@ import { NotImplementedError } from "./not-implemented-error";
 
 export declare class Jsonable {
   toJSON(): string;
-  gateChar(): string;
 }
 
 export function JsonableMixin<TBase extends Constructor<GateComponent>>(
@@ -17,10 +16,6 @@ export function JsonableMixin<TBase extends Constructor<GateComponent>>(
 
     toJSON() {
       return `"${this.jsonLabel}"`;
-    }
-
-    gateChar() {
-      return "?";
     }
   }
 

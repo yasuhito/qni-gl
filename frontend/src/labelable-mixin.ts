@@ -11,7 +11,7 @@ export function LabelableMixin<TBase extends Constructor<GateComponent>>(
 ): Constructor<Labelable> & TBase {
   class LabelableMixinClass extends Base {
     get label(): string {
-      throw new NotImplementedError("label");
+      throw new NotImplementedError("label", this.constructor.name);
     }
   }
 
