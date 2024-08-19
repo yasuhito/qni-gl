@@ -34,7 +34,6 @@ export type DragEvent = {
 };
 
 export class GateComponent extends Container {
-  static gateType: string;
   static cornerRadius = Spacing.cornerRadius.gate;
 
   /**
@@ -50,7 +49,6 @@ export class GateComponent extends Container {
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static texture = Texture.EMPTY;
-  static iconPath = "./assets/Placeholder.svg";
   static iconImage = new Image();
 
   size: Size = "base";

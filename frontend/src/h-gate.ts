@@ -7,8 +7,6 @@ import { SquareGateMixin } from "./square-gate-mixin";
 export class HGate extends SquareGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static iconPath = "./assets/H.png";
-
   get label(): string {
     return "H";
   }
