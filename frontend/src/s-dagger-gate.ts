@@ -13,8 +13,4 @@ export class SDaggerGate extends SquareGateMixin(
   get label(): string {
     return "S†";
   }
-
-  private get jsonLabel(): string {
-    return "S†";
-  }
 }

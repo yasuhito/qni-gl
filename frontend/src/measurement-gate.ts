@@ -23,7 +23,7 @@ export class MeasurementGate extends OutlinedGateMixin(
     return "M";
   }
 
-  private get jsonLabel(): string {
+  get jsonLabel(): string {
     return "Measure";
   }
 

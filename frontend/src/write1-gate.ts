@@ -14,7 +14,7 @@ export class Write1Gate extends WriteGateMixin(
     return "1";
   }
 
-  private get jsonLabel(): string {
+  get jsonLabel(): string {
     return "|1>";
   }
 }

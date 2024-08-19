@@ -17,10 +17,6 @@ export class XGate extends CircularGateMixin(
     return "X";
   }
 
-  private get jsonLabel(): string {
-    return "X";
-  }
-
   serialize(targetBits: number[], controlBits?: number[]): SerializedGate {
     if (controlBits && controlBits.some((bit) => targetBits.includes(bit))) {
       throw new Error("Overlap detected between target bits and control bits.");
