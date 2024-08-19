@@ -1,10 +1,20 @@
 // @vitest-environment jsdom
 
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { HGate } from "../../src/h-gate";
 
 describe("HGate", () => {
+  let gate: HGate;
+
+  beforeEach(() => {
+    gate = new HGate();
+  });
+
   test("gateType", () => {
     expect(HGate.gateType).toBe("HGate");
+  });
+
+  test("label", () => {
+    expect(gate.label).toBe("H");
   });
 });

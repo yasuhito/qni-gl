@@ -1,9 +1,12 @@
 import { CircularGateMixin } from "./circular-gate-mixin";
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { LabelableMixin } from "./labelable-mixin";
 import { SerializedGate } from "./types";
 
-export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
+export class XGate extends JsonableMixin(
+  CircularGateMixin(LabelableMixin(GateComponent))
+) {
   static readonly gateType = "XGate";
   static readonly iconPath = "./assets/X.png";
 
@@ -21,6 +24,10 @@ export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
     return serialized;
   }
 
+  get label(): string {
+    return "X";
+  }
+
   get controls() {
     return this._controls;
   }
@@ -31,9 +38,5 @@ export class XGate extends JsonableMixin(CircularGateMixin(GateComponent)) {
 
   toCircuitJSON() {
     return '"X"';
-  }
-
-  gateChar() {
-    return "X";
   }
 }

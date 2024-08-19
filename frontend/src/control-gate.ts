@@ -1,10 +1,11 @@
 import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
+import { LabelableMixin } from "./labelable-mixin";
 import { OutlinedGateMixin } from "./outlined-gate-mixin";
 import { SerializedGate } from "./types";
 
 export class ControlGate extends JsonableMixin(
-  OutlinedGateMixin(GateComponent)
+  OutlinedGateMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "ControlGate";
   static readonly iconPath = "./assets/Control.png";
@@ -13,11 +14,11 @@ export class ControlGate extends JsonableMixin(
     return { type: "•", targets: targetBits };
   }
 
-  toCircuitJSON() {
-    return `"${this.gateChar()}"`;
+  get label(): string {
+    return "@";
   }
 
-  gateChar() {
-    return "•";
+  toCircuitJSON() {
+    return `"•"`;
   }
 }

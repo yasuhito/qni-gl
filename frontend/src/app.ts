@@ -11,7 +11,7 @@ import { MeasurementGate } from "./measurement-gate";
 import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { GatePaletteComponent } from "./gate-palette-component";
-import { rectIntersect } from "./util";
+import { logger, rectIntersect } from "./util";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import {
   Application,
@@ -522,6 +522,8 @@ export class App {
     // ページの <div id="app"></div> を
     // <div id="app" data-state="running"></div> に変更
     this.element.dataset.state = "running";
+
+    logger.log(this.circuit.toString());
 
     this.worker.postMessage({
       circuitJson: this.circuit.toCircuitJSON(),

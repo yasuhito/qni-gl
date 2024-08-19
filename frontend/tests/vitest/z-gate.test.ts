@@ -1,0 +1,16 @@
+// @vitest-environment jsdom
+
+import { beforeEach, describe, expect, test } from "vitest";
+import { ZGate } from "../../src/z-gate";
+
+describe("ZGate", () => {
+  let gate: ZGate;
+
+  beforeEach(() => {
+    gate = new ZGate();
+  });
+
+  test("label", () => {
+    expect(gate.label).toBe("Z");
+  });
+});

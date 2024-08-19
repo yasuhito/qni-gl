@@ -4,9 +4,10 @@ import { GateState, GateStyleOptions, SerializedGate } from "./types";
 import { OutlinedGateMixin } from "./outlined-gate-mixin";
 import { Colors } from "./colors";
 import { Assets, Texture } from "pixi.js";
+import { LabelableMixin } from "./labelable-mixin";
 
 export class MeasurementGate extends JsonableMixin(
-  OutlinedGateMixin(GateComponent)
+  OutlinedGateMixin(LabelableMixin(GateComponent))
 ) {
   static gateType = "MeasurementGate";
   static readonly iconPath = "./assets/Measurement.png";
@@ -20,6 +21,10 @@ export class MeasurementGate extends JsonableMixin(
   }
 
   _value: "" | 0 | 1 = "";
+
+  get label(): string {
+    return "M";
+  }
 
   set value(newValue) {
     this._value = newValue;
