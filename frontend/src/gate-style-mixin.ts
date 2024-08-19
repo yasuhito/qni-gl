@@ -6,6 +6,8 @@ import { GateShapeConfig, GateState, GateStyleOptions } from "./types";
 import { need } from "./util";
 
 export declare class GateStyle {
+  get borderWidth(): number;
+  get cornerRadius(): number;
   applyIdleStyle(): void;
   applyHoverStyle(): void;
   applyGrabbedStyle(): void;
@@ -104,7 +106,7 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
       borderAlpha: number
     ): void {
       const constructor = this.constructor as typeof GateStyleMixinClass;
-      const { cornerRadius, strokeAlignment } = constructor.SHAPE_CONFIG;
+      const { strokeAlignment } = constructor.SHAPE_CONFIG;
 
       this._shape
         .clear()
@@ -113,7 +115,7 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
           this.borderWidth / 2,
           this.borderSize,
           this.borderSize,
-          cornerRadius
+          this.cornerRadius
         )
         .fill(fillColor)
         .stroke({
@@ -140,8 +142,15 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
       return this.sizeInPx - this.borderWidth;
     }
 
-    protected get borderWidth(): number {
+    get borderWidth(): number {
       return Spacing.borderWidth.gate[this.size];
+    }
+
+    get cornerRadius(): number {
+      const constructor = this.constructor as typeof GateStyleMixinClass;
+      const { cornerRadius } = constructor.SHAPE_CONFIG;
+
+      return cornerRadius;
     }
 
     protected validateBounds(): void {

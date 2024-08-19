@@ -39,7 +39,7 @@ export class GateComponent extends IconableMixin(Container) {
     sm: spacingInPx(6),
     xs: spacingInPx(4),
   };
-  static cornerRadius = Spacing.cornerRadius.gate;
+  static readonly cornerRadius = Spacing.cornerRadius.gate;
 
   sprite!: Sprite;
   whiteSprite!: Sprite;

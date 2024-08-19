@@ -3,11 +3,14 @@ import { GateComponent } from "./gate-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
 import { SerializeableMixin } from "./serializeable-mixin";
+import { Spacing } from "./spacing";
 import { SerializedGate } from "./types";
 
 export class XGate extends CircularGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
+  static readonly cornerRadius = Spacing.cornerRadius.full;
+
   private _controls: number[] = [];
 
   get label(): string {

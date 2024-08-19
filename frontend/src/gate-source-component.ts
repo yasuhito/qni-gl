@@ -1,12 +1,11 @@
 import { Colors } from "./colors";
 import { Container, Graphics, Point } from "pixi.js";
 import { GateComponent } from "./gate-component";
+import { GateStyle } from "./gate-style-mixin";
 import { need } from "./util";
-import { Spacing } from "./spacing";
 
 export class GateSourceComponent extends Container {
   static borderColor = Colors["border-inverse"];
-  static borderWidth = 2;
 
   private gateClass: typeof GateComponent;
   private border: Graphics;
@@ -16,51 +15,38 @@ export class GateSourceComponent extends Container {
 
     this.gateClass = gateClass;
     this.border = new Graphics();
-
-    this.addBorder();
-    this.validateBounds();
-  }
-
-  private addBorder() {
-    this.border
-      .roundRect(
-        this.borderWidth / 2,
-        this.borderWidth / 2,
-        this.borderSize,
-        this.borderSize,
-        this.cornerRadius
-      )
-      .stroke({
-        color: GateSourceComponent.borderColor,
-        width: this.borderWidth,
-        alignment: 1,
-      });
-
     this.addChild(this.border);
   }
 
-  private get borderSize() {
-    return GateComponent.sizeInPx.base - GateSourceComponent.borderWidth;
+  private drawBorder(gate: GateComponent & GateStyle) {
+    const width = gate.borderWidth;
+    const size = gate.sizeInPx - width;
+    const cornerRadius = gate.cornerRadius;
+    const color = GateSourceComponent.borderColor;
+    const alignment = 1;
+
+    this.border
+      .roundRect(width / 2, width / 2, size, size, cornerRadius)
+      .stroke({
+        color,
+        width,
+        alignment,
+      });
   }
 
-  private get borderWidth() {
-    return GateSourceComponent.borderWidth;
-  }
-
-  private get cornerRadius() {
-    return this.gateClass.name === "XGate"
-      ? Spacing.cornerRadius.full
-      : this.gateClass.cornerRadius;
-  }
-
-  protected validateBounds(): void {
+  protected validateBounds(gate: GateComponent & GateStyle): void {
     const bounds = this.getLocalBounds();
-    this.validateBoundsSize(bounds);
+
+    this.validateBoundsSize(bounds, gate);
     this.validateBoundsPosition(bounds);
   }
 
-  private validateBoundsSize(bounds: { width: number; height: number }) {
-    const expectedSize = GateComponent.sizeInPx.base;
+  private validateBoundsSize(
+    bounds: { width: number; height: number },
+    gate: GateComponent & GateStyle
+  ) {
+    const expectedSize = gate.sizeInPx;
+
     need(
       bounds.width === expectedSize && bounds.height === expectedSize,
       `Size is incorrect: ${bounds.width}x${bounds.height}, expected: ${expectedSize}x${expectedSize}`
@@ -75,23 +61,36 @@ export class GateSourceComponent extends Container {
   }
 
   generateNewGate(): GateComponent {
-    const gate = new this.gateClass();
-    this.addChild(gate);
+    const gate = this.createGate();
 
+    this.addChild(gate);
+    this.setupGateEventListeners(gate);
+    this.drawBorder(gate);
+    this.validateBounds(gate);
+    this.emitNewGateEvent(gate);
+
+    return gate;
+  }
+
+  private createGate(): GateComponent & GateStyle {
+    return new this.gateClass() as GateComponent & GateStyle;
+  }
+
+  private setupGateEventListeners(gate: GateComponent): void {
     gate.on("mouseLeave", this.emitMouseLeaveGateEvent, this);
     gate.on("grab", this.grabGate, this);
     gate.on("discarded", this.discardGate, this);
     gate.on("snap", this.removeGateEventListeners, this);
-
-    this.emit("newGate", gate);
-
-    return gate;
   }
 
   private removeGateEventListeners(gate: GateComponent) {
     gate.off("grab", this.grabGate, this);
     gate.off("mouseLeave", this.emitMouseLeaveGateEvent, this);
     gate.off("snap", this.removeGateEventListeners, this);
+  }
+
+  private emitNewGateEvent(gate: GateComponent): void {
+    this.emit("newGate", gate);
   }
 
   private emitMouseLeaveGateEvent(gate: GateComponent) {
