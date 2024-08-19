@@ -4,7 +4,13 @@ import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
 import { sizeInPx } from "./util";
 import { Spacing } from "./spacing";
-import { Container, FederatedPointerEvent, Graphics, Point } from "pixi.js";
+import {
+  Container,
+  FederatedPointerEvent,
+  Graphics,
+  Point,
+  Sprite,
+} from "pixi.js";
 import { IconableMixin } from "./iconable-mixin";
 
 /**
@@ -27,6 +33,9 @@ export type DragEvent = {
 
 export class GateComponent extends IconableMixin(Container) {
   static cornerRadius = Spacing.cornerRadius.gate;
+
+  sprite!: Sprite;
+  whiteSprite!: Sprite;
 
   size: Size = "base";
   sizeInPx = sizeInPx[this.size];
@@ -167,22 +176,29 @@ export class GateComponent extends IconableMixin(Container) {
     this._shape = new Graphics();
     this.addChild(this._shape);
 
-    this.loadTextures(this.gateType, this.sizeInPx).then(() => {
-      // setup events for mouse + touch using
-      // the pointer events
-      this.on("pointerover", this.onPointerOver, this)
-        .on("pointerout", this.onPointerOut, this)
-        .on("pointerdown", this.onPointerDown, this)
-        .on("pointerup", this.onPointerUp, this);
+    this.createSprites(this.gateType, this.sizeInPx).then(
+      ({ sprite, whiteSprite }) => {
+        this.sprite = sprite;
+        this.whiteSprite = whiteSprite;
+        this.addChild(this.sprite);
+        this.addChild(this.whiteSprite);
 
-      this.actor = createActor(this.stateMachine);
-      this.actor.subscribe((state) => {
-        if (this.debug) {
-          console.log(`${state.value} state`);
-        }
-      });
-      this.actor.start();
-    });
+        // setup events for mouse + touch using
+        // the pointer events
+        this.on("pointerover", this.onPointerOver, this)
+          .on("pointerout", this.onPointerOut, this)
+          .on("pointerdown", this.onPointerDown, this)
+          .on("pointerup", this.onPointerUp, this);
+
+        this.actor = createActor(this.stateMachine);
+        this.actor.subscribe((state) => {
+          if (this.debug) {
+            console.log(`${state.value} state`);
+          }
+        });
+        this.actor.start();
+      }
+    );
   }
 
   click(globalPosition: Point, dropzone: DropzoneComponent | null) {
