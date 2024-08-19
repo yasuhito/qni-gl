@@ -13,4 +13,8 @@ describe("ControlGate", () => {
   test("label", () => {
     expect(gate.label).toBe("@");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"•"');
+  });
 });

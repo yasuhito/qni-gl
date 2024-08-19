@@ -13,4 +13,8 @@ describe("ZGate", () => {
   test("label", () => {
     expect(gate.label).toBe("Z");
   });
+
+  test("toJSON", () => {
+    expect(gate.toJSON()).toBe('"Z"');
+  });
 });

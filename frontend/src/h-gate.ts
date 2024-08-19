@@ -18,7 +18,7 @@ export class HGate extends SquareGateMixin(
     return "H";
   }
 
-  get jsonLabel(): string {
+  private get jsonLabel(): string {
     return "H";
   }
 
