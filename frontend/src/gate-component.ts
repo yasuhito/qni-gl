@@ -60,6 +60,9 @@ export class GateComponent extends IconableMixin(Container) {
         Idle: {
           entry: "applyIdleStyle",
           on: {
+            Click: {
+              target: "Grabbed",
+            },
             "Mouse enter": {
               target: "Hover",
             },
