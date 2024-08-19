@@ -124,15 +124,15 @@ export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
         });
 
       if (iconColor) {
-        this._sprite.tint = iconColor;
+        this.sprite.tint = iconColor;
       }
 
       if (iconInverse) {
-        this._sprite.visible = false;
-        this._whiteSprite.visible = true;
+        this.sprite.visible = false;
+        this.whiteSprite.visible = true;
       } else {
-        this._sprite.visible = true;
-        this._whiteSprite.visible = false;
+        this.sprite.visible = true;
+        this.whiteSprite.visible = false;
       }
     }
 

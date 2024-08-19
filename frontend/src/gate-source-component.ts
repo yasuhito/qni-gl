@@ -1,7 +1,7 @@
 import { Colors } from "./colors";
 import { Container, Graphics, Point } from "pixi.js";
 import { GateComponent } from "./gate-component";
-import { need } from "./util";
+import { need, sizeInPx } from "./util";
 import { Spacing } from "./spacing";
 
 export class GateSourceComponent extends Container {
@@ -40,7 +40,7 @@ export class GateSourceComponent extends Container {
   }
 
   private get borderSize() {
-    return GateComponent.sizeInPx.base - GateSourceComponent.borderWidth;
+    return sizeInPx.base - GateSourceComponent.borderWidth;
   }
 
   private get borderWidth() {
@@ -60,7 +60,7 @@ export class GateSourceComponent extends Container {
   }
 
   private validateBoundsSize(bounds: { width: number; height: number }) {
-    const expectedSize = GateComponent.sizeInPx.base;
+    const expectedSize = sizeInPx.base;
     need(
       bounds.width === expectedSize && bounds.height === expectedSize,
       `Size is incorrect: ${bounds.width}x${bounds.height}, expected: ${expectedSize}x${expectedSize}`

@@ -76,3 +76,14 @@ export const logger = {
     }
   },
 };
+
+/**
+ * ゲートの幅と高さ (ピクセル)
+ */
+export const sizeInPx = {
+  xl: spacingInPx(12),
+  lg: spacingInPx(10),
+  base: spacingInPx(8),
+  sm: spacingInPx(6),
+  xs: spacingInPx(4),
+};

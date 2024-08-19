@@ -29,9 +29,9 @@ export class MeasurementGate extends OutlinedGateMixin(
     this._value = newValue;
 
     if (newValue === 0) {
-      this._sprite.texture = MeasurementGate._icon0;
+      this.sprite.texture = MeasurementGate._icon0;
     } else if (newValue === 1) {
-      this._sprite.texture = MeasurementGate._icon1;
+      this.sprite.texture = MeasurementGate._icon1;
     }
   }
 
@@ -39,8 +39,8 @@ export class MeasurementGate extends OutlinedGateMixin(
     return this._value;
   }
 
-  protected async loadTextures() {
-    super.loadTextures();
+  async loadTextures() {
+    super.loadTextures(this.gateType, this.sizeInPx);
 
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);
