@@ -10,6 +10,10 @@ describe("ZGate", () => {
     gate = new ZGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("ZGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("Z");
   });

@@ -168,14 +168,8 @@ export class GateComponent extends Container {
    * Returns the gate type of the component.
    * If the gate type is not defined, it throws an error.
    */
-  gateType(): string {
-    const klass = this.constructor as typeof GateComponent;
-
-    if (typeof klass.gateType === "string") {
-      return klass.gateType;
-    }
-
-    throw new Error("Gate type is not defined");
+  get gateType(): string {
+    return this.constructor.name;
   }
 
   get gateSource(): GateSourceComponent | null {
@@ -231,7 +225,7 @@ export class GateComponent extends Container {
       this.actor = createActor(this.stateMachine);
       this.actor.subscribe((state) => {
         if (this.debug) {
-          console.log(`${this.gateType()}: ${state.value} state`);
+          console.log(`${this.gateType}: ${state.value} state`);
         }
       });
       this.actor.start();

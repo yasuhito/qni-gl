@@ -10,6 +10,10 @@ describe("MeasurementGate", () => {
     gate = new MeasurementGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("MeasurementGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("M");
   });

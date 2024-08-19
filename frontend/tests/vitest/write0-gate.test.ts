@@ -10,6 +10,10 @@ describe("Write0Gate", () => {
     gate = new Write0Gate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("Write0Gate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("0");
   });

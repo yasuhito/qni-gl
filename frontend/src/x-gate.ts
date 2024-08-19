@@ -8,7 +8,6 @@ import { SerializedGate } from "./types";
 export class XGate extends CircularGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly gateType = "XGate";
   static readonly iconPath = "./assets/X.png";
 
   private _controls: number[] = [];

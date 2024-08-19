@@ -11,7 +11,7 @@ describe("HGate", () => {
   });
 
   test("gateType", () => {
-    expect(HGate.gateType).toBe("HGate");
+    expect(gate.gateType).toBe("HGate");
   });
 
   test("label", () => {

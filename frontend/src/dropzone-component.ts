@@ -151,12 +151,12 @@ export class DropzoneComponent extends Container {
 
   hasWriteGate() {
     return ["Write0Gate", "Write1Gate"].some(
-      (each) => this.operation?.gateType() === each
+      (each) => this.operation?.gateType === each
     );
   }
 
   hasMeasurementGate() {
-    return this.operation?.gateType() === "MeasurementGate";
+    return this.operation?.gateType === "MeasurementGate";
   }
 
   private isIconGate(gate: GateComponent | null) {
@@ -164,7 +164,7 @@ export class DropzoneComponent extends Container {
       return false;
     }
     return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
-      (type) => gate.gateType() === type
+      (type) => gate.gateType === type
     );
   }
 }

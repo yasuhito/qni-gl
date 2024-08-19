@@ -10,6 +10,10 @@ describe("XGate", () => {
     gate = new XGate();
   });
 
+  test("gateType", () => {
+    expect(gate.gateType).toBe("XGate");
+  });
+
   test("label", () => {
     expect(gate.label).toBe("X");
   });
