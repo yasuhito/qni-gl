@@ -29,9 +29,9 @@ export class MeasurementGate extends OutlinedGateMixin(
     this._value = newValue;
 
     if (newValue === 0) {
-      this._sprite.texture = MeasurementGate._icon0;
+      this.sprite.texture = MeasurementGate._icon0;
     } else if (newValue === 1) {
-      this._sprite.texture = MeasurementGate._icon1;
+      this.sprite.texture = MeasurementGate._icon1;
     }
   }
 
@@ -39,15 +39,13 @@ export class MeasurementGate extends OutlinedGateMixin(
     return this._value;
   }
 
-  constructor() {
-    super();
+  async createSprites() {
+    const sprites = await super.createSprites(this.gateType);
 
-    this.loadExtraTextures();
-  }
-
-  private async loadExtraTextures() {
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);
+
+    return sprites;
   }
 
   // Override the styleMap from OutlinedGateMixin

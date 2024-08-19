@@ -2,18 +2,16 @@ import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
-import { convertToKebabCase, spacingInPx } from "./util";
+import { sizeInPx } from "./util";
 import { Spacing } from "./spacing";
 import {
-  Assets,
-  ColorMatrixFilter,
   Container,
   FederatedPointerEvent,
   Graphics,
   Point,
   Sprite,
-  Texture,
 } from "pixi.js";
+import { IconableMixin } from "./iconable-mixin";
 
 /**
  * ゲートのクリックイベント
@@ -33,32 +31,18 @@ export type DragEvent = {
   dropzone: DropzoneComponent | null;
 };
 
-export class GateComponent extends Container {
+export class GateComponent extends IconableMixin(Container) {
   static cornerRadius = Spacing.cornerRadius.gate;
 
-  /**
-   * ゲートの幅と高さ (ピクセル)
-   */
-  static sizeInPx = {
-    xl: spacingInPx(12),
-    lg: spacingInPx(10),
-    base: spacingInPx(8),
-    sm: spacingInPx(6),
-    xs: spacingInPx(4),
-  };
-
-  /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
-  static texture = Texture.EMPTY;
-  static iconImage = new Image();
+  sprite!: Sprite;
+  whiteSprite!: Sprite;
 
   size: Size = "base";
-  sizeInPx = GateComponent.sizeInPx[this.size];
+  sizeInPx = sizeInPx[this.size];
 
   debug = false;
 
   protected _shape!: Graphics;
-  protected _sprite!: Sprite;
-  protected _whiteSprite!: Sprite;
 
   protected stateMachine = createMachine(
     {
@@ -185,29 +169,23 @@ export class GateComponent extends Container {
   constructor() {
     super();
 
-    this.loadTexture().then((texture) => {
-      this._shape = new Graphics();
-      this.addChild(this._shape);
+    // enable the gate to be interactive...
+    // this will allow it to respond to mouse and touch events
+    this.eventMode = "static";
 
-      this._sprite = new Sprite(texture);
-      this.addChild(this._sprite);
-      this._sprite.width = this.sizeInPx;
-      this._sprite.height = this.sizeInPx;
+    this._shape = new Graphics();
+    this.addChild(this._shape);
 
-      const whiteFilter = new ColorMatrixFilter();
-      whiteFilter.matrix = [
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-      ];
-      this._whiteSprite = Sprite.from(texture);
-      this.addChild(this._whiteSprite);
-      this._whiteSprite.visible = false;
-      this._whiteSprite.filters = [whiteFilter];
-      this._whiteSprite.width = this.sizeInPx;
-      this._whiteSprite.height = this.sizeInPx;
-
-      // enable the gate to be interactive...
-      // this will allow it to respond to mouse and touch events
-      this.eventMode = "static";
+    this.createSprites(this.gateType).then(({ sprite, whiteSprite }) => {
+      this.sprite = sprite;
+      this.sprite.width = this.sizeInPx;
+      this.sprite.height = this.sizeInPx;
+      this.whiteSprite = whiteSprite;
+      this.whiteSprite.visible = false;
+      this.whiteSprite.width = this.sizeInPx;
+      this.whiteSprite.height = this.sizeInPx;
+      this.addChild(this.sprite);
+      this.addChild(this.whiteSprite);
 
       // setup events for mouse + touch using
       // the pointer events
@@ -219,19 +197,11 @@ export class GateComponent extends Container {
       this.actor = createActor(this.stateMachine);
       this.actor.subscribe((state) => {
         if (this.debug) {
-          console.log(`${this.gateType}: ${state.value} state`);
+          console.log(`${state.value} state`);
         }
       });
       this.actor.start();
     });
-  }
-
-  private async loadTexture() {
-    const iconName = `${convertToKebabCase(this.gateType)}.png`;
-    const iconPath = `./assets/${iconName}`;
-    const texture = await Assets.load(iconPath);
-
-    return texture;
   }
 
   click(globalPosition: Point, dropzone: DropzoneComponent | null) {
