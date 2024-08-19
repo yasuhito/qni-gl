@@ -2,7 +2,7 @@ import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
 import { GateSourceComponent } from "./gate-source-component";
 import { Size } from "./size";
-import { spacingInPx } from "./util";
+import { convertToKebabCase, spacingInPx } from "./util";
 import { Spacing } from "./spacing";
 import {
   Assets,
@@ -34,7 +34,6 @@ export type DragEvent = {
 };
 
 export class GateComponent extends Container {
-  static gateType: string;
   static cornerRadius = Spacing.cornerRadius.gate;
 
   /**
@@ -50,7 +49,6 @@ export class GateComponent extends Container {
 
   /** ゲートのアイコン。HGate などゲートの種類ごとにサブクラスを定義してセットする */
   static texture = Texture.EMPTY;
-  static iconPath = "./assets/Placeholder.svg";
   static iconImage = new Image();
 
   size: Size = "base";
@@ -164,10 +162,6 @@ export class GateComponent extends Container {
   );
   private actor!: ActorRefFrom<typeof this.stateMachine>;
 
-  /**
-   * Returns the gate type of the component.
-   * If the gate type is not defined, it throws an error.
-   */
   get gateType(): string {
     return this.constructor.name;
   }
@@ -233,8 +227,9 @@ export class GateComponent extends Container {
   }
 
   private async loadTexture() {
-    const klass = this.constructor as typeof GateComponent;
-    const texture = await Assets.load(klass.iconPath);
+    const iconName = `${convertToKebabCase(this.gateType)}.png`;
+    const iconPath = `./assets/${iconName}`;
+    const texture = await Assets.load(iconPath);
 
     return texture;
   }

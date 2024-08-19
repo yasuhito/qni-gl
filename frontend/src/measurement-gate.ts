@@ -10,9 +10,8 @@ import { SerializeableMixin } from "./serializeable-mixin";
 export class MeasurementGate extends OutlinedGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
 ) {
-  static readonly iconPath = "./assets/Measurement.png";
-  static readonly _icon0Path = "./assets/Measurement_value0.png";
-  static readonly _icon1Path = "./assets/Measurement_value1.png";
+  static readonly _icon0Path = "./assets/measurement-gate0.png";
+  static readonly _icon1Path = "./assets/measurement-gate1.png";
   static _icon0: Texture;
   static _icon1: Texture;
 
