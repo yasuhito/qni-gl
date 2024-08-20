@@ -1,9 +1,9 @@
-import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
 import { CIRCUIT_EVENTS, Circuit } from "./circuit";
+import { CIRCUIT_FRAME_EVENTS, OPERATION_PALETTE_EVENTS } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
-import { CIRCUIT_FRAME_EVENTS, OPERATION_PALETTE_EVENTS } from "./events";
-import { OperationComponent } from "./operation-component";
+import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
+import { OperationClass } from "./operation";
 import { OperationPalette } from "./operation-palette";
 
 const OPERATION_PALETTE_X = 40;
@@ -95,7 +95,7 @@ export class CircuitFrame extends Container {
   }
 
   private grabPaletteOperation(
-    operation: OperationComponent,
+    operation: InstanceType<OperationClass>,
     pointerPosition: Point
   ): void {
     this.addChild(operation);
@@ -110,7 +110,9 @@ export class CircuitFrame extends Container {
     this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT);
   }
 
-  private removeGrabbedPaletteOperation(operation: OperationComponent): void {
+  private removeGrabbedPaletteOperation(
+    operation: InstanceType<OperationClass>
+  ): void {
     this.removeChild(operation);
     this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED, operation);
   }
@@ -124,7 +126,7 @@ export class CircuitFrame extends Container {
   }
 
   private grabCircuitOperation(
-    operation: OperationComponent,
+    operation: InstanceType<OperationClass>,
     pointerPosition: Point
   ): void {
     this.emit(
