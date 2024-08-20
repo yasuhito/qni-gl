@@ -1,6 +1,6 @@
 import { fail } from "assert";
 import { Page } from "playwright/test";
-import { GateComponent } from "../../src";
+import { OperationComponent } from "../../src";
 import { Container, Point } from "pixi.js";
 
 export async function appData(page: Page) {
@@ -14,7 +14,7 @@ export async function appData(page: Page) {
   return JSON.parse(dataApp);
 }
 
-export function centerPosition(gate: GateComponent) {
+export function centerPosition(gate: OperationComponent) {
   return new Point(gate.x + gate.width / 2, gate.y + gate.height / 2);
 }
 
@@ -61,7 +61,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         Write0Gate: write0Gate,
         Write1Gate: write1Gate,
         MeasurementGate: measurementGate,
-      } = gatePalette?.gates ?? {};
+      } = gatePalette?.operations ?? {};
 
       if (
         !circuit ||

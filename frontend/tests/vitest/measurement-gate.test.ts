@@ -10,8 +10,8 @@ describe("MeasurementGate", () => {
     gate = new MeasurementGate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("MeasurementGate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("MeasurementGate");
   });
 
   test("label", () => {

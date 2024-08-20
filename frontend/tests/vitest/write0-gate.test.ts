@@ -10,8 +10,8 @@ describe("Write0Gate", () => {
     gate = new Write0Gate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("Write0Gate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("Write0Gate");
   });
 
   test("label", () => {

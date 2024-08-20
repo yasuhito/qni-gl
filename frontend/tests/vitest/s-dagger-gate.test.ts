@@ -10,8 +10,8 @@ describe("SDaggerGate", () => {
     gate = new SDaggerGate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("SDaggerGate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("SDaggerGate");
   });
 
   test("label", () => {

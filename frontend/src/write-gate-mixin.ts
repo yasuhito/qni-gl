@@ -1,5 +1,5 @@
 import { Constructor } from "./constructor";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { GateShapeConfig, GateState, GateStyleOptions } from "./types";
 import { Spacing } from "./spacing";
 import { Colors } from "./colors";
@@ -11,7 +11,7 @@ import {
 
 export declare class WriteGate extends GateStyle {}
 
-export function WriteGateMixin<TBase extends Constructor<GateComponent>>(
+export function WriteGateMixin<TBase extends Constructor<OperationComponent>>(
   Base: TBase
 ): Constructor<WriteGate> & TBase & GateStyleConstructor {
   const GateStyleBase = GateStyleMixin(Base);

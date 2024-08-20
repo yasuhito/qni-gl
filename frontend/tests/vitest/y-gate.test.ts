@@ -10,8 +10,8 @@ describe("YGate", () => {
     gate = new YGate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("YGate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("YGate");
   });
 
   test("label", () => {

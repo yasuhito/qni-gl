@@ -1,5 +1,5 @@
 import { Constructor } from "./constructor";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { SerializedGate } from "./types";
 
 export declare class Serializeable {
@@ -7,9 +7,9 @@ export declare class Serializeable {
   serialize(targetBits: number[]): SerializedGate;
 }
 
-export function SerializeableMixin<TBase extends Constructor<GateComponent>>(
-  Base: TBase
-): Constructor<Serializeable> & TBase {
+export function SerializeableMixin<
+  TBase extends Constructor<OperationComponent>
+>(Base: TBase): Constructor<Serializeable> & TBase {
   return class SerializeableMixinClass extends Base {
     get serializeType(): string {
       if (!("jsonLabel" in this) || typeof this.jsonLabel !== "string") {

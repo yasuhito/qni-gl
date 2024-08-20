@@ -1,26 +1,17 @@
-import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
-import { ControlGate } from "./control-gate";
-import { GateComponent } from "./gate-component";
 import {
-  GATE_PALETTE_EVENTS,
-  GatePaletteComponent,
-} from "./gate-palette-component";
-import { HGate } from "./h-gate";
-import { MeasurementGate } from "./measurement-gate";
-import { RnotGate } from "./rnot-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { SGate } from "./s-gate";
-import { SwapGate } from "./swap-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { TGate } from "./t-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
+  Application,
+  Container,
+  Graphics,
+  Point,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { CIRCUIT_EVENTS, CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
+import { Colors } from "./colors";
+import { OPERATION_PALETTE_EVENTS } from "./events";
+import { OperationComponent } from "./operation-component";
+import { OperationPalette } from "./operation-palette";
 
 export const CIRCUIT_FRAME_EVENTS = {
   PALETTE_GATE_GRABBED: "circuit-frame:grab-palette-gate",
@@ -33,61 +24,39 @@ export const CIRCUIT_FRAME_EVENTS = {
 const GATE_PALETTE_X = 40;
 const GATE_PALETTE_Y = 64;
 
-const PALETTE_FIRST_ROW_GATES = [
-  HGate,
-  XGate,
-  YGate,
-  ZGate,
-  RnotGate,
-  SGate,
-  SDaggerGate,
-  TGate,
-  TDaggerGate,
-];
-
-const PALETTE_SECOND_ROW_GATES = [
-  SwapGate,
-  ControlGate,
-  Write0Gate,
-  Write1Gate,
-  MeasurementGate,
-];
-
 /**
  * 量子回路の表示用フレームを表すクラス。
  */
-export class CircuitFrame extends PIXI.Container {
+export class CircuitFrame extends Container {
   private static instance: CircuitFrame | null = null;
 
-  readonly app: PIXI.Application;
-  readonly background: PIXI.Graphics;
-  readonly gatePalette: GatePaletteComponent;
+  readonly app: Application;
+  readonly background: Graphics;
+  readonly gatePalette: OperationPalette;
   readonly circuit: CircuitComponent;
-  // private maskGraphics: PIXI.Graphics;
-  private maskSprite: PIXI.Sprite;
-  private scrollContainer: PIXI.Container;
+  private maskSprite: Sprite;
+  private scrollContainer: Container;
 
   /**
    * インスタンスを取得するメソッド
    * @param app - PIXI アプリケーションインスタンス
    * @param height - 初期のフレームの高さ
    */
-  static getInstance(app: PIXI.Application, height: number): CircuitFrame {
+  static getInstance(app: Application, height: number): CircuitFrame {
     if (this.instance === null) {
       this.instance = new CircuitFrame(app, height);
     }
     return this.instance;
   }
 
-  private constructor(app: PIXI.Application, height: number) {
+  private constructor(app: Application, height: number) {
     super();
 
     this.app = app;
-    this.background = new PIXI.Graphics();
-    this.gatePalette = new GatePaletteComponent();
+    this.background = new Graphics();
+    this.gatePalette = new OperationPalette();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    // this.maskGraphics = new PIXI.Graphics();
-    this.scrollContainer = new PIXI.Container();
+    this.scrollContainer = new Container();
 
     this.addChildAt(this.background, 0);
     this.addChild(this.scrollContainer);
@@ -97,7 +66,7 @@ export class CircuitFrame extends PIXI.Container {
     this.scrollContainer.zIndex = 1;
 
     // マスクの設定を変更
-    this.maskSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+    this.maskSprite = new Sprite(Texture.WHITE);
     this.updateMask(height);
     this.scrollContainer.mask = this.maskSprite;
     this.addChild(this.maskSprite); // マスクをシーンに追加
@@ -138,26 +107,20 @@ export class CircuitFrame extends PIXI.Container {
     this.gatePalette.y = GATE_PALETTE_Y;
 
     this.gatePalette.on(
-      GATE_PALETTE_EVENTS.GATE_GRABBED,
+      OPERATION_PALETTE_EVENTS.OPERATION_GRABBED,
       this.grabPaletteGate,
       this
     );
     this.gatePalette.on(
-      GATE_PALETTE_EVENTS.MOUSE_LEAVE_GATE,
+      OPERATION_PALETTE_EVENTS.OPERATION_MOUSE_LEFT,
       this.emitMouseLeavePaletteGateEvent,
       this
     );
     this.gatePalette.on(
-      GATE_PALETTE_EVENTS.GATE_DISCARDED,
+      OPERATION_PALETTE_EVENTS.OPERATION_DISCARDED,
       this.removeGrabbedPaletteGate,
       this
     );
-
-    PALETTE_FIRST_ROW_GATES.forEach((gate) => {
-      this.gatePalette.addGate(gate);
-    });
-    this.gatePalette.newRow();
-    PALETTE_SECOND_ROW_GATES.forEach((gate) => this.gatePalette.addGate(gate));
   }
 
   private initCircuit() {
@@ -178,8 +141,8 @@ export class CircuitFrame extends PIXI.Container {
    * @param pointerPosition - ポインターの位置
    */
   private grabPaletteGate(
-    gate: GateComponent,
-    pointerPosition: PIXI.Point
+    gate: OperationComponent,
+    pointerPosition: Point
   ): void {
     this.addChild(gate);
     this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED, gate, pointerPosition);
@@ -196,7 +159,7 @@ export class CircuitFrame extends PIXI.Container {
    * 掴んだパレットゲートを削除
    * @param gate - ゲートコンポーネント
    */
-  private removeGrabbedPaletteGate(gate: GateComponent): void {
+  private removeGrabbedPaletteGate(gate: OperationComponent): void {
     this.removeChild(gate);
     this.emit(CIRCUIT_FRAME_EVENTS.DISCARD_PALETTE_GATE, gate);
   }
@@ -219,8 +182,8 @@ export class CircuitFrame extends PIXI.Container {
    * @param pointerPosition - ポインターの位置
    */
   private grabCircuitGate(
-    gate: GateComponent,
-    pointerPosition: PIXI.Point
+    gate: OperationComponent,
+    pointerPosition: Point
   ): void {
     this.emit(CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE, gate, pointerPosition);
   }

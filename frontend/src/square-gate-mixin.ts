@@ -1,5 +1,5 @@
 import { Constructor } from "./constructor";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { GateShapeConfig } from "./types";
 import { Spacing } from "./spacing";
 import {
@@ -10,7 +10,7 @@ import {
 
 export declare class SquareGate extends GateStyle {}
 
-export function SquareGateMixin<TBase extends Constructor<GateComponent>>(
+export function SquareGateMixin<TBase extends Constructor<OperationComponent>>(
   Base: TBase
 ): Constructor<SquareGate> & TBase & GateStyleConstructor {
   const GateStyleBase = GateStyleMixin(Base);

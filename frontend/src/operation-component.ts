@@ -1,6 +1,6 @@
 import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
-import { OperationSourceComponent } from "./operation-source-component";
+import { OperationSource } from "./operation-source";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
@@ -32,8 +32,8 @@ export type DragEvent = {
   dropzone: DropzoneComponent | null;
 };
 
-export class GateComponent extends IconableMixin(Container) {
-  static sizeInPx = {
+export class OperationComponent extends IconableMixin(Container) {
+  private static sizeInPx = {
     xl: spacingInPx(12),
     lg: spacingInPx(10),
     base: spacingInPx(8),
@@ -46,7 +46,7 @@ export class GateComponent extends IconableMixin(Container) {
   whiteSprite!: Sprite;
 
   size: Size = "base";
-  sizeInPx = GateComponent.sizeInPx[this.size];
+  sizeInPx = OperationComponent.sizeInPx[this.size];
 
   debug = false;
 
@@ -157,12 +157,12 @@ export class GateComponent extends IconableMixin(Container) {
   );
   private actor!: ActorRefFrom<typeof this.stateMachine>;
 
-  get gateType(): string {
+  get operationType(): string {
     return this.constructor.name;
   }
 
-  get gateSource(): OperationSourceComponent | null {
-    if (this.parent instanceof OperationSourceComponent) {
+  get gateSource(): OperationSource | null {
+    if (this.parent instanceof OperationSource) {
       return this.parent;
     }
 
@@ -193,11 +193,11 @@ export class GateComponent extends IconableMixin(Container) {
     this.actor = createActor(this.stateMachine);
     this.actor.subscribe((state) => {
       if (this.debug) {
-        console.log(`${this.gateType}: ${state.value} state`);
+        console.log(`${this.operationType}: ${state.value} state`);
       }
     });
 
-    this.createSprites(this.gateType).then(({ sprite, whiteSprite }) => {
+    this.createSprites(this.operationType).then(({ sprite, whiteSprite }) => {
       this.sprite = sprite;
       this.sprite.width = this.sizeInPx;
       this.sprite.height = this.sizeInPx;
