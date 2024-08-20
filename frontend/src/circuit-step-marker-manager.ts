@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js";
 import { Container } from "pixi.js";
 import { Colors, FULL_OPACITY } from "./colors";
 import { spacingInPx } from "./util";
-import { CircuitStepComponent } from "./circuit-step-component";
+import { CircuitStep } from "./circuit-step";
 
 export class CircuitStepMarkerManager extends Container {
   private static readonly MARKER_WIDTH = spacingInPx(1);
@@ -11,16 +11,16 @@ export class CircuitStepMarkerManager extends Container {
   private static readonly COLOR_DEFAULT = 0x000000;
 
   private markers: PIXI.Graphics[] = [];
-  private _steps: CircuitStepComponent[] = [];
+  private _steps: CircuitStep[] = [];
 
-  constructor(steps: CircuitStepComponent[]) {
+  constructor(steps: CircuitStep[]) {
     super();
 
     this.steps = steps;
     this.initMarkers();
   }
 
-  update(steps: CircuitStepComponent[]): void {
+  update(steps: CircuitStep[]): void {
     this.steps = steps;
     this.updateMarkerPositions();
     this.updateMarkerVisibility();
@@ -30,7 +30,7 @@ export class CircuitStepMarkerManager extends Container {
     return this._steps;
   }
 
-  private set steps(steps: CircuitStepComponent[]) {
+  private set steps(steps: CircuitStep[]) {
     if (steps.length === 0) {
       throw new Error("Steps array is empty");
     }
@@ -100,7 +100,7 @@ export class CircuitStepMarkerManager extends Container {
     this.markerAt(index).alpha = 0;
   }
 
-  private stepAt(index: number): CircuitStepComponent {
+  private stepAt(index: number): CircuitStep {
     const step = this._steps[index];
     if (!step) {
       throw new Error(`Step not found at index ${index}`);

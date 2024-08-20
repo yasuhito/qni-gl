@@ -1,6 +1,6 @@
-import { CircuitComponent } from "./circuit-component";
-import { CIRCUIT_FRAME_EVENTS, CircuitFrame } from "./circuit-frame";
-import { CircuitStepComponent } from "./circuit-step-component";
+import { Circuit } from "./circuit";
+import { CircuitFrame } from "./circuit-frame";
+import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Complex } from "@qni/common";
 import { DropzoneComponent } from "./dropzone-component";
@@ -20,7 +20,7 @@ import {
   Point,
   Renderer,
 } from "pixi.js";
-import { OPERATION_EVENTS } from "./events";
+import { CIRCUIT_FRAME_EVENTS, OPERATION_EVENTS } from "./events";
 
 declare global {
   interface Window {
@@ -45,7 +45,7 @@ export class App {
   activeGate: OperationComponent | null = null;
   grabbedGate: OperationComponent | null = null;
   pixiApp: Application;
-  circuitSteps: CircuitStepComponent[] = [];
+  circuitSteps: CircuitStep[] = [];
   nameMap = new Map();
 
   public static get instance(): App {
@@ -58,10 +58,10 @@ export class App {
   }
 
   get gatePalette(): OperationPalette {
-    return this.circuitFrame!.gatePalette;
+    return this.circuitFrame!.operationPalette;
   }
 
-  get circuit(): CircuitComponent {
+  get circuit(): Circuit {
     return this.circuitFrame!.circuit;
   }
 
@@ -116,7 +116,7 @@ export class App {
       this.pixiApp.stage.addChild(this.mainContainer);
 
       this.circuitFrame = CircuitFrame.getInstance(
-        this.pixiApp,
+        this.pixiApp.screen.width,
         this.pixiApp.screen.height * 0.6
       );
       this.mainContainer.addChild(this.circuitFrame);
@@ -138,7 +138,10 @@ export class App {
         if (!this.frameDivider!.isDragging) return;
 
         // 上下フレームの更新
-        this.circuitFrame!.resize(this.frameDivider!.y);
+        this.circuitFrame!.resize(
+          this.pixiApp.screen.width,
+          this.frameDivider!.y
+        );
         this.stateVectorFrame!.repositionAndResize(
           this.frameDivider!.y + this.frameDivider!.height,
           this.pixiApp.screen.width,
@@ -147,28 +150,28 @@ export class App {
       });
 
       this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED,
+        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
         this.grabGate,
         this
       );
       this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.MOUSE_LEAVE_PALETTE_GATE,
+        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT,
         this.resetCursor,
         this
       );
       this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.DISCARD_PALETTE_GATE,
+        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED,
         this.gateDiscarded,
         this
       );
 
       this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.ACTIVATE_CIRCUIT_STEP,
+        CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
         this.runSimulator,
         this
       );
       this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE,
+        CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
         this.grabGate,
         this
       );

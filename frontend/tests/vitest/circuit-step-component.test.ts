@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { CircuitStepComponent } from "../../src/circuit-step-component";
+import { CircuitStep } from "../../src/circuit-step";
 import { HGate } from "../../src/h-gate";
 import { XGate } from "../../src/x-gate";
 import { ControlGate } from "../../src/control-gate";
@@ -15,10 +15,10 @@ import { Write1Gate } from "../../src/write1-gate";
 import { MeasurementGate, SwapGate } from "../../src";
 
 describe("CircuitStepComponent", () => {
-  let circuitStep: CircuitStepComponent;
+  let circuitStep: CircuitStep;
 
   beforeEach(() => {
-    circuitStep = new CircuitStepComponent(3); // Create a circuit step with 3 qubits
+    circuitStep = new CircuitStep(3); // Create a circuit step with 3 qubits
   });
 
   describe("serialize", () => {
