@@ -1,6 +1,6 @@
 import { Container, Point } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 import { WireType } from "./types";
 import { spacingInPx } from "./util";
@@ -42,7 +42,7 @@ export class DropzoneComponent extends Container {
 
   get operation(): Operation | null {
     for (const each of this.children) {
-      if (each instanceof GateComponent) {
+      if (each instanceof OperationComponent) {
         return each as Operation;
       }
     }
@@ -103,7 +103,7 @@ export class DropzoneComponent extends Container {
     return this._connectBottom;
   }
 
-  snap(gate: GateComponent) {
+  snap(gate: OperationComponent) {
     this.addChild(gate);
     if (this.operation === null) {
       throw new Error("Operation is null");
@@ -121,7 +121,7 @@ export class DropzoneComponent extends Container {
     this.redrawWires();
   }
 
-  private emitGrabGateEvent(gate: GateComponent, globalPosition: Point) {
+  private emitGrabGateEvent(gate: OperationComponent, globalPosition: Point) {
     this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
   }
 
@@ -151,20 +151,20 @@ export class DropzoneComponent extends Container {
 
   hasWriteGate() {
     return ["Write0Gate", "Write1Gate"].some(
-      (each) => this.operation?.gateType === each
+      (each) => this.operation?.operationType === each
     );
   }
 
   hasMeasurementGate() {
-    return this.operation?.gateType === "MeasurementGate";
+    return this.operation?.operationType === "MeasurementGate";
   }
 
-  private isIconGate(gate: GateComponent | null) {
+  private isIconGate(gate: OperationComponent | null) {
     if (gate === null) {
       return false;
     }
     return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
-      (type) => gate.gateType === type
+      (type) => gate.operationType === type
     );
   }
 }

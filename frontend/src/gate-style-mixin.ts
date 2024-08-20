@@ -1,6 +1,6 @@
 import { Colors } from "./colors";
 import { Constructor } from "./constructor";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { Spacing } from "./spacing";
 import { GateShapeConfig, GateState, GateStyleOptions } from "./types";
 import { need } from "./util";
@@ -18,7 +18,7 @@ export interface GateStyleConstructor {
   SHAPE_CONFIG: GateShapeConfig;
 }
 
-export function GateStyleMixin<TBase extends Constructor<GateComponent>>(
+export function GateStyleMixin<TBase extends Constructor<OperationComponent>>(
   Base: TBase
 ): Constructor<GateStyle> & TBase & GateStyleConstructor {
   return class GateStyleMixinClass extends Base {

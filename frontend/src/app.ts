@@ -5,12 +5,12 @@ import { Colors } from "./colors";
 import { Complex } from "@qni/common";
 import { DropzoneComponent } from "./dropzone-component";
 import { FrameDivider } from "./frame-divider";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
 import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
-import { GatePaletteComponent } from "./gate-palette-component";
+import { OperationPaletteComponent } from "./operation-palette-component";
 import { logger, rectIntersect } from "./util";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import {
@@ -42,8 +42,8 @@ export class App {
   stateVectorFrame: StateVectorFrame | null = null;
   frameDivider: FrameDivider | null = null;
 
-  activeGate: GateComponent | null = null;
-  grabbedGate: GateComponent | null = null;
+  activeGate: OperationComponent | null = null;
+  grabbedGate: OperationComponent | null = null;
   pixiApp: Application;
   circuitSteps: CircuitStepComponent[] = [];
   nameMap = new Map();
@@ -57,7 +57,7 @@ export class App {
     return this._instance;
   }
 
-  get gatePalette(): GatePaletteComponent {
+  get gatePalette(): OperationPaletteComponent {
     return this.circuitFrame!.gatePalette;
   }
 
@@ -206,7 +206,7 @@ export class App {
     });
   }
 
-  private gateDiscarded(gate: GateComponent) {
+  private gateDiscarded(gate: OperationComponent) {
     this.activeGate = null;
     this.grabbedGate = null;
     this.circuitFrame!.removeChild(gate);
@@ -303,7 +303,7 @@ export class App {
     }
   }
 
-  private grabGate(gate: GateComponent, pointerPosition: Point) {
+  private grabGate(gate: OperationComponent, pointerPosition: Point) {
     if (this.activeGate !== null && this.activeGate !== gate) {
       this.activeGate.deactivate();
     }
@@ -391,7 +391,7 @@ export class App {
    * @param gateHeight ゲートの高さ
    */
   private isSnappable(
-    gate: GateComponent,
+    gate: OperationComponent,
     gateCenterX: number,
     gateCenterY: number,
     gateWidth: number,
@@ -440,7 +440,7 @@ export class App {
    * @param gate ゲート
    * @param pointerPosition マウス/タッチの位置
    */
-  private moveGate(gate: GateComponent, pointerPosition: Point) {
+  private moveGate(gate: OperationComponent, pointerPosition: Point) {
     let snapDropzone: DropzoneComponent | null = null;
 
     for (const circuitStep of this.circuit.steps) {
@@ -481,7 +481,7 @@ export class App {
     }
   }
 
-  private unsnapGateFromDropzone(gate: GateComponent) {
+  private unsnapGateFromDropzone(gate: OperationComponent) {
     gate.unsnap();
     this.circuitFrame!.addChild(gate);
     // this.pixiApp.stage.addChild(gate);

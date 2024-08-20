@@ -1,4 +1,4 @@
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { GateState, GateStyleOptions } from "./types";
 import { OutlinedGateMixin } from "./outlined-gate-mixin";
@@ -8,7 +8,7 @@ import { LabelableMixin } from "./labelable-mixin";
 import { SerializeableMixin } from "./serializeable-mixin";
 
 export class MeasurementGate extends OutlinedGateMixin(
-  SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
+  SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
 ) {
   static readonly _icon0Path = "./assets/measurement-gate0.png";
   static readonly _icon1Path = "./assets/measurement-gate1.png";
@@ -40,7 +40,7 @@ export class MeasurementGate extends OutlinedGateMixin(
   }
 
   async createSprites() {
-    const sprites = await super.createSprites(this.gateType);
+    const sprites = await super.createSprites(this.operationType);
 
     MeasurementGate._icon0 = await Assets.load(MeasurementGate._icon0Path);
     MeasurementGate._icon1 = await Assets.load(MeasurementGate._icon1Path);

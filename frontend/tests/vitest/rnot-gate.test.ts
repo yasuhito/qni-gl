@@ -10,8 +10,8 @@ describe("RnotGate", () => {
     gate = new RnotGate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("RnotGate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("RnotGate");
   });
 
   test("label", () => {

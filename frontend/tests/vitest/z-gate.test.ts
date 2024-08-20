@@ -10,8 +10,8 @@ describe("ZGate", () => {
     gate = new ZGate();
   });
 
-  test("gateType", () => {
-    expect(gate.gateType).toBe("ZGate");
+  test("operationType", () => {
+    expect(gate.operationType).toBe("ZGate");
   });
 
   test("label", () => {

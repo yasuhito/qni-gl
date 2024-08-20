@@ -1,6 +1,6 @@
 import { DropzoneComponent } from "./dropzone-component";
 import { List } from "@pixi/ui";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 
 export class CircuitStepDropzones {
@@ -25,7 +25,9 @@ export class CircuitStepDropzones {
     return this._dropzones.children as DropzoneComponent[];
   }
 
-  filterByOperationType(gateType: typeof GateComponent): DropzoneComponent[] {
+  filterByOperationType(
+    gateType: typeof OperationComponent
+  ): DropzoneComponent[] {
     return this.occupied.filter((each) => each.operation instanceof gateType);
   }
 

@@ -1,5 +1,5 @@
 import { CircularGateMixin } from "./circular-gate-mixin";
-import { GateComponent } from "./gate-component";
+import { OperationComponent } from "./operation-component";
 import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
 import { SerializeableMixin } from "./serializeable-mixin";
@@ -7,7 +7,7 @@ import { Spacing } from "./spacing";
 import { SerializedGate } from "./types";
 
 export class XGate extends CircularGateMixin(
-  SerializeableMixin(JsonableMixin(LabelableMixin(GateComponent)))
+  SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
 ) {
   static readonly cornerRadius = Spacing.cornerRadius.full;
 
