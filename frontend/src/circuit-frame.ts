@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Application, Container, Graphics, Point, Sprite, Texture } from "pixi.js";
 import { CIRCUIT_EVENTS, CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Colors } from "./colors";
@@ -20,38 +20,36 @@ const GATE_PALETTE_Y = 64;
 /**
  * 量子回路の表示用フレームを表すクラス。
  */
-export class CircuitFrame extends PIXI.Container {
+export class CircuitFrame extends Container {
   private static instance: CircuitFrame | null = null;
 
-  readonly app: PIXI.Application;
-  readonly background: PIXI.Graphics;
+  readonly app: Application;
+  readonly background: Graphics;
   readonly gatePalette: OperationPaletteComponent;
   readonly circuit: CircuitComponent;
-  // private maskGraphics: PIXI.Graphics;
-  private maskSprite: PIXI.Sprite;
-  private scrollContainer: PIXI.Container;
+  private maskSprite: Sprite;
+  private scrollContainer: Container;
 
   /**
    * インスタンスを取得するメソッド
    * @param app - PIXI アプリケーションインスタンス
    * @param height - 初期のフレームの高さ
    */
-  static getInstance(app: PIXI.Application, height: number): CircuitFrame {
+  static getInstance(app: Application, height: number): CircuitFrame {
     if (this.instance === null) {
       this.instance = new CircuitFrame(app, height);
     }
     return this.instance;
   }
 
-  private constructor(app: PIXI.Application, height: number) {
+  private constructor(app: Application, height: number) {
     super();
 
     this.app = app;
-    this.background = new PIXI.Graphics();
+    this.background = new Graphics();
     this.gatePalette = new OperationPaletteComponent();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
-    // this.maskGraphics = new PIXI.Graphics();
-    this.scrollContainer = new PIXI.Container();
+    this.scrollContainer = new Container();
 
     this.addChildAt(this.background, 0);
     this.addChild(this.scrollContainer);
@@ -61,7 +59,7 @@ export class CircuitFrame extends PIXI.Container {
     this.scrollContainer.zIndex = 1;
 
     // マスクの設定を変更
-    this.maskSprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+    this.maskSprite = new Sprite(Texture.WHITE);
     this.updateMask(height);
     this.scrollContainer.mask = this.maskSprite;
     this.addChild(this.maskSprite); // マスクをシーンに追加
@@ -137,7 +135,7 @@ export class CircuitFrame extends PIXI.Container {
    */
   private grabPaletteGate(
     gate: OperationComponent,
-    pointerPosition: PIXI.Point
+    pointerPosition: Point
   ): void {
     this.addChild(gate);
     this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_GATE_GRABBED, gate, pointerPosition);
@@ -178,7 +176,7 @@ export class CircuitFrame extends PIXI.Container {
    */
   private grabCircuitGate(
     gate: OperationComponent,
-    pointerPosition: PIXI.Point
+    pointerPosition: Point
   ): void {
     this.emit(CIRCUIT_FRAME_EVENTS.GRAB_CIRCUIT_GATE, gate, pointerPosition);
   }
