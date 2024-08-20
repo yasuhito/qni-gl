@@ -1,6 +1,6 @@
 import { ActorRefFrom, createActor, createMachine } from "xstate";
 import { DropzoneComponent } from "./dropzone-component";
-import { OperationSourceComponent } from "./operation-source-component";
+import { OperationSource } from "./operation-source";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
@@ -161,8 +161,8 @@ export class OperationComponent extends IconableMixin(Container) {
     return this.constructor.name;
   }
 
-  get gateSource(): OperationSourceComponent | null {
-    if (this.parent instanceof OperationSourceComponent) {
+  get gateSource(): OperationSource | null {
+    if (this.parent instanceof OperationSource) {
       return this.parent;
     }
 

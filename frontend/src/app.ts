@@ -10,7 +10,7 @@ import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
 import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
-import { OperationPaletteComponent } from "./operation-palette-component";
+import { OperationPalette } from "./operation-palette";
 import { logger, rectIntersect } from "./util";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import {
@@ -57,7 +57,7 @@ export class App {
     return this._instance;
   }
 
-  get gatePalette(): OperationPaletteComponent {
+  get gatePalette(): OperationPalette {
     return this.circuitFrame!.gatePalette;
   }
 

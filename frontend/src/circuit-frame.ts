@@ -1,10 +1,17 @@
-import { Application, Container, Graphics, Point, Sprite, Texture } from "pixi.js";
+import {
+  Application,
+  Container,
+  Graphics,
+  Point,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { CIRCUIT_EVENTS, CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
 import { Colors } from "./colors";
 import { OPERATION_PALETTE_EVENTS } from "./events";
 import { OperationComponent } from "./operation-component";
-import { OperationPaletteComponent } from "./operation-palette-component";
+import { OperationPalette } from "./operation-palette";
 
 export const CIRCUIT_FRAME_EVENTS = {
   PALETTE_GATE_GRABBED: "circuit-frame:grab-palette-gate",
@@ -25,7 +32,7 @@ export class CircuitFrame extends Container {
 
   readonly app: Application;
   readonly background: Graphics;
-  readonly gatePalette: OperationPaletteComponent;
+  readonly gatePalette: OperationPalette;
   readonly circuit: CircuitComponent;
   private maskSprite: Sprite;
   private scrollContainer: Container;
@@ -47,7 +54,7 @@ export class CircuitFrame extends Container {
 
     this.app = app;
     this.background = new Graphics();
-    this.gatePalette = new OperationPaletteComponent();
+    this.gatePalette = new OperationPalette();
     this.circuit = new CircuitComponent({ minWireCount: 2, stepCount: 5 });
     this.scrollContainer = new Container();
 

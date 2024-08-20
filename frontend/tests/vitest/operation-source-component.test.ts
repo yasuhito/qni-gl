@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 import { OPERATION_EVENTS, OPERATION_SOURCE_EVENTS } from "../../src/events";
 import { OperationClass } from "../../src/operation";
-import { OperationSourceComponent } from "../../src/operation-source-component";
+import { OperationSource } from "../../src/operation-source";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 class MockOperation extends Container {
@@ -11,12 +11,10 @@ class MockOperation extends Container {
 }
 
 describe("OperationSourceComponent", () => {
-  let operationSource: OperationSourceComponent;
+  let operationSource: OperationSource;
 
   beforeEach(() => {
-    operationSource = new OperationSourceComponent(
-      MockOperation as OperationClass
-    );
+    operationSource = new OperationSource(MockOperation as OperationClass);
   });
 
   it("should create a new operation when generateNewOperation is called", () => {

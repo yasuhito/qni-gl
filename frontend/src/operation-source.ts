@@ -18,7 +18,7 @@ import { need } from "./util";
  * It extends the PIXI.js Container class to integrate with the rendering system and
  * facilitate drag-and-drop functionality.
  */
-export class OperationSourceComponent extends Container {
+export class OperationSource extends Container {
   private static borderColor = Colors["border-inverse"];
 
   private operationClass: OperationClass;
@@ -83,7 +83,7 @@ export class OperationSourceComponent extends Container {
     const width = operation.borderWidth;
     const size = operation.sizeInPx - width;
     const cornerRadius = operation.cornerRadius;
-    const color = OperationSourceComponent.borderColor;
+    const color = OperationSource.borderColor;
     const alignment = 1;
 
     this.border
