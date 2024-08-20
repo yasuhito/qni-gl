@@ -4,7 +4,7 @@ import { GateComponent } from "./gate-component";
 import { Operation } from "./operation";
 import { WireType } from "./types";
 import { spacingInPx } from "./util";
-import { DROPZONE_EVENTS } from "./events";
+import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
 
 export class DropzoneComponent extends Container {
   static size = spacingInPx(8);
@@ -108,7 +108,7 @@ export class DropzoneComponent extends Container {
     if (this.operation === null) {
       throw new Error("Operation is null");
     }
-    this.operation.on("grab", this.emitGrabGateEvent, this);
+    this.operation.on(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
     this.redrawWires();
     this.emit(DROPZONE_EVENTS.GATE_SNAPPED, this);
   }
@@ -117,7 +117,7 @@ export class DropzoneComponent extends Container {
     if (this.operation === null) {
       throw new Error("Operation is null");
     }
-    this.operation.off("grab", this.emitGrabGateEvent, this);
+    this.operation.off(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
     this.redrawWires();
   }
 

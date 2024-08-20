@@ -1,10 +1,12 @@
 import { Container, Graphics } from "pixi.js";
 import { Colors } from "./colors";
 import { GateComponent } from "./gate-component";
-import { GateSourceComponent } from "./gate-source-component";
+import { OperationSourceComponent } from "./operation-source-component";
 import { List } from "@pixi/ui";
 import { spacingInPx } from "./util";
 import { DropShadowFilter } from "pixi-filters";
+import { OperationClass } from "./operation";
+import { OPERATION_SOURCE_EVENTS } from "./events";
 
 export const GATE_PALETTE_EVENTS = {
   GATE_GRABBED: "gate-palette:grab-gate",
@@ -54,31 +56,40 @@ export class GatePaletteComponent extends Container {
    *
    * @param gateClass 追加するゲートのクラス
    */
-  addGate(gateClass: typeof GateComponent) {
+  addGate(gateClass: OperationClass) {
     const currentRow =
       this.gateRows.children[this.gateRows.children.length - 1];
 
-    const gateSource = new GateSourceComponent(gateClass);
-    currentRow.addChild(gateSource);
+    const operationSource = new OperationSourceComponent(gateClass);
+    currentRow.addChild(operationSource);
 
-    gateSource.on("newGate", (newGate) => {
-      this.emit("newGate", newGate);
-    });
+    operationSource.on(
+      OPERATION_SOURCE_EVENTS.OPERATION_CREATED,
+      (newOperation) => {
+        this.emit("newGate", newOperation);
+      }
+    );
 
-    const gate = gateSource.generateNewGate();
+    const operation = operationSource.generateNewOperation();
 
-    gateSource.on("grabGate", (gate, globalPosition) => {
-      this.emit("gate-palette:grab-gate", gate, globalPosition);
+    operationSource.on(
+      OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
+      (operation, globalPosition) => {
+        this.emit("gate-palette:grab-gate", operation, globalPosition);
+      }
+    );
+    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_LEFT, (operation) => {
+      this.emit("gate-palette:mouse-leave-gate", operation);
     });
-    gateSource.on("mouseLeaveGate", (gate) => {
-      this.emit("gate-palette:mouse-leave-gate", gate);
-    });
-    gateSource.on("gateDiscarded", (gate) => {
-      this.gates[gate.gateType] = null;
-      this.emit("gate-palette:gate-discarded", gate);
-    });
+    operationSource.on(
+      OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED,
+      (operation) => {
+        this.gates[operation.gateType] = null;
+        this.emit("gate-palette:gate-discarded", operation);
+      }
+    );
 
-    this.gates[gate.gateType] = gate;
+    this.gates[operation.gateType] = operation;
 
     this.redraw();
   }
