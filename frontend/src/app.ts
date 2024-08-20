@@ -20,7 +20,11 @@ import {
   Point,
   Renderer,
 } from "pixi.js";
-import { CIRCUIT_FRAME_EVENTS, OPERATION_EVENTS } from "./events";
+import {
+  CIRCUIT_FRAME_EVENTS,
+  FRAME_DIVIDER_EVENTS,
+  OPERATION_EVENTS,
+} from "./events";
 
 declare global {
   interface Window {
@@ -39,8 +43,8 @@ export class App {
     type: "vertical",
   });
   circuitFrame!: CircuitFrame;
-  stateVectorFrame: StateVectorFrame | null = null;
-  frameDivider: FrameDivider | null = null;
+  stateVectorFrame!: StateVectorFrame;
+  frameDivider!: FrameDivider;
 
   activeGate: OperationComponent | null = null;
   grabbedGate: OperationComponent | null = null;
@@ -127,26 +131,39 @@ export class App {
       );
       this.mainContainer.addChild(this.stateVectorFrame);
 
-      // 量子回路と状態ベクトルの境界線
       this.frameDivider = FrameDivider.initialize(
-        this.pixiApp,
+        this.pixiApp.screen.width,
         this.circuitFrame.height
       );
       this.pixiApp.stage.addChild(this.frameDivider);
+      this.frameDivider.on(FRAME_DIVIDER_EVENTS.DRAG_STARTED, () => {
+        this.pixiApp.stage.cursor = "ns-resize";
+      });
 
-      this.pixiApp.stage.on("pointermove", () => {
-        if (!this.frameDivider!.isDragging) return;
+      this.pixiApp.stage.on("pointermove", (event) => {
+        if (!this.frameDivider.isDragging) return;
+
+        this.frameDivider.move(event.global.y, this.pixiApp.screen.height);
 
         // 上下フレームの更新
-        this.circuitFrame!.resize(
+        this.circuitFrame.resize(
           this.pixiApp.screen.width,
-          this.frameDivider!.y
+          this.frameDivider.y
         );
-        this.stateVectorFrame!.repositionAndResize(
-          this.frameDivider!.y + this.frameDivider!.height,
+        this.stateVectorFrame.repositionAndResize(
+          this.frameDivider.y + this.frameDivider.height,
           this.pixiApp.screen.width,
-          this.pixiApp.screen.height - this.frameDivider!.y
+          this.pixiApp.screen.height - this.frameDivider.y
         );
+      });
+
+      this.pixiApp.stage.on("pointerup", () => {
+        this.frameDivider.endDragging();
+        this.pixiApp.stage.cursor = "default";
+      });
+      this.pixiApp.stage.on("pointerupoutside", () => {
+        this.frameDivider.endDragging();
+        this.pixiApp.stage.cursor = "default";
       });
 
       this.circuitFrame.on(
@@ -294,14 +311,14 @@ export class App {
     this.pixiApp.renderer.resize(width, height);
 
     if (this.frameDivider) {
-      this.frameDivider.updateWidth();
+      this.frameDivider.updateWidth(this.pixiApp.screen.width);
     }
 
     if (this.stateVectorFrame) {
       this.stateVectorFrame.repositionAndResize(
-        this.frameDivider!.y + this.frameDivider!.height,
+        this.frameDivider.y + this.frameDivider.height,
         this.pixiApp.screen.width,
-        this.pixiApp.screen.height - this.frameDivider!.y
+        this.pixiApp.screen.height - this.frameDivider.y
       );
     }
   }
