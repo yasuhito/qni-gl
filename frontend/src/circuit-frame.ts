@@ -1,24 +1,10 @@
 import * as PIXI from "pixi.js";
-import { Colors } from "./colors";
-import { ControlGate } from "./control-gate";
-import { OperationComponent } from "./operation-component";
-import { OperationPaletteComponent } from "./operation-palette-component";
-import { HGate } from "./h-gate";
-import { MeasurementGate } from "./measurement-gate";
-import { RnotGate } from "./rnot-gate";
-import { SDaggerGate } from "./s-dagger-gate";
-import { SGate } from "./s-gate";
-import { SwapGate } from "./swap-gate";
-import { TDaggerGate } from "./t-dagger-gate";
-import { TGate } from "./t-gate";
-import { Write0Gate } from "./write0-gate";
-import { Write1Gate } from "./write1-gate";
-import { XGate } from "./x-gate";
-import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate";
 import { CIRCUIT_EVENTS, CircuitComponent } from "./circuit-component";
 import { CircuitStepComponent } from "./circuit-step-component";
+import { Colors } from "./colors";
 import { OPERATION_PALETTE_EVENTS } from "./events";
+import { OperationComponent } from "./operation-component";
+import { OperationPaletteComponent } from "./operation-palette-component";
 
 export const CIRCUIT_FRAME_EVENTS = {
   PALETTE_GATE_GRABBED: "circuit-frame:grab-palette-gate",
@@ -30,26 +16,6 @@ export const CIRCUIT_FRAME_EVENTS = {
 
 const GATE_PALETTE_X = 40;
 const GATE_PALETTE_Y = 64;
-
-const PALETTE_FIRST_ROW_GATES = [
-  HGate,
-  XGate,
-  YGate,
-  ZGate,
-  RnotGate,
-  SGate,
-  SDaggerGate,
-  TGate,
-  TDaggerGate,
-];
-
-const PALETTE_SECOND_ROW_GATES = [
-  SwapGate,
-  ControlGate,
-  Write0Gate,
-  Write1Gate,
-  MeasurementGate,
-];
 
 /**
  * 量子回路の表示用フレームを表すクラス。
@@ -151,14 +117,14 @@ export class CircuitFrame extends PIXI.Container {
       this
     );
 
-    this.gatePalette.newRow();
-    PALETTE_FIRST_ROW_GATES.forEach((gate) => {
-      this.gatePalette.addOperation(gate);
-    });
-    this.gatePalette.newRow();
-    PALETTE_SECOND_ROW_GATES.forEach((gate) =>
-      this.gatePalette.addOperation(gate)
-    );
+    // this.gatePalette.newRow();
+    // PALETTE_FIRST_ROW_GATES.forEach((gate) => {
+    //   this.gatePalette.addOperation(gate);
+    // });
+    // this.gatePalette.newRow();
+    // PALETTE_SECOND_ROW_GATES.forEach((gate) =>
+    //   this.gatePalette.addOperation(gate)
+    // );
   }
 
   private initCircuit() {

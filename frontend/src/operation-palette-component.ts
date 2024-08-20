@@ -1,12 +1,46 @@
 import { Colors } from "./colors";
 import { Container, Graphics } from "pixi.js";
+import { ControlGate } from "./control-gate";
 import { DropShadowFilter } from "pixi-filters";
+import { HGate } from "./h-gate";
 import { List } from "@pixi/ui";
+import { MeasurementGate } from "./measurement-gate";
 import { OPERATION_PALETTE_EVENTS, OPERATION_SOURCE_EVENTS } from "./events";
 import { OperationClass } from "./operation";
 import { OperationComponent } from "./operation-component";
 import { OperationSourceComponent } from "./operation-source-component";
+import { RnotGate } from "./rnot-gate";
+import { SDaggerGate } from "./s-dagger-gate";
+import { SGate } from "./s-gate";
+import { SwapGate } from "./swap-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { TGate } from "./t-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { XGate } from "./x-gate";
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate";
 import { spacingInPx } from "./util";
+
+const FIRST_ROW_OPERATIONS = [
+  HGate,
+  XGate,
+  YGate,
+  ZGate,
+  RnotGate,
+  SGate,
+  SDaggerGate,
+  TGate,
+  TDaggerGate,
+];
+
+const SECOND_ROW_OPERATIONS = [
+  SwapGate,
+  ControlGate,
+  Write0Gate,
+  Write1Gate,
+  MeasurementGate,
+];
 
 /**
  * Represents the palette of available operations in the UI.
@@ -36,13 +70,18 @@ export class OperationPaletteComponent extends Container {
       horPadding: OperationPaletteComponent.horizontalPadding,
     });
     this.addChild(this.rows);
+
+    this.newRow();
+    FIRST_ROW_OPERATIONS.forEach((gate) => {
+      this.addOperation(gate);
+    });
+    this.newRow();
+    SECOND_ROW_OPERATIONS.forEach((gate) => this.addOperation(gate));
+
+    this.draw();
   }
 
-  /**
-   * Adds a new operation to the palette.
-   * @param operationClass The class of the operation to add.
-   */
-  addOperation(operationClass: OperationClass) {
+  private addOperation(operationClass: OperationClass) {
     const currentRow = this.rows.children[this.rows.children.length - 1];
     const operationSource = new OperationSourceComponent(operationClass);
 
@@ -52,14 +91,9 @@ export class OperationPaletteComponent extends Container {
 
     const operation = operationSource.generateNewOperation();
     this.operations[operation.operationType] = operation;
-
-    this.redraw();
   }
 
-  /**
-   * Creates a new row in the palette for organizing operations.
-   */
-  newRow() {
+  private newRow() {
     const row = new List({
       type: "horizontal",
       elementsMargin: OperationPaletteComponent.gapBetweenOperations,
@@ -102,7 +136,7 @@ export class OperationPaletteComponent extends Container {
     );
   }
 
-  private redraw(): void {
+  private draw(): void {
     const width =
       Math.max(...this.rows.children.map((row) => row.width)) +
       OperationPaletteComponent.horizontalPadding * 2;
