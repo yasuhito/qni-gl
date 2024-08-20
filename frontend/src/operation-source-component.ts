@@ -154,6 +154,7 @@ export class OperationSourceComponent extends Container {
     globalPosition: Point
   ): void {
     this.generateNewOperation();
+    this.removeChild(operation);
     this.emit(
       OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
       operation,
