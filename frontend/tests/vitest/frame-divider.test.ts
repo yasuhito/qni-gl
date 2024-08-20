@@ -16,8 +16,7 @@ describe("FrameDivider", () => {
       },
     } as unknown as Application;
 
-    // FrameDividerのインスタンスを初期化
-    frameDivider = FrameDivider.initialize(800, 300);
+    frameDivider = FrameDivider.initialize({ width: 800, initialY: 300 });
   });
 
   afterEach(() => {

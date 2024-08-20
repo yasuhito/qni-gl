@@ -16,7 +16,13 @@ export class FrameDivider extends Graphics {
   private _isDragging = false;
   private dragStartY = 0;
 
-  static initialize(width: number, initialY: number): FrameDivider {
+  static initialize({
+    width,
+    initialY,
+  }: {
+    width: number;
+    initialY: number;
+  }): FrameDivider {
     if (!this.instance) {
       this.instance = new FrameDivider(initialY, width);
     }

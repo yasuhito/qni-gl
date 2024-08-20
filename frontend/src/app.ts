@@ -48,7 +48,7 @@ export class App {
 
   activeGate: OperationComponent | null = null;
   grabbedGate: OperationComponent | null = null;
-  pixiApp: Application;
+  app: Application;
   circuitSteps: CircuitStep[] = [];
   nameMap = new Map();
 
@@ -95,20 +95,20 @@ export class App {
     );
 
     // view, stage などをまとめた application を作成
-    this.pixiApp = new Application<Renderer<HTMLCanvasElement>>();
+    this.app = new Application<Renderer<HTMLCanvasElement>>();
     this.initApp().then(() => {
       // this.pixiApp.stage = new Stage();
 
       window.addEventListener("resize", this.resize.bind(this), false);
       this.resize();
 
-      el.appendChild(this.pixiApp.canvas);
+      el.appendChild(this.app.canvas);
 
       // stage: 画面に表示するオブジェクトたちの入れ物
-      this.pixiApp.stage.eventMode = "static";
-      this.pixiApp.stage.hitArea = this.pixiApp.screen;
-      this.pixiApp.stage.sortableChildren = true;
-      this.pixiApp.stage
+      this.app.stage.eventMode = "static";
+      this.app.stage.hitArea = this.app.screen;
+      this.app.stage.sortableChildren = true;
+      this.app.stage
         .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
         .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
         .on("pointerdown", this.maybeDeactivateGate, this);
@@ -117,54 +117,21 @@ export class App {
         type: "vertical",
       });
       this.mainContainer.sortableChildren = true;
-      this.pixiApp.stage.addChild(this.mainContainer);
+      this.app.stage.addChild(this.mainContainer);
 
       this.circuitFrame = CircuitFrame.getInstance(
-        this.pixiApp.screen.width,
-        this.pixiApp.screen.height * 0.6
+        this.app.screen.width,
+        this.app.screen.height * 0.6
       );
       this.mainContainer.addChild(this.circuitFrame);
 
       this.stateVectorFrame = StateVectorFrame.getInstance(
-        this.pixiApp.screen.width,
-        this.pixiApp.screen.height * 0.4
+        this.app.screen.width,
+        this.app.screen.height * 0.4
       );
       this.mainContainer.addChild(this.stateVectorFrame);
 
-      this.frameDivider = FrameDivider.initialize(
-        this.pixiApp.screen.width,
-        this.circuitFrame.height
-      );
-      this.pixiApp.stage.addChild(this.frameDivider);
-      this.frameDivider.on(FRAME_DIVIDER_EVENTS.DRAG_STARTED, () => {
-        this.pixiApp.stage.cursor = "ns-resize";
-      });
-
-      this.pixiApp.stage.on("pointermove", (event) => {
-        if (!this.frameDivider.isDragging) return;
-
-        this.frameDivider.move(event.global.y, this.pixiApp.screen.height);
-
-        // 上下フレームの更新
-        this.circuitFrame.resize(
-          this.pixiApp.screen.width,
-          this.frameDivider.y
-        );
-        this.stateVectorFrame.repositionAndResize(
-          this.frameDivider.y + this.frameDivider.height,
-          this.pixiApp.screen.width,
-          this.pixiApp.screen.height - this.frameDivider.y
-        );
-      });
-
-      this.pixiApp.stage.on("pointerup", () => {
-        this.frameDivider.endDragging();
-        this.pixiApp.stage.cursor = "default";
-      });
-      this.pixiApp.stage.on("pointerupoutside", () => {
-        this.frameDivider.endDragging();
-        this.pixiApp.stage.cursor = "default";
-      });
+      this.setupFrameDivider();
 
       this.circuitFrame.on(
         CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
@@ -203,15 +170,60 @@ export class App {
       // これによって、最初のステップの状態ベクトルが表示される
       this.circuit.stepAt(0).activate();
 
-      this.nameMap.set(this.pixiApp.stage, "stage");
+      this.nameMap.set(this.app.stage, "stage");
 
       // テスト用
       window.pixiApp = this;
     });
   }
 
+  private setupFrameDivider() {
+    this.frameDivider = FrameDivider.initialize({
+      width: this.app.screen.width,
+      initialY: this.circuitFrame.height,
+    });
+    this.app.stage.addChild(this.frameDivider);
+
+    this.setupFrameDividerEventHandlers();
+  }
+
+  private setupFrameDividerEventHandlers() {
+    this.frameDivider.on(
+      FRAME_DIVIDER_EVENTS.DRAG_STARTED,
+      this.startFrameDividerDragging,
+      this
+    );
+    this.app.stage.on("pointermove", this.maybeUpdateFrames, this);
+    this.app.stage.on("pointerup", this.endFrameDividerDragging, this);
+    this.app.stage.on("pointerupoutside", this.endFrameDividerDragging, this);
+  }
+
+  // frameDivider のドラッグスタートでカーソルを変更
+  private startFrameDividerDragging() {
+    this.app.stage.cursor = "ns-resize";
+  }
+
+  private maybeUpdateFrames(event: FederatedPointerEvent) {
+    if (!this.frameDivider.isDragging) return;
+
+    this.frameDivider.move(event.global.y, this.app.screen.height);
+
+    // 上下フレームの更新
+    this.circuitFrame.resize(this.app.screen.width, this.frameDivider.y);
+    this.stateVectorFrame.repositionAndResize(
+      this.frameDivider.y + this.frameDivider.height,
+      this.app.screen.width,
+      this.app.screen.height - this.frameDivider.y
+    );
+  }
+
+  private endFrameDividerDragging() {
+    this.frameDivider.endDragging();
+    this.app.stage.cursor = "default";
+  }
+
   private async initApp() {
-    await this.pixiApp.init({
+    await this.app.init({
       resizeTo: window,
       resolution: window.devicePixelRatio,
       preference: "webgpu",
@@ -297,30 +309,26 @@ export class App {
   }
 
   get screenWidth(): number {
-    return this.pixiApp.screen.width;
+    return this.app.screen.width;
   }
 
   get screenHeight(): number {
-    return this.pixiApp.screen.height;
+    return this.app.screen.height;
   }
 
   resize() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    this.pixiApp.renderer.resize(width, height);
+    this.app.renderer.resize(width, height);
 
-    if (this.frameDivider) {
-      this.frameDivider.updateWidth(this.pixiApp.screen.width);
-    }
+    this.frameDivider.updateWidth(this.app.screen.width);
 
-    if (this.stateVectorFrame) {
-      this.stateVectorFrame.repositionAndResize(
-        this.frameDivider.y + this.frameDivider.height,
-        this.pixiApp.screen.width,
-        this.pixiApp.screen.height - this.frameDivider.y
-      );
-    }
+    this.stateVectorFrame.repositionAndResize(
+      this.frameDivider.y + this.frameDivider.height,
+      this.app.screen.width,
+      this.app.screen.height - this.frameDivider.y
+    );
   }
 
   private grabGate(gate: OperationComponent, pointerPosition: Point) {
@@ -373,9 +381,9 @@ export class App {
     }
 
     // TODO: メソッド化
-    this.pixiApp.stage.cursor = "grabbing";
+    this.app.stage.cursor = "grabbing";
 
-    this.pixiApp.stage.on("pointermove", this.maybeMoveGate, this);
+    this.app.stage.on("pointermove", this.maybeMoveGate, this);
   }
 
   /**
@@ -514,7 +522,7 @@ export class App {
 
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
     this.resetCursor();
-    this.pixiApp.stage.off("pointermove", this.maybeMoveGate);
+    this.app.stage.off("pointermove", this.maybeMoveGate);
     // this.grabbedGate.parentLayer = this.gateLayer;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
@@ -526,7 +534,7 @@ export class App {
   }
 
   private resetCursor() {
-    this.pixiApp.stage.cursor = "default";
+    this.app.stage.cursor = "default";
   }
 
   private updateStateVectorComponentQubitCount() {
@@ -534,7 +542,7 @@ export class App {
   }
 
   private maybeDeactivateGate(event: FederatedPointerEvent) {
-    if (event.target === this.pixiApp.stage) {
+    if (event.target === this.app.stage) {
       this.activeGate?.deactivate();
     }
   }
