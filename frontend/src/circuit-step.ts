@@ -10,7 +10,7 @@ import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
 import { CircuitStepState } from "./circuit-step-state";
 import { CircuitStepDropzones } from "./circuit-step-dropzones";
 
-export class CircuitStepComponent extends Container {
+export class CircuitStep extends Container {
   private _dropzones: CircuitStepDropzones;
   private _state: CircuitStepState;
 

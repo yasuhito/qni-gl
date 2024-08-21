@@ -1,4 +1,4 @@
-import { CircuitStepComponent } from "./circuit-step-component";
+import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
 import { List as ListContainer } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
@@ -7,7 +7,7 @@ import { CIRCUIT_STEP_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 
 /**
- * Represents the options for a {@link CircuitComponent}.
+ * Represents the options for a {@link Circuit}.
  */
 export interface CircuitOptions {
   minWireCount: number;
@@ -15,14 +15,14 @@ export interface CircuitOptions {
 }
 
 export const CIRCUIT_EVENTS = {
-  GATE_GRABBED: "circuit:grab-gate",
+  OPERATION_GRABBED: "circuit:grab-gate",
   ACTIVATE_STEP: "circuit:activate-step",
 };
 
 /**
- * Represents a quantum circuit that holds multiple {@link CircuitStepComponent}s.
+ * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
  */
-export class CircuitComponent extends Container {
+export class Circuit extends Container {
   /** Minimum number of wires. */
   minWireCount = 1;
   /** Maximum number of wires. */
@@ -30,12 +30,12 @@ export class CircuitComponent extends Container {
 
   minStepCount = 5;
 
-  /** Layout container for arranging {@link CircuitStepComponent}s in a row. */
+  /** Layout container for arranging {@link CircuitStep}s in a row. */
   circuitStepsContainer: ListContainer;
   private markerManager: CircuitStepMarkerManager;
 
   /**
-   * Returns the number of wires (bits) in the {@link CircuitComponent}.
+   * Returns the number of wires (bits) in the {@link Circuit}.
    */
   get wireCount() {
     let wireCount = this.minWireCount;
@@ -67,10 +67,10 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Returns an array of {@link CircuitStepComponent}s in the {@link CircuitComponent}.
+   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
    */
-  get steps(): CircuitStepComponent[] {
-    return this.circuitStepsContainer.children as CircuitStepComponent[];
+  get steps(): CircuitStep[] {
+    return this.circuitStepsContainer.children as CircuitStep[];
   }
 
   get activeStepIndex() {
@@ -85,7 +85,7 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Returns a new {@link CircuitComponent} instance.
+   * Returns a new {@link Circuit} instance.
    *
    * @param {CircuitOptions} options - The options for the Circuit.
    */
@@ -113,7 +113,7 @@ export class CircuitComponent extends Container {
   }
 
   private appendStep(wireCount = this.minWireCount) {
-    const circuitStep = new CircuitStepComponent(wireCount);
+    const circuitStep = new CircuitStep(wireCount);
     this.circuitStepsContainer.addChild(circuitStep);
 
     circuitStep.on(
@@ -128,7 +128,7 @@ export class CircuitComponent extends Container {
     );
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_EVENTS.GATE_GRABBED, gate, globalPosition);
+      this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
     });
   }
 
@@ -167,7 +167,7 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Retrieves the {@link CircuitStepComponent} at the specified index.
+   * Retrieves the {@link CircuitStep} at the specified index.
    */
   stepAt(stepIndex: number) {
     if (stepIndex < 0 || stepIndex >= this.steps.length) {
@@ -207,7 +207,7 @@ export class CircuitComponent extends Container {
     }
   }
 
-  private get emptySteps(): CircuitStepComponent[] {
+  private get emptySteps(): CircuitStep[] {
     return this.steps.filter((each) => each.isEmpty);
   }
 
@@ -308,7 +308,7 @@ export class CircuitComponent extends Container {
     return output.join("\n");
   }
 
-  private emitOnStepHoverSignal(circuitStep: CircuitStepComponent) {
+  private emitOnStepHoverSignal(circuitStep: CircuitStep) {
     // const stepIndex = this.steps.indexOf(circuitStep);
     // if (stepIndex !== -1) {
     //   this.markerManager.hoverMarker(stepIndex, this.steps);
@@ -318,10 +318,10 @@ export class CircuitComponent extends Container {
   }
 
   /**
-   * Deactivates all other {@link CircuitStepComponent}s except for the specified {@link CircuitStepComponent}.
+   * Deactivates all other {@link CircuitStep}s except for the specified {@link CircuitStep}.
    */
-  private activateStep(circuitStep: CircuitStepComponent) {
-    this.steps.forEach((each: CircuitStepComponent) => {
+  private activateStep(circuitStep: CircuitStep) {
+    this.steps.forEach((each: CircuitStep) => {
       if (each !== circuitStep) {
         if (each.isActive()) {
           each.deactivate();

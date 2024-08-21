@@ -30,3 +30,15 @@ export const OPERATION_PALETTE_EVENTS = {
   OPERATION_MOUSE_LEFT: "operation-palette.operation-mouse-left",
   OPERATION_DISCARDED: "operation-palette.operation-discarded",
 } as const;
+
+export const CIRCUIT_FRAME_EVENTS = {
+  PALETTE_OPERATION_GRABBED: "circuit-frame.palette-operation-grabbed",
+  PALETTE_OPERATION_MOUSE_LEFT: "circuit-frame.palette-operation-mouse-left",
+  PALETTE_OPERATION_DISCARDED: "circuit-frame.palette-operation-discarded",
+  CIRCUIT_OPERATION_GRABBED: "circuit-frame.circuit-operation-grabbed",
+  CIRCUIT_STEP_ACTIVATED: "circuit-frame.circuit-step-activated",
+} as const;
+
+export const FRAME_DIVIDER_EVENTS = {
+  DRAG_STARTED: "frame-divider.drag-started",
+} as const;

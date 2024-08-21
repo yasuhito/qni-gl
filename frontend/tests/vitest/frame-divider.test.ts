@@ -16,8 +16,7 @@ describe("FrameDivider", () => {
       },
     } as unknown as Application;
 
-    // FrameDividerのインスタンスを初期化
-    frameDivider = FrameDivider.initialize(app, 300);
+    frameDivider = FrameDivider.initialize({ width: 800, initialY: 300 });
   });
 
   afterEach(() => {
@@ -45,7 +44,7 @@ describe("FrameDivider", () => {
     const rectSpy = vi.spyOn(frameDivider, "rect");
     const fillSpy = vi.spyOn(frameDivider, "fill");
 
-    frameDivider.updateWidth();
+    frameDivider.updateWidth(800);
 
     expect(clearSpy).toHaveBeenCalled();
     expect(rectSpy).toHaveBeenCalledWith(0, 0, 800, 2);
@@ -59,7 +58,6 @@ describe("FrameDivider", () => {
 
     expect(frameDivider["isDragging"]).toBe(true);
     expect(frameDivider["dragStartY"]).toBe(50);
-    expect(app.stage.cursor).toBe("ns-resize");
   });
 
   it("should end dragging on pointerup", () => {
@@ -74,8 +72,7 @@ describe("FrameDivider", () => {
     frameDivider["_isDragging"] = true;
     frameDivider["dragStartY"] = 50;
 
-    const event = { global: { y: 400 } } as FederatedPointerEvent;
-    frameDivider["move"](event);
+    frameDivider.move(400, 600);
 
     expect(frameDivider.y).toBe(350);
   });
@@ -84,15 +81,14 @@ describe("FrameDivider", () => {
     frameDivider["_isDragging"] = false;
 
     const initialY = frameDivider.y;
-    const event = { global: { y: 400 } } as FederatedPointerEvent;
-    frameDivider["move"](event);
+    frameDivider.move(400, 600);
 
     expect(frameDivider.y).toBe(initialY);
   });
 
   it("should clamp position within bounds", () => {
-    expect(frameDivider["clampPosition"](-50)).toBe(0);
-    expect(frameDivider["clampPosition"](700)).toBe(598);
-    expect(frameDivider["clampPosition"](300)).toBe(300);
+    expect(frameDivider["clampPosition"](-50, 600)).toBe(0);
+    expect(frameDivider["clampPosition"](700, 600)).toBe(598);
+    expect(frameDivider["clampPosition"](300, 600)).toBe(300);
   });
 });
