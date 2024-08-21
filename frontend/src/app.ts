@@ -39,9 +39,7 @@ export class App {
   declare worker: Worker;
 
   element: HTMLElement;
-  mainContainer: List = new List({
-    type: "vertical",
-  });
+  verticalFrameLayout!: List;
   circuitFrame!: CircuitFrame;
   stateVectorFrame!: StateVectorFrame;
   frameDivider!: FrameDivider;
@@ -97,10 +95,7 @@ export class App {
     // view, stage などをまとめた application を作成
     this.app = new Application<Renderer<HTMLCanvasElement>>();
     this.initApp().then(() => {
-      // this.pixiApp.stage = new Stage();
-
       window.addEventListener("resize", this.resize.bind(this), false);
-      this.resize();
 
       el.appendChild(this.app.canvas);
 
@@ -113,58 +108,7 @@ export class App {
         .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
         .on("pointerdown", this.maybeDeactivateGate, this);
 
-      this.mainContainer = new List({
-        type: "vertical",
-      });
-      this.mainContainer.sortableChildren = true;
-      this.app.stage.addChild(this.mainContainer);
-
-      this.circuitFrame = CircuitFrame.getInstance(
-        this.app.screen.width,
-        this.app.screen.height * 0.6
-      );
-      this.mainContainer.addChild(this.circuitFrame);
-
-      this.stateVectorFrame = StateVectorFrame.getInstance(
-        this.app.screen.width,
-        this.app.screen.height * 0.4
-      );
-      this.mainContainer.addChild(this.stateVectorFrame);
-
-      this.setupFrameDivider();
-
-      this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
-        this.grabGate,
-        this
-      );
-      this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT,
-        this.resetCursor,
-        this
-      );
-      this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED,
-        this.gateDiscarded,
-        this
-      );
-
-      this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
-        this.runSimulator,
-        this
-      );
-      this.circuitFrame.on(
-        CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
-        this.grabGate,
-        this
-      );
-
-      this.stateVector.on(
-        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-        this.runSimulator,
-        this
-      );
+      this.setupFrames();
 
       // 回路の最初のステップをアクティブにする
       // これによって、最初のステップの状態ベクトルが表示される
@@ -177,7 +121,24 @@ export class App {
     });
   }
 
-  private setupFrameDivider() {
+  private setupFrames() {
+    this.verticalFrameLayout = new List({
+      type: "vertical",
+    });
+    this.app.stage.addChild(this.verticalFrameLayout);
+
+    this.circuitFrame = CircuitFrame.getInstance(
+      this.app.screen.width,
+      this.app.screen.height * 0.6
+    );
+    this.verticalFrameLayout.addChild(this.circuitFrame);
+
+    this.stateVectorFrame = StateVectorFrame.getInstance(
+      this.app.screen.width,
+      this.app.screen.height * 0.4
+    );
+    this.verticalFrameLayout.addChild(this.stateVectorFrame);
+
     this.frameDivider = FrameDivider.initialize({
       width: this.app.screen.width,
       initialY: this.circuitFrame.height,
@@ -185,6 +146,8 @@ export class App {
     this.app.stage.addChild(this.frameDivider);
 
     this.setupFrameDividerEventHandlers();
+    this.setupCircuitFrameEventHandlers();
+    this.setupStateVectorEventHandlers();
   }
 
   private setupFrameDividerEventHandlers() {
@@ -198,9 +161,9 @@ export class App {
     this.app.stage.on("pointerupoutside", this.endFrameDividerDragging, this);
   }
 
-  // frameDivider のドラッグスタートでカーソルを変更
   private startFrameDividerDragging() {
-    this.app.stage.cursor = "ns-resize";
+    this.circuitFrame.cursor = "ns-resize";
+    this.stateVectorFrame.cursor = "ns-resize";
   }
 
   private maybeUpdateFrames(event: FederatedPointerEvent) {
@@ -219,7 +182,45 @@ export class App {
 
   private endFrameDividerDragging() {
     this.frameDivider.endDragging();
-    this.app.stage.cursor = "default";
+    this.circuitFrame.cursor = "default";
+    this.stateVectorFrame.cursor = "default";
+  }
+
+  private setupCircuitFrameEventHandlers() {
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
+      this.grabGate,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT,
+      this.resetCursor,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED,
+      this.gateDiscarded,
+      this
+    );
+
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
+      this.runSimulator,
+      this
+    );
+    this.circuitFrame.on(
+      CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
+      this.grabGate,
+      this
+    );
+  }
+
+  private setupStateVectorEventHandlers() {
+    this.stateVector.on(
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+      this.runSimulator,
+      this
+    );
   }
 
   private async initApp() {
