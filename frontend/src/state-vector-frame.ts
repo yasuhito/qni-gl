@@ -19,12 +19,18 @@ export class StateVectorFrame extends PIXI.Container {
   private maskGraphics: PIXI.Graphics;
   private scrollContainer: PIXI.Container;
 
-  /**
-   * インスタンスを取得
-   */
-  static getInstance(width: number, height: number): StateVectorFrame {
-    if (this.instance === null) {
+  static initialize(width: number, height: number): StateVectorFrame {
+    if (!this.instance) {
       this.instance = new StateVectorFrame(width, height);
+    }
+    return this.instance;
+  }
+
+  static getInstance(): StateVectorFrame {
+    if (this.instance === null) {
+      throw new Error(
+        "StateVectorFrame is not initialized. Call initialize() first."
+      );
     }
     return this.instance;
   }

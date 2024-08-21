@@ -133,7 +133,7 @@ export class App {
     );
     this.verticalFrameLayout.addChild(this.circuitFrame);
 
-    this.stateVectorFrame = StateVectorFrame.getInstance(
+    this.stateVectorFrame = StateVectorFrame.initialize(
       this.app.screen.width,
       this.app.screen.height * 0.4
     );
