@@ -10,7 +10,6 @@ export class CircuitStepDropzones extends List {
   constructor() {
     super({
       type: "vertical",
-      elementsMargin: CircuitStepDropzones.MARGIN,
       vertPadding: CircuitStepDropzones.PADDING,
     });
     this.eventMode = "static";

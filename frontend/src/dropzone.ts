@@ -23,7 +23,7 @@ export class Dropzone extends Container {
 
   constructor() {
     super();
-    this.renderer = new DropzoneRenderer(this);
+    this.renderer = new DropzoneRenderer(this, this.size);
     this.redrawWires();
     this.redrawConnections();
   }
@@ -32,12 +32,8 @@ export class Dropzone extends Container {
     return Dropzone.size;
   }
 
-  get width(): number {
+  slotWidth(): number {
     return Dropzone.size * 1.5;
-  }
-
-  get height(): number {
-    return Dropzone.size;
   }
 
   get operation(): Operation | null {
@@ -126,20 +122,15 @@ export class Dropzone extends Container {
   }
 
   redrawWires() {
-    this.renderer.drawWires(
+    this.renderer.updateWires(
       this.inputWireType,
       this.outputWireType,
-      this.size,
       this.isIconGate(this.operation)
     );
   }
 
   redrawConnections() {
-    this.renderer.drawConnections(
-      this.connectTop,
-      this.connectBottom,
-      this.size
-    );
+    this.renderer.updateConnections(this.connectTop, this.connectBottom);
   }
 
   toJSON() {

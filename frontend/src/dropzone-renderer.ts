@@ -4,82 +4,82 @@ import { WireType } from "./types";
 
 export class DropzoneRenderer {
   private static readonly wireWidth = 2;
+  private static readonly connectionWidth = 4;
 
+  private size: number;
   private wire: Graphics;
-  private connection: Graphics;
+  private topConnection: Graphics;
+  private bottomConnection: Graphics;
 
-  constructor(container: Container) {
+  constructor(container: Container, size: number) {
+    this.size = size;
     this.wire = new Graphics();
-    this.connection = new Graphics();
+    this.topConnection = new Graphics();
+    this.bottomConnection = new Graphics();
 
     container.addChild(this.wire);
-    container.addChild(this.connection);
+    container.addChild(this.topConnection);
+    container.addChild(this.bottomConnection);
+
+    this.updateWires();
+    this.initConnections();
   }
 
-  drawWires(
-    inputWireType: WireType,
-    outputWireType: WireType,
-    size: number,
-    isIconGate: boolean
+  updateWires(
+    inputWireType: WireType = WireType.Classical,
+    outputWireType: WireType = WireType.Classical,
+    isIconGate: boolean = false
   ) {
     this.wire.clear();
 
     this.drawWireSegment(
       0,
-      isIconGate ? size / 4 : size * 0.75,
-      this.getWireColor(inputWireType),
-      inputWireType,
-      size
+      isIconGate ? this.size / 4 : this.size * 0.75,
+      inputWireType
     );
     this.drawWireSegment(
-      isIconGate ? (size * 5) / 4 : size * 0.75,
-      size * 1.5,
-      this.getWireColor(outputWireType),
-      outputWireType,
-      size
+      isIconGate ? (this.size * 5) / 4 : this.size * 0.75,
+      this.size * 1.5,
+      outputWireType
     );
   }
 
-  drawConnections(connectTop: boolean, connectBottom: boolean, size: number) {
-    this.connection.clear();
-
-    if (connectTop) {
-      this.drawConnection(size * -0.25, size * 0.5, size);
-    }
-    if (connectBottom) {
-      this.drawConnection(size * 0.5, size * 1.25, size);
-    }
+  updateConnections(connectTop: boolean, connectBottom: boolean) {
+    this.topConnection.alpha = connectTop ? 1 : 0;
+    this.bottomConnection.alpha = connectBottom ? 1 : 0;
   }
 
-  private drawWireSegment(
-    startX: number,
-    endX: number,
-    color: WireColor,
-    wireType: WireType,
-    size: number
-  ) {
+  private initConnections() {
+    this.drawConnection(this.topConnection, this.size * -0.25, this.size * 0.5);
+    this.drawConnection(
+      this.bottomConnection,
+      this.size * 0.5,
+      this.size * 1.25
+    );
+  }
+
+  private drawConnection(graphics: Graphics, startY: number, endY: number) {
+    const width = DropzoneRenderer.connectionWidth;
+    const x = this.size * 0.75 - width / 2;
+
+    graphics
+      .clear()
+      .rect(x, startY, width, endY - startY)
+      .fill(Colors["bg-brand"]);
+  }
+
+  private drawWireSegment(startX: number, endX: number, wireType: WireType) {
     this.wire
       .rect(
         startX,
-        size / 2 - DropzoneRenderer.wireWidth / 2,
+        this.size / 2 - DropzoneRenderer.wireWidth / 2,
         endX - startX,
         DropzoneRenderer.wireWidth
       )
-      .fill(color);
-
-    if (wireType === WireType.Quantum) {
-      // Add quantum wire specific rendering if needed
-    }
+      .fill(this.wireColor(wireType));
   }
 
-  private drawConnection(startY: number, endY: number, size: number) {
-    this.connection
-      .moveTo(size * 0.75, startY)
-      .lineTo(size * 0.75, endY)
-      .stroke({ color: Colors["bg-brand"], width: 4 });
-  }
-
-  private getWireColor(wireType: WireType): WireColor {
+  private wireColor(wireType: WireType): WireColor {
     return wireType === WireType.Quantum
       ? Colors["text"]
       : Colors["text-inverse"];
