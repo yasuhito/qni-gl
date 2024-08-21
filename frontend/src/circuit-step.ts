@@ -107,7 +107,7 @@ export class CircuitStep extends Container {
 
     this._dropzones = new CircuitStepDropzones();
 
-    this.addChild(this._dropzones.container);
+    this.addChild(this._dropzones);
 
     for (let i = 0; i < qubitCount; i++) {
       this.appendNewDropzone();

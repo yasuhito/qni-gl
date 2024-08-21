@@ -3,26 +3,21 @@ import { List } from "@pixi/ui";
 import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 
-export class CircuitStepDropzones {
+export class CircuitStepDropzones extends List {
   private static readonly PADDING = DropzoneComponent.size;
   private static readonly MARGIN = DropzoneComponent.size / 2;
-  private _dropzones: List;
 
   constructor() {
-    this._dropzones = new List({
+    super({
       type: "vertical",
       elementsMargin: CircuitStepDropzones.MARGIN,
       vertPadding: CircuitStepDropzones.PADDING,
     });
-    this._dropzones.eventMode = "static";
-  }
-
-  get container(): List {
-    return this._dropzones;
+    this.eventMode = "static";
   }
 
   get all(): DropzoneComponent[] {
-    return this._dropzones.children as DropzoneComponent[];
+    return this.children as DropzoneComponent[];
   }
 
   filterByOperationType(
@@ -36,7 +31,7 @@ export class CircuitStepDropzones {
   }
 
   get length(): number {
-    return this._dropzones.children.length;
+    return this.children.length;
   }
 
   get occupied(): DropzoneComponent[] {
@@ -62,18 +57,14 @@ export class CircuitStepDropzones {
 
   append(): DropzoneComponent {
     const dropzone = new DropzoneComponent();
-    this._dropzones.addChild(dropzone);
+    this.addChild(dropzone);
     return dropzone;
   }
 
   removeLast(): void {
     const dropzone = this.fetch(this.length - 1);
-    this._dropzones.removeChildAt(this.length - 1);
+    this.removeChildAt(this.length - 1);
     dropzone.destroy();
-  }
-
-  get width(): number {
-    return this._dropzones.width;
   }
 
   get height(): number {
