@@ -1,4 +1,4 @@
-import { DropzoneComponent } from "../../src/dropzone-component";
+import { Dropzone } from "../../src/dropzone";
 import { DropzoneRenderer } from "../../src/dropzone-renderer";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "../../src/events";
 import { HGate } from "../../src/h-gate";
@@ -12,11 +12,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../../src/dropzone-renderer");
 
 describe("DropzoneComponent", () => {
-  let dropzone: DropzoneComponent;
+  let dropzone: Dropzone;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    dropzone = new DropzoneComponent();
+    dropzone = new Dropzone();
   });
 
   it("should initialize with correct default values", () => {
@@ -24,8 +24,8 @@ describe("DropzoneComponent", () => {
     expect(dropzone.outputWireType).toBe(WireType.Classical);
     expect(dropzone.connectTop).toBe(false);
     expect(dropzone.connectBottom).toBe(false);
-    expect(dropzone.width).toBe(DropzoneComponent.size * 1.5);
-    expect(dropzone.height).toBe(DropzoneComponent.size);
+    expect(dropzone.width).toBe(Dropzone.size * 1.5);
+    expect(dropzone.height).toBe(Dropzone.size);
   });
 
   it("should create a DropzoneRenderer and call initial draw methods", () => {
@@ -79,7 +79,7 @@ describe("DropzoneComponent", () => {
       expect(dropzone["renderer"].drawConnections).toHaveBeenCalledWith(
         true,
         false,
-        DropzoneComponent.size
+        Dropzone.size
       );
     });
 
@@ -89,7 +89,7 @@ describe("DropzoneComponent", () => {
       expect(dropzone["renderer"].drawConnections).toHaveBeenCalledWith(
         false,
         true,
-        DropzoneComponent.size
+        Dropzone.size
       );
     });
   });

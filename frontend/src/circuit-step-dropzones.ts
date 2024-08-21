@@ -1,11 +1,11 @@
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { List } from "@pixi/ui";
 import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 
 export class CircuitStepDropzones extends List {
-  private static readonly PADDING = DropzoneComponent.size;
-  private static readonly MARGIN = DropzoneComponent.size / 2;
+  private static readonly PADDING = Dropzone.size;
+  private static readonly MARGIN = Dropzone.size / 2;
 
   constructor() {
     super({
@@ -16,13 +16,11 @@ export class CircuitStepDropzones extends List {
     this.eventMode = "static";
   }
 
-  get all(): DropzoneComponent[] {
-    return this.children as DropzoneComponent[];
+  get all(): Dropzone[] {
+    return this.children as Dropzone[];
   }
 
-  filterByOperationType(
-    gateType: typeof OperationComponent
-  ): DropzoneComponent[] {
+  filterByOperationType(gateType: typeof OperationComponent): Dropzone[] {
     return this.occupied.filter((each) => each.operation instanceof gateType);
   }
 
@@ -34,11 +32,11 @@ export class CircuitStepDropzones extends List {
     return this.children.length;
   }
 
-  get occupied(): DropzoneComponent[] {
+  get occupied(): Dropzone[] {
     return this.all.filter((each) => each.isOccupied());
   }
 
-  at(index: number): DropzoneComponent | undefined {
+  at(index: number): Dropzone | undefined {
     if (index < 0 || index >= this.length) {
       return undefined;
     }
@@ -46,7 +44,7 @@ export class CircuitStepDropzones extends List {
     return this.all[index];
   }
 
-  fetch(index: number): DropzoneComponent {
+  fetch(index: number): Dropzone {
     const dropzone = this.at(index);
     if (!dropzone) {
       throw new Error(`Dropzone at index ${index} not found`);
@@ -55,8 +53,8 @@ export class CircuitStepDropzones extends List {
     return dropzone;
   }
 
-  append(): DropzoneComponent {
-    const dropzone = new DropzoneComponent();
+  append(): Dropzone {
+    const dropzone = new Dropzone();
     this.addChild(dropzone);
     return dropzone;
   }
@@ -69,7 +67,7 @@ export class CircuitStepDropzones extends List {
 
   get height(): number {
     return (
-      DropzoneComponent.size * this.length +
+      Dropzone.size * this.length +
       (this.length - 1) * CircuitStepDropzones.MARGIN +
       CircuitStepDropzones.PADDING * 2
     );

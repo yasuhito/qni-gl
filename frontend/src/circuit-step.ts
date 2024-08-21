@@ -3,7 +3,7 @@ import { CircuitStepDropzones } from "./circuit-step-dropzones";
 import { CircuitStepState } from "./circuit-step-state";
 import { Container, Rectangle } from "pixi.js";
 import { ControlGate } from "./control-gate";
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
@@ -26,7 +26,7 @@ export class CircuitStep extends Container {
 
   /**
    * Gets the qubit count in use.
-   * If no gate is placed in any {@link DropzoneComponent}, returns 0.
+   * If no gate is placed in any {@link Dropzone}, returns 0.
    */
   get qubitCountInUse() {
     let count = 0;
@@ -41,14 +41,14 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * ステップ内のすべての {@link DropzoneComponent} を返す
+   * ステップ内のすべての {@link Dropzone} を返す
    */
-  get dropzones(): DropzoneComponent[] {
+  get dropzones(): Dropzone[] {
     return this._dropzones.all;
   }
 
   /**
-   * ステップ内のすべての {@link DropzoneComponent} のうち、ゲートが置かれたものを返す
+   * ステップ内のすべての {@link Dropzone} のうち、ゲートが置かれたものを返す
    */
   private get occupiedDropzones() {
     return this._dropzones.occupied;
@@ -88,7 +88,7 @@ export class CircuitStep extends Container {
     this.updateHitArea();
   }
 
-  private onDropzoneSnap(dropzone: DropzoneComponent) {
+  private onDropzoneSnap(dropzone: Dropzone) {
     this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
@@ -133,7 +133,7 @@ export class CircuitStep extends Container {
     );
   }
 
-  bit(dropzone: DropzoneComponent): number {
+  bit(dropzone: Dropzone): number {
     const bit = this.dropzones.indexOf(dropzone);
     // Util.need(bit !== -1, 'circuit-dropzone not found.')
 
@@ -208,7 +208,7 @@ export class CircuitStep extends Container {
     }
   }
 
-  private controllableDropzones(): DropzoneComponent[] {
+  private controllableDropzones(): Dropzone[] {
     return this._dropzones.filterByOperationType(XGate);
   }
 

@@ -6,7 +6,7 @@ import { WireType } from "./types";
 import { spacingInPx } from "./util";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
 
-export class DropzoneComponent extends Container {
+export class Dropzone extends Container {
   static size = spacingInPx(8);
 
   inputWireType: WireType = WireType.Classical;
@@ -29,15 +29,15 @@ export class DropzoneComponent extends Container {
   }
 
   get size(): number {
-    return DropzoneComponent.size;
+    return Dropzone.size;
   }
 
   get width(): number {
-    return DropzoneComponent.size * 1.5;
+    return Dropzone.size * 1.5;
   }
 
   get height(): number {
-    return DropzoneComponent.size;
+    return Dropzone.size;
   }
 
   get operation(): Operation | null {

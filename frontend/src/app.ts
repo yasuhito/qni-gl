@@ -3,7 +3,7 @@ import { CircuitFrame } from "./circuit-frame";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Complex } from "@qni/common";
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { FrameDivider } from "./frame-divider";
 import { OperationComponent } from "./operation-component";
 import { List } from "@pixi/ui";
@@ -425,7 +425,7 @@ export class App {
     gateCenterY: number,
     gateWidth: number,
     gateHeight: number,
-    dropzone: DropzoneComponent
+    dropzone: Dropzone
   ) {
     if (dropzone.operation !== null && dropzone.operation !== gate) {
       return false;
@@ -470,7 +470,7 @@ export class App {
    * @param pointerPosition マウス/タッチの位置
    */
   private moveGate(gate: OperationComponent, pointerPosition: Point) {
-    let snapDropzone: DropzoneComponent | null = null;
+    let snapDropzone: Dropzone | null = null;
 
     for (const circuitStep of this.circuit.steps) {
       for (const dropzone of circuitStep.dropzones) {
