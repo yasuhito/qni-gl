@@ -127,7 +127,7 @@ export class App {
     });
     this.app.stage.addChild(this.verticalFrameLayout);
 
-    this.circuitFrame = CircuitFrame.getInstance(
+    this.circuitFrame = CircuitFrame.initialize(
       this.app.screen.width,
       this.app.screen.height * 0.6
     );

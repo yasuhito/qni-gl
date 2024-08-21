@@ -19,9 +19,18 @@ export class CircuitFrame extends Container {
   private readonly maskSprite: Sprite;
   private readonly scrollContainer: Container;
 
-  static getInstance(width: number, height: number): CircuitFrame {
-    if (this.instance === null) {
+  static initialize(width: number, height: number): CircuitFrame {
+    if (!this.instance) {
       this.instance = new CircuitFrame(width, height);
+    }
+    return this.instance;
+  }
+
+  static getInstance(): CircuitFrame {
+    if (this.instance === null) {
+      throw new Error(
+        "CircuitFrame is not initialized. Call initialize() first."
+      );
     }
     return this.instance;
   }
