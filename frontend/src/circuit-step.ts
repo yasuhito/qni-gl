@@ -1,14 +1,13 @@
-import * as PIXI from "pixi.js";
-import { Container } from "pixi.js";
+import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
+import { CircuitStepDropzones } from "./circuit-step-dropzones";
+import { CircuitStepState } from "./circuit-step-state";
+import { Container, Rectangle } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { DropzoneComponent } from "./dropzone-component";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy } from "./util";
-import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
-import { CircuitStepState } from "./circuit-step-state";
-import { CircuitStepDropzones } from "./circuit-step-dropzones";
 
 export class CircuitStep extends Container {
   private _dropzones: CircuitStepDropzones;
@@ -89,7 +88,7 @@ export class CircuitStep extends Container {
     this.updateHitArea();
   }
 
-  protected onDropzoneSnap(dropzone: DropzoneComponent) {
+  private onDropzoneSnap(dropzone: DropzoneComponent) {
     this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
@@ -126,7 +125,7 @@ export class CircuitStep extends Container {
   }
 
   updateHitArea() {
-    this.hitArea = new PIXI.Rectangle(
+    this.hitArea = new Rectangle(
       0,
       0,
       this.dropzonesWidth,
@@ -279,20 +278,20 @@ export class CircuitStep extends Container {
     this._state.setIdle();
   }
 
-  protected onPointerOver() {
+  private onPointerOver() {
     if (this._state.isIdle()) {
       this._state.setHover();
     }
     this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
-  protected onPointerOut() {
+  private onPointerOut() {
     if (this._state.isHover()) {
       this._state.setIdle();
     }
   }
 
-  protected onPointerDown() {
+  private onPointerDown() {
     if (!this.isActive()) {
       this.activate();
     }

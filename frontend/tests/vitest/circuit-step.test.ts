@@ -14,11 +14,11 @@ import { Write0Gate } from "../../src/write0-gate";
 import { Write1Gate } from "../../src/write1-gate";
 import { MeasurementGate, SwapGate } from "../../src";
 
-describe("CircuitStepComponent", () => {
+describe("CircuitStep", () => {
   let circuitStep: CircuitStep;
 
   beforeEach(() => {
-    circuitStep = new CircuitStep(3); // Create a circuit step with 3 qubits
+    circuitStep = new CircuitStep(3);
   });
 
   describe("serialize", () => {
