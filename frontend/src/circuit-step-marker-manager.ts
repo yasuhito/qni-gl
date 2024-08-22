@@ -1,5 +1,5 @@
 import { ColorSource, Container, Graphics } from "pixi.js";
-import { Colors, FULL_OPACITY } from "./colors";
+import { Colors, FULL_OPACITY, NO_OPACITY } from "./colors";
 import { spacingInPx } from "./util";
 import { CircuitStep } from "./circuit-step";
 
@@ -95,7 +95,7 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private hideMarker(index: number) {
-    this.markerAt(index).alpha = 0;
+    this.markerAt(index).alpha = FULL_OPACITY;
   }
 
   private stepAt(index: number): CircuitStep {
@@ -125,6 +125,6 @@ export class CircuitStepMarkerManager extends Container {
         color: color,
         width: CircuitStepMarkerManager.MARKER_WIDTH,
       });
-    marker.alpha = FULL_OPACITY;
+    marker.alpha = NO_OPACITY;
   }
 }
