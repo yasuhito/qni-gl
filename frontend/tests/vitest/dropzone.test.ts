@@ -21,8 +21,8 @@ describe("DropzoneComponent", () => {
     expect(dropzone.outputWireType).toBe(WireType.Classical);
     expect(dropzone.connectTop).toBe(false);
     expect(dropzone.connectBottom).toBe(false);
-    expect(dropzone.width).toBe(Dropzone.sizeInPx * 1.5);
-    expect(dropzone.height).toBe(Dropzone.sizeInPx * 1.5);
+    expect(dropzone.width).toBe(dropzone.totalSize);
+    expect(dropzone.height).toBe(dropzone.totalSize);
   });
 
   describe("snap and unsnap", () => {

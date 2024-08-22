@@ -10,7 +10,7 @@ import { XGate } from "./x-gate";
 import { groupBy } from "./util";
 
 export class CircuitStep extends Container {
-  private static readonly PADDING = Dropzone.sizeInPx;
+  private static readonly PADDING = Dropzone.sizeInPx / 2;
 
   private _body: Graphics;
   private _dropzones: CircuitStepDropzones;
@@ -194,10 +194,9 @@ export class CircuitStep extends Container {
   }
 
   private updateSize() {
-    const padding = Dropzone.sizeInPx * 0.75;
-    const height = this._dropzones.height + padding * 2;
+    const height = this._dropzones.height + CircuitStep.PADDING * 2;
 
-    this._body.clear().rect(0, 0, this.width, height).fill(0xff0000);
+    this._body.clear().rect(0, 0, this.width, height).fill(0x0000ff);
     this.removeChild(this._body);
     this.addChildAt(this._body, 0);
   }

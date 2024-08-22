@@ -435,13 +435,15 @@ export class App {
     const gateX = gateCenterX - gateWidth / 2;
     const gateY = gateCenterY - gateHeight / 2;
     const dropboxPosition = dropzone.getGlobalPosition();
+
     const snapzoneX =
       dropboxPosition.x +
-      dropzone.size / 4 +
-      ((1 - snapRatio) * dropzone.size) / 2;
-    const snapzoneY = dropboxPosition.y + ((1 - snapRatio) * dropzone.size) / 2;
-    const snapzoneWidth = dropzone.size * snapRatio;
-    const snapzoneHeight = dropzone.size * snapRatio;
+      dropzone.gateSize / 4 +
+      ((1 - snapRatio) * dropzone.gateSize) / 2;
+    const snapzoneY =
+      dropboxPosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+    const snapzoneWidth = dropzone.gateSize * snapRatio;
+    const snapzoneHeight = dropzone.gateSize * snapRatio;
 
     return rectIntersect(
       gateX,

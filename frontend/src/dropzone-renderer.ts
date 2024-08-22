@@ -1,66 +1,143 @@
-import { Container, Graphics } from "pixi.js";
 import { Colors, WireColor } from "./colors";
+import { Dropzone } from "./dropzone";
+import { Graphics } from "pixi.js";
 import { WireType } from "./types";
+import { spacingInPx } from "./util";
+
+type WireUpdateInfo = {
+  inputWireType: WireType;
+  outputWireType: WireType;
+};
+
+type ConnectionUpdateInfo = {
+  connectTop: boolean;
+  connectBottom: boolean;
+};
+
+type WireSegment = {
+  wireType: WireType;
+  startX: number;
+  endX: number;
+};
+
+type ConnectionPosition = {
+  startY: number;
+  endY: number;
+};
 
 export class DropzoneRenderer {
-  private static readonly wireWidth = 2;
-  private static readonly connectionWidth = 4;
+  private static readonly WIRE_WIDTH = spacingInPx(0.5);
+  private static readonly CONNECTION_WIDTH = spacingInPx(1);
+  private static readonly NARROW_WIDTH_OPERATIONS = [
+    "Write0Gate",
+    "Write1Gate",
+    "MeasurementGate",
+  ];
+  private static readonly HALF_RATIO = 0.5;
+  private static readonly NARROW_RATIO = 0.25;
 
-  private size: number;
-  private wire: Graphics;
-  private topConnection: Graphics;
-  private bottomConnection: Graphics;
+  private dropzone: Dropzone;
+  private body!: Graphics;
+  private wire!: Graphics;
+  private topConnection!: Graphics;
+  private bottomConnection!: Graphics;
 
-  constructor(container: Container, size: number) {
-    this.size = size;
-    this.wire = new Graphics();
-    this.topConnection = new Graphics();
-    this.bottomConnection = new Graphics();
+  private get totalSize(): number {
+    return this.dropzone.totalSize;
+  }
 
-    container.addChild(this.wire);
-    container.addChild(this.topConnection);
-    container.addChild(this.bottomConnection);
+  private get isNarrowWidthOperation(): boolean {
+    const operation = this.dropzone.operation;
+    return (
+      operation !== null &&
+      DropzoneRenderer.NARROW_WIDTH_OPERATIONS.includes(operation.operationType)
+    );
+  }
 
-    this.updateWires();
+  private get wireEndRatio(): number {
+    return this.isNarrowWidthOperation
+      ? DropzoneRenderer.NARROW_RATIO
+      : DropzoneRenderer.HALF_RATIO;
+  }
+
+  constructor(dropzone: Dropzone) {
+    this.dropzone = dropzone;
+    this.initializeGraphics();
+    this.addChildrenToDropzone();
+    this.initBody();
     this.initConnections();
   }
 
-  updateWires(
-    inputWireType: WireType = WireType.Classical,
-    outputWireType: WireType = WireType.Classical,
-    isIconGate: boolean = false
-  ) {
-    this.wire.clear();
+  private initializeGraphics(): void {
+    this.body = new Graphics({ alpha: 0 });
+    this.wire = new Graphics();
+    this.topConnection = new Graphics();
+    this.bottomConnection = new Graphics();
+  }
 
-    this.drawWireSegment(
-      0,
-      isIconGate ? this.size / 4 : this.size * 0.75,
-      inputWireType
-    );
-    this.drawWireSegment(
-      isIconGate ? (this.size * 5) / 4 : this.size * 0.75,
-      this.size * 1.5,
-      outputWireType
+  private addChildrenToDropzone(): void {
+    this.dropzone.addChild(
+      this.body,
+      this.wire,
+      this.topConnection,
+      this.bottomConnection
     );
   }
 
-  updateConnections(connectTop: boolean, connectBottom: boolean) {
+  updateWires({ inputWireType, outputWireType }: WireUpdateInfo): void {
+    this.wire.clear();
+
+    this.updateInputWire(inputWireType);
+    this.updateOutputWire(outputWireType);
+  }
+
+  updateConnections({ connectTop, connectBottom }: ConnectionUpdateInfo): void {
     this.topConnection.alpha = connectTop ? 1 : 0;
     this.bottomConnection.alpha = connectBottom ? 1 : 0;
   }
 
-  private initConnections() {
-    this.drawConnection(this.topConnection, this.size * -0.25, this.size * 0.5);
-    this.drawConnection(
-      this.bottomConnection,
-      this.size * 0.5,
-      this.size * 1.25
-    );
+  private initBody(): void {
+    this.body
+      .clear()
+      .rect(0, 0, this.dropzone.totalSize, this.dropzone.totalSize)
+      .fill(0x000000);
   }
 
-  private drawConnection(graphics: Graphics, startY: number, endY: number) {
-    const width = DropzoneRenderer.connectionWidth;
-    const x = this.size * 0.75 - width / 2;
+  private updateInputWire(wireType: WireType): void {
+    this.drawWire({ wireType, startX: 0, endX: this.inputWireEndX() });
+  }
+
+  private updateOutputWire(wireType: WireType): void {
+    this.drawWire({
+      wireType,
+      startX: this.outputWireStartX(),
+      endX: this.totalSize,
+    });
+  }
+
+  private inputWireEndX(): number {
+    return this.totalSize * this.wireEndRatio;
+  }
+
+  private outputWireStartX(): number {
+    return this.totalSize * (1 - this.wireEndRatio);
+  }
+
+  private initConnections(): void {
+    const halfSize = this.totalSize * 0.5;
+    this.drawConnection(this.topConnection, { startY: 0, endY: halfSize });
+    this.drawConnection(this.bottomConnection, {
+      startY: halfSize,
+      endY: this.totalSize,
+    });
+  }
+
+  private drawConnection(
+    graphics: Graphics,
+    { startY, endY }: ConnectionPosition
+  ): void {
+    const width = DropzoneRenderer.CONNECTION_WIDTH;
+    const x = this.totalSize * 0.5 - width / 2;
 
     graphics
       .clear()
@@ -68,20 +145,18 @@ export class DropzoneRenderer {
       .fill(Colors["bg-brand"]);
   }
 
-  private drawWireSegment(startX: number, endX: number, wireType: WireType) {
+  private drawWire({ wireType, startX, endX }: WireSegment): void {
     this.wire
       .rect(
         startX,
-        this.size / 2 - DropzoneRenderer.wireWidth / 2,
+        this.totalSize * 0.5 - DropzoneRenderer.WIRE_WIDTH / 2,
         endX - startX,
-        DropzoneRenderer.wireWidth
+        DropzoneRenderer.WIRE_WIDTH
       )
       .fill(this.wireColor(wireType));
   }
 
   private wireColor(wireType: WireType): WireColor {
-    return wireType === WireType.Quantum
-      ? Colors["text"]
-      : Colors["text-inverse"];
+    return Colors[wireType === WireType.Quantum ? "text" : "text-inverse"];
   }
 }

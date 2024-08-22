@@ -12,6 +12,7 @@ export class Dropzone extends Container {
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
+  // private _body: Graphics;
   private _connectTop = false;
   private _connectBottom = false;
   private _swapConnectTop = false;
@@ -23,12 +24,17 @@ export class Dropzone extends Container {
 
   constructor() {
     super();
-    this.renderer = new DropzoneRenderer(this, this.size);
+
+    this.renderer = new DropzoneRenderer(this);
     this.redrawWires();
     this.redrawConnections();
   }
 
-  get size(): number {
+  get totalSize(): number {
+    return this.gateSize * 1.5;
+  }
+
+  get gateSize(): number {
     return Dropzone.sizeInPx;
   }
 
@@ -122,15 +128,17 @@ export class Dropzone extends Container {
   }
 
   redrawWires() {
-    this.renderer.updateWires(
-      this.inputWireType,
-      this.outputWireType,
-      this.isIconGate(this.operation)
-    );
+    this.renderer.updateWires({
+      inputWireType: this.inputWireType,
+      outputWireType: this.outputWireType,
+    });
   }
 
   redrawConnections() {
-    this.renderer.updateConnections(this.connectTop, this.connectBottom);
+    this.renderer.updateConnections({
+      connectTop: this.connectTop,
+      connectBottom: this.connectBottom,
+    });
   }
 
   toJSON() {
@@ -148,14 +156,5 @@ export class Dropzone extends Container {
 
   hasMeasurementGate() {
     return this.operation?.operationType === "MeasurementGate";
-  }
-
-  private isIconGate(gate: OperationComponent | null) {
-    if (gate === null) {
-      return false;
-    }
-    return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
-      (type) => gate.operationType === type
-    );
   }
 }

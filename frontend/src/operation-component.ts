@@ -143,7 +143,7 @@ export class OperationComponent extends IconableMixin(Container) {
 
           if (e.dropzone) {
             // snap した場合
-            this.position.set(this.sizeInPx / 4, 0);
+            this.position.set(this.sizeInPx / 4, this.sizeInPx / 4);
           } else {
             const newPos = this.parent.toLocal(e.globalPosition);
             this.position.set(
