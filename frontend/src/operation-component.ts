@@ -33,7 +33,7 @@ export type DragEvent = {
 };
 
 export class OperationComponent extends IconableMixin(Container) {
-  private static sizeInPx = {
+  static sizeInPx = {
     xl: spacingInPx(12),
     lg: spacingInPx(10),
     base: spacingInPx(8),

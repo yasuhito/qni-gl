@@ -1,5 +1,4 @@
-import * as PIXI from "pixi.js";
-import { Container } from "pixi.js";
+import { ColorSource, Container, Graphics } from "pixi.js";
 import { Colors, FULL_OPACITY } from "./colors";
 import { spacingInPx } from "./util";
 import { CircuitStep } from "./circuit-step";
@@ -8,12 +7,11 @@ export class CircuitStepMarkerManager extends Container {
   private static readonly MARKER_WIDTH = spacingInPx(1);
   private static readonly COLOR_HOVER = Colors["bg-brand-hover"];
   private static readonly COLOR_ACTIVE = Colors["bg-brand"];
-  private static readonly COLOR_DEFAULT = 0x000000;
 
-  private markers: PIXI.Graphics[] = [];
+  private markers: Graphics[] = [];
   private _steps: CircuitStep[] = [];
 
-  constructor(steps: CircuitStep[]) {
+  constructor({ steps }: { steps: CircuitStep[] }) {
     super();
 
     this.steps = steps;
@@ -43,16 +41,16 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private get stepWidth() {
-    return this.stepAt(0).dropzonesWidth;
+    return this.stepAt(0).width;
   }
 
   private get stepHeight() {
-    return this.stepAt(0).dropzonesHeight;
+    return this.stepAt(0).height;
   }
 
   private initMarkers() {
     for (let i = 0; i < this.stepCount; i++) {
-      const marker = new PIXI.Graphics();
+      const marker = new Graphics();
       this.addChild(marker);
       this.markers.push(marker);
     }
@@ -109,7 +107,7 @@ export class CircuitStepMarkerManager extends Container {
     return step;
   }
 
-  private markerAt(index: number): PIXI.Graphics {
+  private markerAt(index: number): Graphics {
     const marker = this.markers[index];
     if (!marker) {
       throw new Error(`Marker not found at index ${index}`);
@@ -118,7 +116,7 @@ export class CircuitStepMarkerManager extends Container {
     return marker;
   }
 
-  private drawMarker(marker: PIXI.Graphics, color: PIXI.ColorSource) {
+  private drawMarker(marker: Graphics, color: ColorSource) {
     marker
       .clear()
       .moveTo(CircuitStepMarkerManager.MARKER_WIDTH / 2, 0)

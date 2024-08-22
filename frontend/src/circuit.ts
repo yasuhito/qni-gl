@@ -105,7 +105,7 @@ export class Circuit extends Container {
       this.appendStep();
     }
 
-    this.markerManager = new CircuitStepMarkerManager(this.steps);
+    this.markerManager = new CircuitStepMarkerManager({ steps: this.steps });
     this.addChild(this.markerManager);
 
     this.markerManager.zIndex = 1;
@@ -309,10 +309,6 @@ export class Circuit extends Container {
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStep) {
-    // const stepIndex = this.steps.indexOf(circuitStep);
-    // if (stepIndex !== -1) {
-    //   this.markerManager.hoverMarker(stepIndex, this.steps);
-    // }
     this.markerManager.update(this.steps);
     this.emit("stepHover", this, circuitStep);
   }

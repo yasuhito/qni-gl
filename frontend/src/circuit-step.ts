@@ -1,7 +1,7 @@
 import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
 import { CircuitStepDropzones } from "./circuit-step-dropzones";
 import { CircuitStepState } from "./circuit-step-state";
-import { Container, Rectangle } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
@@ -10,6 +10,9 @@ import { XGate } from "./x-gate";
 import { groupBy } from "./util";
 
 export class CircuitStep extends Container {
+  private static readonly PADDING = Dropzone.sizeInPx;
+
+  private _body: Graphics;
   private _dropzones: CircuitStepDropzones;
   private _state: CircuitStepState;
 
@@ -17,7 +20,7 @@ export class CircuitStep extends Container {
    * ステップ内のワイヤ数 (ビット数) を返す
    */
   get wireCount() {
-    return this._dropzones.length;
+    return this._dropzones.size;
   }
 
   get isEmpty(): boolean {
@@ -80,12 +83,13 @@ export class CircuitStep extends Container {
    */
   appendNewDropzone() {
     const dropzone = this._dropzones.append();
+
+    this.updateSize();
+
     dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
     dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
-
-    this.updateHitArea();
   }
 
   private onDropzoneSnap(dropzone: Dropzone) {
@@ -97,19 +101,22 @@ export class CircuitStep extends Container {
    */
   deleteLastDropzone() {
     this._dropzones.removeLast();
-    this.updateHitArea();
+    this.updateSize();
   }
 
-  constructor(qubitCount: number) {
+  constructor(wireCount: number) {
     super();
 
+    this._body = new Graphics({ alpha: 0 });
     this._state = new CircuitStepState();
+    this._dropzones = new CircuitStepDropzones({
+      padding: CircuitStep.PADDING,
+    });
 
-    this._dropzones = new CircuitStepDropzones();
+    this.addChildAt(this._body, 0);
+    this.addChildAt(this._dropzones, 1);
 
-    this.addChild(this._dropzones);
-
-    for (let i = 0; i < qubitCount; i++) {
+    for (let i = 0; i < wireCount; i++) {
       this.appendNewDropzone();
     }
 
@@ -117,20 +124,7 @@ export class CircuitStep extends Container {
       .on("pointerout", this.onPointerOut, this)
       .on("pointerdown", this.onPointerDown, this);
 
-    // enable the step to be interactive...
-    // this will allow it to respond to mouse and touch events
     this.eventMode = "static";
-
-    this.updateHitArea();
-  }
-
-  updateHitArea() {
-    this.hitArea = new Rectangle(
-      0,
-      0,
-      this.dropzonesWidth,
-      this.dropzonesHeight
-    );
   }
 
   bit(dropzone: Dropzone): number {
@@ -199,6 +193,15 @@ export class CircuitStep extends Container {
     this.updateConnections();
   }
 
+  private updateSize() {
+    const padding = Dropzone.sizeInPx * 0.75;
+    const height = this._dropzones.height + padding * 2;
+
+    this._body.clear().rect(0, 0, this.width, height).fill(0xff0000);
+    this.removeChild(this._body);
+    this.addChildAt(this._body, 0);
+  }
+
   private updateConnections(): void {
     for (const dropzone of this.dropzones) {
       dropzone.connectTop =
@@ -210,14 +213,6 @@ export class CircuitStep extends Container {
 
   private controllableDropzones(): Dropzone[] {
     return this._dropzones.filterByOperationType(XGate);
-  }
-
-  get dropzonesWidth(): number {
-    return this._dropzones.width;
-  }
-
-  get dropzonesHeight(): number {
-    return this._dropzones.height;
   }
 
   isHovered(): boolean {

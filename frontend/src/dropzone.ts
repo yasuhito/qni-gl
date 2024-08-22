@@ -3,11 +3,11 @@ import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 import { WireType } from "./types";
-import { spacingInPx } from "./util";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
+import { spacingInPx } from "./util";
 
 export class Dropzone extends Container {
-  static size = spacingInPx(8);
+  static readonly sizeInPx = spacingInPx(8);
 
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
@@ -29,11 +29,11 @@ export class Dropzone extends Container {
   }
 
   get size(): number {
-    return Dropzone.size;
+    return Dropzone.sizeInPx;
   }
 
   slotWidth(): number {
-    return Dropzone.size * 1.5;
+    return Dropzone.sizeInPx * 1.5;
   }
 
   get operation(): Operation | null {
