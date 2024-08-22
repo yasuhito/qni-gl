@@ -1,4 +1,4 @@
-import { Colors, WireColor } from "./colors";
+import { Colors, FULL_OPACITY, NO_OPACITY, WireColor } from "./colors";
 import { Dropzone } from "./dropzone";
 import { Graphics } from "pixi.js";
 import { WireType } from "./types";
@@ -25,6 +25,10 @@ type ConnectionPosition = {
   endY: number;
 };
 
+/**
+ * Responsible for rendering the visual components of a Dropzone,
+ * including the body, wires, and connections.
+ */
 export class DropzoneRenderer {
   private static readonly WIRE_WIDTH = spacingInPx(0.5);
   private static readonly CONNECTION_WIDTH = spacingInPx(1);
@@ -69,7 +73,7 @@ export class DropzoneRenderer {
   }
 
   private initializeGraphics(): void {
-    this.body = new Graphics({ alpha: 0 });
+    this.body = new Graphics({ alpha: FULL_OPACITY });
     this.wire = new Graphics();
     this.topConnection = new Graphics();
     this.bottomConnection = new Graphics();
@@ -84,6 +88,9 @@ export class DropzoneRenderer {
     );
   }
 
+  /**
+   * Updates the input and output wires of the dropzone.
+   */
   updateWires({ inputWireType, outputWireType }: WireUpdateInfo): void {
     this.wire.clear();
 
@@ -91,9 +98,12 @@ export class DropzoneRenderer {
     this.updateOutputWire(outputWireType);
   }
 
+  /**
+   * Updates the visibility of top and bottom connections.
+   */
   updateConnections({ connectTop, connectBottom }: ConnectionUpdateInfo): void {
-    this.topConnection.alpha = connectTop ? 1 : 0;
-    this.bottomConnection.alpha = connectBottom ? 1 : 0;
+    this.topConnection.alpha = connectTop ? NO_OPACITY : FULL_OPACITY;
+    this.bottomConnection.alpha = connectBottom ? NO_OPACITY : FULL_OPACITY;
   }
 
   private initBody(): void {
