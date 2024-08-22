@@ -12,7 +12,6 @@ export class Dropzone extends Container {
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
 
-  // private _body: Graphics;
   private _connectTop = false;
   private _connectBottom = false;
   private _swapConnectTop = false;
@@ -36,10 +35,6 @@ export class Dropzone extends Container {
 
   get gateSize(): number {
     return Dropzone.sizeInPx;
-  }
-
-  slotWidth(): number {
-    return Dropzone.sizeInPx * 1.5;
   }
 
   get operation(): Operation | null {
