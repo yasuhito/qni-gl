@@ -63,6 +63,24 @@ export class CircuitStep extends Container {
     );
   }
 
+  /**
+   * Checks if the pointer is currently over this circuit step.
+   *
+   * Returns true if the pointer is over the circuit step, false otherwise.
+   */
+  get isHovered(): boolean {
+    return this.state.isHover();
+  }
+
+  /**
+   * Checks if this circuit step is currently in an active state.
+   *
+   * Returns true if the circuit step is active, false otherwise.
+   */
+  get isActive(): boolean {
+    return this.state.isActive();
+  }
+
   private get occupiedDropzones() {
     return this.dropzoneList.occupied;
   }
@@ -161,15 +179,28 @@ export class CircuitStep extends Container {
     this.dropzoneList.removeLast();
   }
 
-  private onDropzoneSnap(dropzone: Dropzone) {
-    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
+  activate() {
+    if (this.isActive) {
+      return;
+    }
+
+    this.state.setActive();
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
-  bit(dropzone: Dropzone): number {
+  deactivate() {
+    this.state.setIdle();
+  }
+
+  private bit(dropzone: Dropzone): number {
     const bit = this.dropzones.indexOf(dropzone);
     // Util.need(bit !== -1, 'circuit-dropzone not found.')
 
     return bit;
+  }
+
+  private onDropzoneSnap(dropzone: Dropzone) {
+    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
   updateSwapConnections(): void {
@@ -245,14 +276,6 @@ export class CircuitStep extends Container {
     return this.dropzoneList.filterByOperationType(XGate);
   }
 
-  isHovered(): boolean {
-    return this.state.isHover();
-  }
-
-  isActive(): boolean {
-    return this.state.isActive();
-  }
-
   serialize() {
     const result: { type: string; targets: number[]; controls?: number[] }[] =
       [];
@@ -290,19 +313,6 @@ export class CircuitStep extends Container {
   toJSON() {
     const jsons = this.dropzones.map((each) => each.toJSON());
     return `[${jsons.join(",")}]`;
-  }
-
-  activate() {
-    if (this.isActive()) {
-      return;
-    }
-
-    this.state.setActive();
-    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
-  }
-
-  deactivate() {
-    this.state.setIdle();
   }
 
   private maybeSetHoverState() {

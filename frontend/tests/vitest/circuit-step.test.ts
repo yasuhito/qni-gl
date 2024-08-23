@@ -155,6 +155,28 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("isHovered", () => {
+    it("returns false if the pointer is not over the circuit step", () => {
+      expect(circuitStep.isHovered).toBe(false);
+    });
+
+    it("returns true if the pointer is over the circuit step", () => {
+      circuitStep["maybeSetHoverState"]();
+      expect(circuitStep.isHovered).toBe(true);
+    });
+  });
+
+  describe("isActive", () => {
+    it("returns false if the circuit step is not active", () => {
+      expect(circuitStep.isActive).toBe(false);
+    });
+
+    it("returns true if the circuit step is active", () => {
+      circuitStep.activate();
+      expect(circuitStep.isActive).toBe(true);
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);

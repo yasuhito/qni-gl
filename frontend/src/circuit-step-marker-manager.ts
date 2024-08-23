@@ -74,10 +74,10 @@ export class CircuitStepMarkerManager extends Container {
     this.steps.forEach((step, index) => {
       this.hideMarker(index);
 
-      if (step.isActive()) {
+      if (step.isActive) {
         this.drawActiveStepMarker(index);
       }
-      if (step.isHovered()) {
+      if (step.isHovered) {
         this.drawHoveredStepMarker(index);
       }
     });

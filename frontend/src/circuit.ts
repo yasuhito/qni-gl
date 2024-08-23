@@ -76,7 +76,7 @@ export class Circuit extends Container {
   get activeStepIndex() {
     for (let i = 0; i < this.steps.length; i++) {
       const step = this.steps[i];
-      if (step.isActive()) {
+      if (step.isActive) {
         return i;
       }
     }
@@ -319,7 +319,7 @@ export class Circuit extends Container {
   private activateStep(circuitStep: CircuitStep) {
     this.steps.forEach((each: CircuitStep) => {
       if (each !== circuitStep) {
-        if (each.isActive()) {
+        if (each.isActive) {
           each.deactivate();
         }
         // this.markerManager.hideMarker(index);
