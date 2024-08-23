@@ -104,6 +104,27 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("hasOperationAt", () => {
+    it("returns false if the dropzone at the specified index has no operation", () => {
+      expect(circuitStep.hasOperationAt(0)).toBe(false);
+      expect(circuitStep.hasOperationAt(1)).toBe(false);
+      expect(circuitStep.hasOperationAt(2)).toBe(false);
+    });
+
+    it("returns true if the dropzone at the specified index has an operation", () => {
+      const hGate = new HGate();
+      circuitStep.fetchDropzone(1).addChild(hGate);
+
+      expect(circuitStep.hasOperationAt(1)).toBe(true);
+    });
+
+    it("throws an error if the index is out of bounds", () => {
+      expect(() => circuitStep.hasOperationAt(3)).toThrow(
+        "Dropzone not found at index 3"
+      );
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);

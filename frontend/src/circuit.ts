@@ -254,7 +254,7 @@ export class Circuit extends Container {
   }
 
   private isLastWireUnused() {
-    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
+    return this.steps.every((each) => !each.hasOperationAt(each.wireCount - 1));
   }
 
   protected get maxWireCountForAllSteps() {

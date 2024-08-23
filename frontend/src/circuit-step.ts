@@ -20,7 +20,6 @@ export class CircuitStep extends Container {
   /** The padding space around the dropzones within the circuit step. */
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
-  // private body: Graphics;
   private dropzoneList!: DropzoneList;
   private state!: CircuitStepState;
 
@@ -123,13 +122,17 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * 指定した量子ビットにゲートが置かれているかどうかを返す
+   * Checks if an operation is present at the specified qubit index.
+   *
+   * @param index The index of the qubit to check.
+   *
+   * This method returns true if there is an operation placed on the dropzone
+   * at the specified qubit index, and false otherwise.
+   * If the qubit index is out of bounds, it will throw an error.
    */
-  hasGateAt(qubitIndex: number) {
-    const dropzone = this.fetchDropzone(qubitIndex);
-    if (!dropzone) {
-      throw new Error(`Dropzone not found at index ${qubitIndex}`);
-    }
+  hasOperationAt(index: number) {
+    const dropzone = this.fetchDropzone(index);
+
     return dropzone.isOccupied();
   }
 
