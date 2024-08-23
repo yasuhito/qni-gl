@@ -61,6 +61,19 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("occupiedDropzoneCount", () => {
+    it("returns 0 if no dropzone has an operation", () => {
+      expect(circuitStep.occupiedDropzoneCount).toBe(0);
+    });
+
+    it("returns the correct count of occupied dropzones", () => {
+      const hGate = new HGate();
+      circuitStep.fetchDropzone(1).addChild(hGate);
+
+      expect(circuitStep.occupiedDropzoneCount).toBe(1);
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);

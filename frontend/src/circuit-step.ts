@@ -46,32 +46,45 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * Gets the qubit count in use.
-   * If no gate is placed in any {@link Dropzone}, returns 0.
+   * Gets the count of dropzones with operations placed in them.
+   * If no operation is placed in any {@link Dropzone}, returns 0.
    */
-  get qubitCountInUse() {
-    let count = 0;
-
-    this.dropzones.forEach((each, dropzoneIndex) => {
-      if (each.isOccupied()) {
-        count = dropzoneIndex + 1;
-      }
-    });
-
-    return count;
+  get occupiedDropzoneCount() {
+    return this.dropzones.filter((dropzone) => dropzone.isOccupied()).length;
   }
 
-  /**
-   * ステップ内のすべての {@link Dropzone} のうち、ゲートが置かれたものを返す
-   */
   private get occupiedDropzones() {
     return this.dropzoneList.occupied;
   }
 
   private get operations(): Operation[] {
-    return this.occupiedDropzones
-      .map((each) => each.operation)
-      .filter((each): each is NonNullable<Operation> => each !== null);
+    return this.occupiedDropzones.map((each) => each.operation as Operation);
+  }
+
+  constructor(wireCount: number) {
+    super();
+
+    // Container のサイズを dropzoneList の変化にあわせて更新するための Graphics オブジェクト
+    // dropzoneList に dropzone が追加されたり削除された場合、この body をあらためて addChild することで
+    // CircuitStep のサイズを適切に更新する
+    this.body = new Graphics({ alpha: 0 });
+    this.state = new CircuitStepState();
+    this.dropzoneList = new DropzoneList({
+      padding: CircuitStep.PADDING,
+    });
+
+    this.addChildAt(this.body, 0);
+    this.addChildAt(this.dropzoneList, 1);
+
+    for (let i = 0; i < wireCount; i++) {
+      this.appendNewDropzone();
+    }
+
+    this.on("pointerover", this.onPointerOver, this)
+      .on("pointerout", this.onPointerOut, this)
+      .on("pointerdown", this.onPointerDown, this);
+
+    this.eventMode = "static";
   }
 
   fetchDropzone(index: number) {
@@ -113,29 +126,6 @@ export class CircuitStep extends Container {
   deleteLastDropzone() {
     this.dropzoneList.removeLast();
     this.updateSize();
-  }
-
-  constructor(wireCount: number) {
-    super();
-
-    this.body = new Graphics({ alpha: 0 });
-    this.state = new CircuitStepState();
-    this.dropzoneList = new DropzoneList({
-      padding: CircuitStep.PADDING,
-    });
-
-    this.addChildAt(this.body, 0);
-    this.addChildAt(this.dropzoneList, 1);
-
-    for (let i = 0; i < wireCount; i++) {
-      this.appendNewDropzone();
-    }
-
-    this.on("pointerover", this.onPointerOver, this)
-      .on("pointerout", this.onPointerOut, this)
-      .on("pointerdown", this.onPointerDown, this);
-
-    this.eventMode = "static";
   }
 
   bit(dropzone: Dropzone): number {

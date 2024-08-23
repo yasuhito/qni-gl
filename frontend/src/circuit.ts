@@ -52,10 +52,10 @@ export class Circuit extends Container {
     return wireCount;
   }
 
-  get qubitCountInUse(): QubitCount {
+  get occupiedDropzoneCount(): QubitCount {
     const qubitCount = Math.max(
       ...this.steps.map((each) => {
-        return each.qubitCountInUse;
+        return each.occupiedDropzoneCount;
       })
     );
 
@@ -274,7 +274,7 @@ export class Circuit extends Container {
   }
 
   toString() {
-    const output = Array(this.qubitCountInUse * 2)
+    const output = Array(this.occupiedDropzoneCount * 2)
       .fill("")
       .map((_, i) => {
         if (i % 2 == 0) {
@@ -286,7 +286,7 @@ export class Circuit extends Container {
 
     this.steps.forEach((step) => {
       step.dropzones.forEach((dropzone, qubitIndex) => {
-        if (qubitIndex < this.qubitCountInUse) {
+        if (qubitIndex < this.occupiedDropzoneCount) {
           const gate = dropzone.operation;
 
           if (gate) {
