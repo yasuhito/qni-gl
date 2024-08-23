@@ -1,10 +1,10 @@
 import { Container, Point } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
-import { Operation } from "./operation";
 import { WireType } from "./types";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
 import { spacingInPx } from "./util";
+import { Operation } from "./operation";
 
 export class Dropzone extends Container {
   static readonly sizeInPx = spacingInPx(8);

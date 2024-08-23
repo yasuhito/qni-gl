@@ -211,6 +211,51 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("updateConnections", () => {
+    it("should update the connections between an X gate and a control gate in the circuit step", () => {
+      const xGate = new XGate();
+      const controlGate = new ControlGate();
+
+      circuitStep.fetchDropzone(0).addChild(controlGate);
+      circuitStep.fetchDropzone(2).addChild(xGate);
+
+      const controlGateDropzone = circuitStep.fetchDropzone(0);
+      const middleDropzone = circuitStep.fetchDropzone(1);
+      const xGateDropzone = circuitStep.fetchDropzone(2);
+
+      circuitStep.updateConnections();
+
+      expect(xGate.controls).toEqual([0]);
+      expect(controlGateDropzone.controlConnectBottom).toBe(true);
+      expect(controlGateDropzone.controlConnectTop).toBe(false);
+      expect(middleDropzone.controlConnectTop).toBe(true);
+      expect(middleDropzone.controlConnectBottom).toBe(true);
+      expect(xGateDropzone.controlConnectTop).toBe(true);
+      expect(xGateDropzone.controlConnectBottom).toBe(false);
+    });
+
+    it("should update the connections between two swap gates in the circuit step", () => {
+      const swapGate1 = new SwapGate();
+      const swapGate2 = new SwapGate();
+
+      circuitStep.fetchDropzone(0).addChild(swapGate1);
+      circuitStep.fetchDropzone(2).addChild(swapGate2);
+
+      const swapGate1Dropzone = circuitStep.fetchDropzone(0);
+      const middleDropzone = circuitStep.fetchDropzone(1);
+      const swapGate2Dropzone = circuitStep.fetchDropzone(2);
+
+      circuitStep.updateConnections();
+
+      expect(swapGate1Dropzone.swapConnectBottom).toBe(true);
+      expect(swapGate1Dropzone.swapConnectTop).toBe(false);
+      expect(middleDropzone.swapConnectBottom).toBe(true);
+      expect(middleDropzone.swapConnectTop).toBe(true);
+      expect(swapGate2Dropzone.swapConnectBottom).toBe(false);
+      expect(swapGate2Dropzone.swapConnectTop).toBe(true);
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);

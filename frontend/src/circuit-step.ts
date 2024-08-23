@@ -7,7 +7,7 @@ import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
-import { groupBy } from "./util";
+import { groupBy, need } from "./util";
 
 /**
  * Represents a single step in a quantum circuit.
@@ -202,20 +202,25 @@ export class CircuitStep extends Container {
     this.state.setIdle();
   }
 
-  private bit(dropzone: Dropzone): number {
-    const bit = this.dropzones.indexOf(dropzone);
-    // Util.need(bit !== -1, 'circuit-dropzone not found.')
-
-    return bit;
+  /**
+   * Updates the connections between operations in the circuit step.
+   * This method handles the visual connections for swap operations and controlled operations.
+   */
+  updateConnections(): void {
+    this.updateSwapConnections();
+    this.updateControlledUConnections();
   }
 
-  private onDropzoneSnap(dropzone: Dropzone) {
-    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
+  private qubitNumberOf(dropzone: Dropzone): number {
+    const num = this.dropzones.indexOf(dropzone);
+    need(num !== -1, "dropzone not found.");
+
+    return num;
   }
 
-  updateSwapConnections(): void {
+  private updateSwapConnections(): void {
     const swapDropzones = this.dropzoneList.filterByOperationType(SwapGate);
-    const swapBits = swapDropzones.map((each) => this.bit(each));
+    const swapBits = swapDropzones.map((each) => this.qubitNumberOf(each));
 
     if (swapDropzones.length !== 2) {
       for (const dropzone of this.dropzones) {
@@ -226,23 +231,25 @@ export class CircuitStep extends Container {
       const [minBit, maxBit] = [Math.min(...swapBits), Math.max(...swapBits)];
 
       for (const dropzone of this.dropzones) {
-        const bit = this.bit(dropzone);
+        const bit = this.qubitNumberOf(dropzone);
         dropzone.swapConnectTop = bit > minBit && bit <= maxBit;
         dropzone.swapConnectBottom = bit >= minBit && bit < maxBit;
       }
     }
 
-    this.updateConnections();
+    this.applyConnectionUpdates();
   }
 
-  updateControlledUConnections(): void {
+  private updateControlledUConnections(): void {
     const controllableDropzones = this.controllableDropzones();
     const controlDropzones =
       this.dropzoneList.filterByOperationType(ControlGate);
-    const allControlBits = controlDropzones.map((dz) => this.bit(dz));
+    const allControlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
 
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
-    const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
+    const controllableBits = controllableDropzones.map((dz) =>
+      this.qubitNumberOf(dz)
+    );
     const activeOperationBits = activeControlBits.concat(controllableBits);
 
     if (activeOperationBits.length > 0) {
@@ -252,16 +259,15 @@ export class CircuitStep extends Container {
       ];
 
       for (const dropzone of this.dropzones) {
-        const bit = this.bit(dropzone);
+        const bit = this.qubitNumberOf(dropzone);
         dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
         dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
       }
 
       // Set controls for XGates
       for (const each of controllableDropzones) {
-        if (each.operation instanceof XGate) {
-          each.operation.controls = allControlBits;
-        }
+        need(each.operation instanceof XGate, "operation is not XGate");
+        each.operation.controls = allControlBits;
       }
     } else {
       for (const dropzone of this.dropzones) {
@@ -270,10 +276,10 @@ export class CircuitStep extends Container {
       }
     }
 
-    this.updateConnections();
+    this.applyConnectionUpdates();
   }
 
-  private updateConnections(): void {
+  private applyConnectionUpdates(): void {
     for (const dropzone of this.dropzones) {
       dropzone.connectTop =
         dropzone.swapConnectTop || dropzone.controlConnectTop;
@@ -291,7 +297,7 @@ export class CircuitStep extends Container {
       [];
     const controlBits = this.dropzoneList
       .filterByOperationType(ControlGate)
-      .map((each) => this.bit(each));
+      .map((each) => this.qubitNumberOf(each));
 
     for (const [GateClass, sameOps] of groupBy(
       this.operations,
@@ -323,6 +329,10 @@ export class CircuitStep extends Container {
   toJSON() {
     const jsons = this.dropzones.map((each) => each.toJSON());
     return `[${jsons.join(",")}]`;
+  }
+
+  private onDropzoneSnap(dropzone: Dropzone) {
+    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
   private maybeSetHoverState() {

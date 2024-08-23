@@ -134,8 +134,7 @@ export class Circuit extends Container {
 
   private onGateSnapToDropzone() {
     this.redrawDropzoneInputAndOutputWires();
-    this.updateSwapConnections();
-    this.updateGateConnections();
+    this.updateConnections();
   }
 
   private redrawDropzoneInputAndOutputWires() {
@@ -186,8 +185,7 @@ export class Circuit extends Container {
     this.removeEmptySteps();
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
-    this.updateSwapConnections();
-    this.updateGateConnections();
+    this.updateConnections();
 
     this.stepAt(activeStepIndex).activate();
     this.markerManager.update(this.steps);
@@ -241,15 +239,9 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
-  private updateSwapConnections() {
+  private updateConnections() {
     this.steps.forEach((each) => {
-      each.updateSwapConnections();
-    });
-  }
-
-  private updateGateConnections() {
-    this.steps.forEach((each) => {
-      each.updateControlledUConnections();
+      each.updateConnections();
     });
   }
 
