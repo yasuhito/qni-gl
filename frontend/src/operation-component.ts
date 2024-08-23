@@ -1,5 +1,5 @@
 import { ActorRefFrom, createActor, createMachine } from "xstate";
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { OperationSource } from "./operation-source";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
@@ -20,7 +20,7 @@ import { OPERATION_EVENTS } from "./events";
 export type ClickEvent = {
   type: "Click";
   globalPosition: Point;
-  dropzone: DropzoneComponent | null;
+  dropzone: Dropzone | null;
 };
 
 /**
@@ -29,11 +29,11 @@ export type ClickEvent = {
 export type DragEvent = {
   type: "Drag";
   globalPosition: Point;
-  dropzone: DropzoneComponent | null;
+  dropzone: Dropzone | null;
 };
 
 export class OperationComponent extends IconableMixin(Container) {
-  private static sizeInPx = {
+  static sizeInPx = {
     xl: spacingInPx(12),
     lg: spacingInPx(10),
     base: spacingInPx(8),
@@ -143,7 +143,7 @@ export class OperationComponent extends IconableMixin(Container) {
 
           if (e.dropzone) {
             // snap した場合
-            this.position.set(this.sizeInPx / 4, 0);
+            this.position.set(this.sizeInPx / 4, this.sizeInPx / 4);
           } else {
             const newPos = this.parent.toLocal(e.globalPosition);
             this.position.set(
@@ -169,8 +169,8 @@ export class OperationComponent extends IconableMixin(Container) {
     return null;
   }
 
-  get dropzone(): DropzoneComponent | null {
-    if (this.parent instanceof DropzoneComponent) {
+  get dropzone(): Dropzone | null {
+    if (this.parent instanceof Dropzone) {
       return this.parent;
     }
 
@@ -216,7 +216,7 @@ export class OperationComponent extends IconableMixin(Container) {
     });
   }
 
-  click(globalPosition: Point, dropzone: DropzoneComponent | null) {
+  click(globalPosition: Point, dropzone: Dropzone | null) {
     this.actor.send({
       type: "Click",
       globalPosition: globalPosition,
@@ -240,7 +240,7 @@ export class OperationComponent extends IconableMixin(Container) {
     });
   }
 
-  snapToDropzone(dropzone: DropzoneComponent, globalPosition: Point) {
+  snapToDropzone(dropzone: Dropzone, globalPosition: Point) {
     if (this.dropzone && this.dropzone !== dropzone) {
       this.unsnap();
     }
@@ -252,7 +252,7 @@ export class OperationComponent extends IconableMixin(Container) {
     });
   }
 
-  snap(dropzone: DropzoneComponent) {
+  snap(dropzone: Dropzone) {
     dropzone.snap(this);
     this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
   }

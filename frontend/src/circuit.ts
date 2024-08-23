@@ -52,10 +52,10 @@ export class Circuit extends Container {
     return wireCount;
   }
 
-  get qubitCountInUse(): QubitCount {
+  get highestOccupiedQubitNumber(): QubitCount {
     const qubitCount = Math.max(
       ...this.steps.map((each) => {
-        return each.qubitCountInUse;
+        return each.highestOccupiedQubitNumber;
       })
     );
 
@@ -76,7 +76,7 @@ export class Circuit extends Container {
   get activeStepIndex() {
     for (let i = 0; i < this.steps.length; i++) {
       const step = this.steps[i];
-      if (step.isActive()) {
+      if (step.isActive) {
         return i;
       }
     }
@@ -105,7 +105,7 @@ export class Circuit extends Container {
       this.appendStep();
     }
 
-    this.markerManager = new CircuitStepMarkerManager(this.steps);
+    this.markerManager = new CircuitStepMarkerManager({ steps: this.steps });
     this.addChild(this.markerManager);
 
     this.markerManager.zIndex = 1;
@@ -117,7 +117,7 @@ export class Circuit extends Container {
     this.circuitStepsContainer.addChild(circuitStep);
 
     circuitStep.on(
-      CIRCUIT_STEP_EVENTS.GATE_SNAPPED,
+      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
       this.onGateSnapToDropzone,
       this
     );
@@ -127,15 +127,17 @@ export class Circuit extends Container {
       this
     );
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-    circuitStep.on(CIRCUIT_STEP_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
-    });
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+      (gate, globalPosition) => {
+        this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
+      }
+    );
   }
 
   private onGateSnapToDropzone() {
     this.redrawDropzoneInputAndOutputWires();
-    this.updateSwapConnections();
-    this.updateGateConnections();
+    this.updateConnections();
   }
 
   private redrawDropzoneInputAndOutputWires() {
@@ -143,7 +145,7 @@ export class Circuit extends Container {
       let wireType = WireType.Classical;
 
       this.steps.forEach((each) => {
-        const dropzone = each.fetchDropzoneByIndex(wireIndex);
+        const dropzone = each.fetchDropzone(wireIndex);
 
         if (dropzone.isOccupied()) {
           if (dropzone.hasWriteGate()) {
@@ -186,8 +188,7 @@ export class Circuit extends Container {
     this.removeEmptySteps();
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
-    this.updateSwapConnections();
-    this.updateGateConnections();
+    this.updateConnections();
 
     this.stepAt(activeStepIndex).activate();
     this.markerManager.update(this.steps);
@@ -220,7 +221,7 @@ export class Circuit extends Container {
       this.maxWireCountForAllSteps > this.minWireCount
     ) {
       this.steps.forEach((each) => {
-        each.deleteLastDropzone();
+        each.removeLastDropzone();
       });
     }
   }
@@ -241,20 +242,14 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
-  private updateSwapConnections() {
+  private updateConnections() {
     this.steps.forEach((each) => {
-      each.updateSwapConnections();
-    });
-  }
-
-  private updateGateConnections() {
-    this.steps.forEach((each) => {
-      each.updateControlledUConnections();
+      each.updateConnections();
     });
   }
 
   private isLastWireUnused() {
-    return this.steps.every((each) => !each.hasGateAt(each.wireCount - 1));
+    return this.steps.every((each) => !each.hasOperationAt(each.wireCount - 1));
   }
 
   protected get maxWireCountForAllSteps() {
@@ -274,7 +269,7 @@ export class Circuit extends Container {
   }
 
   toString() {
-    const output = Array(this.qubitCountInUse * 2)
+    const output = Array(this.highestOccupiedQubitNumber * 2)
       .fill("")
       .map((_, i) => {
         if (i % 2 == 0) {
@@ -286,17 +281,17 @@ export class Circuit extends Container {
 
     this.steps.forEach((step) => {
       step.dropzones.forEach((dropzone, qubitIndex) => {
-        if (qubitIndex < this.qubitCountInUse) {
-          const gate = dropzone.operation;
+        if (qubitIndex < this.highestOccupiedQubitNumber) {
+          const operation = dropzone.operation;
 
-          if (gate) {
-            const gateLabel = dropzone.operation.label;
-            // gateLabel は 1 文字または 2 文字になる。
+          if (operation) {
+            const operationLabel = dropzone.operation.label;
+            // label は 1 文字または 2 文字になる。
             // このため、1 文字の場合は 2 文字分のスペースを確保する。
-            if (gateLabel.length == 1) {
-              output[qubitIndex * 2] += `${gateLabel}────`;
+            if (operationLabel.length == 1) {
+              output[qubitIndex * 2] += `${operationLabel}────`;
             } else {
-              output[qubitIndex * 2] += `${gateLabel}───`;
+              output[qubitIndex * 2] += `${operationLabel}───`;
             }
           } else {
             output[qubitIndex * 2] += `─────`;
@@ -309,10 +304,6 @@ export class Circuit extends Container {
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStep) {
-    // const stepIndex = this.steps.indexOf(circuitStep);
-    // if (stepIndex !== -1) {
-    //   this.markerManager.hoverMarker(stepIndex, this.steps);
-    // }
     this.markerManager.update(this.steps);
     this.emit("stepHover", this, circuitStep);
   }
@@ -323,7 +314,7 @@ export class Circuit extends Container {
   private activateStep(circuitStep: CircuitStep) {
     this.steps.forEach((each: CircuitStep) => {
       if (each !== circuitStep) {
-        if (each.isActive()) {
+        if (each.isActive) {
           each.deactivate();
         }
         // this.markerManager.hideMarker(index);

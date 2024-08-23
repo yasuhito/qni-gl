@@ -3,7 +3,7 @@ import { CircuitFrame } from "./circuit-frame";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Complex } from "@qni/common";
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { FrameDivider } from "./frame-divider";
 import { OperationComponent } from "./operation-component";
 import { List } from "@pixi/ui";
@@ -266,12 +266,10 @@ export class App {
           throw new Error("value is not '' | 0 | 1");
         }
 
-        const qubitCount = this.circuit.qubitCountInUse;
+        const qubitCount = this.circuit.highestOccupiedQubitNumber;
         // TODO: ビットオーダーの変換をサービスワーカ側で行う
         // フロントエンドからは Qni のビットオーダ (上が下位) しか意識しなくて良いようにする
-        const dropzone = step.fetchDropzoneByIndex(
-          qubitCount - parseInt(bit) - 1
-        );
+        const dropzone = step.fetchDropzone(qubitCount - parseInt(bit) - 1);
         const measurementGate = dropzone.operation;
 
         // もし measurementGate が MeasurementGate でない場合はエラー
@@ -425,7 +423,7 @@ export class App {
     gateCenterY: number,
     gateWidth: number,
     gateHeight: number,
-    dropzone: DropzoneComponent
+    dropzone: Dropzone
   ) {
     if (dropzone.operation !== null && dropzone.operation !== gate) {
       return false;
@@ -435,13 +433,15 @@ export class App {
     const gateX = gateCenterX - gateWidth / 2;
     const gateY = gateCenterY - gateHeight / 2;
     const dropboxPosition = dropzone.getGlobalPosition();
+
     const snapzoneX =
       dropboxPosition.x +
-      dropzone.size / 4 +
-      ((1 - snapRatio) * dropzone.size) / 2;
-    const snapzoneY = dropboxPosition.y + ((1 - snapRatio) * dropzone.size) / 2;
-    const snapzoneWidth = dropzone.size * snapRatio;
-    const snapzoneHeight = dropzone.size * snapRatio;
+      dropzone.gateSize / 4 +
+      ((1 - snapRatio) * dropzone.gateSize) / 2;
+    const snapzoneY =
+      dropboxPosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+    const snapzoneWidth = dropzone.gateSize * snapRatio;
+    const snapzoneHeight = dropzone.gateSize * snapRatio;
 
     return rectIntersect(
       gateX,
@@ -470,7 +470,7 @@ export class App {
    * @param pointerPosition マウス/タッチの位置
    */
   private moveGate(gate: OperationComponent, pointerPosition: Point) {
-    let snapDropzone: DropzoneComponent | null = null;
+    let snapDropzone: Dropzone | null = null;
 
     for (const circuitStep of this.circuit.steps) {
       for (const dropzone of circuitStep.dropzones) {
@@ -539,7 +539,7 @@ export class App {
   }
 
   private updateStateVectorComponentQubitCount() {
-    this.stateVector.qubitCount = this.circuit.qubitCountInUse;
+    this.stateVector.qubitCount = this.circuit.highestOccupiedQubitNumber;
   }
 
   private maybeDeactivateGate(event: FederatedPointerEvent) {
@@ -557,7 +557,7 @@ export class App {
 
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
-      qubitCount: this.circuit.qubitCountInUse,
+      qubitCount: this.circuit.highestOccupiedQubitNumber,
       stepIndex: this.circuit.activeStepIndex,
       targets: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),

@@ -36,7 +36,7 @@ export function IconableMixin<TBase extends Constructor<Container>>(
     private async loadTexture(gateType: string): Promise<Texture> {
       try {
         const iconName = `${convertToKebabCase(gateType)}.png`;
-        const iconPath = `./assets/${iconName}`;
+        const iconPath = `/assets/${iconName}`;
 
         return await Assets.load(iconPath);
       } catch (error) {

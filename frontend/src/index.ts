@@ -7,7 +7,7 @@ export * from "./colors";
 export * from "./constants";
 export * from "./constructor";
 export * from "./control-gate";
-export * from "./dropzone-component";
+export * from "./dropzone";
 export * from "./frame-divider";
 export * from "./operation-component";
 export * from "./operation-palette";

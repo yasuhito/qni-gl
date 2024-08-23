@@ -1,13 +1,13 @@
 import { Container, Point } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
-import { Operation } from "./operation";
 import { WireType } from "./types";
-import { spacingInPx } from "./util";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
+import { spacingInPx } from "./util";
+import { Operation } from "./operation";
 
-export class DropzoneComponent extends Container {
-  static size = spacingInPx(8);
+export class Dropzone extends Container {
+  static readonly sizeInPx = spacingInPx(8);
 
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
@@ -23,21 +23,18 @@ export class DropzoneComponent extends Container {
 
   constructor() {
     super();
+
     this.renderer = new DropzoneRenderer(this);
     this.redrawWires();
     this.redrawConnections();
   }
 
-  get size(): number {
-    return DropzoneComponent.size;
+  get totalSize(): number {
+    return this.gateSize * 1.5;
   }
 
-  get width(): number {
-    return DropzoneComponent.size * 1.5;
-  }
-
-  get height(): number {
-    return DropzoneComponent.size;
+  get gateSize(): number {
+    return Dropzone.sizeInPx;
   }
 
   get operation(): Operation | null {
@@ -110,7 +107,7 @@ export class DropzoneComponent extends Container {
     }
     this.operation.on(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
     this.redrawWires();
-    this.emit(DROPZONE_EVENTS.GATE_SNAPPED, this);
+    this.emit(DROPZONE_EVENTS.OPERATION_SNAPPED, this);
   }
 
   unsnap() {
@@ -122,24 +119,21 @@ export class DropzoneComponent extends Container {
   }
 
   private emitGrabGateEvent(gate: OperationComponent, globalPosition: Point) {
-    this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
+    this.emit(DROPZONE_EVENTS.OPERATION_GRABBED, gate, globalPosition);
   }
 
   redrawWires() {
-    this.renderer.drawWires(
-      this.inputWireType,
-      this.outputWireType,
-      this.size,
-      this.isIconGate(this.operation)
-    );
+    this.renderer.updateWires({
+      inputWireType: this.inputWireType,
+      outputWireType: this.outputWireType,
+    });
   }
 
   redrawConnections() {
-    this.renderer.drawConnections(
-      this.connectTop,
-      this.connectBottom,
-      this.size
-    );
+    this.renderer.updateConnections({
+      connectTop: this.connectTop,
+      connectBottom: this.connectBottom,
+    });
   }
 
   toJSON() {
@@ -157,14 +151,5 @@ export class DropzoneComponent extends Container {
 
   hasMeasurementGate() {
     return this.operation?.operationType === "MeasurementGate";
-  }
-
-  private isIconGate(gate: OperationComponent | null) {
-    if (gate === null) {
-      return false;
-    }
-    return ["Write0Gate", "Write1Gate", "MeasurementGate"].some(
-      (type) => gate.operationType === type
-    );
   }
 }

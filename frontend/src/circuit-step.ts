@@ -1,260 +1,268 @@
-import * as PIXI from "pixi.js";
+import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
+import { DropzoneList } from "./dropzone-list";
+import { CircuitStepState } from "./circuit-step-state";
 import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
-import { DropzoneComponent } from "./dropzone-component";
+import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
-import { groupBy } from "./util";
-import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
-import { CircuitStepState } from "./circuit-step-state";
-import { CircuitStepDropzones } from "./circuit-step-dropzones";
+import { groupBy, need } from "./util";
 
+type SerializedOperation = {
+  type: string;
+  targets: number[];
+  controls?: number[];
+};
+
+/**
+ * Represents a single step in a quantum circuit.
+ *
+ * This class manages a collection of Dropzones, each corresponding to a qubit in the circuit.
+ * It handles the placement and interaction of operations within the step, including
+ * special operations like swap gates and controlled operations.
+ */
 export class CircuitStep extends Container {
-  private _dropzones: CircuitStepDropzones;
-  private _state: CircuitStepState;
+  /** The padding space around the dropzones within the circuit step. */
+  static readonly PADDING = Dropzone.sizeInPx / 2;
+
+  private dropzoneList!: DropzoneList;
+  private state!: CircuitStepState;
 
   /**
-   * ステップ内のワイヤ数 (ビット数) を返す
+   *  Returns the number of wires (qubits) in this circuit step.
    */
   get wireCount() {
-    return this._dropzones.length;
+    return this.dropzoneList.size;
   }
 
+  /**
+   * Returns all {@link Dropzone}s in this circuit step.
+   */
+  get dropzones(): Dropzone[] {
+    return this.dropzoneList.all;
+  }
+
+  /**
+   *  Returns true if all dropzones in this circuit step are empty (have no operations).
+   */
   get isEmpty(): boolean {
     return this.dropzones.every((each) => each.operation === null);
   }
 
   /**
-   * Gets the qubit count in use.
-   * If no gate is placed in any {@link DropzoneComponent}, returns 0.
+   * Returns the number of the highest qubit with an operation placed on it.
+   * Qubit numbers start from 1.
+   * Returns 0 if all qubits are empty (no operations placed).
+   *
+   * Examples:
+   * - [X, _, H, _] => returns 3 (3rd qubit is the last with an operation)
+   * - [_, _, _, X] => returns 4 (4th qubit is the last with an operation)
+   * - [H, _, _, _] => returns 1 (only the 1st qubit has an operation)
+   * - [_, _, _, _] => returns 0 (all qubits are empty)
    */
-  get qubitCountInUse() {
-    let count = 0;
-
-    this.dropzones.forEach((each, dropzoneIndex) => {
-      if (each.isOccupied()) {
-        count = dropzoneIndex + 1;
-      }
-    });
-
-    return count;
+  get highestOccupiedQubitNumber() {
+    return this.dropzones.reduce(
+      (maxIndex, dropzone, currentIndex) =>
+        dropzone.isOccupied() ? currentIndex + 1 : maxIndex,
+      0
+    );
   }
 
   /**
-   * ステップ内のすべての {@link DropzoneComponent} を返す
+   * Checks if the pointer is currently over this circuit step.
+   *
+   * Returns true if the pointer is over the circuit step, false otherwise.
    */
-  get dropzones(): DropzoneComponent[] {
-    return this._dropzones.all;
+  get isHovered(): boolean {
+    return this.state.isHover();
   }
 
   /**
-   * ステップ内のすべての {@link DropzoneComponent} のうち、ゲートが置かれたものを返す
+   * Checks if this circuit step is currently in an active state.
+   *
+   * Returns true if the circuit step is active, false otherwise.
    */
+  get isActive(): boolean {
+    return this.state.isActive();
+  }
+
   private get occupiedDropzones() {
-    return this._dropzones.occupied;
+    return this.dropzoneList.occupied;
   }
 
   private get operations(): Operation[] {
-    return this.occupiedDropzones
-      .map((each) => each.operation)
-      .filter((each): each is NonNullable<Operation> => each !== null);
+    return this.occupiedDropzones.map((each) => each.operation as Operation);
   }
 
-  fetchDropzoneByIndex(index: number) {
-    return this._dropzones.fetch(index);
+  private get controlBits(): number[] {
+    return this.dropzoneList
+      .filterByOperationType(ControlGate)
+      .map((dropzone) => this.qubitNumberOf(dropzone));
   }
 
   /**
-   * 指定した量子ビットにゲートが置かれているかどうかを返す
+   * Creates a new CircuitStep instance.
+   *
+   * @param wireCount The number of wires (qubits) in this circuit step.
    */
-  hasGateAt(qubitIndex: number) {
-    const dropzone = this.fetchDropzoneByIndex(qubitIndex);
-    if (!dropzone) {
-      throw new Error(`Dropzone not found at index ${qubitIndex}`);
+  constructor(wireCount: number) {
+    super();
+
+    this.initializeState();
+    this.initializeDropzoneList();
+    this.createDropzones(wireCount);
+    this.setupEventListeners();
+  }
+
+  private initializeState(): void {
+    this.state = new CircuitStepState();
+  }
+
+  private initializeDropzoneList(): void {
+    this.dropzoneList = new DropzoneList({
+      padding: CircuitStep.PADDING,
+    });
+    this.addChild(this.dropzoneList);
+  }
+
+  private createDropzones(wireCount: number): void {
+    for (let i = 0; i < wireCount; i++) {
+      this.appendNewDropzone();
     }
+  }
+
+  private setupEventListeners(): void {
+    this.on("pointerover", this.maybeSetHoverState, this)
+      .on("pointerout", this.maybeSetIdleState, this)
+      .on("pointerdown", this.activate, this);
+    this.eventMode = "static";
+  }
+
+  /**
+   * Retrieves a Dropzone at the specified index.
+   *
+   * @param index The index of the Dropzone to fetch.
+   *
+   * This method returns the Dropzone at the specified index.
+   * If the index is out of bounds, it throws an error.
+   */
+  fetchDropzone(index: number) {
+    return this.dropzoneList.fetch(index);
+  }
+
+  /**
+   * Checks if an operation is present at the specified qubit index.
+   *
+   * @param index The index of the qubit to check.
+   *
+   * This method returns true if there is an operation placed on the dropzone
+   * at the specified qubit index, and false otherwise.
+   * If the qubit index is out of bounds, it will throw an error.
+   */
+  hasOperationAt(index: number) {
+    const dropzone = this.fetchDropzone(index);
+
     return dropzone.isOccupied();
   }
 
   /**
-   * Dropzone を末尾に追加する
+   * Appends a new Dropzone to the end of the circuit step.
+   * The method returns the newly created and appended Dropzone.
    */
   appendNewDropzone() {
-    const dropzone = this._dropzones.append();
-    dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
-    dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
-    });
+    const dropzone = this.dropzoneList.append();
 
-    this.updateHitArea();
-  }
+    dropzone.on(DROPZONE_EVENTS.OPERATION_SNAPPED, this.onDropzoneSnap, this);
+    dropzone.on(
+      DROPZONE_EVENTS.OPERATION_GRABBED,
+      (operation, globalPosition) => {
+        this.emit(
+          CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+          operation,
+          globalPosition
+        );
+      }
+    );
 
-  protected onDropzoneSnap(dropzone: DropzoneComponent) {
-    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
+    return dropzone;
   }
 
   /**
-   * 末尾の Dropzone を削除する
+   * Removes the last Dropzone from the circuit step.
+   *
+   * This method removes the Dropzone at the end of the dropzone list.
+   * If the list is already empty, this method has no effect.
    */
-  deleteLastDropzone() {
-    this._dropzones.removeLast();
-    this.updateHitArea();
+  removeLastDropzone() {
+    this.dropzoneList.removeLast();
   }
 
-  constructor(qubitCount: number) {
-    super();
-
-    this._state = new CircuitStepState();
-
-    this._dropzones = new CircuitStepDropzones();
-
-    this.addChild(this._dropzones.container);
-
-    for (let i = 0; i < qubitCount; i++) {
-      this.appendNewDropzone();
+  /**
+   * Activates this circuit step.
+   *
+   * If the step is already active, this method has no effect.
+   */
+  activate() {
+    if (this.isActive) {
+      return;
     }
 
-    this.on("pointerover", this.onPointerOver, this)
-      .on("pointerout", this.onPointerOut, this)
-      .on("pointerdown", this.onPointerDown, this);
-
-    // enable the step to be interactive...
-    // this will allow it to respond to mouse and touch events
-    this.eventMode = "static";
-
-    this.updateHitArea();
+    this.state.setActive();
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
-  updateHitArea() {
-    this.hitArea = new PIXI.Rectangle(
-      0,
-      0,
-      this.dropzonesWidth,
-      this.dropzonesHeight
-    );
+  /**
+   * Deactivates this circuit step.
+   *
+   * Sets the state of the circuit step to idle.
+   */
+  deactivate() {
+    this.state.setIdle();
   }
 
-  bit(dropzone: DropzoneComponent): number {
-    const bit = this.dropzones.indexOf(dropzone);
-    // Util.need(bit !== -1, 'circuit-dropzone not found.')
-
-    return bit;
+  /**
+   * Updates the connections between operations in the circuit step.
+   * This method handles the visual connections for swap operations and controlled operations.
+   */
+  updateConnections(): void {
+    this.updateSwapConnections();
+    this.updateControlledUConnections();
   }
 
-  updateSwapConnections(): void {
-    const swapDropzones = this._dropzones.filterByOperationType(SwapGate);
-    const swapBits = swapDropzones.map((each) => this.bit(each));
+  /**
+   * Serializes the current state of the circuit step into a JSON-compatible format.
+   *
+   * This method converts the operations in the circuit step into a serialized representation,
+   * including information about the type of operation and target qubits. For controlled operations,
+   * it also includes control qubits.
+   *
+   * Returns an array of serialized operations, each represented as an object.
+   */
+  serialize(): SerializedOperation[] {
+    const result: SerializedOperation[] = [];
+    const operations = this.operations;
 
-    if (swapDropzones.length !== 2) {
-      for (const dropzone of this.dropzones) {
-        dropzone.swapConnectTop = false;
-        dropzone.swapConnectBottom = false;
-      }
-    } else {
-      const [minBit, maxBit] = [Math.min(...swapBits), Math.max(...swapBits)];
-
-      for (const dropzone of this.dropzones) {
-        const bit = this.bit(dropzone);
-        dropzone.swapConnectTop = bit > minBit && bit <= maxBit;
-        dropzone.swapConnectBottom = bit >= minBit && bit < maxBit;
-      }
-    }
-
-    this.updateConnections();
-  }
-
-  updateControlledUConnections(): void {
-    const controllableDropzones = this.controllableDropzones();
-    const controlDropzones = this._dropzones.filterByOperationType(ControlGate);
-    const allControlBits = controlDropzones.map((dz) => this.bit(dz));
-
-    const activeControlBits = allControlBits.slice(0, controlDropzones.length);
-    const controllableBits = controllableDropzones.map((dz) => this.bit(dz));
-    const activeOperationBits = activeControlBits.concat(controllableBits);
-
-    if (activeOperationBits.length > 0) {
-      const [minBit, maxBit] = [
-        Math.min(...activeOperationBits),
-        Math.max(...activeOperationBits),
-      ];
-
-      for (const dropzone of this.dropzones) {
-        const bit = this.bit(dropzone);
-        dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
-        dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
-      }
-
-      // Set controls for XGates
-      for (const each of controllableDropzones) {
-        if (each.operation instanceof XGate) {
-          each.operation.controls = allControlBits;
-        }
-      }
-    } else {
-      for (const dropzone of this.dropzones) {
-        dropzone.controlConnectTop = false;
-        dropzone.controlConnectBottom = false;
-      }
-    }
-
-    this.updateConnections();
-  }
-
-  private updateConnections(): void {
-    for (const dropzone of this.dropzones) {
-      dropzone.connectTop =
-        dropzone.swapConnectTop || dropzone.controlConnectTop;
-      dropzone.connectBottom =
-        dropzone.swapConnectBottom || dropzone.controlConnectBottom;
-    }
-  }
-
-  private controllableDropzones(): DropzoneComponent[] {
-    return this._dropzones.filterByOperationType(XGate);
-  }
-
-  get dropzonesWidth(): number {
-    return this._dropzones.width;
-  }
-
-  get dropzonesHeight(): number {
-    return this._dropzones.height;
-  }
-
-  isHovered(): boolean {
-    return this._state.isHover();
-  }
-
-  isActive(): boolean {
-    return this._state.isActive();
-  }
-
-  serialize() {
-    const result: { type: string; targets: number[]; controls?: number[] }[] =
-      [];
-    const controlBits = this._dropzones
-      .filterByOperationType(ControlGate)
-      .map((each) => this.bit(each));
-
-    for (const [GateClass, sameOps] of groupBy(
-      this.operations,
+    for (const [operationClass, sameOps] of groupBy(
+      operations,
       (op) => op.constructor
     )) {
       if (
-        GateClass === ControlGate &&
-        this.operations.some((op) => op instanceof XGate)
+        operationClass === ControlGate &&
+        operations.some((op) => op instanceof XGate)
       ) {
-        continue; // X ゲートがある場合は ControlGate をスキップ
+        continue; // Skip ControlGate if X gate is present
       }
 
-      const gates = sameOps as Operation[];
-      const targetBits = gates.map((each) => this._dropzones.findIndexOf(each));
-      const gateInstance = gates[0];
+      // const sameOperations = sameOps as Operation[];
+      const targetBits = sameOps.map((each) =>
+        this.dropzoneList.findIndexOf(each)
+      );
+      const operation = sameOps[0];
       const serializedGate =
-        gateInstance instanceof XGate
-          ? gateInstance.serialize(targetBits, controlBits)
-          : gateInstance.serialize(targetBits);
-
+        operation instanceof XGate
+          ? operation.serialize(targetBits, this.controlBits)
+          : operation.serialize(targetBits);
       result.push(serializedGate);
     }
 
@@ -266,35 +274,101 @@ export class CircuitStep extends Container {
     return `[${jsons.join(",")}]`;
   }
 
-  activate() {
-    if (this.isActive()) {
-      return;
+  private qubitNumberOf(dropzone: Dropzone): number {
+    const num = this.dropzones.indexOf(dropzone);
+    need(num !== -1, "dropzone not found.");
+
+    return num;
+  }
+
+  private updateSwapConnections(): void {
+    const swapDropzones = this.dropzoneList.filterByOperationType(SwapGate);
+    const swapBits = swapDropzones.map((each) => this.qubitNumberOf(each));
+
+    if (swapDropzones.length !== 2) {
+      for (const dropzone of this.dropzones) {
+        dropzone.swapConnectTop = false;
+        dropzone.swapConnectBottom = false;
+      }
+    } else {
+      const [minBit, maxBit] = [Math.min(...swapBits), Math.max(...swapBits)];
+
+      for (const dropzone of this.dropzones) {
+        const bit = this.qubitNumberOf(dropzone);
+        dropzone.swapConnectTop = bit > minBit && bit <= maxBit;
+        dropzone.swapConnectBottom = bit >= minBit && bit < maxBit;
+      }
     }
 
-    this._state.setActive();
-    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
+    this.applyConnectionUpdates();
   }
 
-  deactivate() {
-    this._state.setIdle();
+  private updateControlledUConnections(): void {
+    const controllableDropzones = this.controllableDropzones();
+    const controlDropzones =
+      this.dropzoneList.filterByOperationType(ControlGate);
+    const allControlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
+
+    const activeControlBits = allControlBits.slice(0, controlDropzones.length);
+    const controllableBits = controllableDropzones.map((dz) =>
+      this.qubitNumberOf(dz)
+    );
+    const activeOperationBits = activeControlBits.concat(controllableBits);
+
+    if (activeOperationBits.length > 0) {
+      const [minBit, maxBit] = [
+        Math.min(...activeOperationBits),
+        Math.max(...activeOperationBits),
+      ];
+
+      for (const dropzone of this.dropzones) {
+        const bit = this.qubitNumberOf(dropzone);
+        dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
+        dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
+      }
+
+      // Set controls for XGates
+      for (const each of controllableDropzones) {
+        need(each.operation instanceof XGate, "operation is not XGate");
+        each.operation.controls = allControlBits;
+      }
+    } else {
+      for (const dropzone of this.dropzones) {
+        dropzone.controlConnectTop = false;
+        dropzone.controlConnectBottom = false;
+      }
+    }
+
+    this.applyConnectionUpdates();
   }
 
-  protected onPointerOver() {
-    if (this._state.isIdle()) {
-      this._state.setHover();
+  private applyConnectionUpdates(): void {
+    for (const dropzone of this.dropzones) {
+      dropzone.connectTop =
+        dropzone.swapConnectTop || dropzone.controlConnectTop;
+      dropzone.connectBottom =
+        dropzone.swapConnectBottom || dropzone.controlConnectBottom;
+    }
+  }
+
+  private controllableDropzones(): Dropzone[] {
+    return this.dropzoneList.filterByOperationType(XGate);
+  }
+
+  private onDropzoneSnap(dropzone: Dropzone) {
+    this.emit(CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED, this, dropzone);
+  }
+
+  private maybeSetHoverState() {
+    if (this.state.isIdle()) {
+      this.state.setHover();
     }
     this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
-  protected onPointerOut() {
-    if (this._state.isHover()) {
-      this._state.setIdle();
-    }
-  }
-
-  protected onPointerDown() {
-    if (!this.isActive()) {
-      this.activate();
+  private maybeSetIdleState() {
+    if (this.state.isHover()) {
+      this.state.setIdle();
     }
   }
 }

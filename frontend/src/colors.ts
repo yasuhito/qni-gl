@@ -59,4 +59,5 @@ export type WireColor =
   | typeof Colors["border-component-strong-disabled"]
   | typeof Colors["text"];
 
-export const FULL_OPACITY = 1;
+export const NO_OPACITY = 1;
+export const FULL_OPACITY = 0;
