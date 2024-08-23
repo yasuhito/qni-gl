@@ -1,5 +1,6 @@
 import { CircuitStep } from "../../src/circuit-step";
 import { ControlGate } from "../../src/control-gate";
+import { CIRCUIT_STEP_EVENTS } from "../../src/events";
 import { HGate } from "../../src/h-gate";
 import { MeasurementGate } from "../../src/measurement-gate";
 import { RnotGate } from "../../src/rnot-gate";
@@ -13,7 +14,7 @@ import { Write1Gate } from "../../src/write1-gate";
 import { XGate } from "../../src/x-gate";
 import { YGate } from "../../src/y-gate";
 import { ZGate } from "../../src/z-gate";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 describe("CircuitStep", () => {
   let circuitStep: CircuitStep;
@@ -174,6 +175,39 @@ describe("CircuitStep", () => {
     it("returns true if the circuit step is active", () => {
       circuitStep.activate();
       expect(circuitStep.isActive).toBe(true);
+    });
+  });
+
+  describe("activate", () => {
+    it("activates the circuit step", () => {
+      const eventSpy = vi.spyOn(circuitStep, "emit");
+
+      circuitStep.activate();
+
+      expect(circuitStep.isActive).toBe(true);
+      expect(eventSpy).toHaveBeenCalledWith(
+        CIRCUIT_STEP_EVENTS.ACTIVATED,
+        circuitStep
+      );
+    });
+
+    it("does nothing if the circuit step is already active", () => {
+      circuitStep.activate();
+
+      const eventSpy = vi.spyOn(circuitStep, "emit");
+      circuitStep.activate();
+
+      expect(eventSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deactivate", () => {
+    it("deactivates the circuit step", () => {
+      circuitStep.activate();
+
+      circuitStep.deactivate();
+
+      expect(circuitStep.isActive).toBe(false);
     });
   });
 

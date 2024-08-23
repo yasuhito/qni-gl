@@ -179,6 +179,11 @@ export class CircuitStep extends Container {
     this.dropzoneList.removeLast();
   }
 
+  /**
+   * Activates this circuit step.
+   *
+   * If the step is already active, this method has no effect.
+   */
   activate() {
     if (this.isActive) {
       return;
@@ -188,6 +193,11 @@ export class CircuitStep extends Container {
     this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
+  /**
+   * Deactivates this circuit step.
+   *
+   * Sets the state of the circuit step to idle.
+   */
   deactivate() {
     this.state.setIdle();
   }
