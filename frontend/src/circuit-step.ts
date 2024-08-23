@@ -10,7 +10,7 @@ import { XGate } from "./x-gate";
 import { groupBy } from "./util";
 
 export class CircuitStep extends Container {
-  private static readonly PADDING = Dropzone.sizeInPx / 2;
+  static readonly PADDING = Dropzone.sizeInPx / 2;
 
   private _body: Graphics;
   private _dropzones: CircuitStepDropzones;

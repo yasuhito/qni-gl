@@ -42,6 +42,7 @@ export default defineConfig({
       provider: "playwright", // or 'webdriverio'
       enabled: true,
       name: "chromium", // browser name is required
+      headless: true,
     },
   },
   optimizeDeps: {

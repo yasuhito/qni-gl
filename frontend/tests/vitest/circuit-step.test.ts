@@ -21,6 +21,18 @@ describe("CircuitStep", () => {
     circuitStep = new CircuitStep(3);
   });
 
+  describe("height", () => {
+    it("has the correct height considering padding", () => {
+      const dropzoneHeight = circuitStep.fetchDropzoneByIndex(0).totalSize;
+      const numDropzones = 3;
+      const padding = CircuitStep.PADDING;
+
+      expect(circuitStep.height).toEqual(
+        dropzoneHeight * numDropzones + padding * 2
+      );
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);

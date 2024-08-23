@@ -10,7 +10,7 @@
     "build": "vite build",
     "build:sw": "rollup -c",
     "preview": "vite preview",
-    "test:unit": "vitest run --dir tests/vitest",
+    "test:unit": "vitest run --dir tests/vitest --reporter dot",
     "test": "yarn lint && yarn test:unit && playwright test",
     "lint": "eslint .",
     "doc": "typedoc --blockTags @param --blockTags @memberof"

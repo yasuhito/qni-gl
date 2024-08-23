@@ -34,9 +34,6 @@ describe("CircuitStepMarkerManager", () => {
     });
     const markers = manager["markers"];
 
-    console.dir(`markers.length = ${markers.length}`);
-    console.dir(markers[0].x);
-
     expect(markers[0].position.x).toBe(98); // 100 - markerWidth/2
     expect(markers[1].position.x).toBe(198); // 200 - markerWidth/2
   });
