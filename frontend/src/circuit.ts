@@ -143,7 +143,7 @@ export class Circuit extends Container {
       let wireType = WireType.Classical;
 
       this.steps.forEach((each) => {
-        const dropzone = each.fetchDropzoneByIndex(wireIndex);
+        const dropzone = each.fetchDropzone(wireIndex);
 
         if (dropzone.isOccupied()) {
           if (dropzone.hasWriteGate()) {

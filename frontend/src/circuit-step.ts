@@ -74,7 +74,7 @@ export class CircuitStep extends Container {
       .filter((each): each is NonNullable<Operation> => each !== null);
   }
 
-  fetchDropzoneByIndex(index: number) {
+  fetchDropzone(index: number) {
     return this.dropzoneList.fetch(index);
   }
 
@@ -82,7 +82,7 @@ export class CircuitStep extends Container {
    * 指定した量子ビットにゲートが置かれているかどうかを返す
    */
   hasGateAt(qubitIndex: number) {
-    const dropzone = this.fetchDropzoneByIndex(qubitIndex);
+    const dropzone = this.fetchDropzone(qubitIndex);
     if (!dropzone) {
       throw new Error(`Dropzone not found at index ${qubitIndex}`);
     }
