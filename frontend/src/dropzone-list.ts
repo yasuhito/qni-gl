@@ -49,7 +49,7 @@ export class DropzoneList extends Container {
   fetch(index: number): Dropzone {
     const dropzone = this.at(index);
     if (!dropzone) {
-      throw new Error(`Dropzone at index ${index} not found`);
+      throw new Error(`Dropzone not found at index ${index}`);
     }
 
     return dropzone;

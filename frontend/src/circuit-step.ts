@@ -72,6 +72,11 @@ export class CircuitStep extends Container {
     return this.occupiedDropzones.map((each) => each.operation as Operation);
   }
 
+  /**
+   * Creates a new CircuitStep instance.
+   *
+   * @param wireCount The number of wires (qubits) in this circuit step.
+   */
   constructor(wireCount: number) {
     super();
 
@@ -105,6 +110,14 @@ export class CircuitStep extends Container {
     this.eventMode = "static";
   }
 
+  /**
+   * Retrieves a Dropzone at the specified index.
+   *
+   * @param index The index of the Dropzone to fetch.
+   *
+   * This method returns the Dropzone at the specified index.
+   * If the index is out of bounds, it throws an error.
+   */
   fetchDropzone(index: number) {
     return this.dropzoneList.fetch(index);
   }

@@ -86,6 +86,24 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("fetchDropzone", () => {
+    it("returns the dropzone at the specified index", () => {
+      const dropzone0 = circuitStep.fetchDropzone(0);
+      const dropzone1 = circuitStep.fetchDropzone(1);
+      const dropzone2 = circuitStep.fetchDropzone(2);
+
+      expect(dropzone0).toBeDefined();
+      expect(dropzone1).toBeDefined();
+      expect(dropzone2).toBeDefined();
+    });
+
+    it("throws an error if the index is out of bounds", () => {
+      expect(() => circuitStep.fetchDropzone(3)).toThrow(
+        "Dropzone not found at index 3"
+      );
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);
