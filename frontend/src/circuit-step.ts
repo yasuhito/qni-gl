@@ -103,9 +103,9 @@ export class CircuitStep extends Container {
   }
 
   private setupEventListeners(): void {
-    this.on("pointerover", this.onPointerOver, this)
-      .on("pointerout", this.onPointerOut, this)
-      .on("pointerdown", this.onPointerDown, this);
+    this.on("pointerover", this.maybeSetHoverState, this)
+      .on("pointerout", this.maybeSetIdleState, this)
+      .on("pointerdown", this.activate, this);
     this.eventMode = "static";
   }
 
@@ -137,7 +137,8 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * Dropzone を末尾に追加する
+   * Appends a new Dropzone to the end of the circuit step.
+   * The method returns the newly created and appended Dropzone.
    */
   appendNewDropzone() {
     const dropzone = this.dropzoneList.append();
@@ -146,10 +147,8 @@ export class CircuitStep extends Container {
     dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
     });
-  }
 
-  private onDropzoneSnap(dropzone: Dropzone) {
-    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
+    return dropzone;
   }
 
   /**
@@ -157,6 +156,10 @@ export class CircuitStep extends Container {
    */
   deleteLastDropzone() {
     this.dropzoneList.removeLast();
+  }
+
+  private onDropzoneSnap(dropzone: Dropzone) {
+    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
   }
 
   bit(dropzone: Dropzone): number {
@@ -299,22 +302,16 @@ export class CircuitStep extends Container {
     this.state.setIdle();
   }
 
-  private onPointerOver() {
+  private maybeSetHoverState() {
     if (this.state.isIdle()) {
       this.state.setHover();
     }
     this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
-  private onPointerOut() {
+  private maybeSetIdleState() {
     if (this.state.isHover()) {
       this.state.setIdle();
-    }
-  }
-
-  private onPointerDown() {
-    if (!this.isActive()) {
-      this.activate();
     }
   }
 }

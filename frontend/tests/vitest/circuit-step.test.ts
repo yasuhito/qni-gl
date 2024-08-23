@@ -125,6 +125,15 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("appendNewDropzone", () => {
+    it("adds a new dropzone to the end of the list", () => {
+      const dropzone = circuitStep.appendNewDropzone();
+
+      expect(circuitStep.dropzones.length).toBe(4);
+      expect(circuitStep.fetchDropzone(3)).toBe(dropzone);
+    });
+  });
+
   describe("serialize", () => {
     it("should serialize an empty circuit step", () => {
       expect(circuitStep.serialize()).toEqual([]);
