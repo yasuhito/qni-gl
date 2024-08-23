@@ -1,18 +1,19 @@
-import { describe, it, expect, beforeEach } from "vitest";
 import { CircuitStep } from "../../src/circuit-step";
-import { HGate } from "../../src/h-gate";
-import { XGate } from "../../src/x-gate";
 import { ControlGate } from "../../src/control-gate";
-import { YGate } from "../../src/y-gate";
-import { ZGate } from "../../src/z-gate";
+import { HGate } from "../../src/h-gate";
+import { MeasurementGate } from "../../src/measurement-gate";
 import { RnotGate } from "../../src/rnot-gate";
-import { SGate } from "../../src/s-gate";
 import { SDaggerGate } from "../../src/s-dagger-gate";
-import { TGate } from "../../src/t-gate";
+import { SGate } from "../../src/s-gate";
+import { SwapGate } from "../../src/swap-gate";
 import { TDaggerGate } from "../../src/t-dagger-gate";
+import { TGate } from "../../src/t-gate";
 import { Write0Gate } from "../../src/write0-gate";
 import { Write1Gate } from "../../src/write1-gate";
-import { MeasurementGate, SwapGate } from "../../src";
+import { XGate } from "../../src/x-gate";
+import { YGate } from "../../src/y-gate";
+import { ZGate } from "../../src/z-gate";
+import { describe, it, expect, beforeEach } from "vitest";
 
 describe("CircuitStep", () => {
   let circuitStep: CircuitStep;
@@ -30,6 +31,20 @@ describe("CircuitStep", () => {
       expect(circuitStep.height).toEqual(
         dropzoneHeight * numDropzones + padding * 2
       );
+    });
+  });
+
+  describe("wireCount", () => {
+    it("returns the correct number of wires", () => {
+      expect(circuitStep.wireCount).toBe(3);
+    });
+  });
+
+  describe("dropzones", () => {
+    it("returns all dropzones", () => {
+      const dropzones = circuitStep.dropzones;
+
+      expect(dropzones.length).toBe(3);
     });
   });
 

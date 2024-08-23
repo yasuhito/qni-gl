@@ -3,7 +3,7 @@ import { List } from "@pixi/ui";
 import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
 
-export class CircuitStepDropzones extends List {
+export class DropzoneList extends List {
   get size(): number {
     return this.children.length;
   }

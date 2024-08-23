@@ -1,5 +1,5 @@
 import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
-import { CircuitStepDropzones } from "./circuit-step-dropzones";
+import { DropzoneList } from "./dropzone-list";
 import { CircuitStepState } from "./circuit-step-state";
 import { Container, Graphics } from "pixi.js";
 import { ControlGate } from "./control-gate";
@@ -9,20 +9,38 @@ import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy } from "./util";
 
+/**
+ * Represents a single step in a quantum circuit.
+ *
+ * This class manages a collection of Dropzones, each corresponding to a qubit in the circuit.
+ * It handles the placement and interaction of quantum gates within the step, including
+ * special operations like swap gates and controlled operations.
+ */
 export class CircuitStep extends Container {
+  /** The padding space around the dropzones within the circuit step. */
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
-  private _body: Graphics;
-  private _dropzones: CircuitStepDropzones;
-  private _state: CircuitStepState;
+  private body: Graphics;
+  private dropzoneList: DropzoneList;
+  private state: CircuitStepState;
 
   /**
-   * ステップ内のワイヤ数 (ビット数) を返す
+   *  Returns the number of wires (qubits) in this circuit step.
    */
   get wireCount() {
-    return this._dropzones.size;
+    return this.dropzoneList.size;
   }
 
+  /**
+   * Returns all {@link Dropzone}s in this circuit step.
+   */
+  get dropzones(): Dropzone[] {
+    return this.dropzoneList.all;
+  }
+
+  /**
+   *  Returns true if all dropzones in this circuit step are empty (have no operations).
+   */
   get isEmpty(): boolean {
     return this.dropzones.every((each) => each.operation === null);
   }
@@ -44,17 +62,10 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * ステップ内のすべての {@link Dropzone} を返す
-   */
-  get dropzones(): Dropzone[] {
-    return this._dropzones.all;
-  }
-
-  /**
    * ステップ内のすべての {@link Dropzone} のうち、ゲートが置かれたものを返す
    */
   private get occupiedDropzones() {
-    return this._dropzones.occupied;
+    return this.dropzoneList.occupied;
   }
 
   private get operations(): Operation[] {
@@ -64,7 +75,7 @@ export class CircuitStep extends Container {
   }
 
   fetchDropzoneByIndex(index: number) {
-    return this._dropzones.fetch(index);
+    return this.dropzoneList.fetch(index);
   }
 
   /**
@@ -82,7 +93,7 @@ export class CircuitStep extends Container {
    * Dropzone を末尾に追加する
    */
   appendNewDropzone() {
-    const dropzone = this._dropzones.append();
+    const dropzone = this.dropzoneList.append();
 
     this.updateSize();
 
@@ -100,21 +111,21 @@ export class CircuitStep extends Container {
    * 末尾の Dropzone を削除する
    */
   deleteLastDropzone() {
-    this._dropzones.removeLast();
+    this.dropzoneList.removeLast();
     this.updateSize();
   }
 
   constructor(wireCount: number) {
     super();
 
-    this._body = new Graphics({ alpha: 0 });
-    this._state = new CircuitStepState();
-    this._dropzones = new CircuitStepDropzones({
+    this.body = new Graphics({ alpha: 0 });
+    this.state = new CircuitStepState();
+    this.dropzoneList = new DropzoneList({
       padding: CircuitStep.PADDING,
     });
 
-    this.addChildAt(this._body, 0);
-    this.addChildAt(this._dropzones, 1);
+    this.addChildAt(this.body, 0);
+    this.addChildAt(this.dropzoneList, 1);
 
     for (let i = 0; i < wireCount; i++) {
       this.appendNewDropzone();
@@ -135,7 +146,7 @@ export class CircuitStep extends Container {
   }
 
   updateSwapConnections(): void {
-    const swapDropzones = this._dropzones.filterByOperationType(SwapGate);
+    const swapDropzones = this.dropzoneList.filterByOperationType(SwapGate);
     const swapBits = swapDropzones.map((each) => this.bit(each));
 
     if (swapDropzones.length !== 2) {
@@ -158,7 +169,8 @@ export class CircuitStep extends Container {
 
   updateControlledUConnections(): void {
     const controllableDropzones = this.controllableDropzones();
-    const controlDropzones = this._dropzones.filterByOperationType(ControlGate);
+    const controlDropzones =
+      this.dropzoneList.filterByOperationType(ControlGate);
     const allControlBits = controlDropzones.map((dz) => this.bit(dz));
 
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
@@ -194,11 +206,11 @@ export class CircuitStep extends Container {
   }
 
   private updateSize() {
-    const height = this._dropzones.height + CircuitStep.PADDING * 2;
+    const height = this.dropzoneList.height + CircuitStep.PADDING * 2;
 
-    this._body.clear().rect(0, 0, this.width, height).fill(0x0000ff);
-    this.removeChild(this._body);
-    this.addChildAt(this._body, 0);
+    this.body.clear().rect(0, 0, this.width, height).fill(0x0000ff);
+    this.removeChild(this.body);
+    this.addChildAt(this.body, 0);
   }
 
   private updateConnections(): void {
@@ -211,21 +223,21 @@ export class CircuitStep extends Container {
   }
 
   private controllableDropzones(): Dropzone[] {
-    return this._dropzones.filterByOperationType(XGate);
+    return this.dropzoneList.filterByOperationType(XGate);
   }
 
   isHovered(): boolean {
-    return this._state.isHover();
+    return this.state.isHover();
   }
 
   isActive(): boolean {
-    return this._state.isActive();
+    return this.state.isActive();
   }
 
   serialize() {
     const result: { type: string; targets: number[]; controls?: number[] }[] =
       [];
-    const controlBits = this._dropzones
+    const controlBits = this.dropzoneList
       .filterByOperationType(ControlGate)
       .map((each) => this.bit(each));
 
@@ -241,7 +253,9 @@ export class CircuitStep extends Container {
       }
 
       const gates = sameOps as Operation[];
-      const targetBits = gates.map((each) => this._dropzones.findIndexOf(each));
+      const targetBits = gates.map((each) =>
+        this.dropzoneList.findIndexOf(each)
+      );
       const gateInstance = gates[0];
       const serializedGate =
         gateInstance instanceof XGate
@@ -264,24 +278,24 @@ export class CircuitStep extends Container {
       return;
     }
 
-    this._state.setActive();
+    this.state.setActive();
     this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, this);
   }
 
   deactivate() {
-    this._state.setIdle();
+    this.state.setIdle();
   }
 
   private onPointerOver() {
-    if (this._state.isIdle()) {
-      this._state.setHover();
+    if (this.state.isIdle()) {
+      this.state.setHover();
     }
     this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
   private onPointerOut() {
-    if (this._state.isHover()) {
-      this._state.setIdle();
+    if (this.state.isHover()) {
+      this.state.setIdle();
     }
   }
 
