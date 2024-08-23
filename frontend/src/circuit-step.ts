@@ -152,9 +152,12 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * 末尾の Dropzone を削除する
+   * Removes the last Dropzone from the circuit step.
+   *
+   * This method removes the Dropzone at the end of the dropzone list.
+   * If the list is already empty, this method has no effect.
    */
-  deleteLastDropzone() {
+  removeLastDropzone() {
     this.dropzoneList.removeLast();
   }
 

@@ -220,7 +220,7 @@ export class Circuit extends Container {
       this.maxWireCountForAllSteps > this.minWireCount
     ) {
       this.steps.forEach((each) => {
-        each.deleteLastDropzone();
+        each.removeLastDropzone();
       });
     }
   }

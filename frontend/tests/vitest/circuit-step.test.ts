@@ -32,8 +32,8 @@ describe("CircuitStep", () => {
       circuitStep.appendNewDropzone();
       expect(circuitStep.height).toEqual(dropzoneHeight * 4 + padding * 2);
 
-      circuitStep.deleteLastDropzone();
-      circuitStep.deleteLastDropzone();
+      circuitStep.removeLastDropzone();
+      circuitStep.removeLastDropzone();
       expect(circuitStep.height).toEqual(dropzoneHeight * 2 + padding * 2);
     });
   });
@@ -131,6 +131,27 @@ describe("CircuitStep", () => {
 
       expect(circuitStep.dropzones.length).toBe(4);
       expect(circuitStep.fetchDropzone(3)).toBe(dropzone);
+    });
+  });
+
+  describe("removeLastDropzone", () => {
+    it("removes the last dropzone from the step", () => {
+      circuitStep.removeLastDropzone();
+      expect(circuitStep.dropzones.length).toBe(2);
+
+      circuitStep.removeLastDropzone();
+      expect(circuitStep.dropzones.length).toBe(1);
+
+      circuitStep.removeLastDropzone();
+      expect(circuitStep.dropzones.length).toBe(0);
+    });
+
+    it("does nothing if the step is empty", () => {
+      circuitStep.removeLastDropzone();
+      circuitStep.removeLastDropzone();
+      circuitStep.removeLastDropzone();
+
+      expect(() => circuitStep.removeLastDropzone()).not.toThrow();
     });
   });
 

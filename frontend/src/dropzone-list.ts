@@ -73,6 +73,10 @@ export class DropzoneList extends Container {
   }
 
   removeLast(): void {
+    if (this.size === 0) {
+      return;
+    }
+
     const dropzone = this.fetch(this.size - 1);
 
     this.list.removeChildAt(this.size - 1);
