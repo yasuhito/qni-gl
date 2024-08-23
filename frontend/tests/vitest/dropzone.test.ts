@@ -39,7 +39,7 @@ describe("DropzoneComponent", () => {
         dropzone
       );
       expect(emitSpy).toHaveBeenCalledWith(
-        DROPZONE_EVENTS.GATE_SNAPPED,
+        DROPZONE_EVENTS.OPERATION_SNAPPED,
         dropzone
       );
     });

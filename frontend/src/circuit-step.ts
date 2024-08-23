@@ -9,11 +9,17 @@ import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy, need } from "./util";
 
+type SerializedOperation = {
+  type: string;
+  targets: number[];
+  controls?: number[];
+};
+
 /**
  * Represents a single step in a quantum circuit.
  *
  * This class manages a collection of Dropzones, each corresponding to a qubit in the circuit.
- * It handles the placement and interaction of quantum gates within the step, including
+ * It handles the placement and interaction of operations within the step, including
  * special operations like swap gates and controlled operations.
  */
 export class CircuitStep extends Container {
@@ -89,6 +95,12 @@ export class CircuitStep extends Container {
     return this.occupiedDropzones.map((each) => each.operation as Operation);
   }
 
+  private get controlBits(): number[] {
+    return this.dropzoneList
+      .filterByOperationType(ControlGate)
+      .map((dropzone) => this.qubitNumberOf(dropzone));
+  }
+
   /**
    * Creates a new CircuitStep instance.
    *
@@ -161,10 +173,17 @@ export class CircuitStep extends Container {
   appendNewDropzone() {
     const dropzone = this.dropzoneList.append();
 
-    dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
-    dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
-    });
+    dropzone.on(DROPZONE_EVENTS.OPERATION_SNAPPED, this.onDropzoneSnap, this);
+    dropzone.on(
+      DROPZONE_EVENTS.OPERATION_GRABBED,
+      (operation, globalPosition) => {
+        this.emit(
+          CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+          operation,
+          globalPosition
+        );
+      }
+    );
 
     return dropzone;
   }
@@ -209,6 +228,50 @@ export class CircuitStep extends Container {
   updateConnections(): void {
     this.updateSwapConnections();
     this.updateControlledUConnections();
+  }
+
+  /**
+   * Serializes the current state of the circuit step into a JSON-compatible format.
+   *
+   * This method converts the operations in the circuit step into a serialized representation,
+   * including information about the type of operation and target qubits. For controlled operations,
+   * it also includes control qubits.
+   *
+   * Returns an array of serialized operations, each represented as an object.
+   */
+  serialize(): SerializedOperation[] {
+    const result: SerializedOperation[] = [];
+    const operations = this.operations;
+
+    for (const [operationClass, sameOps] of groupBy(
+      operations,
+      (op) => op.constructor
+    )) {
+      if (
+        operationClass === ControlGate &&
+        operations.some((op) => op instanceof XGate)
+      ) {
+        continue; // Skip ControlGate if X gate is present
+      }
+
+      // const sameOperations = sameOps as Operation[];
+      const targetBits = sameOps.map((each) =>
+        this.dropzoneList.findIndexOf(each)
+      );
+      const operation = sameOps[0];
+      const serializedGate =
+        operation instanceof XGate
+          ? operation.serialize(targetBits, this.controlBits)
+          : operation.serialize(targetBits);
+      result.push(serializedGate);
+    }
+
+    return result;
+  }
+
+  toJSON() {
+    const jsons = this.dropzones.map((each) => each.toJSON());
+    return `[${jsons.join(",")}]`;
   }
 
   private qubitNumberOf(dropzone: Dropzone): number {
@@ -292,47 +355,8 @@ export class CircuitStep extends Container {
     return this.dropzoneList.filterByOperationType(XGate);
   }
 
-  serialize() {
-    const result: { type: string; targets: number[]; controls?: number[] }[] =
-      [];
-    const controlBits = this.dropzoneList
-      .filterByOperationType(ControlGate)
-      .map((each) => this.qubitNumberOf(each));
-
-    for (const [GateClass, sameOps] of groupBy(
-      this.operations,
-      (op) => op.constructor
-    )) {
-      if (
-        GateClass === ControlGate &&
-        this.operations.some((op) => op instanceof XGate)
-      ) {
-        continue; // X ゲートがある場合は ControlGate をスキップ
-      }
-
-      const gates = sameOps as Operation[];
-      const targetBits = gates.map((each) =>
-        this.dropzoneList.findIndexOf(each)
-      );
-      const gateInstance = gates[0];
-      const serializedGate =
-        gateInstance instanceof XGate
-          ? gateInstance.serialize(targetBits, controlBits)
-          : gateInstance.serialize(targetBits);
-
-      result.push(serializedGate);
-    }
-
-    return result;
-  }
-
-  toJSON() {
-    const jsons = this.dropzones.map((each) => each.toJSON());
-    return `[${jsons.join(",")}]`;
-  }
-
   private onDropzoneSnap(dropzone: Dropzone) {
-    this.emit(CIRCUIT_STEP_EVENTS.GATE_SNAPPED, this, dropzone);
+    this.emit(CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED, this, dropzone);
   }
 
   private maybeSetHoverState() {

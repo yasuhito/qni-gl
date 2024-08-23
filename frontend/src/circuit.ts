@@ -117,7 +117,7 @@ export class Circuit extends Container {
     this.circuitStepsContainer.addChild(circuitStep);
 
     circuitStep.on(
-      CIRCUIT_STEP_EVENTS.GATE_SNAPPED,
+      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
       this.onGateSnapToDropzone,
       this
     );
@@ -127,9 +127,12 @@ export class Circuit extends Container {
       this
     );
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-    circuitStep.on(CIRCUIT_STEP_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
-      this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
-    });
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+      (gate, globalPosition) => {
+        this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
+      }
+    );
   }
 
   private onGateSnapToDropzone() {

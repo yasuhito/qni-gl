@@ -107,7 +107,7 @@ export class Dropzone extends Container {
     }
     this.operation.on(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
     this.redrawWires();
-    this.emit(DROPZONE_EVENTS.GATE_SNAPPED, this);
+    this.emit(DROPZONE_EVENTS.OPERATION_SNAPPED, this);
   }
 
   unsnap() {
@@ -119,7 +119,7 @@ export class Dropzone extends Container {
   }
 
   private emitGrabGateEvent(gate: OperationComponent, globalPosition: Point) {
-    this.emit(DROPZONE_EVENTS.GATE_GRABBED, gate, globalPosition);
+    this.emit(DROPZONE_EVENTS.OPERATION_GRABBED, gate, globalPosition);
   }
 
   redrawWires() {
