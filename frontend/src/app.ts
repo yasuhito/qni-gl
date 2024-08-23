@@ -266,7 +266,7 @@ export class App {
           throw new Error("value is not '' | 0 | 1");
         }
 
-        const qubitCount = this.circuit.occupiedDropzoneCount;
+        const qubitCount = this.circuit.highestOccupiedQubitNumber;
         // TODO: ビットオーダーの変換をサービスワーカ側で行う
         // フロントエンドからは Qni のビットオーダ (上が下位) しか意識しなくて良いようにする
         const dropzone = step.fetchDropzone(qubitCount - parseInt(bit) - 1);
@@ -539,7 +539,7 @@ export class App {
   }
 
   private updateStateVectorComponentQubitCount() {
-    this.stateVector.qubitCount = this.circuit.occupiedDropzoneCount;
+    this.stateVector.qubitCount = this.circuit.highestOccupiedQubitNumber;
   }
 
   private maybeDeactivateGate(event: FederatedPointerEvent) {
@@ -557,7 +557,7 @@ export class App {
 
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
-      qubitCount: this.circuit.occupiedDropzoneCount,
+      qubitCount: this.circuit.highestOccupiedQubitNumber,
       stepIndex: this.circuit.activeStepIndex,
       targets: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),

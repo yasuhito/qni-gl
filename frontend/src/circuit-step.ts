@@ -1,7 +1,7 @@
 import { CIRCUIT_STEP_EVENTS, DROPZONE_EVENTS } from "./events";
 import { DropzoneList } from "./dropzone-list";
 import { CircuitStepState } from "./circuit-step-state";
-import { Container, Graphics } from "pixi.js";
+import { Container } from "pixi.js";
 import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
@@ -20,7 +20,7 @@ export class CircuitStep extends Container {
   /** The padding space around the dropzones within the circuit step. */
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
-  private body: Graphics;
+  // private body: Graphics;
   private dropzoneList: DropzoneList;
   private state: CircuitStepState;
 
@@ -46,11 +46,22 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * Gets the count of dropzones with operations placed in them.
-   * If no operation is placed in any {@link Dropzone}, returns 0.
+   * Returns the number of the highest qubit with an operation placed on it.
+   * Qubit numbers start from 1.
+   * Returns 0 if all qubits are empty (no operations placed).
+   *
+   * Examples:
+   * - [X, _, H, _] => returns 3 (3rd qubit is the last with an operation)
+   * - [_, _, _, X] => returns 4 (4th qubit is the last with an operation)
+   * - [H, _, _, _] => returns 1 (only the 1st qubit has an operation)
+   * - [_, _, _, _] => returns 0 (all qubits are empty)
    */
-  get occupiedDropzoneCount() {
-    return this.dropzones.filter((dropzone) => dropzone.isOccupied()).length;
+  get highestOccupiedQubitNumber() {
+    return this.dropzones.reduce(
+      (maxIndex, dropzone, currentIndex) =>
+        dropzone.isOccupied() ? currentIndex + 1 : maxIndex,
+      0
+    );
   }
 
   private get occupiedDropzones() {
@@ -64,17 +75,12 @@ export class CircuitStep extends Container {
   constructor(wireCount: number) {
     super();
 
-    // Container のサイズを dropzoneList の変化にあわせて更新するための Graphics オブジェクト
-    // dropzoneList に dropzone が追加されたり削除された場合、この body をあらためて addChild することで
-    // CircuitStep のサイズを適切に更新する
-    this.body = new Graphics({ alpha: 0 });
     this.state = new CircuitStepState();
     this.dropzoneList = new DropzoneList({
       padding: CircuitStep.PADDING,
     });
 
-    this.addChildAt(this.body, 0);
-    this.addChildAt(this.dropzoneList, 1);
+    this.addChild(this.dropzoneList);
 
     for (let i = 0; i < wireCount; i++) {
       this.appendNewDropzone();
@@ -108,8 +114,6 @@ export class CircuitStep extends Container {
   appendNewDropzone() {
     const dropzone = this.dropzoneList.append();
 
-    this.updateSize();
-
     dropzone.on(DROPZONE_EVENTS.GATE_SNAPPED, this.onDropzoneSnap, this);
     dropzone.on(DROPZONE_EVENTS.GATE_GRABBED, (gate, globalPosition) => {
       this.emit(CIRCUIT_STEP_EVENTS.GATE_GRABBED, gate, globalPosition);
@@ -125,7 +129,6 @@ export class CircuitStep extends Container {
    */
   deleteLastDropzone() {
     this.dropzoneList.removeLast();
-    this.updateSize();
   }
 
   bit(dropzone: Dropzone): number {
@@ -193,14 +196,6 @@ export class CircuitStep extends Container {
     }
 
     this.updateConnections();
-  }
-
-  private updateSize() {
-    const height = this.dropzoneList.height + CircuitStep.PADDING * 2;
-
-    this.body.clear().rect(0, 0, this.width, height).fill(0x0000ff);
-    this.removeChild(this.body);
-    this.addChildAt(this.body, 0);
   }
 
   private updateConnections(): void {

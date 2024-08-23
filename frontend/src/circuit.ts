@@ -52,10 +52,10 @@ export class Circuit extends Container {
     return wireCount;
   }
 
-  get occupiedDropzoneCount(): QubitCount {
+  get highestOccupiedQubitNumber(): QubitCount {
     const qubitCount = Math.max(
       ...this.steps.map((each) => {
-        return each.occupiedDropzoneCount;
+        return each.highestOccupiedQubitNumber;
       })
     );
 
@@ -274,7 +274,7 @@ export class Circuit extends Container {
   }
 
   toString() {
-    const output = Array(this.occupiedDropzoneCount * 2)
+    const output = Array(this.highestOccupiedQubitNumber * 2)
       .fill("")
       .map((_, i) => {
         if (i % 2 == 0) {
@@ -286,17 +286,17 @@ export class Circuit extends Container {
 
     this.steps.forEach((step) => {
       step.dropzones.forEach((dropzone, qubitIndex) => {
-        if (qubitIndex < this.occupiedDropzoneCount) {
-          const gate = dropzone.operation;
+        if (qubitIndex < this.highestOccupiedQubitNumber) {
+          const operation = dropzone.operation;
 
-          if (gate) {
-            const gateLabel = dropzone.operation.label;
-            // gateLabel は 1 文字または 2 文字になる。
+          if (operation) {
+            const operationLabel = dropzone.operation.label;
+            // label は 1 文字または 2 文字になる。
             // このため、1 文字の場合は 2 文字分のスペースを確保する。
-            if (gateLabel.length == 1) {
-              output[qubitIndex * 2] += `${gateLabel}────`;
+            if (operationLabel.length == 1) {
+              output[qubitIndex * 2] += `${operationLabel}────`;
             } else {
-              output[qubitIndex * 2] += `${gateLabel}───`;
+              output[qubitIndex * 2] += `${operationLabel}───`;
             }
           } else {
             output[qubitIndex * 2] += `─────`;

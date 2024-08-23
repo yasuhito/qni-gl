@@ -25,12 +25,16 @@ describe("CircuitStep", () => {
   describe("height", () => {
     it("has the correct height considering padding", () => {
       const dropzoneHeight = circuitStep.fetchDropzone(0).totalSize;
-      const numDropzones = 3;
       const padding = CircuitStep.PADDING;
 
-      expect(circuitStep.height).toEqual(
-        dropzoneHeight * numDropzones + padding * 2
-      );
+      expect(circuitStep.height).toEqual(dropzoneHeight * 3 + padding * 2);
+
+      circuitStep.appendNewDropzone();
+      expect(circuitStep.height).toEqual(dropzoneHeight * 4 + padding * 2);
+
+      circuitStep.deleteLastDropzone();
+      circuitStep.deleteLastDropzone();
+      expect(circuitStep.height).toEqual(dropzoneHeight * 2 + padding * 2);
     });
   });
 
@@ -61,16 +65,24 @@ describe("CircuitStep", () => {
     });
   });
 
-  describe("occupiedDropzoneCount", () => {
+  describe("highestOccupiedQubitNumber", () => {
     it("returns 0 if no dropzone has an operation", () => {
-      expect(circuitStep.occupiedDropzoneCount).toBe(0);
+      expect(circuitStep.highestOccupiedQubitNumber).toBe(0);
     });
 
-    it("returns the correct count of occupied dropzones", () => {
+    it("returns the highest number of qubit with an operation", () => {
       const hGate = new HGate();
       circuitStep.fetchDropzone(1).addChild(hGate);
 
-      expect(circuitStep.occupiedDropzoneCount).toBe(1);
+      expect(circuitStep.highestOccupiedQubitNumber).toBe(2);
+
+      const xGate = new XGate();
+      circuitStep.fetchDropzone(0).addChild(xGate);
+      expect(circuitStep.highestOccupiedQubitNumber).toBe(2);
+
+      const yGate = new YGate();
+      circuitStep.fetchDropzone(2).addChild(yGate);
+      expect(circuitStep.highestOccupiedQubitNumber).toBe(3);
     });
   });
 

@@ -2,14 +2,19 @@ import { Dropzone } from "./dropzone";
 import { List } from "@pixi/ui";
 import { OperationComponent } from "./operation-component";
 import { Operation } from "./operation";
+import { Container, Graphics } from "pixi.js";
 
-export class DropzoneList extends List {
+export class DropzoneList extends Container {
+  private padding: number;
+  private list: List;
+  private paddedArea: Graphics;
+
   get size(): number {
-    return this.children.length;
+    return this.list.children.length;
   }
 
   get all(): Dropzone[] {
-    return this.children as Dropzone[];
+    return this.list.children as Dropzone[];
   }
 
   get occupied(): Dropzone[] {
@@ -17,10 +22,18 @@ export class DropzoneList extends List {
   }
 
   constructor({ padding }: { padding: number }) {
-    super({
+    super();
+
+    this.padding = padding;
+
+    this.paddedArea = new Graphics({ alpha: 0 });
+    this.addChild(this.paddedArea);
+
+    this.list = new List({
       type: "vertical",
       vertPadding: padding,
     });
+    this.addChild(this.list);
 
     this.eventMode = "static";
   }
@@ -52,13 +65,25 @@ export class DropzoneList extends List {
 
   append(): Dropzone {
     const dropzone = new Dropzone();
-    this.addChild(dropzone);
+
+    this.list.addChild(dropzone);
+    this.updateSize();
+
     return dropzone;
   }
 
   removeLast(): void {
     const dropzone = this.fetch(this.size - 1);
-    this.removeChildAt(this.size - 1);
+
+    this.list.removeChildAt(this.size - 1);
+    this.updateSize();
+
     dropzone.destroy();
+  }
+
+  private updateSize() {
+    const height = this.list.height + this.padding * 2;
+
+    this.paddedArea.clear().rect(0, 0, this.width, height).fill(0x0000ff);
   }
 }
