@@ -21,8 +21,8 @@ export class CircuitStep extends Container {
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
   // private body: Graphics;
-  private dropzoneList: DropzoneList;
-  private state: CircuitStepState;
+  private dropzoneList!: DropzoneList;
+  private state!: CircuitStepState;
 
   /**
    *  Returns the number of wires (qubits) in this circuit step.
@@ -75,21 +75,33 @@ export class CircuitStep extends Container {
   constructor(wireCount: number) {
     super();
 
+    this.initializeState();
+    this.initializeDropzoneList();
+    this.createDropzones(wireCount);
+    this.setupEventListeners();
+  }
+
+  private initializeState(): void {
     this.state = new CircuitStepState();
+  }
+
+  private initializeDropzoneList(): void {
     this.dropzoneList = new DropzoneList({
       padding: CircuitStep.PADDING,
     });
-
     this.addChild(this.dropzoneList);
+  }
 
+  private createDropzones(wireCount: number): void {
     for (let i = 0; i < wireCount; i++) {
       this.appendNewDropzone();
     }
+  }
 
+  private setupEventListeners(): void {
     this.on("pointerover", this.onPointerOver, this)
       .on("pointerout", this.onPointerOut, this)
       .on("pointerdown", this.onPointerDown, this);
-
     this.eventMode = "static";
   }
 
