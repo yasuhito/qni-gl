@@ -25,38 +25,6 @@ export class Circuit extends Container {
   private markerManager: CircuitStepMarkerManager;
 
   /**
-   * Returns the number of wires (bits) in the {@link Circuit}.
-   */
-  get wireCount() {
-    let wireCount = this.minWireCount;
-    if (this.steps.length > 0) {
-      wireCount = this.fetchStep(0).wireCount;
-    }
-
-    this.steps.forEach((each) => {
-      if (each.wireCount !== wireCount) {
-        throw new Error("All steps must have the same number of wires");
-      }
-    });
-
-    return wireCount;
-  }
-
-  get highestOccupiedQubitNumber(): QubitCount {
-    const qubitCount = Math.max(
-      ...this.steps.map((each) => {
-        return each.highestOccupiedQubitNumber;
-      })
-    );
-
-    if (qubitCount == 0) {
-      return MIN_QUBIT_COUNT;
-    }
-
-    return qubitCount as QubitCount;
-  }
-
-  /**
    * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
    */
   get steps(): CircuitStep[] {
@@ -72,6 +40,39 @@ export class Circuit extends Container {
     }
 
     return null;
+  }
+
+  /**
+   * Returns the number of wires (bits) in the {@link Circuit}.
+   */
+  get wireCount() {
+    if (this.steps.length == 0) {
+      return this.minWireCount;
+    }
+
+    const wireCount = this.fetchStep(0).wireCount;
+
+    this.steps.forEach((each) => {
+      if (each.wireCount !== wireCount) {
+        throw new Error("All steps must have the same number of wires");
+      }
+    });
+
+    return wireCount;
+  }
+
+  get highestOccupiedQubitNumber(): QubitCount {
+    const qubitNumber = Math.max(
+      ...this.steps.map((each) => {
+        return each.highestOccupiedQubitNumber;
+      })
+    );
+
+    if (qubitNumber === 0) {
+      return MIN_QUBIT_COUNT;
+    }
+
+    return qubitNumber as QubitCount;
   }
 
   /**
@@ -97,9 +98,6 @@ export class Circuit extends Container {
 
     this.markerManager = new CircuitStepMarkerManager({ steps: this.steps });
     this.addChild(this.markerManager);
-
-    this.markerManager.zIndex = 1;
-    this.sortableChildren = true;
   }
 
   private appendStep(wireCount = this.minWireCount) {
