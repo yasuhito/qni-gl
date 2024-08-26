@@ -18,14 +18,9 @@ export interface CircuitOptions {
  * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
  */
 export class Circuit extends Container {
-  /** Minimum number of wires. */
-  minWireCount = 1;
-  /** Maximum number of wires. */
-  maxWireCount: QubitCount = MAX_QUBIT_COUNT;
-
-  minStepCount = 5;
-
-  /** Layout container for arranging {@link CircuitStep}s in a row. */
+  private minWireCount = 1;
+  private maxWireCount: QubitCount = MAX_QUBIT_COUNT;
+  private minStepCount = 5;
   private stepList: List;
   private markerManager: CircuitStepMarkerManager;
 
