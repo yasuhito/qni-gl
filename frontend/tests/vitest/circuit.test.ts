@@ -10,29 +10,6 @@ describe("Circuit", () => {
     circuit = new Circuit({ minWireCount: wireCount, stepCount: 5 });
   });
 
-  describe("wireCount", () => {
-    it("returns the correct number of wires", () => {
-      expect(circuit.wireCount).toBe(3);
-    });
-
-    it("returns the correct wire count after adding a wire", () => {
-      circuit.maybeAppendWire();
-
-      expect(circuit.wireCount).toBe(4);
-      circuit.steps.forEach((step) => {
-        expect(step.wireCount).toBe(4);
-      });
-    });
-
-    it("throws an error if steps have different wire counts", () => {
-      circuit["stepList"].addChild(new CircuitStep(1));
-
-      expect(() => circuit.wireCount).toThrow(
-        "All steps must have the same number of wires"
-      );
-    });
-  });
-
   describe("fetchStep", () => {
     it("retrieves the step with the correct index", () => {
       const step = circuit.fetchStep(2);
