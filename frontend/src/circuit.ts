@@ -35,7 +35,7 @@ export class Circuit extends Container {
   get wireCount() {
     let wireCount = this.minWireCount;
     if (this.steps.length > 0) {
-      wireCount = this.stepAt(0).wireCount;
+      wireCount = this.fetchStep(0).wireCount;
     }
 
     this.steps.forEach((each) => {
@@ -166,12 +166,12 @@ export class Circuit extends Container {
   /**
    * Retrieves the {@link CircuitStep} at the specified index.
    */
-  stepAt(stepIndex: number) {
-    if (stepIndex < 0 || stepIndex >= this.steps.length) {
-      throw new Error("Step index out of bounds");
+  fetchStep(index: number) {
+    if (index < 0 || index >= this.steps.length) {
+      throw new Error(`Step index out of bounds: ${index}`);
     }
 
-    return this.steps[stepIndex];
+    return this.steps[index];
   }
 
   update(): void {
@@ -185,7 +185,7 @@ export class Circuit extends Container {
     this.removeUnusedUpperWires();
     this.updateConnections();
 
-    this.stepAt(activeStepIndex).activate();
+    this.fetchStep(activeStepIndex).activate();
     this.markerManager.update(this.steps);
   }
 
