@@ -112,7 +112,7 @@ export class App {
 
       // 回路の最初のステップをアクティブにする
       // これによって、最初のステップの状態ベクトルが表示される
-      this.circuit.stepAt(0).activate();
+      this.circuit.fetchStep(0).activate();
 
       this.nameMap.set(this.app.stage, "stage");
 
@@ -245,7 +245,7 @@ export class App {
     this.circuitFrame!.removeChild(gate);
     this.circuit.update();
     if (this.circuit.activeStepIndex === null) {
-      this.circuit.stepAt(0).activate();
+      this.circuit.fetchStep(0).activate();
     }
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -257,9 +257,12 @@ export class App {
     }
 
     const stepIndex = event.data.step;
-    const step = this.circuit.stepAt(stepIndex);
+    let step: CircuitStep | undefined;
+    if (stepIndex) {
+      step = this.circuit.fetchStep(stepIndex);
+    }
 
-    if (event.data.measuredBits) {
+    if (step && event.data.measuredBits) {
       for (const [bit, value] of Object.entries(event.data.measuredBits)) {
         // もし value が '' | 0 | 1 でない場合はエラー
         if (value !== "" && value !== 0 && value !== 1) {
