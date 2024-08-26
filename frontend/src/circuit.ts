@@ -18,9 +18,14 @@ export interface CircuitOptions {
  * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
  */
 export class Circuit extends Container {
-  private minWireCount: number;
-  private maxWireCount: QubitCount = MAX_QUBIT_COUNT;
-  private minStepCount: number;
+  /** Minimum number of wires. */
+  minWireCount = 1;
+  /** Maximum number of wires. */
+  maxWireCount: QubitCount = MAX_QUBIT_COUNT;
+
+  minStepCount = 5;
+
+  /** Layout container for arranging {@link CircuitStep}s in a row. */
   private stepList: List;
   private markerManager: CircuitStepMarkerManager;
 
@@ -29,7 +34,9 @@ export class Circuit extends Container {
    */
   get wireCount() {
     let wireCount = this.minWireCount;
-    wireCount = this.fetchStep(0).wireCount;
+    if (this.steps.length > 0) {
+      wireCount = this.stepAt(0).wireCount;
+    }
 
     this.steps.forEach((each) => {
       if (each.wireCount !== wireCount) {
@@ -80,8 +87,8 @@ export class Circuit extends Container {
   constructor(options: CircuitOptions) {
     super();
 
-    this.minWireCount = options.minWireCount;
     this.minStepCount = options.stepCount;
+    this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
     this.stepList = new List({
@@ -98,14 +105,6 @@ export class Circuit extends Container {
 
     this.markerManager.zIndex = 1;
     this.sortableChildren = true;
-  }
-
-  fetchStep(index: number) {
-    if (index < 0 || index >= this.steps.length) {
-      throw new Error(`Step index out of bounds: ${index}`);
-    }
-
-    return this.steps[index];
   }
 
   private appendStep(wireCount = this.minWireCount) {
@@ -164,6 +163,17 @@ export class Circuit extends Container {
     // this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
   }
 
+  /**
+   * Retrieves the {@link CircuitStep} at the specified index.
+   */
+  stepAt(stepIndex: number) {
+    if (stepIndex < 0 || stepIndex >= this.steps.length) {
+      throw new Error("Step index out of bounds");
+    }
+
+    return this.steps[stepIndex];
+  }
+
   update(): void {
     const activeStepIndex = this.activeStepIndex;
     if (activeStepIndex == null) {
@@ -175,7 +185,7 @@ export class Circuit extends Container {
     this.removeUnusedUpperWires();
     this.updateConnections();
 
-    this.fetchStep(activeStepIndex).activate();
+    this.stepAt(activeStepIndex).activate();
     this.markerManager.update(this.steps);
   }
 
