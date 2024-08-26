@@ -63,7 +63,7 @@ export class Circuit extends Container {
 
   get activeStepIndex() {
     for (let i = 0; i < this.steps.length; i++) {
-      const step = this.steps[i];
+      const step = this.fetchStep(i);
       if (step.isActive) {
         return i;
       }
@@ -106,6 +106,22 @@ export class Circuit extends Container {
     }
 
     return this.steps[index];
+  }
+
+  maybeAppendWire() {
+    const firstStepWireCount = this.fetchStep(0).wireCount;
+
+    this.steps.forEach((each) => {
+      if (each.wireCount !== firstStepWireCount) {
+        throw new Error("All steps must have the same number of wires");
+      }
+
+      if (each.wireCount < this.maxWireCount) {
+        each.appendNewDropzone();
+      }
+    });
+
+    this.markerManager.update(this.steps);
   }
 
   private appendStep(wireCount = this.minWireCount) {
@@ -209,22 +225,6 @@ export class Circuit extends Container {
         each.removeLastDropzone();
       });
     }
-  }
-
-  maybeAppendWire() {
-    const firstStepWireCount = this.steps[0].wireCount;
-
-    this.steps.forEach((each) => {
-      if (each.wireCount !== firstStepWireCount) {
-        throw new Error("All steps must have the same number of wires");
-      }
-
-      if (each.wireCount < this.maxWireCount) {
-        each.appendNewDropzone();
-      }
-    });
-
-    this.markerManager.update(this.steps);
   }
 
   private updateConnections() {
