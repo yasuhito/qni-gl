@@ -41,17 +41,17 @@ export class Circuit extends Container {
   }
 
   get highestOccupiedQubitNumber(): QubitCount {
-    const qubitCount = Math.max(
+    const qubitNumber = Math.max(
       ...this.steps.map((each) => {
         return each.highestOccupiedQubitNumber;
       })
     );
 
-    if (qubitCount == 0) {
+    if (qubitNumber == 0) {
       return MIN_QUBIT_COUNT;
     }
 
-    return qubitCount as QubitCount;
+    return qubitNumber as QubitCount;
   }
 
   /**

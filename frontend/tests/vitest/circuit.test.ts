@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Circuit } from "../../src/circuit";
 import { CircuitStep } from "../../src/circuit-step";
+import { MIN_QUBIT_COUNT } from "../../src/constants";
+import { HGate } from "../../src/h-gate";
+import { XGate } from "../../src/x-gate";
 
 describe("Circuit", () => {
   let circuit: Circuit;
@@ -30,6 +33,38 @@ describe("Circuit", () => {
       expect(() => circuit.wireCount).toThrow(
         "All steps must have the same number of wires"
       );
+    });
+  });
+
+  describe("highestOccupiedQubitNumber", () => {
+    it("returns MIN_QUBIT_COUNT when all steps are empty", () => {
+      expect(circuit.highestOccupiedQubitNumber).toBe(MIN_QUBIT_COUNT);
+    });
+
+    it("returns the highest occupied qubit number across all steps", () => {
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new HGate());
+      expect(circuit.highestOccupiedQubitNumber).toBe(2);
+
+      circuit.fetchStep(1).fetchDropzone(2).addChild(new XGate());
+      expect(circuit.highestOccupiedQubitNumber).toBe(3);
+    });
+
+    it("updates correctly when gates are removed", () => {
+      const hGate = new HGate();
+      const step0Dropzone1 = circuit.fetchStep(0).fetchDropzone(1);
+      step0Dropzone1.addChild(hGate);
+
+      const xGate = new XGate();
+      const step2Dropzone2 = circuit.fetchStep(2).fetchDropzone(2);
+      step2Dropzone2.addChild(xGate);
+
+      expect(circuit.highestOccupiedQubitNumber).toBe(3);
+
+      step2Dropzone2.removeChild(xGate);
+      expect(circuit.highestOccupiedQubitNumber).toBe(2);
+
+      step0Dropzone1.removeChild(hGate);
+      expect(circuit.highestOccupiedQubitNumber).toBe(MIN_QUBIT_COUNT);
     });
   });
 
