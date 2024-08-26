@@ -42,3 +42,8 @@ export const CIRCUIT_FRAME_EVENTS = {
 export const FRAME_DIVIDER_EVENTS = {
   DRAG_STARTED: "frame-divider.drag-started",
 } as const;
+
+export const CIRCUIT_EVENTS = {
+  OPERATION_GRABBED: "circuit.operation-grabbed",
+  CIRCUIT_STEP_ACTIVATED: "circuit.circuit-step-activated",
+};

@@ -3,7 +3,7 @@ import { Container } from "pixi.js";
 import { List as ListContainer } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import { CIRCUIT_STEP_EVENTS } from "./events";
+import { CIRCUIT_EVENTS, CIRCUIT_STEP_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 
 /**
@@ -13,11 +13,6 @@ export interface CircuitOptions {
   minWireCount: number;
   stepCount: number;
 }
-
-export const CIRCUIT_EVENTS = {
-  OPERATION_GRABBED: "circuit:grab-gate",
-  ACTIVATE_STEP: "circuit:activate-step",
-};
 
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
@@ -324,6 +319,6 @@ export class Circuit extends Container {
     });
     this.markerManager.update(this.steps);
 
-    this.emit(CIRCUIT_EVENTS.ACTIVATE_STEP, circuitStep);
+    this.emit(CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED, circuitStep);
   }
 }
