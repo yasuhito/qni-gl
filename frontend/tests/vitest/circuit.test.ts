@@ -13,6 +13,43 @@ describe("Circuit", () => {
     circuit = new Circuit({ minWireCount: wireCount, stepCount: 5 });
   });
 
+  describe("steps", () => {
+    it("returns an array of CircuitStep", () => {
+      expect(circuit.steps).toBeInstanceOf(Array);
+      expect(circuit.steps.length).toBe(5);
+      circuit.steps.forEach((step) => {
+        expect(step).toBeInstanceOf(CircuitStep);
+      });
+    });
+  });
+
+  describe("activeStepIndex", () => {
+    it("returns null in the initial state", () => {
+      expect(circuit.activeStepIndex).toBeNull();
+    });
+
+    it("returns the index of the active step", () => {
+      circuit.fetchStep(1).activate();
+      expect(circuit.activeStepIndex).toBe(1);
+    });
+
+    it("returns the new index when the active step changes", () => {
+      circuit.fetchStep(1).activate();
+      expect(circuit.activeStepIndex).toBe(1);
+
+      circuit.fetchStep(3).activate();
+      expect(circuit.activeStepIndex).toBe(3);
+    });
+
+    it("returns null when all steps are inactive", () => {
+      circuit.fetchStep(1).activate();
+      expect(circuit.activeStepIndex).toBe(1);
+
+      circuit.fetchStep(1).deactivate();
+      expect(circuit.activeStepIndex).toBeNull();
+    });
+  });
+
   describe("wireCount", () => {
     it("returns the correct number of wires", () => {
       expect(circuit.wireCount).toBe(3);
