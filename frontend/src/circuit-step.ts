@@ -8,12 +8,7 @@ import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy, need } from "./util";
-
-type SerializedOperation = {
-  type: string;
-  targets: number[];
-  controls?: number[];
-};
+import { SerializedOperation } from "./types";
 
 /**
  * Represents a single step in a quantum circuit.

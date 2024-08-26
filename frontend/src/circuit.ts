@@ -1,6 +1,6 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
-import { List as ListContainer } from "@pixi/ui";
+import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 import { CIRCUIT_EVENTS, CIRCUIT_STEP_EVENTS } from "./events";
@@ -26,7 +26,7 @@ export class Circuit extends Container {
   minStepCount = 5;
 
   /** Layout container for arranging {@link CircuitStep}s in a row. */
-  circuitStepsContainer: ListContainer;
+  private stepList: List;
   private markerManager: CircuitStepMarkerManager;
 
   /**
@@ -65,7 +65,7 @@ export class Circuit extends Container {
    * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
    */
   get steps(): CircuitStep[] {
-    return this.circuitStepsContainer.children as CircuitStep[];
+    return this.stepList.children as CircuitStep[];
   }
 
   get activeStepIndex() {
@@ -91,10 +91,10 @@ export class Circuit extends Container {
     this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
-    this.circuitStepsContainer = new ListContainer({
+    this.stepList = new List({
       type: "horizontal",
     });
-    this.addChild(this.circuitStepsContainer);
+    this.addChild(this.stepList);
 
     for (let i = 0; i < options.stepCount; i++) {
       this.appendStep();
@@ -109,7 +109,7 @@ export class Circuit extends Container {
 
   private appendStep(wireCount = this.minWireCount) {
     const circuitStep = new CircuitStep(wireCount);
-    this.circuitStepsContainer.addChild(circuitStep);
+    this.stepList.addChild(circuitStep);
 
     circuitStep.on(
       CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,

@@ -37,3 +37,9 @@ export type GateStyleOptions = {
   borderColor: string;
   borderAlpha: number;
 };
+
+export type SerializedOperation = {
+  type: string;
+  targets: number[];
+  controls?: number[];
+};
