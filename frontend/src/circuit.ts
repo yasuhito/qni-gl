@@ -25,28 +25,6 @@ export class Circuit extends Container {
   private markerManager: CircuitStepMarkerManager;
 
   /**
-   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
-   */
-  get steps(): CircuitStep[] {
-    return this.stepList.children as CircuitStep[];
-  }
-
-  /**
-   * Gets the index of the active (currently selected) step.
-   * Returns null if no step is active.
-   */
-  get activeStepIndex() {
-    for (let i = 0; i < this.steps.length; i++) {
-      const step = this.fetchStep(i);
-      if (step.isActive) {
-        return i;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Returns the number of wires (bits) in the {@link Circuit}.
    */
   get wireCount() {
@@ -62,11 +40,6 @@ export class Circuit extends Container {
     return wireCount;
   }
 
-  /**
-   * Returns the highest occupied qubit number in the circuit.
-   * This calculates the highest qubit number used across all steps in the circuit.
-   * If the circuit is empty, it returns the minimum qubit count (MIN_QUBIT_COUNT).
-   */
   get highestOccupiedQubitNumber(): QubitCount {
     const qubitNumber = Math.max(
       ...this.steps.map((each) => {
@@ -79,6 +52,24 @@ export class Circuit extends Container {
     }
 
     return qubitNumber as QubitCount;
+  }
+
+  /**
+   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
+   */
+  get steps(): CircuitStep[] {
+    return this.stepList.children as CircuitStep[];
+  }
+
+  get activeStepIndex() {
+    for (let i = 0; i < this.steps.length; i++) {
+      const step = this.fetchStep(i);
+      if (step.isActive) {
+        return i;
+      }
+    }
+
+    return null;
   }
 
   /**
