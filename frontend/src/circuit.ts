@@ -1,9 +1,9 @@
 import { CircuitStep } from "./circuit-step";
 import { Container } from "pixi.js";
-import { List as ListContainer } from "@pixi/ui";
+import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import { CIRCUIT_STEP_EVENTS } from "./events";
+import { CIRCUIT_EVENTS, CIRCUIT_STEP_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 
 /**
@@ -14,34 +14,43 @@ export interface CircuitOptions {
   stepCount: number;
 }
 
-export const CIRCUIT_EVENTS = {
-  OPERATION_GRABBED: "circuit:grab-gate",
-  ACTIVATE_STEP: "circuit:activate-step",
-};
-
 /**
  * Represents a quantum circuit that holds multiple {@link CircuitStep}s.
  */
 export class Circuit extends Container {
-  /** Minimum number of wires. */
-  minWireCount = 1;
-  /** Maximum number of wires. */
-  maxWireCount: QubitCount = MAX_QUBIT_COUNT;
-
-  minStepCount = 5;
-
-  /** Layout container for arranging {@link CircuitStep}s in a row. */
-  circuitStepsContainer: ListContainer;
+  private minWireCount = 1;
+  private maxWireCount: QubitCount = MAX_QUBIT_COUNT;
+  private minStepCount = 5;
+  private stepList: List;
   private markerManager: CircuitStepMarkerManager;
+
+  /**
+   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
+   */
+  get steps(): CircuitStep[] {
+    return this.stepList.children as CircuitStep[];
+  }
+
+  get activeStepIndex() {
+    for (let i = 0; i < this.steps.length; i++) {
+      const step = this.fetchStep(i);
+      if (step.isActive) {
+        return i;
+      }
+    }
+
+    return null;
+  }
 
   /**
    * Returns the number of wires (bits) in the {@link Circuit}.
    */
   get wireCount() {
-    let wireCount = this.minWireCount;
-    if (this.steps.length > 0) {
-      wireCount = this.stepAt(0).wireCount;
+    if (this.steps.length == 0) {
+      return this.minWireCount;
     }
+
+    const wireCount = this.fetchStep(0).wireCount;
 
     this.steps.forEach((each) => {
       if (each.wireCount !== wireCount) {
@@ -53,35 +62,17 @@ export class Circuit extends Container {
   }
 
   get highestOccupiedQubitNumber(): QubitCount {
-    const qubitCount = Math.max(
+    const qubitNumber = Math.max(
       ...this.steps.map((each) => {
         return each.highestOccupiedQubitNumber;
       })
     );
 
-    if (qubitCount == 0) {
+    if (qubitNumber === 0) {
       return MIN_QUBIT_COUNT;
     }
 
-    return qubitCount as QubitCount;
-  }
-
-  /**
-   * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
-   */
-  get steps(): CircuitStep[] {
-    return this.circuitStepsContainer.children as CircuitStep[];
-  }
-
-  get activeStepIndex() {
-    for (let i = 0; i < this.steps.length; i++) {
-      const step = this.steps[i];
-      if (step.isActive) {
-        return i;
-      }
-    }
-
-    return null;
+    return qubitNumber as QubitCount;
   }
 
   /**
@@ -96,10 +87,10 @@ export class Circuit extends Container {
     this.minWireCount = options.minWireCount;
 
     // TODO: レスポンシブ対応。モバイルではステップを縦に並べる
-    this.circuitStepsContainer = new ListContainer({
+    this.stepList = new List({
       type: "horizontal",
     });
-    this.addChild(this.circuitStepsContainer);
+    this.addChild(this.stepList);
 
     for (let i = 0; i < options.stepCount; i++) {
       this.appendStep();
@@ -107,14 +98,11 @@ export class Circuit extends Container {
 
     this.markerManager = new CircuitStepMarkerManager({ steps: this.steps });
     this.addChild(this.markerManager);
-
-    this.markerManager.zIndex = 1;
-    this.sortableChildren = true;
   }
 
   private appendStep(wireCount = this.minWireCount) {
     const circuitStep = new CircuitStep(wireCount);
-    this.circuitStepsContainer.addChild(circuitStep);
+    this.stepList.addChild(circuitStep);
 
     circuitStep.on(
       CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
@@ -171,12 +159,12 @@ export class Circuit extends Container {
   /**
    * Retrieves the {@link CircuitStep} at the specified index.
    */
-  stepAt(stepIndex: number) {
-    if (stepIndex < 0 || stepIndex >= this.steps.length) {
-      throw new Error("Step index out of bounds");
+  fetchStep(index: number) {
+    if (index < 0 || index >= this.steps.length) {
+      throw new Error(`Step index out of bounds: ${index}`);
     }
 
-    return this.steps[stepIndex];
+    return this.steps[index];
   }
 
   update(): void {
@@ -190,7 +178,7 @@ export class Circuit extends Container {
     this.removeUnusedUpperWires();
     this.updateConnections();
 
-    this.stepAt(activeStepIndex).activate();
+    this.fetchStep(activeStepIndex).activate();
     this.markerManager.update(this.steps);
   }
 
@@ -227,7 +215,7 @@ export class Circuit extends Container {
   }
 
   maybeAppendWire() {
-    const firstStepWireCount = this.steps[0].wireCount;
+    const firstStepWireCount = this.fetchStep(0).wireCount;
 
     this.steps.forEach((each) => {
       if (each.wireCount !== firstStepWireCount) {
@@ -324,6 +312,6 @@ export class Circuit extends Container {
     });
     this.markerManager.update(this.steps);
 
-    this.emit(CIRCUIT_EVENTS.ACTIVATE_STEP, circuitStep);
+    this.emit(CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED, circuitStep);
   }
 }
