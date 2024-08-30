@@ -17,8 +17,10 @@ self.addEventListener("message", (event) => {
   const amplitudes: [number, number][] = [];
 
   for (let i = 0; i < vector.height; i++) {
-    const c = vector.cell(0, i);
-    amplitudes.push([c.real, c.imag]);
+    const c = vector.element(0, i);
+    if (c.isOk()) {
+      amplitudes.push([c.value.real, c.value.imag]);
+    }
   }
 
   // バックエンドを呼ぶ
