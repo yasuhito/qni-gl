@@ -20,13 +20,10 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      strategies: "injectManifest",
+      registerType: "autoUpdate",
+      injectRegister: "auto",
       srcDir: "src",
       filename: "serviceWorker.ts",
-      injectRegister: "auto",
-      injectManifest: {
-        injectionPoint: undefined,
-      },
     }),
     viteStaticCopy({
       targets: [

@@ -6,9 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "prebuild": "yarn build:sw",
-    "build": "vite build",
-    "build:sw": "rollup -c",
+    "build": "rollup -c &&vite build",
     "preview": "vite preview",
     "test:unit": "vitest run --dir tests/vitest --reporter dot --coverage",
     "test:system": "playwright test",
@@ -32,6 +30,7 @@
     "eslint": "^9.9.1",
     "jsdom": "^25.0.0",
     "playwright": "^1.46.1",
+    "rollup": "^4.21.2",
     "start-server-and-test": "^2.0.5",
     "strip-ansi": "~7.1.0",
     "typedoc": "~0.26.6",

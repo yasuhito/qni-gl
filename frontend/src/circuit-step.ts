@@ -310,7 +310,7 @@ export class CircuitStep extends Container {
     );
     const activeOperationBits = activeControlBits.concat(controllableBits);
 
-    if (activeOperationBits.length > 0) {
+    if (activeControlBits.length > 0 && activeOperationBits.length > 0) {
       const [minBit, maxBit] = [
         Math.min(...activeOperationBits),
         Math.max(...activeOperationBits),
