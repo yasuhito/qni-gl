@@ -38,6 +38,10 @@ export default defineConfig({
     }),
   ],
   test: {
+    coverage: {
+      provider: "istanbul",
+      reporter: ["json", "html"],
+    },
     browser: {
       provider: "playwright", // or 'webdriverio'
       enabled: true,

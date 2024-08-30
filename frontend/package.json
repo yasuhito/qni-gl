@@ -10,7 +10,7 @@
     "build": "vite build",
     "build:sw": "rollup -c",
     "preview": "vite preview",
-    "test:unit": "vitest run --dir tests/vitest --reporter dot",
+    "test:unit": "vitest run --dir tests/vitest --reporter dot --coverage",
     "test": "yarn lint && yarn test:unit && playwright test",
     "lint": "eslint .",
     "doc": "typedoc --blockTags @param --blockTags @memberof"
@@ -27,6 +27,8 @@
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "@vitest/browser": "^2.0.4",
+    "@vitest/coverage-istanbul": "^2.0.5",
+    "@vitest/coverage-v8": "^2.0.5",
     "eslint": "^9.5.0",
     "jsdom": "^23.0.1",
     "playwright": "^1.45.3",
@@ -43,7 +45,7 @@
   "dependencies": {
     "@pixi/layout": "~2.0",
     "@pixi/ui": "~2.1",
-    "@qni/simulator": "^0.0.86",
+    "@qni/simulator": "^0.0.87",
     "lodash": "^4.17.21",
     "pixi-filters": "^6.0.4",
     "pixi.js": "~8.3",
@@ -51,5 +53,5 @@
     "typescript": "^5.4.5",
     "xstate": "~5.4"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@4.4.1"
 }
