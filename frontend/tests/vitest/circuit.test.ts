@@ -71,6 +71,11 @@ describe("Circuit", () => {
         "All steps must have the same number of wires"
       );
     });
+
+    it("returns minWireCount when there are no steps", () => {
+      const emptyCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      expect(emptyCircuit.wireCount).toBe(3);
+    });
   });
 
   describe("highestOccupiedQubitNumber", () => {

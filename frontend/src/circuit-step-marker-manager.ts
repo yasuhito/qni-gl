@@ -9,7 +9,7 @@ export class CircuitStepMarkerManager extends Container {
   private static readonly COLOR_ACTIVE = Colors["bg-brand"];
 
   private markers: Graphics[] = [];
-  private _steps: CircuitStep[] = [];
+  private steps: CircuitStep[] = [];
 
   constructor({ steps }: { steps: CircuitStep[] }) {
     super();
@@ -24,20 +24,8 @@ export class CircuitStepMarkerManager extends Container {
     this.updateMarkerVisibility();
   }
 
-  private get steps() {
-    return this._steps;
-  }
-
-  private set steps(steps: CircuitStep[]) {
-    if (steps.length === 0) {
-      throw new Error("Steps array is empty");
-    }
-
-    this._steps = steps;
-  }
-
   private get stepCount() {
-    return this._steps.length;
+    return this.steps.length;
   }
 
   private get stepWidth() {
@@ -99,7 +87,7 @@ export class CircuitStepMarkerManager extends Container {
   }
 
   private stepAt(index: number): CircuitStep {
-    const step = this._steps[index];
+    const step = this.steps[index];
     if (!step) {
       throw new Error(`Step not found at index ${index}`);
     }
