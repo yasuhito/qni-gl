@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Circuit } from "../../src/circuit";
 import { CircuitStep } from "../../src/circuit-step";
 import { MIN_QUBIT_COUNT } from "../../src/constants";
@@ -268,6 +268,17 @@ describe("Circuit", () => {
 
       expect(dropzone.inputWireType).toBe(WireType.Classical);
       expect(dropzone.outputWireType).toBe(WireType.Quantum);
+    });
+  });
+
+  describe("updateStepMarker", () => {
+    it("updates the marker manager with the current steps", () => {
+      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      const updateSpy = vi.spyOn(circuit["markerManager"], "update");
+
+      circuit["updateStepMarker"]();
+
+      expect(updateSpy).toHaveBeenCalledWith(circuit.steps);
     });
   });
 });
