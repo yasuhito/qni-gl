@@ -152,4 +152,24 @@ describe("Circuit", () => {
       );
     });
   });
+
+  describe("update", () => {
+    it("correctly updates the circuit", () => {
+      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      const activeStep = circuit.fetchStep(2);
+      activeStep.activate();
+
+      circuit.update();
+
+      expect(circuit.steps.length).toBe(5);
+      expect(circuit.wireCount).toBe(3);
+      expect(activeStep.isActive).toBe(true);
+    });
+
+    it("throws an error when there is no active step", () => {
+      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+
+      expect(() => circuit.update()).toThrow("activeStepIndex == null");
+    });
+  });
 });
