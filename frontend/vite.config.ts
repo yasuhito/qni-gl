@@ -1,6 +1,5 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 
 export default defineConfig({
   build: {
@@ -20,18 +19,14 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
+      strategies: "injectManifest",
       registerType: "autoUpdate",
       injectRegister: "auto",
       srcDir: "src",
       filename: "serviceWorker.ts",
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: "assets",
-          dest: "",
-        },
-      ],
+      injectManifest: {
+        injectionPoint: undefined,
+      },
     }),
   ],
   test: {

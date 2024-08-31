@@ -17,7 +17,6 @@ export default {
   ],
   onwarn: (warning, defaultHandler) => {
     if (warning.loc.file.includes("/node_modules/")) return;
-    if (warning.loc.file.includes("/vite.config.ts")) return;
     defaultHandler(warning);
   },
 };
