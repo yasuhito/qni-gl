@@ -195,4 +195,23 @@ describe("Circuit", () => {
       expect(serialized).toEqual([[], [], [], [], []]);
     });
   });
+
+  describe("toJSON", () => {
+    it("returns a correctly formatted JSON string", () => {
+      const hGate = new HGate();
+      const xGate = new XGate();
+
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
+
+      const expectedJSON =
+        '{"cols":[["H",1,1],[1,"X",1],[1,1,1],[1,1,1],[1,1,1]]}';
+      expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    });
+
+    it("returns JSON with empty steps for an empty circuit", () => {
+      const expectedJSON = '{"cols":[[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]]}';
+      expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    });
+  });
 });
