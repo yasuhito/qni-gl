@@ -524,7 +524,6 @@ export class App {
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
     this.resetCursor();
     this.app.stage.off("pointermove", this.maybeMoveGate);
-    // this.grabbedGate.parentLayer = this.gateLayer;
     this.grabbedGate.mouseUp();
     this.grabbedGate = null;
 

@@ -121,6 +121,7 @@ export class Circuit extends Container {
     this.removeEmptySteps();
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
+    this.redrawDropzoneInputAndOutputWires();
     this.updateConnections();
 
     this.fetchStep(activeStepIndex).activate();
