@@ -1,5 +1,9 @@
 import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vitest/config";
+import {
+  configDefaults,
+  coverageConfigDefaults,
+  defineConfig,
+} from "vitest/config";
 
 export default defineConfig({
   build: {
@@ -33,6 +37,7 @@ export default defineConfig({
     coverage: {
       provider: "istanbul",
       reporter: ["json", "html"],
+      include: ["src/**"],
     },
     browser: {
       provider: "playwright", // or 'webdriverio'
