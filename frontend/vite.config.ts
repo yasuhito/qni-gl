@@ -1,9 +1,5 @@
 import { VitePWA } from "vite-plugin-pwa";
-import {
-  configDefaults,
-  coverageConfigDefaults,
-  defineConfig,
-} from "vitest/config";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   build: {
