@@ -9,6 +9,8 @@ import { ZGate } from "../../src/z-gate";
 import { TGate } from "../../src/t-gate";
 import { SDaggerGate } from "../../src/s-dagger-gate";
 import { RnotGate } from "../../src/rnot-gate";
+import { Write0Gate } from "../../src/write0-gate";
+import { WireType } from "../../src/types";
 
 describe("Circuit", () => {
   let circuit: Circuit;
@@ -254,6 +256,18 @@ describe("Circuit", () => {
 
 1: ────────√X────────`.trim();
       expect(circuit.toString()).toBe(expected);
+    });
+  });
+
+  describe("onGateSnapToDropzone", () => {
+    it("should update wire types when a gate snaps to a dropzone", () => {
+      const write0 = new Write0Gate();
+      const dropzone = circuit.fetchStep(0).fetchDropzone(0);
+
+      dropzone.snap(write0);
+
+      expect(dropzone.inputWireType).toBe(WireType.Classical);
+      expect(dropzone.outputWireType).toBe(WireType.Quantum);
     });
   });
 });
