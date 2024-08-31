@@ -155,7 +155,6 @@ describe("Circuit", () => {
 
   describe("update", () => {
     it("correctly updates the circuit", () => {
-      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
       const activeStep = circuit.fetchStep(2);
       activeStep.activate();
 
@@ -167,9 +166,33 @@ describe("Circuit", () => {
     });
 
     it("throws an error when there is no active step", () => {
-      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
-
       expect(() => circuit.update()).toThrow("activeStepIndex == null");
+    });
+  });
+
+  describe("serialize", () => {
+    it("returns correctly serialized circuit", () => {
+      const hGate = new HGate();
+      const xGate = new XGate();
+
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
+
+      const serialized = circuit.serialize();
+
+      expect(serialized).toEqual([
+        [{ type: "H", targets: [0] }],
+        [{ type: "X", targets: [1] }],
+        [],
+        [],
+        [],
+      ]);
+    });
+
+    it("correctly serializes an empty circuit", () => {
+      const serialized = circuit.serialize();
+
+      expect(serialized).toEqual([[], [], [], [], []]);
     });
   });
 });
