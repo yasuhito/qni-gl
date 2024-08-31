@@ -288,7 +288,7 @@ export class Circuit extends Container {
       });
     });
 
-    return output.join("\n");
+    return output.join("\n").trim();
   }
 
   private emitOnStepHoverSignal(circuitStep: CircuitStep) {
