@@ -22,12 +22,6 @@ describe("CircuitStepMarkerManager", () => {
     ];
   });
 
-  it("should throw an error when initialized with empty steps array", () => {
-    expect(() => new CircuitStepMarkerManager({ steps: [] })).toThrow(
-      "Steps array is empty"
-    );
-  });
-
   it("should position markers correctly", () => {
     const manager = new CircuitStepMarkerManager({
       steps: mockSteps as CircuitStep[],

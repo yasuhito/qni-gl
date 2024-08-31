@@ -1,10 +1,11 @@
 import { CircuitStep } from "./circuit-step";
-import { Container } from "pixi.js";
+import { Container, Point } from "pixi.js";
 import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
 import { CIRCUIT_EVENTS, CIRCUIT_STEP_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
+import { OperationComponent } from "./operation-component";
 
 /**
  * Represents the options for a {@link Circuit}.
@@ -100,62 +101,6 @@ export class Circuit extends Container {
     this.addChild(this.markerManager);
   }
 
-  private appendStep(wireCount = this.minWireCount) {
-    const circuitStep = new CircuitStep(wireCount);
-    this.stepList.addChild(circuitStep);
-
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
-      this.onGateSnapToDropzone,
-      this
-    );
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.HOVERED,
-      this.emitOnStepHoverSignal,
-      this
-    );
-    circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
-      (gate, globalPosition) => {
-        this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
-      }
-    );
-  }
-
-  private onGateSnapToDropzone() {
-    this.redrawDropzoneInputAndOutputWires();
-    this.updateConnections();
-  }
-
-  private redrawDropzoneInputAndOutputWires() {
-    for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
-      let wireType = WireType.Classical;
-
-      this.steps.forEach((each) => {
-        const dropzone = each.fetchDropzone(wireIndex);
-
-        if (dropzone.isOccupied()) {
-          if (dropzone.hasWriteGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Quantum;
-            dropzone.outputWireType = wireType;
-          } else if (dropzone.hasMeasurementGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Classical;
-            dropzone.outputWireType = wireType;
-          }
-        } else {
-          dropzone.inputWireType = wireType;
-          dropzone.outputWireType = wireType;
-        }
-        dropzone.redrawWires();
-      });
-    }
-
-    // this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
-  }
-
   /**
    * Retrieves the {@link CircuitStep} at the specified index.
    */
@@ -176,42 +121,11 @@ export class Circuit extends Container {
     this.removeEmptySteps();
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
+    this.redrawDropzoneInputAndOutputWires();
     this.updateConnections();
 
     this.fetchStep(activeStepIndex).activate();
     this.markerManager.update(this.steps);
-  }
-
-  private removeEmptySteps(): void {
-    for (const each of this.emptySteps) {
-      each.destroy();
-    }
-  }
-
-  private appendMinimumSteps(): void {
-    const nsteps = this.minStepCount - this.steps.length;
-
-    for (let i = 0; i < nsteps; i++) {
-      this.appendStep(this.wireCount);
-    }
-  }
-
-  private get emptySteps(): CircuitStep[] {
-    return this.steps.filter((each) => each.isEmpty);
-  }
-
-  /**
-   * Delete unused upper wires.
-   */
-  private removeUnusedUpperWires() {
-    while (
-      this.isLastWireUnused() &&
-      this.maxWireCountForAllSteps > this.minWireCount
-    ) {
-      this.steps.forEach((each) => {
-        each.removeLastDropzone();
-      });
-    }
   }
 
   maybeAppendWire() {
@@ -228,20 +142,6 @@ export class Circuit extends Container {
     });
 
     this.markerManager.update(this.steps);
-  }
-
-  private updateConnections() {
-    this.steps.forEach((each) => {
-      each.updateConnections();
-    });
-  }
-
-  private isLastWireUnused() {
-    return this.steps.every((each) => !each.hasOperationAt(each.wireCount - 1));
-  }
-
-  protected get maxWireCountForAllSteps() {
-    return Math.max(...this.steps.map((each) => each.wireCount));
   }
 
   serialize() {
@@ -274,8 +174,6 @@ export class Circuit extends Container {
 
           if (operation) {
             const operationLabel = dropzone.operation.label;
-            // label は 1 文字または 2 文字になる。
-            // このため、1 文字の場合は 2 文字分のスペースを確保する。
             if (operationLabel.length == 1) {
               output[qubitIndex * 2] += `${operationLabel}────`;
             } else {
@@ -288,12 +186,34 @@ export class Circuit extends Container {
       });
     });
 
-    return output.join("\n");
+    return output.join("\n").trim();
   }
 
-  private emitOnStepHoverSignal(circuitStep: CircuitStep) {
+  private appendStep(wireCount = this.minWireCount) {
+    const circuitStep = new CircuitStep(wireCount);
+    this.stepList.addChild(circuitStep);
+
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
+      this.onGateSnapToDropzone,
+      this
+    );
+    circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
+    circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+      this.emitOnGateGrabSignal,
+      this
+    );
+  }
+
+  private onGateSnapToDropzone() {
+    this.redrawDropzoneInputAndOutputWires();
+    this.updateConnections();
+  }
+
+  private updateStepMarker() {
     this.markerManager.update(this.steps);
-    this.emit("stepHover", this, circuitStep);
   }
 
   /**
@@ -305,13 +225,88 @@ export class Circuit extends Container {
         if (each.isActive) {
           each.deactivate();
         }
-        // this.markerManager.hideMarker(index);
-      } else {
-        // this.markerManager.activateMarker(index);
       }
     });
     this.markerManager.update(this.steps);
 
     this.emit(CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED, circuitStep);
+  }
+
+  private emitOnGateGrabSignal(
+    gate: OperationComponent,
+    globalPosition: Point
+  ) {
+    this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
+  }
+
+  private redrawDropzoneInputAndOutputWires() {
+    for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
+      let wireType = WireType.Classical;
+
+      this.steps.forEach((each) => {
+        const dropzone = each.fetchDropzone(wireIndex);
+
+        if (dropzone.isOccupied()) {
+          if (dropzone.hasWriteGate()) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Quantum;
+            dropzone.outputWireType = wireType;
+          } else if (dropzone.hasMeasurementGate()) {
+            dropzone.inputWireType = wireType;
+            wireType = WireType.Classical;
+            dropzone.outputWireType = wireType;
+          }
+        } else {
+          dropzone.inputWireType = wireType;
+          dropzone.outputWireType = wireType;
+        }
+        dropzone.redrawWires();
+      });
+    }
+
+    // this.emit("gateSnapToDropzone", this, circuitStep, dropzone);
+  }
+
+  private removeEmptySteps(): void {
+    for (const each of this.emptySteps) {
+      each.destroy();
+    }
+  }
+
+  private appendMinimumSteps(): void {
+    const nsteps = this.minStepCount - this.steps.length;
+
+    for (let i = 0; i < nsteps; i++) {
+      this.appendStep(this.wireCount);
+    }
+  }
+
+  private get emptySteps(): CircuitStep[] {
+    return this.steps.filter((each) => each.isEmpty);
+  }
+
+  private removeUnusedUpperWires() {
+    while (
+      this.isLastWireUnused() &&
+      this.maxWireCountForAllSteps > this.minWireCount
+    ) {
+      this.steps.forEach((each) => {
+        each.removeLastDropzone();
+      });
+    }
+  }
+
+  private updateConnections() {
+    this.steps.forEach((each) => {
+      each.updateConnections();
+    });
+  }
+
+  private isLastWireUnused() {
+    return this.steps.every((each) => !each.hasOperationAt(each.wireCount - 1));
+  }
+
+  protected get maxWireCountForAllSteps() {
+    return Math.max(...this.steps.map((each) => each.wireCount));
   }
 }

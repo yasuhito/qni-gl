@@ -1,9 +1,16 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Circuit } from "../../src/circuit";
 import { CircuitStep } from "../../src/circuit-step";
 import { MIN_QUBIT_COUNT } from "../../src/constants";
 import { HGate } from "../../src/h-gate";
 import { XGate } from "../../src/x-gate";
+import { YGate } from "../../src/y-gate";
+import { ZGate } from "../../src/z-gate";
+import { TGate } from "../../src/t-gate";
+import { SDaggerGate } from "../../src/s-dagger-gate";
+import { RnotGate } from "../../src/rnot-gate";
+import { Write0Gate } from "../../src/write0-gate";
+import { WireType } from "../../src/types";
 
 describe("Circuit", () => {
   let circuit: Circuit;
@@ -70,6 +77,11 @@ describe("Circuit", () => {
       expect(() => circuit.wireCount).toThrow(
         "All steps must have the same number of wires"
       );
+    });
+
+    it("returns minWireCount when there are no steps", () => {
+      const emptyCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      expect(emptyCircuit.wireCount).toBe(3);
     });
   });
 
@@ -145,6 +157,128 @@ describe("Circuit", () => {
       expect(() => circuit.maybeAppendWire()).toThrow(
         "All steps must have the same number of wires"
       );
+    });
+  });
+
+  describe("update", () => {
+    it("correctly updates the circuit", () => {
+      const activeStep = circuit.fetchStep(2);
+      activeStep.activate();
+
+      circuit.update();
+
+      expect(circuit.steps.length).toBe(5);
+      expect(circuit.wireCount).toBe(3);
+      expect(activeStep.isActive).toBe(true);
+    });
+
+    it("throws an error when there is no active step", () => {
+      expect(() => circuit.update()).toThrow("activeStepIndex == null");
+    });
+  });
+
+  describe("serialize", () => {
+    it("returns correctly serialized circuit", () => {
+      const hGate = new HGate();
+      const xGate = new XGate();
+
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
+
+      const serialized = circuit.serialize();
+
+      expect(serialized).toEqual([
+        [{ type: "H", targets: [0] }],
+        [{ type: "X", targets: [1] }],
+        [],
+        [],
+        [],
+      ]);
+    });
+
+    it("correctly serializes an empty circuit", () => {
+      const serialized = circuit.serialize();
+
+      expect(serialized).toEqual([[], [], [], [], []]);
+    });
+  });
+
+  describe("toJSON", () => {
+    it("returns a correctly formatted JSON string", () => {
+      const hGate = new HGate();
+      const xGate = new XGate();
+
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
+
+      const expectedJSON =
+        '{"cols":[["H",1,1],[1,"X",1],[1,1,1],[1,1,1],[1,1,1]]}';
+      expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    });
+
+    it("returns JSON with empty steps for an empty circuit", () => {
+      const expectedJSON = '{"cols":[[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]]}';
+      expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    });
+  });
+
+  describe("toString", () => {
+    it("should return a string representation of an empty circuit", () => {
+      const emptyCircuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      const expected = "0: ────────────────────────────";
+      expect(emptyCircuit.toString()).toBe(expected);
+    });
+
+    it("should return a string representation of a circuit with gates", () => {
+      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new XGate());
+      circuit.fetchStep(2).fetchDropzone(2).addChild(new YGate());
+      circuit.fetchStep(3).fetchDropzone(0).addChild(new ZGate());
+      circuit.fetchStep(4).fetchDropzone(1).addChild(new TGate());
+
+      const expected = `
+0: ───H──────────────Z─────────
+
+1: ────────X──────────────T────
+
+2: ─────────────Y──────────────`.trim();
+      expect(circuit.toString()).toBe(expected);
+    });
+
+    it("should handle gates with two-character labels correctly", () => {
+      const circuit = new Circuit({ minWireCount: 2, stepCount: 3 });
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new SDaggerGate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new RnotGate());
+
+      const expected = `
+0: ───S†─────────────
+
+1: ────────√X────────`.trim();
+      expect(circuit.toString()).toBe(expected);
+    });
+  });
+
+  describe("onGateSnapToDropzone", () => {
+    it("should update wire types when a gate snaps to a dropzone", () => {
+      const write0 = new Write0Gate();
+      const dropzone = circuit.fetchStep(0).fetchDropzone(0);
+
+      dropzone.snap(write0);
+
+      expect(dropzone.inputWireType).toBe(WireType.Classical);
+      expect(dropzone.outputWireType).toBe(WireType.Quantum);
+    });
+  });
+
+  describe("updateStepMarker", () => {
+    it("updates the marker manager with the current steps", () => {
+      const circuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      const updateSpy = vi.spyOn(circuit["markerManager"], "update");
+
+      circuit["updateStepMarker"]();
+
+      expect(updateSpy).toHaveBeenCalledWith(circuit.steps);
     });
   });
 });
