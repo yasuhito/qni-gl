@@ -1,5 +1,7 @@
+from math import sqrt
 import unittest
 import numpy
+from pytest import approx
 from src.cirq_runner import CirqRunner
 
 
@@ -293,10 +295,12 @@ class TestCirqRunner(unittest.TestCase):
             circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
-        assert numpy.isclose(
-            result[0][':amplitude'][0], numpy.complex128(1/numpy.sqrt(2)))
-        assert numpy.isclose(
-            result[0][':amplitude'][1], numpy.complex128(1/numpy.sqrt(2)))
+
+        amplitudes = result[0][':amplitude']
+        assert (approx(amplitudes[0].real), approx(
+            amplitudes[0].imag)) == (1/sqrt(2), 0.0)
+        assert (approx(amplitudes[1].real), approx(
+            amplitudes[1].imag)) == (1/sqrt(2), 0.0)
         assert result[0][':measuredBits'] == {}
 
     def test_run_circuit_with_x_gate(self):
@@ -307,8 +311,12 @@ class TestCirqRunner(unittest.TestCase):
             circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
-        assert numpy.isclose(result[0][':amplitude'][0], numpy.complex128(0))
-        assert numpy.isclose(result[0][':amplitude'][1], numpy.complex128(1))
+
+        amplitudes = result[0][':amplitude']
+        assert (approx(amplitudes[0].real), approx(
+            amplitudes[0].imag)) == (0.0, 0.0)
+        assert (approx(amplitudes[1].real), approx(
+            amplitudes[1].imag)) == (1.0, 0.0)
         assert result[0][':measuredBits'] == {}
 
 
