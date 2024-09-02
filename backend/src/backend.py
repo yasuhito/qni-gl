@@ -90,7 +90,7 @@ def run_cirq(qubit_count, step_index, steps, targets):
             if ":measuredBits" in item:
                 return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
             return {"amplitudes": convert_amp(item[":amplitude"])}
-        elif ":measuredBits" in item:
+        if ":measuredBits" in item:
             return {"measuredBits": item[":measuredBits"]}
         return {}
 
