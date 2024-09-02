@@ -1,13 +1,12 @@
-import cirq
 import sys
-from sympy import *
+
+import cirq
 from cirq.circuits import InsertStrategy
 
 
 class CirqRunner:
     def __init__(self, logger):
         self.logger = logger
-        return
 
     def lookup_measurement_label(self, _circuit_from_qni, label):
         counter = 0
@@ -27,8 +26,7 @@ class CirqRunner:
                         break
             sys.stdout.flush()
 #        print("counter", counter)
-        label = 'm' + str(counter)
-        return label
+        return 'm' + str(counter)
 
     def build_circuit(self, qubit_count, circuit_qni):
         circuit_from_qni = []
@@ -48,10 +46,10 @@ class CirqRunner:
             circuit_from_qni.append(step)
 
         qubits = cirq.LineQubit.range(qubit_count)
-        c = cirq.Circuit()
-        m = 0
+        circuit = cirq.Circuit()
+        measurement_label_number = 0
         measurement_moment = []
-        _current_index = 0
+        moment_index = 0
 
         for step in circuit_from_qni:
             moment = []
@@ -63,92 +61,87 @@ class CirqRunner:
                     moment.append([cirq.I(qubits[bit])])
 
             for gate in step:
-                if gate['type'] == u'H':
+                if gate['type'] == 'H':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.H(target) for target in targets]
-                elif gate['type'] == u'X':
+                    operations = [cirq.H(target) for target in targets]
+                elif gate['type'] == 'X':
                     targets = self._target_qubits(qubits, gate)
-                    if not "controls" in gate:
-                        _c = [cirq.X(target) for target in targets]
+                    if "controls" not in gate:
+                        operations = [cirq.X(target) for target in targets]
                     else:
-                        controlQubits = [qubits[control]
-                                         for control in gate['controls']]
-                        _c = [cirq.ControlledOperation(
-                            controlQubits, cirq.X(target)) for target in targets]
-                elif gate['type'] == u'Y':
+                        control_qubits = [qubits[control]
+                                          for control in gate['controls']]
+                        operations = [cirq.ControlledOperation(
+                            control_qubits, cirq.X(target)) for target in targets]
+                elif gate['type'] == 'Y':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Y(target) for target in targets]
-                elif gate['type'] == u'Z':
+                    operations = [cirq.Y(target) for target in targets]
+                elif gate['type'] == 'Z':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Z(target) for target in targets]
-                elif gate['type'] == u'X^½':
+                    operations = [cirq.Z(target) for target in targets]
+                elif gate['type'] == 'X^½':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.X(target)**0.5 for target in targets]
-                elif gate['type'] == u'S':
+                    operations = [cirq.X(target)**0.5 for target in targets]
+                elif gate['type'] == 'S':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Z(target)**0.5 for target in targets]
-                elif gate['type'] == u'S†':
+                    operations = [cirq.Z(target)**0.5 for target in targets]
+                elif gate['type'] == 'S†':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Z(target)**(-0.5) for target in targets]
-                elif gate['type'] == u'T':
+                    operations = [cirq.Z(target)**(-0.5) for target in targets]
+                elif gate['type'] == 'T':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Z(target)**0.25 for target in targets]
-                elif gate['type'] == u'T†':
+                    operations = [cirq.Z(target)**0.25 for target in targets]
+                elif gate['type'] == 'T†':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.Z(target)**(-0.25) for target in targets]
-                elif gate['type'] == u'Swap':
-                    _c = []
+                    operations = [cirq.Z(target)**(-0.25)
+                                  for target in targets]
+                elif gate['type'] == 'Swap':
+                    operations = []
                     if len(gate['targets']) == 2:
                         target0 = qubits[gate['targets'][0]]
                         target1 = qubits[gate['targets'][1]]
-                        _c.append(cirq.SWAP(target0, target1))
-                elif gate['type'] == u'•':
-                    if "controls" in gate:
-                        #                        print("control is not supported for CZ gate", gate['type'])
-                        #                        sys.stdout.flush()
-                        exit(1)
+                        operations.append(cirq.SWAP(target0, target1))
+                elif gate['type'] == '•':
                     targets = self._target_qubits(qubits, gate)
-                    if len(targets) == 2:
-                        _c = [cirq.CZ(qubits[gate['targets'][0]],
+                    if len(targets) < 2:
+                        operations = []
+                    elif len(targets) == 2:
+                        operations = [cirq.CZ(qubits[gate['targets'][0]],
                                       qubits[gate['targets'][1]])]
-                    elif len(targets) < 2:
-                        _c = []
                     else:
-                        # we regard the first and the second qubit as the target qubits,
-                        # and others are controlled qubits.
-                        controls = []
-                        for _i in range(len(gate['targets'])-2):
-                            controls.append(
-                                qubits[gate['targets'][_i+2]])
-                        sys.stdout.flush()
-                        _c = [cirq.ControlledOperation(controls, cirq.CZ(
-                            qubits[gate['targets'][0]], qubits[gate['targets'][1]]))]
-                elif gate['type'] == u'|0>':
+                        controls = [qubits[gate['targets'][index]]
+                                    for index in range(len(gate['targets']) - 2)]
+                        operations = [cirq.ControlledOperation(
+                            controls, cirq.CZ(qubits[gate['targets'][-2]], qubits[gate['targets'][-1]]))]
+                elif gate['type'] == '|0>':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.ops.reset(target) for target in targets]
-                elif gate['type'] == u'|1>':
+                    operations = [cirq.ops.reset(target) for target in targets]
+                elif gate['type'] == '|1>':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.ops.reset(target) for target in targets]
-                    _c.append([cirq.X(target) for target in targets])
-                elif gate['type'] == u'Measure':
+                    operations = [cirq.ops.reset(target) for target in targets]
+                    operations.append([cirq.X(target) for target in targets])
+                elif gate['type'] == 'Measure':
                     targets = self._target_qubits(qubits, gate)
-                    _c = [cirq.measure(targets[index], key='m' + str(m + index))
-                          for index in range(len(targets))]
-                    __m = ['m' + str(m + index)
-                           for index in range(len(targets))]
-                    _m = [[__m[index], gate['targets'][index]]
-                          for index in range(len(targets))]
-                    measurement_moment[_current_index].append(_m)
-                    m = m + len(targets)
+                    operations = [cirq.measure(targets[index], key='m' + str(measurement_label_number + index))
+                                  for index in range(len(targets))]
+                    measurement_ids = ['m' + str(measurement_label_number + index)
+                                       for index in range(len(targets))]
+                    measurement_pairs = [[measurement_ids[index], gate['targets'][index]]
+                                         for index in range(len(targets))]
+                    measurement_moment[moment_index].append(measurement_pairs)
+                    measurement_label_number = measurement_label_number + \
+                        len(targets)
                 else:
-                    exit(1)
+                    raise ValueError(
+                        "Unknown operation: {}".format(gate['type']))
 
-                for __c in _c:
-                    moment.append(__c)
-            c.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
-            _current_index = _current_index + 1
+                for each in operations:
+                    moment.append(each)
 
-        return c, measurement_moment
+            circuit.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
+            moment_index = moment_index + 1
+
+        return circuit, measurement_moment
 
     def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps, targets):
         cirq_simulator = cirq.Simulator()
@@ -164,7 +157,7 @@ class CirqRunner:
             if sleep_flag == 0:
                 for _d in steps[counter]:
                     if 'type' in _d:
-                        if _d['type'] == u'|1>':
+                        if _d['type'] == '|1>':
                             sleep_flag = 1
             else:
                 sleep_flag = 0

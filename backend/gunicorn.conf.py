@@ -1,4 +1,4 @@
-wsgi_app = 'backend:app'
+wsgi_app = 'src.backend:app'
 
 accesslog = 'access.log'
 errorlog = 'error.log'
