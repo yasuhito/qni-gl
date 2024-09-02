@@ -21,7 +21,7 @@ class TestCirqRunner(unittest.TestCase):
             qubit_count, circuit_qni)
 
         assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0].gate) == 'H'
+        assert str(circuit[0].operations[0]) == 'H(q(0))'
 
     def test_build_circuit_with_x_gate(self):
         qubit_count = 1
@@ -33,7 +33,7 @@ class TestCirqRunner(unittest.TestCase):
             qubit_count, circuit_qni)
 
         assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0].gate) == 'X'
+        assert str(circuit[0].operations[0]) == 'X(q(0))'
 
     def test_build_circuit_with_controlled_x_gate(self):
         qubit_count = 2
@@ -56,6 +56,28 @@ class TestCirqRunner(unittest.TestCase):
 
         assert len(circuit.all_qubits()) == 3
         assert str(circuit[0].operations[0]) == 'CCX(q(0), q(1), q(2))'
+
+    def test_build_circuit_with_y_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'Y', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'Y(q(0))'
+
+    def test_build_circuit_with_z_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'Z', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'Z(q(0))'
 
 
 if __name__ == '__main__':
