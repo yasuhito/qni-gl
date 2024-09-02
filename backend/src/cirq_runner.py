@@ -1,4 +1,3 @@
-import sys
 
 import cirq
 from cirq.circuits import InsertStrategy
@@ -112,8 +111,9 @@ class CirqRunner:
                     measurement_label_number = measurement_label_number + \
                         len(targets)
                 else:
+                    msg = "Unknown operation: {}".format(gate['type'])
                     raise ValueError(
-                        "Unknown operation: {}".format(gate['type']))
+                        msg)
 
                 for each in operations:
                     moment.append(each)
@@ -136,9 +136,8 @@ class CirqRunner:
             dic[':measuredBits'] = {}
             if sleep_flag == 0:
                 for _d in steps[counter]:
-                    if 'type' in _d:
-                        if _d['type'] == '|1>':
-                            sleep_flag = 1
+                    if 'type' in _d and _d['type'] == '|1>':
+                        sleep_flag = 1
             else:
                 sleep_flag = 0
             if sleep_flag == 1:
