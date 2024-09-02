@@ -9,7 +9,7 @@ class TestCirqRunner(unittest.TestCase):
         self.cirq_runner = CirqRunner(self.logger)
 
     def test_initialization(self):
-        self.assertIsNotNone(self.cirq_runner)
+        assert self.cirq_runner is not None  # unittestスタイルのassertを通常のassertに変更
 
     # 他のテストメソッドを追加することができます
     # 例: build_circuit, run_circuit_until_step_index など
