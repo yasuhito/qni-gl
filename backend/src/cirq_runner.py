@@ -26,8 +26,7 @@ class CirqRunner:
                         break
             sys.stdout.flush()
 #        print("counter", counter)
-        label = 'm' + str(counter)
-        return label
+        return 'm' + str(counter)
 
     def build_circuit(self, qubit_count, circuit_qni):
         circuit_from_qni = []
