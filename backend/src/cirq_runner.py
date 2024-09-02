@@ -69,10 +69,10 @@ class CirqRunner:
                     if "controls" not in gate:
                         _c = [cirq.X(target) for target in targets]
                     else:
-                        controlQubits = [qubits[control]
-                                         for control in gate['controls']]
+                        control_qubits = [qubits[control]
+                                          for control in gate['controls']]
                         _c = [cirq.ControlledOperation(
-                            controlQubits, cirq.X(target)) for target in targets]
+                            control_qubits, cirq.X(target)) for target in targets]
                 elif gate['type'] == 'Y':
                     targets = self._target_qubits(qubits, gate)
                     _c = [cirq.Y(target) for target in targets]
@@ -104,7 +104,7 @@ class CirqRunner:
                     if "controls" in gate:
                         #                        print("control is not supported for CZ gate", gate['type'])
                         #                        sys.stdout.flush()
-                        exit(1)
+                        sys.exit(1)
                     targets = self._target_qubits(qubits, gate)
                     if len(targets) == 2:
                         _c = [cirq.CZ(qubits[gate['targets'][0]],
@@ -139,7 +139,7 @@ class CirqRunner:
                     measurement_moment[_current_index].append(_m)
                     m = m + len(targets)
                 else:
-                    exit(1)
+                    sys.exit(1)
 
                 for __c in _c:
                     moment.append(__c)
