@@ -8,26 +8,6 @@ class CirqRunner:
     def __init__(self, logger):
         self.logger = logger
 
-    def lookup_measurement_label(self, _circuit_from_qni, label):
-        counter = 0
-        label_found = 0
-        for _i in _circuit_from_qni:
-            if label_found == 1:
-                break
-            if _i == []:
-                continue
-            for _p in range(len(_i)):
-                if 'flag' in _i[_p]:
-                    if _i[_p]['type'] == "Measure" and _i[_p]['flag'] != label:
-                        counter = counter + 1
-                    elif _i[_p]['type'] == "Measure" and _i[_p]['flag'] == label:
-                        #                        print("found flag _i[%d]" % _p,  _i[_p]['flag'])
-                        label_found = 1
-                        break
-            sys.stdout.flush()
-#        print("counter", counter)
-        return 'm' + str(counter)
-
     def build_circuit(self, qubit_count, circuit_qni):
         circuit_from_qni = []
 
