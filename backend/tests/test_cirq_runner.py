@@ -90,6 +90,50 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0]) == 'X**0.5(q(0))'
 
+    def test_build_circuit_with_s_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'S', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'S(q(0))'
+
+    def test_build_circuit_with_s_dagger_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'S†', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'S**-1(q(0))'
+
+    def test_build_circuit_with_t_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'T', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'T(q(0))'
+
+    def test_build_circuit_with_t_dagger_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'T†', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]) == 'T**-1(q(0))'
+
 
 if __name__ == '__main__':
     unittest.main()
