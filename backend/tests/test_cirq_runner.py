@@ -319,6 +319,40 @@ class TestCirqRunner(unittest.TestCase):
             amplitudes[1].imag)) == (1.0, 0.0)
         assert result[0][':measuredBits'] == {}
 
+    def test_run_circuit_with_y_gate(self):
+        # Y∣0⟩=i∣1⟩
+        steps = [[{'type': 'Y', 'targets': [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
+
+        assert len(result) == 1
+
+        amplitudes = result[0][':amplitude']
+        assert (approx(amplitudes[0].real), approx(
+            amplitudes[0].imag)) == (0.0, 0.0)
+        assert (approx(amplitudes[1].real), approx(
+            amplitudes[1].imag)) == (0.0, 1.0)
+        assert result[0][':measuredBits'] == {}
+
+        # Y∣1⟩=-i∣0⟩
+        steps = [[{'type': 'X', 'targets': [0]}],
+                 [{'type': 'Y', 'targets': [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1])
+
+        assert len(result) == 2
+
+        amplitudes = result[1][':amplitude']
+        assert (approx(amplitudes[0].real), approx(
+            amplitudes[0].imag)) == (0.0, -1.0)
+        assert (approx(amplitudes[1].real), approx(
+            amplitudes[1].imag)) == (0.0, 0.0)
+        assert result[0][':measuredBits'] == {}
+
 
 if __name__ == '__main__':
     unittest.main()
