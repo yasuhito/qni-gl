@@ -134,6 +134,37 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0]) == 'T**-1(q(0))'
 
+    def test_build_circuit_with_two_swap_gates(self):
+        qubit_count = 2
+        circuit_qni = [
+            [{'type': 'Swap', 'targets': [0, 1]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 2
+        assert str(circuit[0].operations[0]) == 'SWAP(q(0), q(1))'
+
+    def test_build_circuit_with_one_swap_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'Swap', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 0
+
+    def test_build_circuit_with_three_swap_gates(self):
+        qubit_count = 3
+        circuit_qni = [
+            [{'type': 'Swap', 'targets': [0, 1, 2]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 0
+
 
 if __name__ == '__main__':
     unittest.main()
