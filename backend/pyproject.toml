@@ -37,7 +37,7 @@ Issues = "https://github.com/yasuhito/qni/issues"
 Source = "https://github.com/yasuhito/qni"
 
 [tool.hatch.version]
-path = "qni/__init__.py"
+path = "src/__init__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
