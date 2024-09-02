@@ -165,6 +165,51 @@ class TestCirqRunner(unittest.TestCase):
 
         assert len(circuit.all_qubits()) == 0
 
+    def test_build_circuit_with_two_control_gates(self):
+        qubit_count = 2
+        circuit_qni = [
+            [{'type': '•', 'targets': [0, 1]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 2
+        assert str(circuit[0].operations[0]) == 'CZ(q(0), q(1))'
+
+    def test_build_circuit_with_one_control_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': '•', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 0
+        # assert str(circuit[0].operations[0]) == 'CZ(q(0), q(1))'
+
+    def test_build_circuit_with_three_control_gates(self):
+        qubit_count = 3
+        circuit_qni = [
+            [{'type': '•', 'targets': [0, 1, 2]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 3
+        assert str(circuit[0].operations[0]) == 'CCZ(q(0), q(1), q(2))'
+
+    def test_build_circuit_with_four_control_gates(self):
+        qubit_count = 4
+        circuit_qni = [
+            [{'type': '•', 'targets': [0, 1, 2, 3]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 4
+        assert str(circuit[0].operations[0]
+                   ) == 'CCCZ(q(0), q(1), q(2), q(3))'
+
 
 if __name__ == '__main__':
     unittest.main()

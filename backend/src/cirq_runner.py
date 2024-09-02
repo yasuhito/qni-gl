@@ -101,26 +101,17 @@ class CirqRunner:
                         target1 = qubits[gate['targets'][1]]
                         _c.append(cirq.SWAP(target0, target1))
                 elif gate['type'] == '•':
-                    if "controls" in gate:
-                        #                        print("control is not supported for CZ gate", gate['type'])
-                        #                        sys.stdout.flush()
-                        sys.exit(1)
                     targets = self._target_qubits(qubits, gate)
-                    if len(targets) == 2:
+                    if len(targets) < 2:
+                        _c = []
+                    elif len(targets) == 2:
                         _c = [cirq.CZ(qubits[gate['targets'][0]],
                                       qubits[gate['targets'][1]])]
-                    elif len(targets) < 2:
-                        _c = []
                     else:
-                        # we regard the first and the second qubit as the target qubits,
-                        # and others are controlled qubits.
-                        controls = []
-                        for _i in range(len(gate['targets'])-2):
-                            controls.append(
-                                qubits[gate['targets'][_i+2]])
-                        sys.stdout.flush()
-                        _c = [cirq.ControlledOperation(controls, cirq.CZ(
-                            qubits[gate['targets'][0]], qubits[gate['targets'][1]]))]
+                        controls = [qubits[gate['targets'][index]]
+                                    for index in range(len(gate['targets']) - 2)]
+                        _c = [cirq.ControlledOperation(
+                            controls, cirq.CZ(qubits[gate['targets'][-2]], qubits[gate['targets'][-1]]))]
                 elif gate['type'] == '|0>':
                     targets = self._target_qubits(qubits, gate)
                     _c = [cirq.ops.reset(target) for target in targets]
