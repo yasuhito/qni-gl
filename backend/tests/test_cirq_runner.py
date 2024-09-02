@@ -1,5 +1,5 @@
 import unittest
-
+import sys
 from src.cirq_runner import CirqRunner
 
 
@@ -11,20 +11,51 @@ class TestCirqRunner(unittest.TestCase):
     def test_initialization(self):
         assert self.cirq_runner is not None  # unittestスタイルのassertを通常のassertに変更
 
-    def test_build_circuit(self):
+    def test_build_circuit_with_h_gate(self):
         qubit_count = 1
         circuit_qni = [
             [{'type': 'H', 'targets': [0]}],
         ]
 
-        circuit, measurement_moment = self.cirq_runner.build_circuit(
+        circuit, _ = self.cirq_runner.build_circuit(
             qubit_count, circuit_qni)
 
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0].gate) == 'H'
 
-    # 他のテストメソッドを追加することができます
-    # 例: build_circuit, run_circuit_until_step_index など
+    def test_build_circuit_with_x_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'X', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(
+            qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0].gate) == 'X'
+
+    def test_build_circuit_with_controlled_x_gate(self):
+        qubit_count = 2
+        circuit_qni = [
+            [{'type': 'X', 'targets': [0], 'controls': [1]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 2
+        assert str(circuit[0].operations[0]) == 'CX(q(0), q(1))'
+
+    def test_build_circuit_with_two_controlled_x_gates(self):
+        qubit_count = 3
+        circuit_qni = [
+            [{'type': 'X', 'targets': [0], 'controls': [1, 2]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 3
+        assert str(circuit[0].operations[0]) == 'CCX(q(0), q(1), q(2))'
 
 
 if __name__ == '__main__':
