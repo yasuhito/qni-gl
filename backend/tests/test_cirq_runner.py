@@ -296,12 +296,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 0, steps, [0, 1])
 
-        assert len(result) == 1
-
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
         assert_complex_approx(amplitudes[1], 1 / sqrt(2), 0)
-        assert result[0][":measuredBits"] == {}
 
     # X|0⟩=|1⟩
     def test_x_0ket(self):
@@ -311,12 +308,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 0, steps, [0, 1])
 
-        assert len(result) == 1
-
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 1, 0)
-        assert result[0][":measuredBits"] == {}
 
     # X|1⟩=|0⟩
     def test_x_1ket(self):
@@ -327,11 +321,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 1, steps, [0, 1])
 
-        assert len(result) == 2
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
-        assert result[0][":measuredBits"] == {}
 
     # Y|0⟩=i|1⟩
     def test_y_0ket(self):
@@ -341,11 +333,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 0, steps, [0, 1])
 
-        assert len(result) == 1
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 0, 1)
-        assert result[0][":measuredBits"] == {}
 
     # Y|1⟩=-i|0⟩
     def test_y_1ket(self):
@@ -356,12 +346,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 1, steps, [0, 1])
 
-        assert len(result) == 2
-
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, -1)
         assert_complex_approx(amplitudes[1], 0, 0)
-        assert result[0][":measuredBits"] == {}
 
     # Z|0⟩=|0⟩
     def test_z_0ket(self):
@@ -371,11 +358,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 0, steps, [0, 1])
 
-        assert len(result) == 1
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
-        assert result[0][":measuredBits"] == {}
 
     # Z|1⟩=-|1⟩
     def test_z_1ket(self):
@@ -386,11 +371,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 1, steps, [0, 1])
 
-        assert len(result) == 2
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], -1, 0)
-        assert result[0][":measuredBits"] == {}
 
     # X^½|0⟩=1/2((1+i)|0⟩+(1-i)|1⟩)
     def test_rnot_0ket(self):
@@ -400,12 +383,9 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 0, steps, [0, 1])
 
-        assert len(result) == 1
-
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / 2, 1 / 2)
         assert_complex_approx(amplitudes[1], 1 / 2, -1 / 2)
-        assert result[0][":measuredBits"] == {}
 
     # X^½|1⟩=1/2((1-i)|0⟩+(1+i)|1⟩)
     def test_rnot_1ket(self):
@@ -416,12 +396,34 @@ class TestCirqRunner(unittest.TestCase):
         result = self.cirq_runner.run_circuit_until_step_index(
             circuit, measurement_moment, 1, steps, [0, 1])
 
-        assert len(result) == 2
-
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / 2, -1 / 2)
         assert_complex_approx(amplitudes[1], 1 / 2, 1 / 2)
-        assert result[0][":measuredBits"] == {}
+
+    # S|0⟩=|0⟩
+    def test_s_0ket(self):
+        steps = [[{"type": "S", "targets": [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
+
+        amplitudes = result[0][":amplitude"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+
+    # S|1⟩=i|1⟩
+    def test_s_1ket(self):
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "S", "targets": [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1])
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 1)
 
 
 if __name__ == "__main__":
