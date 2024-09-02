@@ -2,7 +2,6 @@ import sys
 
 import cirq
 from cirq.circuits import InsertStrategy
-from sympy import *
 
 
 class CirqRunner:
