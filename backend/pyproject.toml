@@ -28,7 +28,8 @@ dependencies = [
   "cirq",
   "flask-cors",
   "gunicorn",
-"pytest"
+  "pytest",
+  "coverage"
 ]
 
 [project.urls]
@@ -54,7 +55,8 @@ source_pkgs = ["src", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/qni/__about__.py",
+  "src/__init__.py",
+  "tests/__init__.py",
 ]
 
 [tool.coverage.paths]
