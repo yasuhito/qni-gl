@@ -1,5 +1,5 @@
 import unittest
-import sys
+import numpy
 from src.cirq_runner import CirqRunner
 
 
@@ -284,6 +284,32 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 2
         assert str(circuit[0].operations[0]) == 'I(q(0))'
         assert str(circuit[0].operations[1]) == 'I(q(1))'
+
+    def test_run_circuit_with_h_gate(self):
+        steps = [[{'type': 'H', 'targets': [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
+
+        assert len(result) == 1
+        assert numpy.isclose(
+            result[0][':amplitude'][0], numpy.complex128(1/numpy.sqrt(2)))
+        assert numpy.isclose(
+            result[0][':amplitude'][1], numpy.complex128(1/numpy.sqrt(2)))
+        assert result[0][':measuredBits'] == {}
+
+    def test_run_circuit_with_x_gate(self):
+        steps = [[{'type': 'X', 'targets': [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
+
+        assert len(result) == 1
+        assert numpy.isclose(result[0][':amplitude'][0], numpy.complex128(0))
+        assert numpy.isclose(result[0][':amplitude'][1], numpy.complex128(1))
+        assert result[0][':measuredBits'] == {}
 
 
 if __name__ == '__main__':
