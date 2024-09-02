@@ -19,8 +19,8 @@ def setup_logger():
     logger.setLevel(logging.DEBUG)
 
     # カスタムフォーマットを設定
-    log_format = '[%(asctime)s] [%(levelname)s] %(message)s'
-    date_format = '%Y-%m-%d %H:%M:%S %z'
+    log_format = "[%(asctime)s] [%(levelname)s] %(message)s"
+    date_format = "%Y-%m-%d %H:%M:%S %z"
 
     # Gunicorn の stderr にログを出力するためのハンドラ
     stream_handler = logging.StreamHandler()
@@ -29,7 +29,7 @@ def setup_logger():
     stream_handler.setFormatter(stream_formatter)
 
     # backend.log ファイルにログを出力するためのハンドラ
-    file_handler = logging.FileHandler('backend.log')
+    file_handler = logging.FileHandler("backend.log")
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter(log_format, datefmt=date_format)
     file_handler.setFormatter(file_formatter)
@@ -42,14 +42,14 @@ def setup_logger():
 setup_logger()
 
 
-@app.route('/backend.json', methods=["POST"])
+@app.route("/backend.json", methods=["POST"])
 def backend():
-    circuit_id = request.form.get('id')
-    qubit_count = int(request.form.get('qubitCount'))
-    step_index = int(request.form.get('stepIndex'))
+    circuit_id = request.form.get("id")
+    qubit_count = int(request.form.get("qubitCount"))
+    step_index = int(request.form.get("stepIndex"))
     # targets には "0,1,2" のようなカンマ区切り整数が入っているので、リストに変換する
-    targets = [int(x) for x in request.form.get('targets').split(",")]
-    steps = json.loads(request.form.get('steps'))
+    targets = [int(x) for x in request.form.get("targets").split(",")]
+    steps = json.loads(request.form.get("steps"))
 
     app.logger.debug("circuit_id = %s", circuit_id)
     app.logger.debug("qubit_count = %d", qubit_count)
@@ -75,8 +75,7 @@ def run_cirq(qubit_count, step_index, steps, targets):
     for each in str(circuit).split("\n"):
         app.logger.debug(each)
 
-    result_list = cirq_runner.run_circuit_until_step_index(
-        circuit, measurement_moment, step_index, steps, targets)
+    result_list = cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, step_index, steps, targets)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):
