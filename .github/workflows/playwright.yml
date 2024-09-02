@@ -13,10 +13,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Install dependencies (pip)
-        run: |
-          pip install -r requirements.txt
-        working-directory: ./backend
+      - name: Install Hatch
+        uses: pypa/hatch@install
       - name: Install dependencies (yarn)
         run: yarn
         working-directory: ./frontend
@@ -25,7 +23,7 @@ jobs:
         working-directory: ./frontend
       - name: Run backend server
         run: |
-          gunicorn --daemon
+          hatch run gunicorn --daemon
         working-directory: ./backend
       - name: Run Playwright tests
         run: yarn playwright test

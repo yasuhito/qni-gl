@@ -2,9 +2,10 @@ import json
 import logging
 import traceback
 
-from src.cirq_runner import CirqRunner
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+
+from src.cirq_runner import CirqRunner
 
 app = Flask(__name__)
 CORS(app)
