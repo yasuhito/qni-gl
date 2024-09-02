@@ -6,6 +6,13 @@ import pytest
 from src.cirq_runner import CirqRunner
 
 
+def assert_complex_approx(actual, expected_real, expected_imag):
+    assert pytest.approx(actual.real) == expected_real, f"Real parts differ: {
+        actual.real} != {expected_real}"
+    assert pytest.approx(actual.imag) == expected_imag, f"Imaginary parts differ: {
+        actual.imag} != {expected_imag}"
+
+
 class TestCirqRunner(unittest.TestCase):
     def setUp(self):
         self.logger = None  # ロガーのモックまたは実際のロガーを設定
@@ -239,10 +246,12 @@ class TestCirqRunner(unittest.TestCase):
             [{"type": "Measure", "targets": [0]}],
         ]
 
-        circuit, measurements = self.cirq_runner.build_circuit(qubit_count, step)
+        circuit, measurements = self.cirq_runner.build_circuit(
+            qubit_count, step)
 
         assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0]) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
+        assert str(circuit[0].operations[0]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
         assert str(measurements) == "[[[['m0', 0]]]]"
 
     def test_build_circuit_with_two_measurement_gates(self):
@@ -251,11 +260,14 @@ class TestCirqRunner(unittest.TestCase):
             [{"type": "Measure", "targets": [0, 1]}],
         ]
 
-        circuit, measurements = self.cirq_runner.build_circuit(qubit_count, step)
+        circuit, measurements = self.cirq_runner.build_circuit(
+            qubit_count, step)
 
         assert len(circuit.all_qubits()) == 2
-        assert str(circuit[0].operations[0]) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
-        assert str(circuit[0].operations[1]) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m1'), ())(q(1))"
+        assert str(circuit[0].operations[0]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
+        assert str(circuit[0].operations[1]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m1'), ())(q(1))"
         assert str(measurements) == "[[[['m0', 0], ['m1', 1]]]]"
 
     def test_build_circuit_with_unknown_operation(self):
@@ -281,26 +293,28 @@ class TestCirqRunner(unittest.TestCase):
         steps = [[{"type": "H", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
 
         amplitudes = result[0][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (1 / sqrt(2), 0.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (1 / sqrt(2), 0.0)
+        assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
+        assert_complex_approx(amplitudes[1], 1 / sqrt(2), 0)
         assert result[0][":measuredBits"] == {}
 
     def test_run_circuit_with_x_gate(self):
         steps = [[{"type": "X", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
 
         amplitudes = result[0][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (0.0, 0.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (1.0, 0.0)
+        assert_complex_approx(amplitudes[0], 0.0, 0.0)
+        assert_complex_approx(amplitudes[1], 1.0, 0.0)
         assert result[0][":measuredBits"] == {}
 
     def test_run_circuit_with_y_gate(self):
@@ -308,26 +322,29 @@ class TestCirqRunner(unittest.TestCase):
         steps = [[{"type": "Y", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
 
         amplitudes = result[0][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (0.0, 0.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (0.0, 1.0)
+        assert_complex_approx(amplitudes[0], 0.0, 0.0)
+        assert_complex_approx(amplitudes[1], 0.0, 1.0)
         assert result[0][":measuredBits"] == {}
 
         # Y|1⟩=-i|0⟩
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "Y", "targets": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "Y", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 1, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1])
 
         assert len(result) == 2
 
         amplitudes = result[1][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (0.0, -1.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (0.0, 0.0)
+        assert_complex_approx(amplitudes[0], 0.0, -1.0)
+        assert_complex_approx(amplitudes[1], 0.0, 0.0)
         assert result[0][":measuredBits"] == {}
 
     def test_run_circuit_with_z_gate(self):
@@ -335,26 +352,29 @@ class TestCirqRunner(unittest.TestCase):
         steps = [[{"type": "Z", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
 
         amplitudes = result[0][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (1.0, 0.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (0.0, 0.0)
+        assert_complex_approx(amplitudes[0], 1.0, 0.0)
+        assert_complex_approx(amplitudes[1], 0.0, 0.0)
         assert result[0][":measuredBits"] == {}
 
         # Z|1⟩=-|1⟩
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "Z", "targets": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "Z", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 1, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1])
 
         assert len(result) == 2
 
         amplitudes = result[1][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (0.0, 0.0)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (-1.0, 0.0)
+        assert_complex_approx(amplitudes[0], 0.0, 0.0)
+        assert_complex_approx(amplitudes[1], -1.0, 0.0)
         assert result[0][":measuredBits"] == {}
 
     def test_run_circuit_with_rnot_gate(self):
@@ -362,26 +382,29 @@ class TestCirqRunner(unittest.TestCase):
         steps = [[{"type": "X^½", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
 
         assert len(result) == 1
 
         amplitudes = result[0][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (1 / 2, 1 / 2)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (1 / 2, -1 / 2)
+        assert_complex_approx(amplitudes[0], 1 / 2, 1 / 2)
+        assert_complex_approx(amplitudes[1], 1 / 2, -1 / 2)
         assert result[0][":measuredBits"] == {}
 
         # X^½|0⟩=1/2((1-i)|0⟩+(1+i)|1⟩)
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "X^½", "targets": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "X^½", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 1, steps, [0, 1])
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1])
 
         assert len(result) == 2
 
         amplitudes = result[1][":amplitude"]
-        assert (pytest.approx(amplitudes[0].real), pytest.approx(amplitudes[0].imag)) == (1 / 2, -1 / 2)
-        assert (pytest.approx(amplitudes[1].real), pytest.approx(amplitudes[1].imag)) == (1 / 2, 1 / 2)
+        assert_complex_approx(amplitudes[0], 1 / 2, -1 / 2)
+        assert_complex_approx(amplitudes[1], 1 / 2, 1 / 2)
         assert result[0][":measuredBits"] == {}
 
 
