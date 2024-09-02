@@ -46,6 +46,9 @@ extra-dependencies = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/qni tests}"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/"] 
+
 [tool.coverage.run]
 source_pkgs = ["src", "tests"]
 branch = true
