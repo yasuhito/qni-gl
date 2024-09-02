@@ -44,14 +44,14 @@ setup_logger()
 
 @app.route('/backend.json', methods=["POST"])
 def backend():
-    id = request.form.get('id')
+    circuit_id = request.form.get('id')
     qubit_count = int(request.form.get('qubitCount'))
     step_index = int(request.form.get('stepIndex'))
     # targets には "0,1,2" のようなカンマ区切り整数が入っているので、リストに変換する
     targets = [int(x) for x in request.form.get('targets').split(",")]
     steps = json.loads(request.form.get('steps'))
 
-    # app.logger.debug("circuit_id = %s", id)
+    app.logger.debug("circuit_id = %s", circuit_id)
     app.logger.debug("qubit_count = %d", qubit_count)
     app.logger.debug("step_index = %d", step_index)
     app.logger.debug("targets.size = %d", len(targets))
@@ -62,9 +62,9 @@ def backend():
         # app.logger.debug("step_results = %s", step_results)
 
         return jsonify(step_results)
-    except Exception as e:
-        app.logger.error("An error occurred: %s", str(e))
-        app.logger.error("Stack trace: %s", traceback.format_exc())
+    except Exception:
+        app.logger.exception("An error occurred")
+        app.logger.exception("Stack trace: %s", traceback.format_exc())
         return "Internal Server Error ", 500
 
 
@@ -89,8 +89,7 @@ def run_cirq(qubit_count, step_index, steps, targets):
         if ":amplitude" in item:
             if ":measuredBits" in item:
                 return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
-            else:
-                return {"amplitudes": convert_amp(item[":amplitude"])}
+            return {"amplitudes": convert_amp(item[":amplitude"])}
         elif ":measuredBits" in item:
             return {"measuredBits": item[":measuredBits"]}
         return {}
