@@ -1,9 +1,10 @@
-from cirq_runner import CirqRunner
-from flask import Flask, jsonify, request
-from flask_cors import CORS
 import json
 import logging
 import traceback
+
+from cirq_runner import CirqRunner
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
@@ -89,9 +90,8 @@ def run_cirq(qubit_count, step_index, steps, targets):
                 return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
             else:
                 return {"amplitudes": convert_amp(item[":amplitude"])}
-        else:
-            if ":measuredBits" in item:
-                return {"measuredBits": item[":measuredBits"]}
+        elif ":measuredBits" in item:
+            return {"measuredBits": item[":measuredBits"]}
         return {}
 
     return [convert_item(item) for item in result_list]

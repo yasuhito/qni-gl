@@ -1,3 +1,4 @@
 cirq
 flask-cors
 gunicorn
+pytest
