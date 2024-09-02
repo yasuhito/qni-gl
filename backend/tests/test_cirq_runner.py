@@ -233,6 +233,32 @@ class TestCirqRunner(unittest.TestCase):
         assert str(circuit[0].operations[0]) == 'reset(q(0))'
         assert str(circuit[1].operations[0]) == 'X(q(0))'
 
+    def test_build_circuit_with_measurement_gate(self):
+        qubit_count = 1
+        circuit_qni = [
+            [{'type': 'Measure', 'targets': [0]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 1
+        assert str(circuit[0].operations[0]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
+
+    def test_build_circuit_with_two_measurement_gates(self):
+        qubit_count = 2
+        circuit_qni = [
+            [{'type': 'Measure', 'targets': [0, 1]}],
+        ]
+
+        circuit, _ = self.cirq_runner.build_circuit(qubit_count, circuit_qni)
+
+        assert len(circuit.all_qubits()) == 2
+        assert str(circuit[0].operations[0]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
+        assert str(circuit[0].operations[1]
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m1'), ())(q(1))"
+
 
 if __name__ == '__main__':
     unittest.main()
