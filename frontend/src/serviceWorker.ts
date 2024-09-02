@@ -37,7 +37,7 @@ self.addEventListener("message", (event) => {
       // console.log("Sending request to backend with the following parameters:");
       // console.dir(Object.fromEntries(params.entries()));
 
-      const response = await fetch(`http://localhost:8000/backend.json`, {
+      const response = await fetch(`backend.json`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded", // URLSearchParams を使用する場合

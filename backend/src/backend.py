@@ -6,8 +6,10 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from src.cirq_runner import CirqRunner
+from src.gpu_runner import GpuCirqRunner
 
 app = Flask(__name__)
+app.config.from_prefixed_env()
 CORS(app)
 
 
@@ -70,6 +72,9 @@ def backend():
 
 def run_cirq(qubit_count, step_index, steps, targets):
     cirq_runner = CirqRunner(app.logger)
+    if "USE_GPU" in app.config and app.config["USE_GPU"]:
+        #app.logger.debug("Use GPU")
+        cirq_runner = GpuCirqRunner(cirq_runner)
     circuit, measurement_moment = cirq_runner.build_circuit(qubit_count, steps)
 
     for each in str(circuit).split("\n"):

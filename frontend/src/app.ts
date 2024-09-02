@@ -86,7 +86,7 @@ export class App {
     }
     this.element = el;
 
-    this.worker = new Worker("/serviceWorker.js");
+    this.worker = new Worker("serviceWorker.js");
     this.worker.addEventListener(
       "message",
       this.handleServiceWorkerMessage.bind(this)
