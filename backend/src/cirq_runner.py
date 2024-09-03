@@ -136,14 +136,13 @@ class CirqRunner:
         return circuit, measurement_moment
 
     def run_circuit(self, circuit, steps, measurement_moment):
-        return self.run_circuit_until_step_index(
-            circuit, measurement_moment, len(steps) - 1, steps)
+        return self.run_circuit_until_step_index(circuit, measurement_moment, len(steps) - 1, steps)
 
     # TODO: 引数 step_index を最後にし、省略した場合には「最後のステップまで実行」という意味にする
     def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps, targets=None):
         if targets is None:
             qubit_count = len(c.all_qubits())
-            targets = list(range(2 ** qubit_count))
+            targets = list(range(2**qubit_count))
 
         cirq_simulator = cirq.Simulator()
         _data = []
