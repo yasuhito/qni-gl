@@ -21,6 +21,7 @@ class TestH(unittest.TestCase):
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0]) == "H(q(0))"
 
+    # H|0⟩=1/√2(|0⟩+|1⟩)
     def test_h_0(self):
         qubit_count = 1
         steps = [
@@ -36,6 +37,7 @@ class TestH(unittest.TestCase):
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
         assert_complex_approx(amplitudes[1], 1 / sqrt(2), 0)
 
+    # H|1⟩=1/√2(|0⟩-|1⟩)
     def test_h_1(self):
         qubit_count = 1
         steps = [
