@@ -122,11 +122,11 @@ class CirqRunner:
                     targets = self._target_qubits(qubits, gate)
                     operations = [
                         cirq.measure(
-                            targets[index], key="m" + str(measurement_label_number + index))
+                            targets[index], key=self._measurement_key(measurement_label_number + index))
                         for index in range(len(targets))
                     ]
-                    measurement_ids = [
-                        "m" + str(measurement_label_number + index) for index in range(len(targets))]
+                    measurement_ids = [self._measurement_key(
+                        measurement_label_number + index) for index in range(len(targets))]
                     measurement_pairs = [
                         [measurement_ids[index], gate["targets"][index]] for index in range(len(targets))
                     ]
@@ -221,6 +221,9 @@ class CirqRunner:
             _data[step_index][":amplitude"][_target] = target_amplitudes[_target]
 
         return _data
+
+    def _measurement_key(self, number):
+        return "m" + str(number)
 
     def _target_qubits(self, qubits, gate):
         return [qubits[each] for each in gate["targets"]]

@@ -40,12 +40,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|00⟩ = |00⟩
     def test_cz_00(self):
-        steps = [
-            [{"type": "•", "targets": [0, 1]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "•", "targets": [0, 1]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
@@ -55,13 +53,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|01⟩ = |01⟩
     def test_cz_01(self):
-        steps = [
-            [{"type": "X", "targets": [0]}],
-            [{"type": "•", "targets": [0, 1]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "•", "targets": [0, 1]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -71,13 +66,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|10⟩ = |10⟩
     def test_cz_10(self):
-        steps = [
-            [{"type": "X", "targets": [1]}],
-            [{"type": "•", "targets": [0, 1]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "X", "targets": [1]}], [{"type": "•", "targets": [0, 1]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -87,13 +79,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|11⟩ = -|11⟩
     def test_cz_11(self):
-        steps = [
-            [{"type": "X", "targets": [0, 1]}],
-            [{"type": "•", "targets": [0, 1]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "•", "targets": [0, 1]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -103,13 +92,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|111⟩ = -|111⟩
     def test_cz_111(self):
-        steps = [
-            [{"type": "X", "targets": [0, 1, 2]}],
-            [{"type": "•", "targets": [0, 1, 2]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "•", "targets": [0, 1, 2]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

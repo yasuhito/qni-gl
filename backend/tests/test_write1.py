@@ -20,29 +20,27 @@ class TestWrite1(unittest.TestCase):
         assert str(circuit[1].operations[0]) == "X(q(0))"
 
     # Write1|0⟩=|1>
-    def test_Write1_0(self):
+    def test_write1_0(self):
         steps = [
             [{"type": "|1>", "targets": [0]}],
         ]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 1, 0)
 
     # Write1|1⟩=|1>
-    def test_Write1_1(self):
+    def test_write1_1(self):
         steps = [
             [{"type": "X", "targets": [0]}],
             [{"type": "|1>", "targets": [0]}],
         ]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

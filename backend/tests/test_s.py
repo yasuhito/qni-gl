@@ -21,10 +21,9 @@ class TestS(unittest.TestCase):
     # S|0⟩=|0⟩
     def test_s_0(self):
         steps = [[{"type": "S", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
@@ -32,12 +31,10 @@ class TestS(unittest.TestCase):
 
     # S|1⟩=i|1⟩
     def test_s_1(self):
-        steps = [[{"type": "X", "targets": [0]}],
-                 [{"type": "S", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "S", "targets": [0]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(
-            circuit, steps, measurement_moment)
+        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

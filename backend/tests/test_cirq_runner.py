@@ -1,10 +1,8 @@
 import unittest
-from math import sqrt
 
 import pytest
 
 from src.cirq_runner import CirqRunner
-from tests.conftest import assert_complex_approx
 
 
 class TestCirqRunner(unittest.TestCase):
