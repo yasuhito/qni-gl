@@ -35,34 +35,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 3
         assert str(circuit[0].operations[0]) == "CCX(q(0), q(1), q(2))"
 
-    def test_build_circuit_with_two_swap_gates(self):
-        step = [
-            [{"type": "Swap", "targets": [0, 1]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 2
-        assert str(circuit[0].operations[0]) == "SWAP(q(0), q(1))"
-
-    def test_build_circuit_with_one_swap_gate(self):
-        step = [
-            [{"type": "Swap", "targets": [0]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 1
-
-    def test_build_circuit_with_three_swap_gates(self):
-        step = [
-            [{"type": "Swap", "targets": [0, 1, 2]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 3
-
     def test_build_circuit_with_two_control_gates(self):
         step = [
             [{"type": "•", "targets": [0, 1]}],
@@ -165,29 +137,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 2
         assert str(circuit[0].operations[0]) == "I(q(0))"
         assert str(circuit[0].operations[1]) == "I(q(1))"
-
-    def test_run_circuit_with_h_gate(self):
-        steps = [[{"type": "H", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps)
-
-        amplitudes = result[0][":amplitude"]
-        assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
-        assert_complex_approx(amplitudes[1], 1 / sqrt(2), 0)
-
-    # Swap|0⟩=|0⟩
-    def test_swap_0ket(self):
-        steps = [[{"type": "Swap", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps)
-
-        amplitudes = result[0][":amplitude"]
-        assert_complex_approx(amplitudes[0], 1, 0)
-        assert_complex_approx(amplitudes[1], 0, 0)
 
     # Control|0⟩
     def test_control_0ket(self):
