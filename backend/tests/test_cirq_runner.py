@@ -525,14 +525,11 @@ class TestCirqRunner(unittest.TestCase):
         assert_complex_approx(amplitudes[1], 1, 0)
 
     def test_cnot_00ket(self):
-        steps = [
-            [{"type": "X", "targets": [1], "controls": [0]}]
-        ]
+        steps = [[{"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(2, steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps, [0, 1, 2, 3]
-        )
+            circuit, measurement_moment, 0, steps, [0, 1, 2, 3])
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
@@ -541,15 +538,12 @@ class TestCirqRunner(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_01ket(self):
-        steps = [
-            [{"type": "X", "targets": [0]}],
-            [{"type": "X", "targets": [1], "controls": [0]}]
-        ]
+        steps = [[{"type": "X", "targets": [0]}], [
+            {"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(2, steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps, [0, 1, 2, 3]
-        )
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3])
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -558,15 +552,12 @@ class TestCirqRunner(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 1, 0)
 
     def test_cnot_10ket(self):
-        steps = [
-            [{"type": "X", "targets": [1]}],
-            [{"type": "X", "targets": [1], "controls": [0]}]
-        ]
+        steps = [[{"type": "X", "targets": [1]}], [
+            {"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(2, steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps, [0, 1, 2, 3]
-        )
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3])
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -575,14 +566,44 @@ class TestCirqRunner(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_11ket(self):
-        steps = [
-            [{"type": "X", "targets": [0, 1]}],
-            [{"type": "X", "targets": [1], "controls": [0]}]
-        ]
+        steps = [[{"type": "X", "targets": [0, 1]}], [
+            {"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(2, steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps, [0, 1, 2, 3]
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3])
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 1, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+
+    def test_ccnot_000ket(self):
+        steps = [[{"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[0][":amplitude"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_001ket(self):
+        steps = [[{"type": "X", "targets": [0]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
         )
 
         amplitudes = result[1][":amplitude"]
@@ -590,6 +611,124 @@ class TestCirqRunner(unittest.TestCase):
         assert_complex_approx(amplitudes[1], 1, 0)
         assert_complex_approx(amplitudes[2], 0, 0)
         assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_010ket(self):
+        steps = [[{"type": "X", "targets": [1]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 1, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_011ket(self):
+        steps = [[{"type": "X", "targets": [0, 1]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 1, 0)
+
+    def test_ccnot_100ket(self):
+        steps = [[{"type": "X", "targets": [2]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 1, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_101ket(self):
+        steps = [[{"type": "X", "targets": [0, 2]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 1, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_110ket(self):
+        steps = [[{"type": "X", "targets": [1, 2]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 1, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_ccnot_111ket(self):
+        steps = [[{"type": "X", "targets": [0, 1, 2]}], [
+            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(3, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 1, steps, [0, 1, 2, 3, 4, 5, 6, 7]
+        )
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 1, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
 
 
 if __name__ == "__main__":
