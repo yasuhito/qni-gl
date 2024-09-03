@@ -161,7 +161,7 @@ class TestCirqRunner(unittest.TestCase):
 
         circuit, _ = self.cirq_runner.build_circuit(qubit_count, step)
 
-        assert len(circuit.all_qubits()) == 0
+        assert len(circuit.all_qubits()) == 1
 
     def test_build_circuit_with_three_swap_gates(self):
         qubit_count = 3
@@ -171,7 +171,7 @@ class TestCirqRunner(unittest.TestCase):
 
         circuit, _ = self.cirq_runner.build_circuit(qubit_count, step)
 
-        assert len(circuit.all_qubits()) == 0
+        assert len(circuit.all_qubits()) == 3
 
     def test_build_circuit_with_two_control_gates(self):
         qubit_count = 2
@@ -498,6 +498,18 @@ class TestCirqRunner(unittest.TestCase):
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], sqrt(2) / 2, -sqrt(2) / 2)
+
+    # Swap|0⟩=|0⟩
+    def test_swap_0ket(self):
+        steps = [[{"type": "Swap", "targets": [0]}]]
+        circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
+
+        result = self.cirq_runner.run_circuit_until_step_index(
+            circuit, measurement_moment, 0, steps, [0, 1])
+
+        amplitudes = result[0][":amplitude"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
 
     # Control|0⟩
     def test_control_0ket(self):

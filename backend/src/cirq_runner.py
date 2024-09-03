@@ -19,9 +19,11 @@ class CirqRunner:
         for step in circuit_qni:
             for gate in step:
                 if "targets" in gate:
-                    gate["targets"] = reverse_and_sort(gate["targets"], qubit_count)
+                    gate["targets"] = reverse_and_sort(
+                        gate["targets"], qubit_count)
                 if "controls" in gate:
-                    gate["controls"] = reverse_and_sort(gate["controls"], qubit_count)
+                    gate["controls"] = reverse_and_sort(
+                        gate["controls"], qubit_count)
             circuit_from_qni.append(step)
 
         qubits = cirq.LineQubit.range(qubit_count)
@@ -47,8 +49,10 @@ class CirqRunner:
                     if "controls" not in gate:
                         operations = [cirq.X(target) for target in targets]
                     else:
-                        control_qubits = [qubits[control] for control in gate["controls"]]
-                        operations = [cirq.ControlledOperation(control_qubits, cirq.X(target)) for target in targets]
+                        control_qubits = [qubits[control]
+                                          for control in gate["controls"]]
+                        operations = [cirq.ControlledOperation(
+                            control_qubits, cirq.X(target)) for target in targets]
                 elif gate["type"] == "Y":
                     targets = self._target_qubits(qubits, gate)
                     operations = [cirq.Y(target) for target in targets]
@@ -63,30 +67,38 @@ class CirqRunner:
                     operations = [cirq.Z(target) ** 0.5 for target in targets]
                 elif gate["type"] == "S†":
                     targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** (-0.5) for target in targets]
+                    operations = [cirq.Z(target) ** (-0.5)
+                                  for target in targets]
                 elif gate["type"] == "T":
                     targets = self._target_qubits(qubits, gate)
                     operations = [cirq.Z(target) ** 0.25 for target in targets]
                 elif gate["type"] == "T†":
                     targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** (-0.25) for target in targets]
+                    operations = [cirq.Z(target) ** (-0.25)
+                                  for target in targets]
                 elif gate["type"] == "Swap":
                     operations = []
                     if self._is_valid_swap(gate):
                         target0 = qubits[gate["targets"][0]]
                         target1 = qubits[gate["targets"][1]]
                         operations.append(cirq.SWAP(target0, target1))
+                    else:
+                        operations = [cirq.I(qubits[target])
+                                      for target in gate["targets"]]
                 elif gate["type"] == "•":
                     targets = self._target_qubits(qubits, gate)
                     if self._is_invalid_cz(gate):
                         operations = [cirq.I(qubits[gate["targets"][0]])]
                     elif self._is_minimally_valid_cz(gate):
-                        operations = [cirq.CZ(qubits[gate["targets"][0]], qubits[gate["targets"][1]])]
+                        operations = [
+                            cirq.CZ(qubits[gate["targets"][0]], qubits[gate["targets"][1]])]
                     else:
-                        controls = [qubits[gate["targets"][index]] for index in range(len(gate["targets"]) - 2)]
+                        controls = [qubits[gate["targets"][index]]
+                                    for index in range(len(gate["targets"]) - 2)]
                         operations = [
                             cirq.ControlledOperation(
-                                controls, cirq.CZ(qubits[gate["targets"][-2]], qubits[gate["targets"][-1]])
+                                controls, cirq.CZ(
+                                    qubits[gate["targets"][-2]], qubits[gate["targets"][-1]])
                             )
                         ]
                 elif gate["type"] == "|0>":
@@ -99,15 +111,18 @@ class CirqRunner:
                 elif gate["type"] == "Measure":
                     targets = self._target_qubits(qubits, gate)
                     operations = [
-                        cirq.measure(targets[index], key="m" + str(measurement_label_number + index))
+                        cirq.measure(
+                            targets[index], key="m" + str(measurement_label_number + index))
                         for index in range(len(targets))
                     ]
-                    measurement_ids = ["m" + str(measurement_label_number + index) for index in range(len(targets))]
+                    measurement_ids = [
+                        "m" + str(measurement_label_number + index) for index in range(len(targets))]
                     measurement_pairs = [
                         [measurement_ids[index], gate["targets"][index]] for index in range(len(targets))
                     ]
                     measurement_moment[moment_index].append(measurement_pairs)
-                    measurement_label_number = measurement_label_number + len(targets)
+                    measurement_label_number = measurement_label_number + \
+                        len(targets)
                 else:
                     msg = "Unknown operation: {}".format(gate["type"])
                     raise ValueError(msg)
@@ -151,7 +166,8 @@ class CirqRunner:
                 #                sys.stdout.flush()
                 if bloch_index != -1:
                     for _bloch_target in steps[counter][bloch_index]["targets"]:
-                        blochxyz = cirq.qis.bloch_vector_from_state_vector(step.state_vector(), _bloch_target)
+                        blochxyz = cirq.qis.bloch_vector_from_state_vector(
+                            step.state_vector(), _bloch_target)
                         dic[":blochVectors"][_bloch_target] = blochxyz
             #                        print("bloch sphere: ", blochxyz)
             #                        sys.stdout.flush()
