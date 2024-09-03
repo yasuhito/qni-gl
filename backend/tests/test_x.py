@@ -25,7 +25,8 @@ class TestH(unittest.TestCase):
         steps = [[{"type": "X", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 0, steps, [0, 1])
+        result = self.cirq_runner.run_circuit(
+            circuit, steps, measurement_moment)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -33,10 +34,12 @@ class TestH(unittest.TestCase):
 
     # X|1⟩=|0⟩
     def test_x_1ket(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "X", "targets": [0]}]]
         circuit, measurement_moment = self.cirq_runner.build_circuit(1, steps)
 
-        result = self.cirq_runner.run_circuit_until_step_index(circuit, measurement_moment, 1, steps, [0, 1])
+        result = self.cirq_runner.run_circuit(
+            circuit, steps, measurement_moment)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
