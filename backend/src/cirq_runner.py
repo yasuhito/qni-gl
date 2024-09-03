@@ -9,14 +9,24 @@ class CirqRunner:
     def __init__(self, logger):
         self.logger = logger
 
-    def build_circuit(self, qubit_count, circuit_qni):
+    def build_circuit(self, steps, qubit_count=None):
+        if qubit_count is None:
+            qubit_count = (
+                max(
+                    max((max(gate.get("targets", [-1]))
+                        for step in steps for gate in step), default=-1),
+                    max((max(gate.get("controls", [-1]))
+                        for step in steps for gate in step), default=-1),
+                )
+                + 1
+            )
         circuit_from_qni = []
 
         # Function to reverse and sort the target and control bits
         def reverse_and_sort(bits, qubit_count):
             return sorted(qubit_count - bit - 1 for bit in bits)
 
-        for step in circuit_qni:
+        for step in steps:
             for gate in step:
                 if "targets" in gate:
                     gate["targets"] = reverse_and_sort(

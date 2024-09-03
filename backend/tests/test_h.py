@@ -11,24 +11,21 @@ class TestH(unittest.TestCase):
         self.cirq_runner = CirqRunner(self.logger)
 
     def test_build_circuit(self):
-        qubit_count = 1
         step = [
             [{"type": "H", "targets": [0]}],
         ]
 
-        circuit, _ = self.cirq_runner.build_circuit(qubit_count, step)
+        circuit, _ = self.cirq_runner.build_circuit(step)
 
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0]) == "H(q(0))"
 
     # H|0⟩=1/√2(|0⟩+|1⟩)
     def test_h_0(self):
-        qubit_count = 1
         steps = [
             [{"type": "H", "targets": [0]}],
         ]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(
-            qubit_count, steps)
+        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(
             circuit, steps, measurement_moment)
@@ -39,13 +36,11 @@ class TestH(unittest.TestCase):
 
     # H|1⟩=1/√2(|0⟩-|1⟩)
     def test_h_1(self):
-        qubit_count = 1
         steps = [
             [{"type": "X", "targets": [0]}],
             [{"type": "H", "targets": [0]}],
         ]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(
-            qubit_count, steps)
+        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(
             circuit, steps, measurement_moment)
