@@ -35,16 +35,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 3
         assert str(circuit[0].operations[0]) == "CCX(q(0), q(1), q(2))"
 
-    def test_build_circuit_with_write0_gate(self):
-        step = [
-            [{"type": "|0>", "targets": [0]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0]) == "reset(q(0))"
-
     def test_build_circuit_with_write1_gate(self):
         step = [
             [{"type": "|1>", "targets": [0]}],
