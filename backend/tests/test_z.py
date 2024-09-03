@@ -9,7 +9,7 @@ class TestZ(unittest.TestCase):
         self.logger = None
         self.cirq_runner = CirqRunner(self.logger)
 
-    def test_build_circuit_with_z_gate(self):
+    def test_build_circuit(self):
         qubit_count = 1
         step = [
             [{"type": "Z", "targets": [0]}],

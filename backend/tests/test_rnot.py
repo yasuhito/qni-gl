@@ -9,7 +9,7 @@ class TestRnot(unittest.TestCase):
         self.logger = None
         self.cirq_runner = CirqRunner(self.logger)
 
-    def test_build_circuit_with_rnot_gate(self):
+    def test_build_circuit(self):
         qubit_count = 1
         step = [
             [{"type": "X^½", "targets": [0]}],
