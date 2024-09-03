@@ -6,7 +6,7 @@ class CirqRunner:
     VALID_SWAP_TARGET_COUNT = 2
     MINIMAL_CZ_CONTROL_COUNT = 2
 
-    def __init__(self, logger):
+    def __init__(self, logger=None):
         self.logger = logger
 
     def build_circuit(self, steps, qubit_count=None):

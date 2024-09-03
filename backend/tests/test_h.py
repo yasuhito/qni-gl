@@ -7,8 +7,7 @@ from tests.conftest import assert_complex_approx
 
 class TestH(unittest.TestCase):
     def setUp(self):
-        self.logger = None
-        self.cirq_runner = CirqRunner(self.logger)
+        self.cirq_runner = CirqRunner()
 
     def test_build_circuit(self):
         step = [
