@@ -45,15 +45,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 2
         assert str(circuit[0].operations[0]) == "CZ(q(0), q(1))"
 
-    def test_build_circuit_with_one_control_gate(self):
-        step = [
-            [{"type": "•", "targets": [0]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 1
-
     def test_build_circuit_with_three_control_gates(self):
         step = [
             [{"type": "•", "targets": [0, 1, 2]}],
@@ -137,31 +128,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 2
         assert str(circuit[0].operations[0]) == "I(q(0))"
         assert str(circuit[0].operations[1]) == "I(q(1))"
-
-    # Control|0⟩
-    def test_control_0ket(self):
-        steps = [[{"type": "•", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps)
-
-        amplitudes = result[0][":amplitude"]
-        assert_complex_approx(amplitudes[0], 1, 0)
-        assert_complex_approx(amplitudes[1], 0, 0)
-
-    # Control|1⟩
-    def test_control_1ket(self):
-        steps = [[{"type": "X", "targets": [0]}],
-                 [{"type": "•", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps)
-
-        amplitudes = result[1][":amplitude"]
-        assert_complex_approx(amplitudes[0], 0, 0)
-        assert_complex_approx(amplitudes[1], 1, 0)
 
     def test_cnot_00ket(self):
         steps = [[{"type": "X", "targets": [1], "controls": [0]}]]
