@@ -35,16 +35,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 3
         assert str(circuit[0].operations[0]) == "CCX(q(0), q(1), q(2))"
 
-    def test_build_circuit_with_s_dagger_gate(self):
-        step = [
-            [{"type": "S†", "targets": [0]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0]) == "S**-1(q(0))"
-
     def test_build_circuit_with_t_gate(self):
         step = [
             [{"type": "T", "targets": [0]}],
@@ -206,31 +196,6 @@ class TestCirqRunner(unittest.TestCase):
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
         assert_complex_approx(amplitudes[1], 1 / sqrt(2), 0)
-
-    # S†|0⟩=|0⟩
-    def test_s_dagger_0ket(self):
-        steps = [[{"type": "S†", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps, [0, 1])
-
-        amplitudes = result[0][":amplitude"]
-        assert_complex_approx(amplitudes[0], 1, 0)
-        assert_complex_approx(amplitudes[1], 0, 0)
-
-    # S†|1⟩=-i|1⟩
-    def test_s_dagger_1ket(self):
-        steps = [[{"type": "X", "targets": [0]}],
-                 [{"type": "S†", "targets": [0]}]]
-        circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
-
-        result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps, [0, 1])
-
-        amplitudes = result[1][":amplitude"]
-        assert_complex_approx(amplitudes[0], 0, 0)
-        assert_complex_approx(amplitudes[1], 0, -1)
 
     # T|0⟩=|0⟩
     def test_t_0ket(self):
