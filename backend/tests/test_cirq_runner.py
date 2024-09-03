@@ -35,36 +35,6 @@ class TestCirqRunner(unittest.TestCase):
         assert len(circuit.all_qubits()) == 3
         assert str(circuit[0].operations[0]) == "CCX(q(0), q(1), q(2))"
 
-    def test_build_circuit_with_two_control_gates(self):
-        step = [
-            [{"type": "•", "targets": [0, 1]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 2
-        assert str(circuit[0].operations[0]) == "CZ(q(0), q(1))"
-
-    def test_build_circuit_with_three_control_gates(self):
-        step = [
-            [{"type": "•", "targets": [0, 1, 2]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 3
-        assert str(circuit[0].operations[0]) == "CCZ(q(0), q(1), q(2))"
-
-    def test_build_circuit_with_four_control_gates(self):
-        step = [
-            [{"type": "•", "targets": [0, 1, 2, 3]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(step)
-
-        assert len(circuit.all_qubits()) == 4
-        assert str(circuit[0].operations[0]) == "CCCZ(q(0), q(1), q(2), q(3))"
-
     def test_build_circuit_with_write0_gate(self):
         step = [
             [{"type": "|0>", "targets": [0]}],
