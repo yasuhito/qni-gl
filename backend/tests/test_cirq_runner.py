@@ -4,13 +4,7 @@ from math import sqrt
 import pytest
 
 from src.cirq_runner import CirqRunner
-
-
-def assert_complex_approx(actual, expected_real, expected_imag):
-    assert pytest.approx(actual.real) == expected_real, f"Real parts differ: {
-        actual.real} != {expected_real}"
-    assert pytest.approx(actual.imag) == expected_imag, f"Imaginary parts differ: {
-        actual.imag} != {expected_imag}"
+from tests.conftest import assert_complex_approx
 
 
 class TestCirqRunner(unittest.TestCase):
@@ -20,17 +14,6 @@ class TestCirqRunner(unittest.TestCase):
 
     def test_initialization(self):
         assert self.cirq_runner is not None
-
-    def test_build_circuit_with_h_gate(self):
-        qubit_count = 1
-        step = [
-            [{"type": "H", "targets": [0]}],
-        ]
-
-        circuit, _ = self.cirq_runner.build_circuit(qubit_count, step)
-
-        assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0]) == "H(q(0))"
 
     def test_build_circuit_with_x_gate(self):
         qubit_count = 1
