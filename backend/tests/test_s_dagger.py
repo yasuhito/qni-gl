@@ -25,7 +25,7 @@ class TestSDagger(unittest.TestCase):
         circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 0, steps, [0, 1])
+            circuit, measurement_moment, 0, steps)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
@@ -38,7 +38,7 @@ class TestSDagger(unittest.TestCase):
         circuit, measurement_moment = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit_until_step_index(
-            circuit, measurement_moment, 1, steps, [0, 1])
+            circuit, measurement_moment, 1, steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
