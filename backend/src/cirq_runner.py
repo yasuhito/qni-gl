@@ -79,7 +79,7 @@ class CirqRunner:
                 elif gate["type"] == "•":
                     targets = self._target_qubits(qubits, gate)
                     if self._is_invalid_cz(gate):
-                        operations = []
+                        operations = [cirq.I(qubits[gate["targets"][0]])]
                     elif self._is_minimally_valid_cz(gate):
                         operations = [cirq.CZ(qubits[gate["targets"][0]], qubits[gate["targets"][1]])]
                     else:
