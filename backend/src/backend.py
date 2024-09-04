@@ -70,13 +70,13 @@ def backend():
 
 def run_cirq(qubit_count, step_index, steps, targets):
     cirq_runner = CirqRunner(app.logger)
-    circuit, measurement_moment = cirq_runner.build_circuit(steps, qubit_count)
+    circuit, measurements = cirq_runner.build_circuit(steps, qubit_count)
 
     for each in str(circuit).split("\n"):
         app.logger.debug(each)
 
     result_list = cirq_runner.run_circuit(
-        circuit, steps, measurement_moment, step_index, targets)
+        circuit, steps, measurements, step_index, targets)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):

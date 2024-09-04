@@ -13,17 +13,66 @@ class CirqRunner:
         self.logger = logger
 
     def build_circuit(self, steps, qubit_count=None):
-        if qubit_count is None:
-            qubit_count = (
-                max(
-                    max((max(gate.get("targets", [-1]))
-                        for step in steps for gate in step), default=-1),
-                    max((max(gate.get("controls", [-1]))
-                        for step in steps for gate in step), default=-1),
-                )
-                + 1
+        qubit_count = qubit_count or self._get_qubit_count(steps)
+        qubits = cirq.LineQubit.range(qubit_count)
+        steps_cirq = self._steps_cirq(steps, qubit_count)
+        circuit, measurements = self._process_step_operations(
+            steps_cirq, qubits, qubit_count)
+
+        return circuit, measurements
+
+    def run_circuit(self, circuit, steps, measurements, step_index=None, targets=None):
+        if step_index is None:
+            step_index = len(steps) - 1
+
+        if targets is None:
+            qubit_count = len(circuit.all_qubits())
+            targets = list(range(2**qubit_count))
+
+        cirq_simulator = cirq.Simulator()
+        _data = []
+        counter = -1
+        for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
+            counter = counter + 1
+            dic = {}
+            dic[":measuredBits"] = {}
+
+            if steps[counter] == []:
+                pass
+            if counter == step_index:
+                dic[":amplitude"] = step.state_vector()
+
+            _data.append(dic)
+
+        if step.measurements:
+            for i, measurement in enumerate(measurements):
+                for key_targets in measurement:
+                    for key, target in key_targets:
+                        if key in step.measurements:
+                            _value = step.measurements[key][0]
+                            _data[i][":measuredBits"][target] = _value
+
+        target_amplitudes = _data[step_index][":amplitude"]
+        _data[step_index][":amplitude"] = {}
+
+        for _target in targets:
+            _data[step_index][":amplitude"][_target] = target_amplitudes[_target]
+
+        return _data
+
+    def _get_qubit_count(self, steps: list) -> int:
+        return (
+            max(
+                max((max(gate.get("targets", [-1]))
+                    for step in steps for gate in step), default=-1),
+                max((max(gate.get("controls", [-1]))
+                    for step in steps for gate in step), default=-1),
             )
-        steps_reversed = []
+            + 1
+        )
+
+    def _steps_cirq(self, steps, qubit_count):
+        steps_cirq = []
 
         # Function to reverse and sort the target and control bits
         def reverse_and_sort(bits, qubit_count):
@@ -37,17 +86,18 @@ class CirqRunner:
                 if "controls" in operation:
                     operation["controls"] = reverse_and_sort(
                         operation["controls"], qubit_count)
-            steps_reversed.append(step)
+            steps_cirq.append(step)
 
-        qubits = cirq.LineQubit.range(qubit_count)
+        return steps_cirq
+
+    def _process_step_operations(self, steps_cirq, qubits, qubit_count):
         circuit = cirq.Circuit()
-        measurement_moment = []
+        measurements = []
 
-        for step_index, step in enumerate(steps_reversed):
+        for step_index, step in enumerate(steps_cirq):
             operations_cirq = []
-            measurement_moment.append([])
+            measurements.append([])
 
-            # empty step is converted to I gate
             if len(step) == 0:
                 operations_cirq.extend([cirq.I(qubits[bit])
                                        for bit in range(qubit_count)])
@@ -94,10 +144,9 @@ class CirqRunner:
                         self._process_write1_gate(qubits, operation))
                 elif operation["type"] == "Measure":
                     _operations_cirq, measurement_pairs = self._process_measure_gate(
-                        qubits, operation, step_index
-                    )
+                        qubits, operation, step_index)
                     operations_cirq.extend(_operations_cirq)
-                    measurement_moment[step_index].append(measurement_pairs)
+                    measurements[step_index].append(measurement_pairs)
                 else:
                     msg = "Unknown operation: {}".format(operation["type"])
                     raise ValueError(msg)
@@ -105,7 +154,7 @@ class CirqRunner:
             circuit.append(cirq.Moment(operations_cirq),
                            strategy=InsertStrategy.NEW_THEN_INLINE)
 
-        return circuit, measurement_moment
+        return circuit, measurements
 
     def _process_h_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
@@ -185,56 +234,14 @@ class CirqRunner:
 
     def _process_measure_gate(self, qubits, operation, step_index):
         targets = self._target_qubits(qubits, operation)
-        operations_cirq = [
-            cirq.measure(target, key=self._measurement_key(
-                step_index, target))
-            for target in targets
-        ]
-        measurement_keys = [self._measurement_key(
-            step_index, target) for target in targets]
-        measurement_pairs = [
-            [measurement_keys[index], operation["targets"][index]] for index in range(len(targets))]
+        operations_cirq = [cirq.measure(target, key=self._measurement_key(
+            step_index, target)) for target in targets]
+        keys = [self._measurement_key(step_index, target)
+                for target in targets]
+        measurement_pairs = [[keys[index], operation["targets"][index]]
+                             for index in range(len(targets))]
 
         return operations_cirq, measurement_pairs
-
-    def run_circuit(self, circuit, steps, measurement_moment, step_index=None, targets=None):
-        if step_index is None:
-            step_index = len(steps) - 1
-
-        if targets is None:
-            qubit_count = len(circuit.all_qubits())
-            targets = list(range(2**qubit_count))
-
-        cirq_simulator = cirq.Simulator()
-        _data = []
-        counter = -1
-        for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
-            counter = counter + 1
-            dic = {}
-            dic[":measuredBits"] = {}
-
-            if steps[counter] == []:
-                pass
-            if counter == step_index:
-                dic[":amplitude"] = step.state_vector()
-
-            _data.append(dic)
-        if step.measurements:
-            for i, moment in enumerate(measurement_moment):
-                for pairs in moment:
-                    for _key, _qubit in pairs:
-                        if _key not in step.measurements:
-                            continue
-                        _value = step.measurements[_key][0]
-                        _data[i][":measuredBits"][_qubit] = _value
-
-        target_amplitudes = _data[step_index][":amplitude"]
-        _data[step_index][":amplitude"] = {}
-
-        for _target in targets:
-            _data[step_index][":amplitude"][_target] = target_amplitudes[_target]
-
-        return _data
 
     def _measurement_key(self, step_index, target):
         return "m" + str(step_index) + "_" + str(target.x)
