@@ -1,6 +1,7 @@
 import cirq
 from cirq.circuits import InsertStrategy
 
+from src.write0 import Write0
 from src.write1 import Write1
 
 
@@ -180,14 +181,11 @@ class CirqRunner:
 
     def _process_write0_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
-        return [cirq.ops.reset(target) for target in targets]
+        return [Write0()(target) for target in targets]
 
     def _process_write1_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
         return [Write1()(target) for target in targets]
-        # operations_cirq = [cirq.ops.reset(target) for target in targets]
-        # operations_cirq.append([cirq.X(target) for target in targets])
-        # return operations_cirq
 
     def _process_measure_gate(self, qubits, operation, measurement_label_number):
         targets = self._target_qubits(qubits, operation)
@@ -218,25 +216,10 @@ class CirqRunner:
         for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(c)):
             counter = counter + 1
             dic = {}
-            dic[":blochVectors"] = {}
             dic[":measuredBits"] = {}
 
             if steps[counter] == []:
                 pass
-            else:
-                bloch_index = -1
-                for _bloch_index in range(len(steps[counter])):
-                    if steps[counter][_bloch_index]["type"] == "Bloch":
-                        bloch_index = _bloch_index
-                #                print("bloch_index ", bloch_index)
-                #                sys.stdout.flush()
-                if bloch_index != -1:
-                    for _bloch_target in steps[counter][bloch_index]["targets"]:
-                        blochxyz = cirq.qis.bloch_vector_from_state_vector(
-                            step.state_vector(), _bloch_target)
-                        dic[":blochVectors"][_bloch_target] = blochxyz
-            #                        print("bloch sphere: ", blochxyz)
-            #                        sys.stdout.flush()
             if counter == step_index:
                 dic[":amplitude"] = step.state_vector()
 
@@ -253,8 +236,6 @@ class CirqRunner:
                             if _key not in step.measurements:
                                 break
                             _value = step.measurements[_key][0]
-                            #                            print("step: ", _step, "key:", _key, "target qubit", _qubit, "value ", _value)
-                            #                            sys.stdout.flush()
                             _data[i][":measuredBits"][_qubit] = _value
         #        print("_data ", _data)
         #        sys.stdout.flush()
