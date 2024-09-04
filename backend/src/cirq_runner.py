@@ -20,21 +20,21 @@ class CirqRunner:
                 )
                 + 1
             )
-        circuit_from_qni = []
+        steps_reversed = []
 
         # Function to reverse and sort the target and control bits
         def reverse_and_sort(bits, qubit_count):
             return sorted(qubit_count - bit - 1 for bit in bits)
 
         for step in steps:
-            for gate in step:
-                if "targets" in gate:
-                    gate["targets"] = reverse_and_sort(
-                        gate["targets"], qubit_count)
-                if "controls" in gate:
-                    gate["controls"] = reverse_and_sort(
-                        gate["controls"], qubit_count)
-            circuit_from_qni.append(step)
+            for operation in step:
+                if "targets" in operation:
+                    operation["targets"] = reverse_and_sort(
+                        operation["targets"], qubit_count)
+                if "controls" in operation:
+                    operation["controls"] = reverse_and_sort(
+                        operation["controls"], qubit_count)
+            steps_reversed.append(step)
 
         qubits = cirq.LineQubit.range(qubit_count)
         circuit = cirq.Circuit()
@@ -42,7 +42,7 @@ class CirqRunner:
         measurement_moment = []
         moment_index = 0
 
-        for step in circuit_from_qni:
+        for step in steps_reversed:
             moment = []
             measurement_moment.append([])
 
@@ -50,100 +50,149 @@ class CirqRunner:
             if len(step) == 0:
                 moment = [[cirq.I(qubits[bit])] for bit in range(qubit_count)]
 
-            for gate in step:
-                if gate["type"] == "H":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.H(target) for target in targets]
-                elif gate["type"] == "X":
-                    targets = self._target_qubits(qubits, gate)
-                    if "controls" not in gate:
-                        operations = [cirq.X(target) for target in targets]
-                    else:
-                        control_qubits = [qubits[control]
-                                          for control in gate["controls"]]
-                        operations = [cirq.ControlledOperation(
-                            control_qubits, cirq.X(target)) for target in targets]
-                elif gate["type"] == "Y":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Y(target) for target in targets]
-                elif gate["type"] == "Z":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) for target in targets]
-                elif gate["type"] == "X^½":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.X(target) ** 0.5 for target in targets]
-                elif gate["type"] == "S":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** 0.5 for target in targets]
-                elif gate["type"] == "S†":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** (-0.5)
-                                  for target in targets]
-                elif gate["type"] == "T":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** 0.25 for target in targets]
-                elif gate["type"] == "T†":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.Z(target) ** (-0.25)
-                                  for target in targets]
-                elif gate["type"] == "Swap":
-                    operations = []
-                    if self._is_valid_swap(gate):
-                        target0 = qubits[gate["targets"][0]]
-                        target1 = qubits[gate["targets"][1]]
-                        operations.append(cirq.SWAP(target0, target1))
-                    else:
-                        operations = [cirq.I(qubits[target])
-                                      for target in gate["targets"]]
-                elif gate["type"] == "•":
-                    targets = self._target_qubits(qubits, gate)
-                    if self._is_invalid_cz(gate):
-                        operations = [cirq.I(qubits[gate["targets"][0]])]
-                    elif self._is_minimally_valid_cz(gate):
-                        operations = [
-                            cirq.CZ(qubits[gate["targets"][0]], qubits[gate["targets"][1]])]
-                    else:
-                        controls = [qubits[gate["targets"][index]]
-                                    for index in range(len(gate["targets"]) - 2)]
-                        operations = [
-                            cirq.ControlledOperation(
-                                controls, cirq.CZ(
-                                    qubits[gate["targets"][-2]], qubits[gate["targets"][-1]])
-                            )
-                        ]
-                elif gate["type"] == "|0>":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.ops.reset(target) for target in targets]
-                elif gate["type"] == "|1>":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [cirq.ops.reset(target) for target in targets]
-                    operations.append([cirq.X(target) for target in targets])
-                elif gate["type"] == "Measure":
-                    targets = self._target_qubits(qubits, gate)
-                    operations = [
-                        cirq.measure(
-                            targets[index], key=self._measurement_key(measurement_label_number + index))
-                        for index in range(len(targets))
-                    ]
-                    measurement_ids = [self._measurement_key(
-                        measurement_label_number + index) for index in range(len(targets))]
-                    measurement_pairs = [
-                        [measurement_ids[index], gate["targets"][index]] for index in range(len(targets))
-                    ]
+            for operation in step:
+                if operation["type"] == "H":
+                    operations_cirq = self._process_h_gate(qubits, operation)
+                elif operation["type"] == "X":
+                    operations_cirq = self._process_x_gate(qubits, operation)
+                elif operation["type"] == "Y":
+                    operations_cirq = self._process_y_gate(qubits, operation)
+                elif operation["type"] == "Z":
+                    operations_cirq = self._process_z_gate(qubits, operation)
+                elif operation["type"] == "X^½":
+                    operations_cirq = self._process_rnot_gate(
+                        qubits, operation)
+                elif operation["type"] == "S":
+                    operations_cirq = self._process_s_gate(qubits, operation)
+                elif operation["type"] == "S†":
+                    operations_cirq = self._process_s_dagger_gate(
+                        qubits, operation)
+                elif operation["type"] == "T":
+                    operations_cirq = self._process_t_gate(qubits, operation)
+                elif operation["type"] == "T†":
+                    operations_cirq = self._process_t_dagger_gate(
+                        qubits, operation)
+                elif operation["type"] == "Swap":
+                    operations_cirq = self._process_swap_gate(
+                        qubits, operation)
+                elif operation["type"] == "•":
+                    operations_cirq = self._process_control_gate(
+                        qubits, operation)
+                elif operation["type"] == "|0>":
+                    operations_cirq = self._process_write0_gate(
+                        qubits, operation)
+                elif operation["type"] == "|1>":
+                    operations_cirq = self._process_write1_gate(
+                        qubits, operation)
+                elif operation["type"] == "Measure":
+                    operations_cirq, measurement_pairs = self._process_measure_gate(
+                        qubits, operation, measurement_label_number
+                    )
                     measurement_moment[moment_index].append(measurement_pairs)
-                    measurement_label_number = measurement_label_number + \
-                        len(targets)
+                    measurement_label_number += len(operation["targets"])
                 else:
-                    msg = "Unknown operation: {}".format(gate["type"])
+                    msg = "Unknown operation: {}".format(operation["type"])
                     raise ValueError(msg)
 
-                for each in operations:
+                for each in operations_cirq:
                     moment.append(each)
 
             circuit.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
             moment_index = moment_index + 1
 
         return circuit, measurement_moment
+
+    def _process_h_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.H(target) for target in targets]
+
+    def _process_x_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        if "controls" not in operation:
+            return [cirq.X(target) for target in targets]
+
+        control_qubits = [qubits[control] for control in operation["controls"]]
+        return [cirq.ControlledOperation(control_qubits, cirq.X(target)) for target in targets]
+
+    def _process_y_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Y(target) for target in targets]
+
+    def _process_z_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Z(target) for target in targets]
+
+    def _process_rnot_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.X(target) ** 0.5 for target in targets]
+
+    def _process_s_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Z(target) ** 0.5 for target in targets]
+
+    def _process_s_dagger_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Z(target) ** (-0.5) for target in targets]
+
+    def _process_t_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Z(target) ** 0.25 for target in targets]
+
+    def _process_t_dagger_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.Z(target) ** (-0.25) for target in targets]
+
+    def _process_swap_gate(self, qubits, operation):
+        operations_cirq = []
+
+        if self._is_valid_swap(operation):
+            target0 = qubits[operation["targets"][0]]
+            target1 = qubits[operation["targets"][1]]
+            operations_cirq.append(cirq.SWAP(target0, target1))
+        else:
+            operations_cirq = [cirq.I(qubits[target])
+                               for target in operation["targets"]]
+
+        return operations_cirq
+
+    def _process_control_gate(self, qubits, operation):
+        if self._is_invalid_cz(operation):
+            return [cirq.I(qubits[operation["targets"][0]])]
+        if self._is_minimally_valid_cz(operation):
+            return [cirq.CZ(qubits[operation["targets"][0]], qubits[operation["targets"][1]])]
+
+        controls = [qubits[operation["targets"][index]]
+                    for index in range(len(operation["targets"]) - 2)]
+        return [
+            cirq.ControlledOperation(
+                controls, cirq.CZ(
+                    qubits[operation["targets"][-2]], qubits[operation["targets"][-1]])
+            )
+        ]
+
+    def _process_write0_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        return [cirq.ops.reset(target) for target in targets]
+
+    def _process_write1_gate(self, qubits, operation):
+        targets = self._target_qubits(qubits, operation)
+        operations_cirq = [cirq.ops.reset(target) for target in targets]
+        operations_cirq.append([cirq.X(target) for target in targets])
+        return operations_cirq
+
+    def _process_measure_gate(self, qubits, operation, measurement_label_number):
+        targets = self._target_qubits(qubits, operation)
+        operations_cirq = [
+            cirq.measure(targets[index], key=self._measurement_key(
+                measurement_label_number + index))
+            for index in range(len(targets))
+        ]
+        measurement_ids = [self._measurement_key(
+            measurement_label_number + index) for index in range(len(targets))]
+        measurement_pairs = [
+            [measurement_ids[index], operation["targets"][index]] for index in range(len(targets))]
+
+        return operations_cirq, measurement_pairs
 
     def run_circuit(self, circuit, steps, measurement_moment):
         return self.run_circuit_until_step_index(circuit, measurement_moment, len(steps) - 1, steps)
