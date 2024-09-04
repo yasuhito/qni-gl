@@ -190,10 +190,10 @@ class CirqRunner:
                 step_index, target))
             for target in targets
         ]
-        measurement_ids = [self._measurement_key(
+        measurement_keys = [self._measurement_key(
             step_index, target) for target in targets]
         measurement_pairs = [
-            [measurement_ids[index], operation["targets"][index]] for index in range(len(targets))]
+            [measurement_keys[index], operation["targets"][index]] for index in range(len(targets))]
 
         return operations_cirq, measurement_pairs
 
