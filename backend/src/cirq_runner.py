@@ -199,10 +199,7 @@ class CirqRunner:
 
         return operations_cirq, measurement_pairs
 
-    def run_circuit(self, circuit, steps, measurement_moment):
-        return self.run_circuit_until_step_index(circuit, steps, measurement_moment)
-
-    def run_circuit_until_step_index(self, circuit, steps, measurement_moment, step_index=None, targets=None):
+    def run_circuit(self, circuit, steps, measurement_moment, step_index=None, targets=None):
         if step_index is None:
             step_index = len(steps) - 1
 

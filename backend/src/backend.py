@@ -75,7 +75,7 @@ def run_cirq(qubit_count, step_index, steps, targets):
     for each in str(circuit).split("\n"):
         app.logger.debug(each)
 
-    result_list = cirq_runner.run_circuit_until_step_index(
+    result_list = cirq_runner.run_circuit(
         circuit, steps, measurement_moment, step_index, targets)
 
     # [complex ...] => {0: [real,img] ..}
