@@ -14,10 +14,9 @@ class CirqRunner:
 
     def build_circuit(self, steps, qubit_count=None):
         qubit_count = qubit_count or self._get_qubit_count(steps)
-        qubits = cirq.LineQubit.range(qubit_count)
         steps_cirq = self._steps_cirq(steps, qubit_count)
         circuit, measurements = self._process_step_operations(
-            steps_cirq, qubits, qubit_count)
+            steps_cirq, qubit_count)
 
         return circuit, measurements
 
@@ -30,7 +29,7 @@ class CirqRunner:
             targets = list(range(2**qubit_count))
 
         cirq_simulator = cirq.Simulator()
-        _data = []
+        data = []
         counter = -1
         for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
             counter = counter + 1
@@ -42,7 +41,7 @@ class CirqRunner:
             if counter == step_index:
                 dic[":amplitude"] = step.state_vector()
 
-            _data.append(dic)
+            data.append(dic)
 
         if step.measurements:
             for i, measurement in enumerate(measurements):
@@ -50,15 +49,15 @@ class CirqRunner:
                     for key, target in key_targets:
                         if key in step.measurements:
                             _value = step.measurements[key][0]
-                            _data[i][":measuredBits"][target] = _value
+                            data[i][":measuredBits"][target] = _value
 
-        target_amplitudes = _data[step_index][":amplitude"]
-        _data[step_index][":amplitude"] = {}
+        target_amplitudes = data[step_index][":amplitude"]
+        data[step_index][":amplitude"] = {}
 
         for _target in targets:
-            _data[step_index][":amplitude"][_target] = target_amplitudes[_target]
+            data[step_index][":amplitude"][_target] = target_amplitudes[_target]
 
-        return _data
+        return data
 
     def _get_qubit_count(self, steps: list) -> int:
         return (
@@ -90,8 +89,9 @@ class CirqRunner:
 
         return steps_cirq
 
-    def _process_step_operations(self, steps_cirq, qubits, qubit_count):
+    def _process_step_operations(self, steps_cirq, qubit_count):
         circuit = cirq.Circuit()
+        qubits = cirq.LineQubit.range(qubit_count)
         measurements = []
 
         for step_index, step in enumerate(steps_cirq):
