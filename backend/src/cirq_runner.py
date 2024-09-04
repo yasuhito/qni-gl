@@ -43,9 +43,8 @@ class CirqRunner:
         circuit = cirq.Circuit()
         measurement_label_number = 0
         measurement_moment = []
-        moment_index = 0
 
-        for step in steps_reversed:
+        for step_index, step in enumerate(steps_reversed):
             operations_cirq = []
             measurement_moment.append([])
 
@@ -99,7 +98,7 @@ class CirqRunner:
                         qubits, operation, measurement_label_number
                     )
                     operations_cirq.extend(_operations_cirq)
-                    measurement_moment[moment_index].append(measurement_pairs)
+                    measurement_moment[step_index].append(measurement_pairs)
                     measurement_label_number += len(operation["targets"])
                 else:
                     msg = "Unknown operation: {}".format(operation["type"])
@@ -107,7 +106,6 @@ class CirqRunner:
 
             circuit.append(cirq.Moment(operations_cirq),
                            strategy=InsertStrategy.NEW_THEN_INLINE)
-            moment_index = moment_index + 1
 
         return circuit, measurement_moment
 
@@ -202,18 +200,20 @@ class CirqRunner:
         return operations_cirq, measurement_pairs
 
     def run_circuit(self, circuit, steps, measurement_moment):
-        return self.run_circuit_until_step_index(circuit, measurement_moment, len(steps) - 1, steps)
+        return self.run_circuit_until_step_index(circuit, steps, measurement_moment)
 
-    # TODO: 引数 step_index を最後にし、省略した場合には「最後のステップまで実行」という意味にする
-    def run_circuit_until_step_index(self, c, measurement_moment, step_index, steps, targets=None):
+    def run_circuit_until_step_index(self, circuit, steps, measurement_moment, step_index=None, targets=None):
+        if step_index is None:
+            step_index = len(steps) - 1
+
         if targets is None:
-            qubit_count = len(c.all_qubits())
+            qubit_count = len(circuit.all_qubits())
             targets = list(range(2**qubit_count))
 
         cirq_simulator = cirq.Simulator()
         _data = []
         counter = -1
-        for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(c)):
+        for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
             counter = counter + 1
             dic = {}
             dic[":measuredBits"] = {}

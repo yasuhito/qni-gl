@@ -76,7 +76,7 @@ def run_cirq(qubit_count, step_index, steps, targets):
         app.logger.debug(each)
 
     result_list = cirq_runner.run_circuit_until_step_index(
-        circuit, measurement_moment, step_index, steps, targets)
+        circuit, steps, measurement_moment, step_index, targets)
 
     # [complex ...] => {0: [real,img] ..}
     def convert_amp(amp):
