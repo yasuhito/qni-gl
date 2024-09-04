@@ -17,8 +17,8 @@ class TestMeasurement(unittest.TestCase):
 
         assert len(circuit.all_qubits()) == 1
         assert str(circuit[0].operations[0]
-                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
-        assert str(measurements) == "[[[['m0', 0]]]]"
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0_0'), ())(q(0))"
+        assert str(measurements) == "[[[['m0_0', 0]]]]"
 
     def test_build_circuit_with_two_measurement_gates(self):
         step = [
@@ -29,10 +29,10 @@ class TestMeasurement(unittest.TestCase):
 
         assert len(circuit.all_qubits()) == 2
         assert str(circuit[0].operations[0]
-                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0'), ())(q(0))"
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0_0'), ())(q(0))"
         assert str(circuit[0].operations[1]
-                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m1'), ())(q(1))"
-        assert str(measurements) == "[[[['m0', 0], ['m1', 1]]]]"
+                   ) == "cirq.MeasurementGate(1, cirq.MeasurementKey(name='m0_1'), ())(q(1))"
+        assert str(measurements) == "[[[['m0_0', 0], ['m0_1', 1]]]]"
 
     # M|0⟩=|0⟩
     def test_measurement_0(self):
