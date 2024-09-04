@@ -16,8 +16,7 @@ class TestWrite1(unittest.TestCase):
         circuit, _ = self.cirq_runner.build_circuit(step)
 
         assert len(circuit.all_qubits()) == 1
-        assert str(circuit[0].operations[0]) == "reset(q(0))"
-        assert str(circuit[1].operations[0]) == "X(q(0))"
+        assert str(circuit[0].operations[0]) == "|1>(q(0))"
 
     # Write1|0⟩=|1>
     def test_write1_0(self):

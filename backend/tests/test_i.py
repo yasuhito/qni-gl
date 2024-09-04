@@ -4,7 +4,7 @@ from src.cirq_runner import CirqRunner
 from tests.conftest import assert_complex_approx
 
 
-class TestH(unittest.TestCase):
+class TestI(unittest.TestCase):
     def setUp(self):
         self.cirq_runner = CirqRunner()
 

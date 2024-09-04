@@ -1,6 +1,8 @@
 import cirq
 from cirq.circuits import InsertStrategy
 
+from src.write1 import Write1
+
 
 class CirqRunner:
     VALID_SWAP_TARGET_COUNT = 2
@@ -43,61 +45,67 @@ class CirqRunner:
         moment_index = 0
 
         for step in steps_reversed:
-            moment = []
+            operations_cirq = []
             measurement_moment.append([])
 
             # empty step is converted to I gate
             if len(step) == 0:
-                moment = [[cirq.I(qubits[bit])] for bit in range(qubit_count)]
+                operations_cirq.extend([cirq.I(qubits[bit])
+                                       for bit in range(qubit_count)])
 
             for operation in step:
                 if operation["type"] == "H":
-                    operations_cirq = self._process_h_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_h_gate(qubits, operation))
                 elif operation["type"] == "X":
-                    operations_cirq = self._process_x_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_x_gate(qubits, operation))
                 elif operation["type"] == "Y":
-                    operations_cirq = self._process_y_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_y_gate(qubits, operation))
                 elif operation["type"] == "Z":
-                    operations_cirq = self._process_z_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_z_gate(qubits, operation))
                 elif operation["type"] == "X^½":
-                    operations_cirq = self._process_rnot_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_rnot_gate(qubits, operation))
                 elif operation["type"] == "S":
-                    operations_cirq = self._process_s_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_s_gate(qubits, operation))
                 elif operation["type"] == "S†":
-                    operations_cirq = self._process_s_dagger_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_s_dagger_gate(qubits, operation))
                 elif operation["type"] == "T":
-                    operations_cirq = self._process_t_gate(qubits, operation)
+                    operations_cirq.extend(
+                        self._process_t_gate(qubits, operation))
                 elif operation["type"] == "T†":
-                    operations_cirq = self._process_t_dagger_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_t_dagger_gate(qubits, operation))
                 elif operation["type"] == "Swap":
-                    operations_cirq = self._process_swap_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_swap_gate(qubits, operation))
                 elif operation["type"] == "•":
-                    operations_cirq = self._process_control_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_control_gate(qubits, operation))
                 elif operation["type"] == "|0>":
-                    operations_cirq = self._process_write0_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_write0_gate(qubits, operation))
                 elif operation["type"] == "|1>":
-                    operations_cirq = self._process_write1_gate(
-                        qubits, operation)
+                    operations_cirq.extend(
+                        self._process_write1_gate(qubits, operation))
                 elif operation["type"] == "Measure":
-                    operations_cirq, measurement_pairs = self._process_measure_gate(
+                    _operations_cirq, measurement_pairs = self._process_measure_gate(
                         qubits, operation, measurement_label_number
                     )
+                    operations_cirq.extend(_operations_cirq)
                     measurement_moment[moment_index].append(measurement_pairs)
                     measurement_label_number += len(operation["targets"])
                 else:
                     msg = "Unknown operation: {}".format(operation["type"])
                     raise ValueError(msg)
 
-                for each in operations_cirq:
-                    moment.append(each)
-
-            circuit.append(moment, strategy=InsertStrategy.NEW_THEN_INLINE)
+            circuit.append(cirq.Moment(operations_cirq),
+                           strategy=InsertStrategy.NEW_THEN_INLINE)
             moment_index = moment_index + 1
 
         return circuit, measurement_moment
@@ -176,9 +184,10 @@ class CirqRunner:
 
     def _process_write1_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
-        operations_cirq = [cirq.ops.reset(target) for target in targets]
-        operations_cirq.append([cirq.X(target) for target in targets])
-        return operations_cirq
+        return [Write1()(target) for target in targets]
+        # operations_cirq = [cirq.ops.reset(target) for target in targets]
+        # operations_cirq.append([cirq.X(target) for target in targets])
+        # return operations_cirq
 
     def _process_measure_gate(self, qubits, operation, measurement_label_number):
         targets = self._target_qubits(qubits, operation)
@@ -206,21 +215,11 @@ class CirqRunner:
         cirq_simulator = cirq.Simulator()
         _data = []
         counter = -1
-        sleep_flag = 0  # we need padding for |1> because implimented as R + X
         for _counter, step in enumerate(cirq_simulator.simulate_moment_steps(c)):
-            if sleep_flag == 0:
-                counter = counter + 1
+            counter = counter + 1
             dic = {}
             dic[":blochVectors"] = {}
             dic[":measuredBits"] = {}
-            if sleep_flag == 0:
-                for _d in steps[counter]:
-                    if "type" in _d and _d["type"] == "|1>":
-                        sleep_flag = 1
-            else:
-                sleep_flag = 0
-            if sleep_flag == 1:
-                continue
 
             if steps[counter] == []:
                 pass
