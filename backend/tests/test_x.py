@@ -23,7 +23,7 @@ class TestH(unittest.TestCase):
         steps = [[{"type": "X", "targets": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -31,10 +31,11 @@ class TestH(unittest.TestCase):
 
     # X|1⟩=|0⟩
     def test_x_1(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}],
+                 [{"type": "X", "targets": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)

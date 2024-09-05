@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import cirq
 from cirq.circuits import InsertStrategy
 
@@ -6,23 +8,33 @@ from src.write1 import Write1
 
 
 class CirqRunner:
-    VALID_SWAP_TARGET_COUNT = 2
-    MINIMAL_CZ_CONTROL_COUNT = 2
+    PAIR_OPERATION_COUNT = 2
 
     def __init__(self, logger=None):
         self.logger = logger
 
-    def build_circuit(self, steps, qubit_count=None):
+    def build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
+        """
+        Build a quantum circuit based on the provided steps and qubit count.
+
+        Args:
+            steps (list): A list of steps where each step is a list of operations.
+            qubit_count (int | None, optional): The number of qubits to use. If None, the qubit count is determined from the steps.
+
+        Returns:
+            tuple: A tuple containing the constructed circuit and a list of measurement keys.
+        """
         qubit_count = qubit_count or self._get_qubit_count(steps)
         steps_cirq = self._steps_cirq(steps, qubit_count)
-        circuit, measurements = self._process_step_operations(
+        circuit, measurement_keys = self._process_step_operations(
             steps_cirq, qubit_count)
 
-        return circuit, measurements
+        return circuit, measurement_keys
 
-    def run_circuit(self, circuit, steps, measurements, until_step_index=None, amplitude_indices=None):
+    def run_circuit(self, circuit, measurement_keys, until_step_index=None, amplitude_indices=None):
         qubit_count = len(circuit.all_qubits())
-        until_step_index = self._get_until_step_index(until_step_index, steps)
+        until_step_index = self._get_until_step_index(
+            until_step_index, circuit)
         amplitude_indices = self._get_amplitude_indices(
             amplitude_indices, qubit_count, circuit)
 
@@ -31,19 +43,18 @@ class CirqRunner:
 
         for step_index, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
             step_result = self._initialize_step_result(
-                step_index, step, steps, until_step_index)
+                step_index, step, until_step_index)
             self._update_measurements(
-                step, measurements, step_result, qubit_count)
+                step, measurement_keys, step_result, qubit_count)
             step_results.append(step_result)
 
         self._filter_amplitudes(
             step_results, until_step_index, amplitude_indices)
+
         return step_results
 
-    def _initialize_step_result(self, step_index, step, steps, until_step_index):
+    def _initialize_step_result(self, step_index, step, until_step_index):
         result = {":measuredBits": {}}
-        if steps[step_index] == []:
-            pass
         if step_index == until_step_index:
             result[":amplitude"] = step.state_vector()
         return result
@@ -63,8 +74,8 @@ class CirqRunner:
         for amplitude_index in amplitude_indices:
             step_results[until_step_index][":amplitude"][amplitude_index] = amplitudes[amplitude_index]
 
-    def _get_until_step_index(self, until_step_index, steps):
-        return len(steps) - 1 if until_step_index is None else until_step_index
+    def _get_until_step_index(self, until_step_index, circuit):
+        return len(circuit.moments) - 1 if until_step_index is None else until_step_index
 
     def _get_amplitude_indices(self, amplitude_indices, qubit_count, circuit):
         if amplitude_indices is None:
@@ -214,7 +225,7 @@ class CirqRunner:
     def _process_swap_gate(self, qubits, operation):
         operations_cirq = []
 
-        if self._is_valid_swap(operation):
+        if len(operation["targets"]) == self.PAIR_OPERATION_COUNT:
             target0 = qubits[operation["targets"][0]]
             target1 = qubits[operation["targets"][1]]
             operations_cirq.append(cirq.SWAP(target0, target1))
@@ -265,11 +276,8 @@ class CirqRunner:
     def _target_qubits(self, qubits, gate):
         return [qubits[each] for each in gate["targets"]]
 
-    def _is_valid_swap(self, gate):
-        return len(gate["targets"]) == self.VALID_SWAP_TARGET_COUNT
-
     def _is_invalid_cz(self, gate):
-        return len(gate["targets"]) < self.MINIMAL_CZ_CONTROL_COUNT
+        return len(gate["targets"]) < self.PAIR_OPERATION_COUNT
 
     def _is_minimally_valid_cz(self, gate):
-        return len(gate["targets"]) == self.MINIMAL_CZ_CONTROL_COUNT
+        return len(gate["targets"]) == self.PAIR_OPERATION_COUNT

@@ -60,7 +60,7 @@ class TestMeasurement(unittest.TestCase):
 
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[0][":amplitude"]
         measured_bits = result[0][":measuredBits"]
@@ -74,7 +74,7 @@ class TestMeasurement(unittest.TestCase):
                  [{"type": "Measure", "targets": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[1][":amplitude"]
         measured_bits = result[1][":measuredBits"]

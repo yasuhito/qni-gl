@@ -25,7 +25,7 @@ class TestWrite1(unittest.TestCase):
         ]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -39,7 +39,7 @@ class TestWrite1(unittest.TestCase):
         ]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
-        result = self.cirq_runner.run_circuit(circuit, steps, measurements)
+        result = self.cirq_runner.run_circuit(circuit, measurements)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
