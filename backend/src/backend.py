@@ -7,8 +7,11 @@ from flask_cors import CORS
 
 from src.cirq_runner import CirqRunner
 
-BAD_REQUEST = 400
-INTERNAL_SERVER_ERROR = 500
+LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
+LOG_FILE = "backend.log"
+HTTP_BAD_REQUEST = 400
+HTTP_INTERNAL_SERVER_ERROR = 500
 
 app = Flask(__name__)
 CORS(app)
@@ -24,12 +27,10 @@ def _setup_custom_logger():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    log_format = "[%(asctime)s] [%(levelname)s] %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S %z"
-    formatter = logging.Formatter(log_format, datefmt=date_format)
+    formatter = logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT)
 
     _add_logger_handler(logging.StreamHandler(), formatter)
-    _add_logger_handler(logging.FileHandler("backend.log"), formatter)
+    _add_logger_handler(logging.FileHandler(LOG_FILE), formatter)
 
 
 _setup_custom_logger()
@@ -37,23 +38,28 @@ _setup_custom_logger()
 
 @app.route("/backend.json", methods=["POST"])
 def backend():
+    try:
+        circuit_id, qubit_count, step_index, targets, steps = _get_request_data()
+        _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
+
+        step_results = _run_cirq(qubit_count, step_index, steps, targets)
+        return jsonify(step_results)
+    except json.JSONDecodeError as e:
+        return _handle_error(f"An error occurred: {e!s}", "Bad Request: Invalid input", HTTP_BAD_REQUEST)
+    except RuntimeError as e:
+        return _handle_error(
+            f"An unexpected error occurred: {
+                e!s}", "Internal Server Error", HTTP_INTERNAL_SERVER_ERROR
+        )
+
+
+def _get_request_data():
     circuit_id = request.form.get("id", "")
     qubit_count = _get_int_from_request("qubitCount", 0)
     step_index = _get_int_from_request("stepIndex", 0)
     targets = _get_targets_from_request()
     steps = _get_steps_from_request()
-
-    _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
-
-    try:
-        step_results = _run_cirq(qubit_count, step_index, steps, targets)
-        return jsonify(step_results)
-    except json.JSONDecodeError:
-        return _handle_error("JSON decode error", "Bad Request: Invalid JSON", BAD_REQUEST)
-    except ValueError:
-        return _handle_error("Value error", "Bad Request: Invalid input", BAD_REQUEST)
-    except (TypeError, KeyError) as e:
-        return _handle_error(f"An error occurred: {e!s}", "Internal Server Error", INTERNAL_SERVER_ERROR)
+    return circuit_id, qubit_count, step_index, targets, steps
 
 
 def _get_int_from_request(key, default):
@@ -70,7 +76,7 @@ def _get_steps_from_request():
 
 def _handle_error(log_message, response_message, status_code):
     app.logger.exception(log_message)
-    if status_code == INTERNAL_SERVER_ERROR:
+    if status_code == HTTP_INTERNAL_SERVER_ERROR:
         app.logger.exception("Stack trace: %s", traceback.format_exc())
     return response_message, status_code
 
@@ -89,7 +95,8 @@ def _run_cirq(qubit_count, step_index, steps, targets):
 
     _log_circuit(circuit)
 
-    results = cirq_runner.run_circuit(circuit, measurements, step_index, targets)
+    results = cirq_runner.run_circuit(
+        circuit, measurements, step_index, targets)
 
     return [_convert_result(result) for result in results]
 
