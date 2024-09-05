@@ -7,91 +7,109 @@ from flask_cors import CORS
 
 from src.cirq_runner import CirqRunner
 
+BAD_REQUEST = 400
+INTERNAL_SERVER_ERROR = 500
+
 app = Flask(__name__)
 CORS(app)
 
 
-def setup_logger():
-    """
-    Gunicorn の stderr と backend.log の両方にログを出力するためのロガーをセットアップする
-    """
+def _add_logger_handler(handler, formatter):
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+    logging.getLogger().addHandler(handler)
+
+
+def _setup_custom_logger():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # カスタムフォーマットを設定
     log_format = "[%(asctime)s] [%(levelname)s] %(message)s"
     date_format = "%Y-%m-%d %H:%M:%S %z"
+    formatter = logging.Formatter(log_format, datefmt=date_format)
 
-    # Gunicorn の stderr にログを出力するためのハンドラ
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG)
-    stream_formatter = logging.Formatter(log_format, datefmt=date_format)
-    stream_handler.setFormatter(stream_formatter)
-
-    # backend.log ファイルにログを出力するためのハンドラ
-    file_handler = logging.FileHandler("backend.log")
-    file_handler.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter(log_format, datefmt=date_format)
-    file_handler.setFormatter(file_formatter)
-
-    # ロガーにハンドラを追加
-    logger.addHandler(stream_handler)
-    logger.addHandler(file_handler)
+    _add_logger_handler(logging.StreamHandler(), formatter)
+    _add_logger_handler(logging.FileHandler("backend.log"), formatter)
 
 
-setup_logger()
+_setup_custom_logger()
 
 
 @app.route("/backend.json", methods=["POST"])
 def backend():
-    circuit_id = request.form.get("id")
-    qubit_count = int(request.form.get("qubitCount"))
-    step_index = int(request.form.get("stepIndex"))
-    # targets には "0,1,2" のようなカンマ区切り整数が入っているので、リストに変換する
-    targets = [int(x) for x in request.form.get("targets").split(",")]
-    steps = json.loads(request.form.get("steps"))
+    circuit_id = request.form.get("id", "")
+    qubit_count = _get_int_from_request("qubitCount", 0)
+    step_index = _get_int_from_request("stepIndex", 0)
+    targets = _get_targets_from_request()
+    steps = _get_steps_from_request()
 
+    _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
+
+    try:
+        step_results = _run_cirq(qubit_count, step_index, steps, targets)
+        return jsonify(step_results)
+    except json.JSONDecodeError:
+        return _handle_error("JSON decode error", "Bad Request: Invalid JSON", BAD_REQUEST)
+    except ValueError:
+        return _handle_error("Value error", "Bad Request: Invalid input", BAD_REQUEST)
+    except (TypeError, KeyError) as e:
+        return _handle_error(f"An error occurred: {e!s}", "Internal Server Error", INTERNAL_SERVER_ERROR)
+
+
+def _get_int_from_request(key, default):
+    return int(request.form.get(key, default))
+
+
+def _get_targets_from_request():
+    return [int(each) for each in request.form.get("targets", "").split(",") if each.isdigit()]
+
+
+def _get_steps_from_request():
+    return json.loads(request.form.get("steps", "[]"))
+
+
+def _handle_error(log_message, response_message, status_code):
+    app.logger.exception(log_message)
+    if status_code == INTERNAL_SERVER_ERROR:
+        app.logger.exception("Stack trace: %s", traceback.format_exc())
+    return response_message, status_code
+
+
+def _log_request_data(circuit_id, qubit_count, step_index, targets, steps):
     app.logger.debug("circuit_id = %s", circuit_id)
     app.logger.debug("qubit_count = %d", qubit_count)
     app.logger.debug("step_index = %d", step_index)
     app.logger.debug("targets.size = %d", len(targets))
-    # app.logger.debug("steps = %s", steps)
-
-    try:
-        step_results = run_cirq(qubit_count, step_index, steps, targets)
-        # app.logger.debug("step_results = %s", step_results)
-
-        return jsonify(step_results)
-    except Exception:
-        app.logger.exception("An error occurred")
-        app.logger.exception("Stack trace: %s", traceback.format_exc())
-        return "Internal Server Error ", 500
+    app.logger.debug("steps = %s", steps)
 
 
-def run_cirq(qubit_count, step_index, steps, targets):
+def _run_cirq(qubit_count, step_index, steps, targets):
     cirq_runner = CirqRunner(app.logger)
     circuit, measurements = cirq_runner.build_circuit(steps, qubit_count)
 
+    _log_circuit(circuit)
+
+    results = cirq_runner.run_circuit(circuit, measurements, step_index, targets)
+
+    return [_convert_result(result) for result in results]
+
+
+def _log_circuit(circuit):
     for each in str(circuit).split("\n"):
         app.logger.debug(each)
 
-    result_list = cirq_runner.run_circuit(
-        circuit, measurements, step_index, targets)
 
-    # [complex ...] => {0: [real,img] ..}
-    def convert_amp(amp):
-        res = {}
-        for i, c in amp.items():
-            res[i] = [float(c.real), float(c.imag)]
-        return res
+def _convert_result(result):
+    response = {}
 
-    def convert_item(item):
-        if ":amplitude" in item:
-            if ":measuredBits" in item:
-                return {"amplitudes": convert_amp(item[":amplitude"]), "measuredBits": item[":measuredBits"]}
-            return {"amplitudes": convert_amp(item[":amplitude"])}
-        if ":measuredBits" in item:
-            return {"measuredBits": item[":measuredBits"]}
-        return {}
+    if ":amplitude" in result:
+        response["amplitudes"] = _flatten_amplitude(result[":amplitude"])
 
-    return [convert_item(item) for item in result_list]
+    if ":measuredBits" in result:
+        response["measuredBits"] = result[":measuredBits"]
+
+    return response
+
+
+def _flatten_amplitude(amplitude):
+    return {index: [float(each.real), float(each.imag)] for index, each in amplitude.items()}
