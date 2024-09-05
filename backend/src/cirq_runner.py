@@ -79,24 +79,6 @@ class CirqRunner:
                     result[":measuredBits"][bit_qni] = measured_value
         return result
 
-    def _initialize_step_result(self, step_index, step, until_step_index):
-        result = {":measuredBits": {}}
-        if step_index == until_step_index:
-            result[":amplitude"] = step.state_vector()
-        return result
-
-    def _update_measurements(self, step, measurements, step_result, qubit_count):
-        new_step_result = step_result.copy()
-        if step.measurements:
-            for measurement in measurements:
-                key = measurement["key"]
-                if key in step.measurements:
-                    measured_value = step.measurements[key][0]
-                    bit_qni = qubit_count - measurement["target_bit"] - 1
-                    new_step_result[":measuredBits"][bit_qni] = measured_value
-
-        return new_step_result
-
     def _filter_amplitudes(self, step_results, until_step_index, amplitude_indices):
         amplitudes = step_results[until_step_index][":amplitude"]
         filtered_amplitudes = {
