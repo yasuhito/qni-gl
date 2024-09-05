@@ -31,27 +31,53 @@ class CirqRunner:
 
         return circuit, measurement_keys
 
-    def run_circuit(self, circuit, measurement_keys, until_step_index=None, amplitude_indices=None):
-        qubit_count = len(circuit.all_qubits())
+    def run_circuit(
+        self,
+        circuit: cirq.Circuit,
+        measurement_keys: list,
+        until_step_index: int | None = None,
+        amplitude_indices: list | None = None,
+    ) -> list:
+        """
+        Execute the specified quantum circuit and return the results of each step.
+
+        Args:
+            circuit (cirq.Circuit): The quantum circuit to execute.
+            measurement_keys (list): A list of measurement keys.
+            until_step_index (int | None, optional): The step index to stop execution at. Defaults to None, meaning all steps are executed.
+            amplitude_indices (list | None, optional): The indices of amplitudes to filter. Defaults to None, meaning all amplitudes are returned.
+
+        Returns:
+            list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
+        """
         until_step_index = self._get_until_step_index(
             until_step_index, circuit)
         amplitude_indices = self._get_amplitude_indices(
-            amplitude_indices, qubit_count, circuit)
+            amplitude_indices, circuit)
 
         cirq_simulator = cirq.Simulator()
         step_results = []
+        qubit_count = len(circuit.all_qubits())
 
         for step_index, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
-            step_result = self._initialize_step_result(
-                step_index, step, until_step_index)
-            self._update_measurements(
-                step, measurement_keys, step_result, qubit_count)
+            step_result = self._process_step_result(
+                step_index, step, until_step_index, measurement_keys, qubit_count)
             step_results.append(step_result)
 
-        self._filter_amplitudes(
-            step_results, until_step_index, amplitude_indices)
+        return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
 
-        return step_results
+    def _process_step_result(self, step_index, step, until_step_index, measurement_keys, qubit_count):
+        result = {":measuredBits": {}}
+        if step_index == until_step_index:
+            result[":amplitude"] = step.state_vector()
+        if step.measurements:
+            for measurement in measurement_keys:
+                key = measurement["key"]
+                if key in step.measurements:
+                    measured_value = step.measurements[key][0]
+                    bit_qni = qubit_count - measurement["target_bit"] - 1
+                    result[":measuredBits"][bit_qni] = measured_value
+        return result
 
     def _initialize_step_result(self, step_index, step, until_step_index):
         result = {":measuredBits": {}}
@@ -60,27 +86,35 @@ class CirqRunner:
         return result
 
     def _update_measurements(self, step, measurements, step_result, qubit_count):
+        new_step_result = step_result.copy()
         if step.measurements:
             for measurement in measurements:
                 key = measurement["key"]
                 if key in step.measurements:
                     measured_value = step.measurements[key][0]
                     bit_qni = qubit_count - measurement["target_bit"] - 1
-                    step_result[":measuredBits"][bit_qni] = measured_value
+                    new_step_result[":measuredBits"][bit_qni] = measured_value
+
+        return new_step_result
 
     def _filter_amplitudes(self, step_results, until_step_index, amplitude_indices):
         amplitudes = step_results[until_step_index][":amplitude"]
-        step_results[until_step_index][":amplitude"] = {}
-        for amplitude_index in amplitude_indices:
-            step_results[until_step_index][":amplitude"][amplitude_index] = amplitudes[amplitude_index]
+        filtered_amplitudes = {
+            index: amplitudes[index] for index in amplitude_indices}
+        step_results[until_step_index][":amplitude"] = filtered_amplitudes
+
+        return step_results
 
     def _get_until_step_index(self, until_step_index, circuit):
         return len(circuit.moments) - 1 if until_step_index is None else until_step_index
 
-    def _get_amplitude_indices(self, amplitude_indices, qubit_count, circuit):
+    def _get_amplitude_indices(self, amplitude_indices, circuit):
+        qubit_count = len(circuit.all_qubits())
+
         if amplitude_indices is None:
             qubit_count = len(circuit.all_qubits())
             amplitude_indices = list(range(2**qubit_count))
+
         return amplitude_indices
 
     def _get_qubit_count(self, steps: list) -> int:
