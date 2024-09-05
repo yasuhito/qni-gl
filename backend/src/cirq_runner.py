@@ -15,29 +15,31 @@ class CirqRunner:
     def build_circuit(self, steps, qubit_count=None):
         qubit_count = qubit_count or self._get_qubit_count(steps)
         steps_cirq = self._steps_cirq(steps, qubit_count)
-        circuit, measurements = self._process_step_operations(steps_cirq, qubit_count)
+        circuit, measurements = self._process_step_operations(
+            steps_cirq, qubit_count)
 
         return circuit, measurements
 
-    def run_circuit(self, circuit, steps, measurements, step_index=None, targets=None):
-        if step_index is None:
-            step_index = len(steps) - 1
+    def run_circuit(self, circuit, steps, measurements, until_step_index=None, amplitude_indices=None):
+        qubit_count = len(circuit.all_qubits())
 
-        if targets is None:
+        if until_step_index is None:
+            until_step_index = len(steps) - 1
+
+        if amplitude_indices is None:
             qubit_count = len(circuit.all_qubits())
-            targets = list(range(2**qubit_count))
+            amplitude_indices = list(range(2**qubit_count))
 
         cirq_simulator = cirq.Simulator()
         step_results = []
-        counter = -1
-        for _step_index, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
-            counter = counter + 1
+
+        for step_index, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
             dic = {}
             dic[":measuredBits"] = {}
 
-            if steps[counter] == []:
+            if steps[step_index] == []:
                 pass
-            if counter == step_index:
+            if step_index == until_step_index:
                 dic[":amplitude"] = step.state_vector()
 
             step_results.append(dic)
@@ -48,21 +50,23 @@ class CirqRunner:
                     target_bit = measurement["target_bit"]
                     if key in step.measurements:
                         _value = step.measurements[key][0]
-                        step_results[counter][":measuredBits"][target_bit] = _value
+                        step_results[step_index][":measuredBits"][qubit_count -
+                                                                  target_bit - 1] = _value
 
-        target_amplitudes = step_results[step_index][":amplitude"]
-        step_results[step_index][":amplitude"] = {}
-
-        for _target in targets:
-            step_results[step_index][":amplitude"][_target] = target_amplitudes[_target]
+        amplitudes = step_results[until_step_index][":amplitude"]
+        step_results[until_step_index][":amplitude"] = {}
+        for amplitude_index in amplitude_indices:
+            step_results[until_step_index][":amplitude"][amplitude_index] = amplitudes[amplitude_index]
 
         return step_results
 
     def _get_qubit_count(self, steps: list) -> int:
         return (
             max(
-                max((max(gate.get("targets", [-1])) for step in steps for gate in step), default=-1),
-                max((max(gate.get("controls", [-1])) for step in steps for gate in step), default=-1),
+                max((max(gate.get("targets", [-1]))
+                    for step in steps for gate in step), default=-1),
+                max((max(gate.get("controls", [-1]))
+                    for step in steps for gate in step), default=-1),
             )
             + 1
         )
@@ -75,62 +79,83 @@ class CirqRunner:
             return sorted(qubit_count - bit - 1 for bit in bits)
 
         for step in steps:
+            new_step = []
             for operation in step:
-                if "targets" in operation:
-                    operation["targets"] = reverse_and_sort(operation["targets"], qubit_count)
-                if "controls" in operation:
-                    operation["controls"] = reverse_and_sort(operation["controls"], qubit_count)
-            steps_cirq.append(step)
+                new_operation = operation.copy()
+                if "targets" in new_operation:
+                    new_operation["targets"] = reverse_and_sort(
+                        new_operation["targets"], qubit_count)
+                if "controls" in new_operation:
+                    new_operation["controls"] = reverse_and_sort(
+                        new_operation["controls"], qubit_count)
+                new_step.append(new_operation)
+            steps_cirq.append(new_step)
 
         return steps_cirq
 
-    def _process_step_operations(self, steps_cirq, qubit_count):
+    def _process_step_operations(self, steps, qubit_count):
         circuit = cirq.Circuit()
         qubits = cirq.LineQubit.range(qubit_count)
         measurements = []
 
-        for step_index, step in enumerate(steps_cirq):
+        for step_index, step in enumerate(steps):
             operations_cirq = []
 
             if len(step) == 0:
-                operations_cirq.extend([cirq.I(qubits[bit]) for bit in range(qubit_count)])
+                operations_cirq.extend([cirq.I(qubits[bit])
+                                       for bit in range(qubit_count)])
 
             for operation in step:
                 if operation["type"] == "H":
-                    operations_cirq.extend(self._process_h_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_h_gate(qubits, operation))
                 elif operation["type"] == "X":
-                    operations_cirq.extend(self._process_x_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_x_gate(qubits, operation))
                 elif operation["type"] == "Y":
-                    operations_cirq.extend(self._process_y_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_y_gate(qubits, operation))
                 elif operation["type"] == "Z":
-                    operations_cirq.extend(self._process_z_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_z_gate(qubits, operation))
                 elif operation["type"] == "X^½":
-                    operations_cirq.extend(self._process_rnot_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_rnot_gate(qubits, operation))
                 elif operation["type"] == "S":
-                    operations_cirq.extend(self._process_s_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_s_gate(qubits, operation))
                 elif operation["type"] == "S†":
-                    operations_cirq.extend(self._process_s_dagger_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_s_dagger_gate(qubits, operation))
                 elif operation["type"] == "T":
-                    operations_cirq.extend(self._process_t_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_t_gate(qubits, operation))
                 elif operation["type"] == "T†":
-                    operations_cirq.extend(self._process_t_dagger_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_t_dagger_gate(qubits, operation))
                 elif operation["type"] == "Swap":
-                    operations_cirq.extend(self._process_swap_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_swap_gate(qubits, operation))
                 elif operation["type"] == "•":
-                    operations_cirq.extend(self._process_control_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_control_gate(qubits, operation))
                 elif operation["type"] == "|0>":
-                    operations_cirq.extend(self._process_write0_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_write0_gate(qubits, operation))
                 elif operation["type"] == "|1>":
-                    operations_cirq.extend(self._process_write1_gate(qubits, operation))
+                    operations_cirq.extend(
+                        self._process_write1_gate(qubits, operation))
                 elif operation["type"] == "Measure":
-                    _operations_cirq, measurement_pairs = self._process_measure_gate(qubits, operation, step_index)
+                    _operations_cirq, measurement_pairs = self._process_measure_gate(
+                        qubits, operation, step_index)
                     operations_cirq.extend(_operations_cirq)
                     measurements.extend(measurement_pairs)
                 else:
                     msg = "Unknown operation: {}".format(operation["type"])
                     raise ValueError(msg)
 
-            circuit.append(cirq.Moment(operations_cirq), strategy=InsertStrategy.NEW_THEN_INLINE)
+            circuit.append(cirq.Moment(operations_cirq),
+                           strategy=InsertStrategy.NEW_THEN_INLINE)
 
         return circuit, measurements
 
@@ -182,7 +207,8 @@ class CirqRunner:
             target1 = qubits[operation["targets"][1]]
             operations_cirq.append(cirq.SWAP(target0, target1))
         else:
-            operations_cirq = [cirq.I(qubits[target]) for target in operation["targets"]]
+            operations_cirq = [cirq.I(qubits[target])
+                               for target in operation["targets"]]
 
         return operations_cirq
 
@@ -192,10 +218,12 @@ class CirqRunner:
         if self._is_minimally_valid_cz(operation):
             return [cirq.CZ(qubits[operation["targets"][0]], qubits[operation["targets"][1]])]
 
-        controls = [qubits[operation["targets"][index]] for index in range(len(operation["targets"]) - 2)]
+        controls = [qubits[operation["targets"][index]]
+                    for index in range(len(operation["targets"]) - 2)]
         return [
             cirq.ControlledOperation(
-                controls, cirq.CZ(qubits[operation["targets"][-2]], qubits[operation["targets"][-1]])
+                controls, cirq.CZ(
+                    qubits[operation["targets"][-2]], qubits[operation["targets"][-1]])
             )
         ]
 
@@ -209,8 +237,10 @@ class CirqRunner:
 
     def _process_measure_gate(self, qubits, operation, step_index):
         targets = self._target_qubits(qubits, operation)
-        operations_cirq = [cirq.measure(target, key=self._measurement_key(step_index, target)) for target in targets]
-        keys = [self._measurement_key(step_index, target) for target in targets]
+        operations_cirq = [cirq.measure(target, key=self._measurement_key(
+            step_index, target)) for target in targets]
+        keys = [self._measurement_key(step_index, target)
+                for target in targets]
         measurement_pairs = [
             {"key": keys[index], "target_bit": operation["targets"][index]} for index in range(len(targets))
         ]
