@@ -47,11 +47,10 @@ class CirqRunner:
             if step.measurements:
                 for measurement in measurements:
                     key = measurement["key"]
-                    target_bit = measurement["target_bit"]
                     if key in step.measurements:
-                        _value = step.measurements[key][0]
-                        step_results[step_index][":measuredBits"][qubit_count -
-                                                                  target_bit - 1] = _value
+                        measured_value = step.measurements[key][0]
+                        bit_qni = qubit_count - measurement["target_bit"] - 1
+                        step_results[step_index][":measuredBits"][bit_qni] = measured_value
 
         amplitudes = step_results[until_step_index][":amplitude"]
         step_results[until_step_index][":amplitude"] = {}
