@@ -1,7 +1,7 @@
 import unittest
 
-from src.write1 import Write1
 from src.cirq_runner import CirqRunner
+from src.write1 import Write1
 from tests.conftest import assert_complex_approx
 
 

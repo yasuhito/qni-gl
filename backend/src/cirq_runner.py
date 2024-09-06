@@ -72,7 +72,6 @@ class CirqRunner:
             result[":amplitude"] = step.state_vector()
         if step.measurements:
             for measurement in measurement_keys:
-                assert "key" in measurement, "Measurement key is missing"
                 measured_value = step.measurements[measurement["key"]][0]
                 bit_qni = qubit_count - measurement["target_bit"] - 1
                 result[":measuredBits"][bit_qni] = measured_value
@@ -120,7 +119,6 @@ class CirqRunner:
             new_step = []
             for operation in step:
                 new_operation = operation.copy()
-                assert "targets" in new_operation, "targets are missing"
                 new_operation["targets"] = reverse_and_sort(
                     new_operation["targets"], qubit_count)
                 if "controls" in new_operation:
@@ -211,9 +209,7 @@ class CirqRunner:
         if len(targets) == 1:
             return [cirq.X(targets[0]).controlled_by(*control_qubits)]
 
-        circuit = cirq.Circuit(
-            *[cirq.X(target) for target in targets]
-        )
+        circuit = cirq.Circuit(*[cirq.X(target) for target in targets])
         xs = cirq.CircuitOperation(circuit.freeze())
         return [xs.controlled_by(*control_qubits)]
 
