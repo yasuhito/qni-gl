@@ -209,9 +209,8 @@ class CirqRunner:
         if len(targets) == 1:
             return [cirq.X(targets[0]).controlled_by(*control_qubits)]
 
-        circuit = cirq.Circuit(*[cirq.X(target) for target in targets])
-        xs = cirq.CircuitOperation(circuit.freeze())
-        return [xs.controlled_by(*control_qubits)]
+        combined_x = cirq.ParallelGate(cirq.X, num_copies=len(targets))
+        return [combined_x(*targets).controlled_by(*control_qubits)]
 
     def _process_y_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
