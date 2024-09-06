@@ -105,8 +105,7 @@ def _convert_result(result):
     if ":amplitude" in result:
         response["amplitudes"] = _flatten_amplitude(result[":amplitude"])
 
-    if ":measuredBits" in result:
-        response["measuredBits"] = result[":measuredBits"]
+    response["measuredBits"] = result[":measuredBits"]
 
     return response
 
