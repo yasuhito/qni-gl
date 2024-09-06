@@ -1,6 +1,5 @@
 import json
 import logging
-import traceback
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -11,7 +10,6 @@ LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
 LOG_FILE = "backend.log"
 HTTP_BAD_REQUEST = 400
-HTTP_INTERNAL_SERVER_ERROR = 500
 
 app = Flask(__name__)
 CORS(app)
@@ -39,27 +37,22 @@ _setup_custom_logger()
 @app.route("/backend.json", methods=["POST"])
 def backend():
     try:
-        circuit_id, qubit_count, step_index, targets, steps = _get_request_data()
+        circuit_id, qubit_count, step_index, steps, targets = _get_request_data()
         _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
 
         step_results = _run_cirq(qubit_count, step_index, steps, targets)
         return jsonify(step_results)
-    except json.JSONDecodeError as e:
-        return _handle_error(f"An error occurred: {e!s}", "Bad Request: Invalid input", HTTP_BAD_REQUEST)
-    except RuntimeError as e:
-        return _handle_error(
-            f"An unexpected error occurred: {
-                e!s}", "Internal Server Error", HTTP_INTERNAL_SERVER_ERROR
-        )
+    except json.decoder.JSONDecodeError as e:
+        return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
 
 
 def _get_request_data():
     circuit_id = request.form.get("id", "")
     qubit_count = _get_int_from_request("qubitCount", 0)
     step_index = _get_int_from_request("stepIndex", 0)
-    targets = _get_targets_from_request()
     steps = _get_steps_from_request()
-    return circuit_id, qubit_count, step_index, targets, steps
+    targets = _get_targets_from_request()
+    return circuit_id, qubit_count, step_index, steps, targets
 
 
 def _get_int_from_request(key, default):
@@ -74,11 +67,11 @@ def _get_steps_from_request():
     return json.loads(request.form.get("steps", "[]"))
 
 
-def _handle_error(log_message, response_message, status_code):
-    app.logger.exception(log_message)
-    if status_code == HTTP_INTERNAL_SERVER_ERROR:
-        app.logger.exception("Stack trace: %s", traceback.format_exc())
-    return response_message, status_code
+def _handle_error(error_message, response_message, status_code):
+    app.logger.exception(error_message)
+    app.logger.exception(response_message)
+
+    return jsonify({"error": error_message, "message": response_message}), status_code
 
 
 def _log_request_data(circuit_id, qubit_count, step_index, targets, steps):
