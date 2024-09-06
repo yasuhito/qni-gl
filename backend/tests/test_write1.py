@@ -11,7 +11,7 @@ class TestWrite1(unittest.TestCase):
 
     def test_repr(self):
         w = Write1()
-        assert repr(w) == 'Write1()'
+        assert repr(w) == "Write1()"
 
     def test_build_circuit(self):
         step = [

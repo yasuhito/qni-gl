@@ -88,8 +88,7 @@ def _run_cirq(qubit_count, step_index, steps, targets):
 
     _log_circuit(circuit)
 
-    results = cirq_runner.run_circuit(
-        circuit, measurements, step_index, targets)
+    results = cirq_runner.run_circuit(circuit, measurements, step_index, targets)
 
     return [_convert_result(result) for result in results]
 

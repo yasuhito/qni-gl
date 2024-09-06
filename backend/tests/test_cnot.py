@@ -41,8 +41,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_01(self):
-        steps = [[{"type": "X", "targets": [0]}], [
-            {"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -54,8 +53,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 1, 0)
 
     def test_cnot_10(self):
-        steps = [[{"type": "X", "targets": [1]}], [
-            {"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [[{"type": "X", "targets": [1]}], [{"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -67,8 +65,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_11(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [
-            {"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "X", "targets": [1], "controls": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -96,8 +93,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_ccnot_011(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [
-            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "X", "targets": [2], "controls": [0, 1]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -113,8 +109,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 1, 0)
 
     def test_ccnot_111(self):
-        steps = [[{"type": "X", "targets": [0, 1, 2]}], [
-            {"type": "X", "targets": [2], "controls": [0, 1]}]]
+        steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "X", "targets": [2], "controls": [0, 1]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -146,10 +141,7 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_cxx_001(self):
-        steps = [
-            [{"type": "X", "targets": [0]}],
-            [{"type": "X", "targets": [1, 2], "controls": [0]}]
-        ]
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [1, 2], "controls": [0]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)

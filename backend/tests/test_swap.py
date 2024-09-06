@@ -66,8 +66,7 @@ class TestSwap(unittest.TestCase):
 
     # (Swap,Swap)|01> = |10>
     def test_swap_swap_01(self):
-        steps = [[{"type": "X", "targets": [0]}],
-                 [{"type": "Swap", "targets": [0, 1]}]]
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "Swap", "targets": [0, 1]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -80,8 +79,7 @@ class TestSwap(unittest.TestCase):
 
     # (Swap,Swap)|10> = |01>
     def test_swap_swap_10(self):
-        steps = [[{"type": "X", "targets": [1]}],
-                 [{"type": "Swap", "targets": [0, 1]}]]
+        steps = [[{"type": "X", "targets": [1]}], [{"type": "Swap", "targets": [0, 1]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
@@ -94,8 +92,7 @@ class TestSwap(unittest.TestCase):
 
     # (Swap,Swap)|11> = |11>
     def test_swap_swap_11(self):
-        steps = [[{"type": "X", "targets": [0, 1]}],
-                 [{"type": "Swap", "targets": [0, 1]}]]
+        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "Swap", "targets": [0, 1]}]]
         circuit, measurements = self.cirq_runner.build_circuit(steps)
 
         result = self.cirq_runner.run_circuit(circuit, measurements)
