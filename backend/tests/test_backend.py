@@ -1,7 +1,8 @@
 import json
 from math import sqrt
-from tests.conftest import assert_amplitudes_approx
+
 from src.backend import app
+from tests.conftest import assert_amplitudes_approx
 
 
 def test_post_empty_circuit():

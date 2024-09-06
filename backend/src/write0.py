@@ -3,7 +3,7 @@ import cirq
 
 class Write0(cirq.Gate):
     def __init__(self):
-        super(Write0, self).__init__()
+        super().__init__()
 
     def _num_qubits_(self):
         return 1
@@ -13,7 +13,7 @@ class Write0(cirq.Gate):
         return [cirq.ops.reset(q)]
 
     def __str__(self):
-        return '|0>'
+        return "|0>"
 
     def __repr__(self):
-        return 'Write0()'
+        return "Write0()"
