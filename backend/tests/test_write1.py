@@ -1,5 +1,6 @@
 import unittest
 
+from src.write1 import Write1
 from src.cirq_runner import CirqRunner
 from tests.conftest import assert_complex_approx
 
@@ -7,6 +8,10 @@ from tests.conftest import assert_complex_approx
 class TestWrite1(unittest.TestCase):
     def setUp(self):
         self.cirq_runner = CirqRunner()
+
+    def test_repr(self):
+        w = Write1()
+        assert repr(w) == 'Write1()'
 
     def test_build_circuit(self):
         step = [
