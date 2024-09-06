@@ -199,7 +199,7 @@ class CirqRunner:
 
     def _process_h_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
-        return [cirq.H(*targets)]
+        return [cirq.H(target) for target in targets]
 
     def _process_x_gate(self, qubits, operation):
         targets = self._target_qubits(qubits, operation)
