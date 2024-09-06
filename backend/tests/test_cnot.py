@@ -16,7 +16,7 @@ class TestCnot(unittest.TestCase):
         circuit, _ = self.cirq_runner.build_circuit(step)
 
         assert len(circuit.all_qubits()) == 2
-        assert str(circuit[0].operations[0]) == "CX(q(0), q(1))"
+        assert str(circuit[0].operations[0]) == "CNOT(q(0), q(1))"
 
     def test_build_circuit_with_ccnot(self):
         step = [
@@ -26,7 +26,7 @@ class TestCnot(unittest.TestCase):
         circuit, _ = self.cirq_runner.build_circuit(step)
 
         assert len(circuit.all_qubits()) == 3
-        assert str(circuit[0].operations[0]) == "CCX(q(0), q(1), q(2))"
+        assert str(circuit[0].operations[0]) == "TOFFOLI(q(0), q(1), q(2))"
 
     def test_cnot_00(self):
         steps = [[{"type": "X", "targets": [1], "controls": [0]}]]
@@ -213,3 +213,38 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[5], 0, 0)
         assert_complex_approx(amplitudes[6], 0, 0)
         assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_cxx_000(self):
+        steps = [[{"type": "X", "targets": [1, 2], "controls": [0]}]]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
+
+        result = self.cirq_runner.run_circuit(circuit, measurements)
+
+        amplitudes = result[0][":amplitude"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_cxx_001(self):
+        steps = [
+            [{"type": "X", "targets": [0]}],
+            [{"type": "X", "targets": [1, 2], "controls": [0]}]
+        ]
+        circuit, measurements = self.cirq_runner.build_circuit(steps)
+
+        result = self.cirq_runner.run_circuit(circuit, measurements)
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 1, 0)
