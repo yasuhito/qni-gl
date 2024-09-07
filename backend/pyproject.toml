@@ -72,3 +72,10 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.hatch.envs.docs]
+extra-dependencies = [
+  "sphinx"
+]
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -M html docs/source docs/build"

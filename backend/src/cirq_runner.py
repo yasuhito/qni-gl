@@ -8,7 +8,7 @@ from src.write1 import Write1
 
 
 class CirqRunner:
-    PAIR_OPERATION_COUNT = 2
+    _PAIR_OPERATION_COUNT = 2
 
     def __init__(self, logger=None):
         self.logger = logger
@@ -218,7 +218,7 @@ class CirqRunner:
     def _process_swap_gate(self, qubits, operation):
         operations_cirq = []
 
-        if len(operation["targets"]) == self.PAIR_OPERATION_COUNT:
+        if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
             target0 = qubits[operation["targets"][0]]
             target1 = qubits[operation["targets"][1]]
             operations_cirq.append(cirq.SWAP(target0, target1))
@@ -265,7 +265,7 @@ class CirqRunner:
         return [qubits[each] for each in gate["targets"]]
 
     def _is_invalid_cz(self, gate):
-        return len(gate["targets"]) < self.PAIR_OPERATION_COUNT
+        return len(gate["targets"]) < self._PAIR_OPERATION_COUNT
 
     def _is_minimally_valid_cz(self, gate):
-        return len(gate["targets"]) == self.PAIR_OPERATION_COUNT
+        return len(gate["targets"]) == self._PAIR_OPERATION_COUNT
