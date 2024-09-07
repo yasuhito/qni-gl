@@ -36,6 +36,16 @@ _setup_custom_logger()
 
 @app.route("/backend.json", methods=["POST"])
 def backend():
+    """
+    Handles the POST request to the /backend.json endpoint.
+
+    This function processes the incoming request,
+    runs the quantum circuit simulation using Cirq,
+    and returns the simulation results in JSON format.
+
+    Returns:
+        Response: A JSON response containing the simulation results or an error message.
+    """
     try:
         circuit_id, qubit_count, step_index, steps, targets = _get_request_data()
         _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
