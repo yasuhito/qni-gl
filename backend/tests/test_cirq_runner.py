@@ -10,12 +10,12 @@ class TestCirqRunner(unittest.TestCase):
         self.cirq_runner = CirqRunner()
 
     def test_build_circuit_with_unknown_operation(self):
-        step = [
+        steps = [
             [{"type": "UnknownGate", "targets": [0]}],
         ]
 
         with pytest.raises(ValueError, match="Unknown operation: UnknownGate"):
-            self.cirq_runner.build_circuit(step)
+            self.cirq_runner.run_circuit(steps)
 
 
 if __name__ == "__main__":

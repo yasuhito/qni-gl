@@ -13,42 +13,47 @@ class CirqRunner:
     def __init__(self, logger=None):
         self.logger = logger
 
-    def build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
-        """
-        Build a quantum circuit based on the provided steps and qubit count.
-
-        Args:
-            steps (list): A list of steps where each step is a list of operations.
-            qubit_count (int | None, optional): The number of qubits to use. If None, the qubit count is determined from the steps.
-
-        Returns:
-            tuple: A tuple containing the constructed circuit and a list of measurement keys.
-        """
-        qubit_count = qubit_count or self._get_qubit_count(steps)
-        steps_cirq = self._steps_cirq(steps, qubit_count)
-        circuit, measurement_keys = self._process_step_operations(steps_cirq, qubit_count)
-
-        return circuit, measurement_keys
-
     def run_circuit(
         self,
-        circuit: cirq.Circuit,
-        measurement_keys: list,
+        steps: list,
+        qubit_count: int | None = None,
         until_step_index: int | None = None,
         amplitude_indices: list | None = None,
-    ) -> list:
+    ):
         """
         Execute the specified quantum circuit and return the results of each step.
 
         Args:
-            circuit (cirq.Circuit): The quantum circuit to execute.
-            measurement_keys (list): A list of measurement keys.
+            steps (list): A list of steps to execute.
+            qubit_count (int | None, optional): The number of qubits to use. If None, the qubit count is determined from the steps.
             until_step_index (int | None, optional): The step index to stop execution at. Defaults to None, meaning all steps are executed.
             amplitude_indices (list | None, optional): The indices of amplitudes to filter. Defaults to None, meaning all amplitudes are returned.
 
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
+        circuit, measurements = self._build_circuit(steps, qubit_count)
+
+        if self.logger:
+            for each in str(circuit).split("\n"):
+                self.logger.debug(each)
+
+        return self._run_cirq(circuit, measurements, until_step_index, amplitude_indices)
+
+    def _build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
+        qubit_count = qubit_count or self._get_qubit_count(steps)
+        steps_cirq = self._steps_cirq(steps, qubit_count)
+        circuit, measurement_keys = self._process_step_operations(steps_cirq, qubit_count)
+
+        return circuit, measurement_keys
+
+    def _run_cirq(
+        self,
+        circuit: cirq.Circuit,
+        measurement_keys: list,
+        until_step_index: int | None = None,
+        amplitude_indices: list | None = None,
+    ) -> list:
         until_step_index = self._get_until_step_index(until_step_index, circuit)
         amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
 

@@ -50,9 +50,6 @@ check = "mypy --install-types --non-interactive {args:src/qni tests}"
 [tool.hatch.build.targets.wheel]
 packages = ["src/"] 
 
-[tool.hatch.envs.default.scripts]
-post-test = "coverage html"
-
 [tool.coverage.run]
 source_pkgs = ["src", "tests"]
 branch = true

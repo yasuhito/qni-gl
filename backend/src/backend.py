@@ -94,18 +94,10 @@ def _log_request_data(circuit_id, qubit_count, step_index, targets, steps):
 
 def _run_cirq(qubit_count, step_index, steps, targets):
     cirq_runner = CirqRunner(app.logger)
-    circuit, measurements = cirq_runner.build_circuit(steps, qubit_count)
 
-    _log_circuit(circuit)
-
-    results = cirq_runner.run_circuit(circuit, measurements, step_index, targets)
+    results = cirq_runner.run_circuit(steps, qubit_count, step_index, targets)
 
     return [_convert_result(result) for result in results]
-
-
-def _log_circuit(circuit):
-    for each in str(circuit).split("\n"):
-        app.logger.debug(each)
 
 
 def _convert_result(result):
