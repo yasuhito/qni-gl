@@ -86,7 +86,13 @@ export class App {
     }
     this.element = el;
 
-    this.worker = new Worker("serviceWorker.js");
+    const serviceWorkerUrl =
+      import.meta.env.MODE === "production"
+        ? "/service-worker.js"
+        : "/dev-sw.js?dev-sw";
+    this.worker = new Worker(serviceWorkerUrl, {
+      type: import.meta.env.MODE === "production" ? "classic" : "module",
+    });
     this.worker.addEventListener(
       "message",
       this.handleServiceWorkerMessage.bind(this)
@@ -267,16 +273,17 @@ export class App {
         }
 
         const qubitCount = this.circuit.highestOccupiedQubitNumber;
-        // TODO: ビットオーダーの変換をサービスワーカ側で行う
-        // フロントエンドからは Qni のビットオーダ (上が下位) しか意識しなくて良いようにする
-        const dropzone = step.fetchDropzone(qubitCount - parseInt(bit) - 1);
+        const dropzone = step.fetchDropzone(parseInt(bit));
         const measurementGate = dropzone.operation;
 
-        // もし measurementGate が MeasurementGate でない場合はエラー
-        if (!(measurementGate instanceof MeasurementGate)) {
-          throw new Error(`${measurementGate} is not MeasurementGate`);
+        if (measurementGate) {
+          if (!(measurementGate instanceof MeasurementGate)) {
+            console.log(`target_bit: ${qubitCount - parseInt(bit) - 1}`);
+            console.log(event.data);
+            throw new Error(`${measurementGate} is not MeasurementGate`);
+          }
+          measurementGate.value = value;
         }
-        measurementGate.value = value;
       }
     }
 

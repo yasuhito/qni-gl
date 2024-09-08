@@ -1,6 +1,6 @@
-wsgi_app = 'src.backend:app'
+wsgi_app = "src.backend:app"
 
-accesslog = 'access.log'
-errorlog = 'error.log'
+accesslog = "access.log"
+errorlog = "error.log"
 
 limit_request_line = 8190

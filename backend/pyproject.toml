@@ -25,11 +25,11 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "cirq",
-  "flask-cors",
-  "gunicorn",
-  "pytest",
-  "coverage"
+  "cirq>=1.4.1",
+  "flask-cors>=5.0.0",
+  "gunicorn>=23.0.0",
+  "pytest>=8.3.2",
+  "coverage>=7.6.1",
 ]
 
 [project.urls]
@@ -68,4 +68,17 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+
+[tool.hatch.envs.docs]
+extra-dependencies = [
+  "sphinx"
+]
+[tool.hatch.envs.docs.scripts]
+build = "sphinx-build -M html docs/source docs/build"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "docs",
 ]
