@@ -25,11 +25,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "cirq>=1.4.1",
+  "cirq>=1.1.0",
   "flask-cors>=5.0.0",
   "gunicorn>=23.0.0",
   "pytest>=8.3.2",
   "coverage>=7.6.1",
+  "qsimcirq>=0.9.5",
 ]
 
 [project.urls]
