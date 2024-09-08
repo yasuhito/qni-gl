@@ -17,9 +17,6 @@
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@playwright/test": "^1.46.1",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
     "@types/eslint__js": "^8.42.3",
     "@types/lodash": "^4.17.7",
     "@types/node": "^22.5.1",
@@ -30,7 +27,6 @@
     "eslint": "^9.9.1",
     "jsdom": "^25.0.0",
     "playwright": "^1.46.1",
-    "rollup": "^4.21.2",
     "start-server-and-test": "^2.0.5",
     "strip-ansi": "~7.1.0",
     "typedoc": "~0.26.6",
