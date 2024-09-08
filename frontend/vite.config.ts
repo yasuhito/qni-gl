@@ -19,13 +19,18 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
+      srcDir: "src",
+      filename: "service-worker.js",
       strategies: "injectManifest",
       registerType: "autoUpdate",
-      injectRegister: "auto",
-      srcDir: "src",
-      filename: "serviceWorker.ts",
+      injectRegister: false,
+      manifest: false,
       injectManifest: {
         injectionPoint: undefined,
+      },
+      devOptions: {
+        enabled: true,
+        type: "module",
       },
     }),
   ],
