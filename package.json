@@ -1,0 +1,9 @@
+{
+  "name": "qni",
+  "private": true,
+  "scripts": {
+    "test:backend": "cd backend && pytest",
+    "test:frontend": "cd frontend && yarn test",
+    "test": "npm run test:backend && npm run test:frontend"
+  }
+}
