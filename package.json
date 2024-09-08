@@ -7,7 +7,13 @@
     "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
     "test:backend": "cd backend && pytest",
     "test:frontend": "cd frontend && yarn test",
-    "test": "npm run test:backend && npm run test:frontend"
+    "test": "npm run test:backend && npm run test:frontend",
+    "lint:backend": "cd backend && hatch fmt",
+    "lint:frontend": "cd frontend && yarn lint",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "doc:backend": "cd backend && hatch run docs:build",
+    "doc:frontend": "cd frontend && yarn doc",
+    "doc": "npm run doc:backend && npm run doc:frontend"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
