@@ -5,7 +5,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from src.cirq_runner import CirqRunner
-from src.gpu_runner import GpuCirqRunner
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
