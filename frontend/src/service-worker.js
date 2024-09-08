@@ -1,4 +1,5 @@
 import { Simulator } from "@qni/simulator";
+import { BACKEND_URL } from "./constants";
 
 // Install SW
 self.addEventListener("install", () => {
@@ -14,7 +15,7 @@ self.addEventListener("message", (event) => {
   const steps = event.data.steps;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
-  const amplitudes: [number, number][] = [];
+  const amplitudes = [];
 
   for (let i = 0; i < vector.height; i++) {
     const c = vector.element(0, i);
@@ -23,7 +24,6 @@ self.addEventListener("message", (event) => {
     }
   }
 
-  // バックエンドを呼ぶ
   async function call_backend() {
     try {
       const params = new URLSearchParams({
@@ -34,10 +34,7 @@ self.addEventListener("message", (event) => {
         steps: JSON.stringify(steps),
       });
 
-      // console.log("Sending request to backend with the following parameters:");
-      // console.dir(Object.fromEntries(params.entries()));
-
-      const response = await fetch(`http://localhost:8000/backend.json`, {
+      const response = await fetch(BACKEND_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded", // URLSearchParams を使用する場合

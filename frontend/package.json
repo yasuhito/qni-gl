@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "rollup -c && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest run --dir tests/vitest --reporter dot --coverage",
     "test:system": "playwright test",

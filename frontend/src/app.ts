@@ -86,7 +86,13 @@ export class App {
     }
     this.element = el;
 
-    this.worker = new Worker("/serviceWorker.js");
+    const serviceWorkerUrl =
+      import.meta.env.MODE === "production"
+        ? "/service-worker.js"
+        : "/dev-sw.js?dev-sw";
+    this.worker = new Worker(serviceWorkerUrl, {
+      type: import.meta.env.MODE === "production" ? "classic" : "module",
+    });
     this.worker.addEventListener(
       "message",
       this.handleServiceWorkerMessage.bind(this)
