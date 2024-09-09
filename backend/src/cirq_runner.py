@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import cirq
 from cirq.circuits import InsertStrategy
+from qsimcirq import QSimSimulator
 
 from src.write0 import Write0
 from src.write1 import Write1
@@ -10,8 +11,9 @@ from src.write1 import Write1
 class CirqRunner:
     _PAIR_OPERATION_COUNT = 2
 
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, gpu_options=None):
         self.logger = logger
+        self.gpu_options = gpu_options
 
     def run_circuit(
         self,
@@ -38,7 +40,7 @@ class CirqRunner:
             for each in str(circuit).split("\n"):
                 self.logger.debug(each)
 
-        return self._run_cirq(circuit, measurements, until_step_index, amplitude_indices)
+        return self._run_qsim(circuit, measurements, until_step_index, amplitude_indices)
 
     def _build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
         qubit_count = qubit_count or self._get_qubit_count(steps)
@@ -47,7 +49,7 @@ class CirqRunner:
 
         return circuit, measurement_keys
 
-    def _run_cirq(
+    def _run_qsim(
         self,
         circuit: cirq.Circuit,
         measurement_keys: list,
@@ -57,26 +59,32 @@ class CirqRunner:
         until_step_index = self._get_until_step_index(until_step_index, circuit)
         amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
 
-        cirq_simulator = cirq.Simulator()
+        qsim_simulator = QSimSimulator(qsim_options=self.gpu_options)
         step_results = []
         qubit_count = len(circuit.all_qubits())
 
-        for step_index, step in enumerate(cirq_simulator.simulate_moment_steps(circuit)):
-            step_result = self._process_step_result(step_index, step, until_step_index, measurement_keys, qubit_count)
+        for moment_index, moment in enumerate(circuit):
+            if moment_index > until_step_index:
+                break
+
+            partial_circuit = cirq.Circuit(circuit[:moment_index + 1])
+            result = qsim_simulator.simulate(partial_circuit)
+
+            step_result = self._process_step_result(moment_index, result, until_step_index, measurement_keys, qubit_count)
             step_results.append(step_result)
 
         return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
 
-    def _process_step_result(self, step_index, step, until_step_index, measurement_keys, qubit_count):
-        result = {":measuredBits": {}}
+    def _process_step_result(self, step_index, result, until_step_index, measurement_keys, qubit_count):
+        step_result = {":measuredBits": {}}
         if step_index == until_step_index:
-            result[":amplitude"] = step.state_vector()
-        if step.measurements:
+            step_result[":amplitude"] = result.state_vector()
+        if result.measurements:
             for measurement in measurement_keys:
-                measured_value = step.measurements[measurement["key"]][0]
+                measured_value = result.measurements[measurement["key"]][0]
                 bit_qni = qubit_count - measurement["target_bit"] - 1
-                result[":measuredBits"][bit_qni] = measured_value
-        return result
+                step_result[":measuredBits"][bit_qni] = measured_value
+        return step_result
 
     def _filter_amplitudes(self, step_results, until_step_index, amplitude_indices):
         amplitudes = step_results[until_step_index][":amplitude"]
