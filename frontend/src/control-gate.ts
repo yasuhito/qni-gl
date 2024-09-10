@@ -7,6 +7,10 @@ import { SerializeableMixin } from "./serializeable-mixin";
 export class ControlGate extends OutlinedGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
 ) {
+  get operationType(): string {
+    return "ControlGate";
+  }
+
   get label(): string {
     return "@";
   }

@@ -1,5 +1,4 @@
-import * as PIXI from "pixi.js";
-import { Container } from "pixi.js";
+import { Rectangle, Container } from "pixi.js";
 import { QubitCircle } from "./qubit-circle";
 import { QubitCount } from "./types";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
@@ -15,7 +14,7 @@ class InvalidQubitCountError extends Error {
 
 export interface StateVectorConfig {
   initialQubitCount: QubitCount;
-  viewport: PIXI.Rectangle;
+  viewport: Rectangle;
 }
 
 /**
@@ -58,7 +57,7 @@ export class StateVectorComponent extends Container {
     this.setViewport(config.viewport);
   }
 
-  setViewport(viewport: PIXI.Rectangle) {
+  setViewport(viewport: Rectangle) {
     const visibleQubitCirclesChanged = this.renderer.setViewport(viewport);
 
     if (visibleQubitCirclesChanged) {
