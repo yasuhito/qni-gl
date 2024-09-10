@@ -9,6 +9,12 @@ import {
 import { Constructor } from "./constructor";
 import { convertToKebabCase } from "./util";
 
+const icons = import.meta.glob("../assets/*.png", { eager: true });
+
+function hasDefaultExport(module: unknown): module is { default: string } {
+  return typeof module === "object" && module !== null && "default" in module;
+}
+
 export declare class Iconable {
   createSprites(gateType: string): Promise<{
     sprite: Sprite;
@@ -24,6 +30,8 @@ export function IconableMixin<TBase extends Constructor<Container>>(
   Base: TBase
 ): Constructor<Iconable> & TBase {
   return class IconableMixinClass extends Base {
+    private textureCache: Map<string, Texture> = new Map();
+
     async createSprites(gateType: string) {
       const texture = await this.loadTexture(gateType);
 
@@ -35,10 +43,23 @@ export function IconableMixin<TBase extends Constructor<Container>>(
 
     private async loadTexture(gateType: string): Promise<Texture> {
       try {
-        const iconName = `${convertToKebabCase(gateType)}.png`;
-        const iconPath = `/assets/${iconName}`;
+        if (this.textureCache.has(gateType)) {
+          return this.textureCache.get(gateType)!;
+        }
 
-        return await Assets.load(iconPath);
+        const iconName = `${convertToKebabCase(gateType)}.png`;
+        const iconPath = `../assets/${iconName}`;
+
+        const iconModule = icons[iconPath];
+        if (!iconModule || !hasDefaultExport(iconModule)) {
+          throw new Error(`Icon not found for gate type: ${gateType}`);
+        }
+
+        const texture = await Assets.load(iconModule.default);
+
+        this.textureCache.set(gateType, texture);
+
+        return texture;
       } catch (error) {
         console.error(
           `Failed to load texture for gate type: ${gateType}`,
