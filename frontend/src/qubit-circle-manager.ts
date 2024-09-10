@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Container, Point } from "pixi.js";
 import { QubitCircle } from "./qubit-circle";
 import { Size } from "./size";
 import { StateVectorLayout } from "./state-vector-layout";
@@ -6,10 +6,10 @@ import { StateVectorLayout } from "./state-vector-layout";
 export class QubitCircleManager {
   private circles: Map<string, QubitCircle> = new Map();
   private layout: StateVectorLayout;
-  private container: PIXI.Container;
+  private container: Container;
   private _visibleQubitCircleIndices: Set<number> = new Set();
 
-  constructor(layout: StateVectorLayout, container: PIXI.Container) {
+  constructor(layout: StateVectorLayout, container: Container) {
     this.layout = layout;
     this.container = container;
   }
@@ -68,7 +68,7 @@ export class QubitCircleManager {
     });
   }
 
-  private createQubitCircle(position: PIXI.Point): void {
+  private createQubitCircle(position: Point): void {
     const circle = new QubitCircle(this.layout.qubitCircleSize);
     const key = this.circleKeyAt(position);
 
@@ -79,7 +79,7 @@ export class QubitCircleManager {
 
   private updateQubitCirclePositionAndSize(
     circle: QubitCircle,
-    position: PIXI.Point
+    position: Point
   ): void {
     circle.position.copyFrom(position);
     circle.size = this.layout.qubitCircleSize;
@@ -96,7 +96,7 @@ export class QubitCircleManager {
     });
   }
 
-  private circleKeyAt(position: PIXI.Point): string {
+  private circleKeyAt(position: Point): string {
     return `${position.x},${position.y}`;
   }
 }

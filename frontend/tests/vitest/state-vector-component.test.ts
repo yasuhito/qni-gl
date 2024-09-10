@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Rectangle } from "pixi.js";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { QubitCircle } from "../../src/qubit-circle";
 import { StateVectorComponent } from "../../src";
@@ -6,7 +6,7 @@ import { STATE_VECTOR_EVENTS } from "../../src/state-vector-events";
 
 describe("StateVectorComponent", () => {
   let stateVector: StateVectorComponent;
-  const mockScrollRect = new PIXI.Rectangle(0, 0, 1000, 1000);
+  const mockScrollRect = new Rectangle(0, 0, 1000, 1000);
 
   beforeEach(() => {
     stateVector = new StateVectorComponent({
@@ -37,7 +37,7 @@ describe("StateVectorComponent", () => {
   });
 
   it("should adjust scroll correctly", () => {
-    const newScrollRect = new PIXI.Rectangle(500, 500, 1500, 1500);
+    const newScrollRect = new Rectangle(500, 500, 1500, 1500);
     const mockEmit = vi.spyOn(stateVector, "emit");
     stateVector.setViewport(newScrollRect);
     expect(mockEmit).toHaveBeenCalledWith(
@@ -54,7 +54,7 @@ describe("StateVectorComponent", () => {
 
   it("should update visible amplitudes when scrolling", () => {
     stateVector.qubitCount = 4; // 16個のQubitCircleを作成
-    const newScrollRect = new PIXI.Rectangle(100, 100, 100, 100);
+    const newScrollRect = new Rectangle(100, 100, 100, 100);
     stateVector.setViewport(newScrollRect);
     expect(stateVector.visibleQubitCircleIndices.length).toBeLessThan(16);
   });
