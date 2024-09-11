@@ -7,9 +7,6 @@ from qiskit_aer import Aer
 
 class QiskitRunner:
     _PAIR_OPERATION_COUNT = 2
-    _OP_TYPE_H = "H"
-    _OP_TYPE_X = "X"
-    _OP_TYPE_WRITE1 = "|1>"
 
     def __init__(self, logger=None):
         self.logger = logger
@@ -36,18 +33,21 @@ class QiskitRunner:
         until_step_index = options.get("until_step_index")
         amplitude_indices = options.get("amplitude_indices")
 
+        until_step_index = self._get_until_step_index(until_step_index, steps)
+
         circuit = self._build_circuit(steps, qubit_count)
+        circuit_partial = self._build_circuit(steps, qubit_count, until_step_index)
 
         if self.logger:
             self.logger.debug(circuit.draw(output="text"))
 
-        until_step_index = self._get_until_step_index(until_step_index, steps)
+        return self._run_qiskit(circuit, circuit_partial, steps, until_step_index, amplitude_indices)
 
-        return self._run_qiskit(circuit, steps, until_step_index, amplitude_indices)
-
-    def _build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
+    def _build_circuit(self, steps: list, qubit_count: int | None, until_step_index: int | None = None) -> tuple:
         qubit_count = qubit_count or self._get_qubit_count(steps)
-        circuit = self._process_step_operations(steps, qubit_count)
+        until_step_index = until_step_index or len(steps) - 1
+        circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
+
         if qubit_count > 0:
             circuit.save_statevector()
 
@@ -56,6 +56,7 @@ class QiskitRunner:
     def _run_qiskit(
         self,
         circuit: QuantumCircuit,
+        circuit_partial: QuantumCircuit,
         steps: list,
         until_step_index: int,
         amplitude_indices: list | None = None,
@@ -64,10 +65,18 @@ class QiskitRunner:
 
         simulator = Aer.get_backend("aer_simulator")
 
-        # 測定があるかどうかを確認
-        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit.data)
+        # 指定したステップまでの部分回路を作成
+        # adjusted_until_step_index = self.adjusted_step_index(steps, until_step_index)
+        # print(f"adjusted_until_step_index: {adjusted_until_step_index}")
 
-        job = simulator.run(circuit, shots=1, memory=True) if has_measurements else simulator.run(circuit, shots=1)
+        # 測定があるかどうかを確認
+        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit_partial.data)
+
+        job = (
+            simulator.run(circuit_partial, shots=1, memory=True)
+            if has_measurements
+            else simulator.run(circuit_partial, shots=1)
+        )
 
         result = job.result()
         statevector = result.get_statevector() if circuit.depth() > 0 else None
@@ -148,14 +157,13 @@ class QiskitRunner:
             i_targets = list(range(qubit_count))
 
             for operation in step:
-                if "targets" in operation:
-                    i_targets = list(set(i_targets) - set(operation["targets"]))
+                i_targets = list(set(i_targets) - set(operation["targets"]))
                 if "controls" in operation:
                     i_targets = list(set(i_targets) - set(operation["controls"]))
 
-                if operation["type"] == self._OP_TYPE_H:
+                if operation["type"] == "H":
                     circuit.h(operation["targets"])
-                elif operation["type"] == self._OP_TYPE_X:
+                elif operation["type"] == "X":
                     if "controls" in operation:
                         for target in operation["targets"]:
                             circuit.mcx(operation["controls"], target)
@@ -202,19 +210,3 @@ class QiskitRunner:
                 circuit.id(each)
 
         return circuit
-
-    def adjusted_step_index(self, steps, step_index):
-        adjusted_index = step_index
-
-        for step in steps[:step_index]:
-            for operation in step:
-                operation_type = operation["type"]
-                if operation_type == self._OP_TYPE_WRITE1:
-                    adjusted_index += 1
-                elif operation_type == self._OP_TYPE_X and "controls" in operation:
-                    controls = operation["controls"]
-                    targets = operation["targets"]
-                    if controls and len(targets) > 1:
-                        adjusted_index += len(targets) - 1
-
-        return adjusted_index
