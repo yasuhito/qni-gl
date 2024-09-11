@@ -37,6 +37,8 @@ class QiskitRunner:
 
         if self.logger:
             self.logger.debug(circuit.draw(output='text'))
+        
+        print(circuit.draw(output='text'))
 
         until_step_index = self._get_until_step_index(until_step_index, steps)
         print(f"until_step_index: {until_step_index}")
@@ -226,12 +228,6 @@ class QiskitRunner:
                 if operation["type"] == "X" and "controls" in operation:
                     if len(operation["controls"]) > 0 and len(operation["targets"]) > 1:
                         actual_index += len(operation["targets"]) - 1
+                    
         return actual_index
 
-    def original_step_index(self, steps, actual_step_index):
-        original_index = actual_step_index
-        for i, step in enumerate(steps[:actual_step_index]):
-            for operation in step:
-                if operation["type"] == "|1>":
-                    original_index -= 1
-        return original_index
