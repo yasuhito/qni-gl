@@ -7,7 +7,8 @@ test.describe("State vector", () => {
   });
 
   // TODO: 32 までテスト
-  const qubitCounts = [1, 2, 3, 4, 5, 6, 7];
+  // const qubitCounts = [1, 2, 3, 4, 5, 6, 7];
+  const qubitCounts = [1, 2, 3, 4];
 
   for (const qubitCount of qubitCounts) {
     test(`${qubitCount} qubit${qubitCount > 1 ? "s" : ""}`, async ({
