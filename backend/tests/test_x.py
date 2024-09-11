@@ -37,4 +37,4 @@ class TestX(unittest.TestCase):
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
         assert_complex_approx(amplitudes[2], 0, 0)
-        assert_complex_approx(amplitudes[3], 1, 0)  
+        assert_complex_approx(amplitudes[3], 1, 0)

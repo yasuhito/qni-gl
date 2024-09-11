@@ -14,8 +14,6 @@ class TestMeasurement(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        print(f"result: {result}")
-
         amplitudes = result[0][":amplitude"]
         measured_bits = result[0][":measuredBits"]
         assert_complex_approx(amplitudes[0], 1, 0)

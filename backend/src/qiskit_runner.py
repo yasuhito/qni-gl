@@ -7,6 +7,9 @@ from qiskit_aer import Aer
 
 class QiskitRunner:
     _PAIR_OPERATION_COUNT = 2
+    _OP_TYPE_H = "H"
+    _OP_TYPE_X = "X"
+    _OP_TYPE_WRITE1 = "|1>"
 
     def __init__(self, logger=None):
         self.logger = logger
@@ -29,29 +32,21 @@ class QiskitRunner:
         if options is None:
             options = {}
 
-        qubit_count = options.get('qubit_count')
-        until_step_index = options.get('until_step_index')
-        amplitude_indices = options.get('amplitude_indices')
+        qubit_count = options.get("qubit_count")
+        until_step_index = options.get("until_step_index")
+        amplitude_indices = options.get("amplitude_indices")
 
         circuit = self._build_circuit(steps, qubit_count)
 
         if self.logger:
-            self.logger.debug(circuit.draw(output='text'))
-        
-        print(circuit.draw(output='text'))
+            self.logger.debug(circuit.draw(output="text"))
 
         until_step_index = self._get_until_step_index(until_step_index, steps)
-        print(f"until_step_index: {until_step_index}")
 
-        actual_until_step_index = self.actual_step_index(steps, until_step_index)
-
-        print(f"actual_until_step_index: {actual_until_step_index}")
-
-        return self._run_qiskit(circuit, steps, until_step_index, actual_until_step_index, amplitude_indices)
+        return self._run_qiskit(circuit, steps, until_step_index, amplitude_indices)
 
     def _build_circuit(self, steps: list, qubit_count: int | None = None) -> tuple:
         qubit_count = qubit_count or self._get_qubit_count(steps)
-        print(f"qubit_count: {qubit_count}")
         circuit = self._process_step_operations(steps, qubit_count)
         if qubit_count > 0:
             circuit.save_statevector()
@@ -63,38 +58,30 @@ class QiskitRunner:
         circuit: QuantumCircuit,
         steps: list,
         until_step_index: int,
-        actual_until_step_index: int,
         amplitude_indices: list | None = None,
     ) -> list:
         amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
 
-        simulator = Aer.get_backend('aer_simulator')
+        simulator = Aer.get_backend("aer_simulator")
 
         # 測定があるかどうかを確認
         has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit.data)
 
-        if has_measurements:
-            job = simulator.run(circuit, shots=1, memory=True)
-        else:
-            job = simulator.run(circuit, shots=1)
+        job = simulator.run(circuit, shots=1, memory=True) if has_measurements else simulator.run(circuit, shots=1)
 
         result = job.result()
-        if circuit.depth() > 0:
-            statevector = result.get_statevector()
-        else:
-            statevector = None
+        statevector = result.get_statevector() if circuit.depth() > 0 else None
         memory = result.get_memory() if has_measurements else None
-        print(f"memory: {memory}")
-        
+
         step_results = []
         if circuit.depth() == 0:
             return step_results
-        
+
         for step_index in range(len(steps)):
             step_result = self._process_step_result(step_index, statevector, memory, until_step_index)
             step_results.append(step_result)
 
-        return self._filter_amplitudes(step_results, until_step_index, actual_until_step_index, amplitude_indices)
+        return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
 
     def _process_step_result(self, step_index, statevector, memory, until_step_index):
         result = {":measuredBits": {}}
@@ -108,9 +95,7 @@ class QiskitRunner:
 
         return result
 
-    def _filter_amplitudes(self, step_results, until_step_index, actual_until_step_index, amplitude_indices):
-        print(f"step_results: {step_results}")
-
+    def _filter_amplitudes(self, step_results, until_step_index, amplitude_indices):
         amplitudes = step_results[until_step_index][":amplitude"]
         if amplitudes is None:
             return step_results
@@ -168,9 +153,9 @@ class QiskitRunner:
                 if "controls" in operation:
                     i_targets = list(set(i_targets) - set(operation["controls"]))
 
-                if operation["type"] == "H":
+                if operation["type"] == self._OP_TYPE_H:
                     circuit.h(operation["targets"])
-                elif operation["type"] == "X":
+                elif operation["type"] == self._OP_TYPE_X:
                     if "controls" in operation:
                         for target in operation["targets"]:
                             circuit.mcx(operation["controls"], target)
@@ -181,7 +166,7 @@ class QiskitRunner:
                 elif operation["type"] == "Z":
                     circuit.z(operation["targets"])
                 elif operation["type"] == "X^½":
-                    circuit.append(XGate().power(1/2), operation["targets"])
+                    circuit.append(XGate().power(1 / 2), operation["targets"])
                 elif operation["type"] == "S":
                     circuit.s(operation["targets"])
                 elif operation["type"] == "S†":
@@ -196,9 +181,9 @@ class QiskitRunner:
                     else:
                         circuit.id(operation["targets"])
                 elif operation["type"] == "•":
-                    if len(operation["targets"]) >= 2:
-                        U1 = ZGate().control(num_ctrl_qubits = len(operation["targets"]) - 1)
-                        circuit.append(U1, qargs = operation["targets"])
+                    if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
+                        u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
+                        circuit.append(u, qargs=operation["targets"])
                     else:
                         circuit.id(operation["targets"])
                 elif operation["type"] == "|0>":
@@ -218,16 +203,18 @@ class QiskitRunner:
 
         return circuit
 
-    def actual_step_index(self, steps, step_index):
-        actual_index = step_index
+    def adjusted_step_index(self, steps, step_index):
+        adjusted_index = step_index
 
-        for i, step in enumerate(steps[:step_index]):
+        for step in steps[:step_index]:
             for operation in step:
-                if operation["type"] == "|1>":
-                    actual_index += 1
-                if operation["type"] == "X" and "controls" in operation:
-                    if len(operation["controls"]) > 0 and len(operation["targets"]) > 1:
-                        actual_index += len(operation["targets"]) - 1
-                    
-        return actual_index
+                operation_type = operation["type"]
+                if operation_type == self._OP_TYPE_WRITE1:
+                    adjusted_index += 1
+                elif operation_type == self._OP_TYPE_X and "controls" in operation:
+                    controls = operation["controls"]
+                    targets = operation["targets"]
+                    if controls and len(targets) > 1:
+                        adjusted_index += len(targets) - 1
 
+        return adjusted_index

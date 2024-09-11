@@ -4,6 +4,7 @@ import pytest
 
 from src.qiskit_runner import QiskitRunner
 
+
 class TestQiskitRunner(unittest.TestCase):
     def setUp(self):
         self.qiskit_runner = QiskitRunner()

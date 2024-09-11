@@ -14,8 +14,6 @@ class TestSwap(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        print(f"result: {result}")
-
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
@@ -61,8 +59,6 @@ class TestSwap(unittest.TestCase):
         steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "Swap", "targets": [0, 1]}]]
 
         result = self.qiskit_runner.run_circuit(steps)
-
-        print(f"result: {result}")
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
