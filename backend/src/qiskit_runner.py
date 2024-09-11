@@ -38,8 +38,6 @@ class QiskitRunner:
         if self.logger:
             self.logger.debug(circuit.draw(output='text'))
 
-        print(circuit.draw(output='text'))
-
         until_step_index = self._get_until_step_index(until_step_index, steps)
         print(f"until_step_index: {until_step_index}")
 
@@ -84,6 +82,7 @@ class QiskitRunner:
         else:
             statevector = None
         memory = result.get_memory() if has_measurements else None
+        print(f"memory: {memory}")
         
         step_results = []
         if circuit.depth() == 0:
@@ -102,7 +101,7 @@ class QiskitRunner:
             result[":amplitude"] = statevector
 
         if memory:
-            for bit_index, bit_value in enumerate(memory[0]):
+            for bit_index, bit_value in enumerate(reversed(memory[0])):  # ビット列を逆にする
                 result[":measuredBits"][bit_index] = int(bit_value)
 
         return result
@@ -193,22 +192,21 @@ class QiskitRunner:
                     if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
                         circuit.swap(operation["targets"][0], operation["targets"][1])
                     else:
-                        for target in operation["targets"]:
-                            circuit.id(target)
+                        circuit.id(operation["targets"])
                 elif operation["type"] == "•":
                     if len(operation["targets"]) >= 2:
                         U1 = ZGate().control(num_ctrl_qubits = len(operation["targets"]) - 1)
                         circuit.append(U1, qargs = operation["targets"])
                     else:
-                        for target in operation["targets"]:
-                            circuit.id(target)
+                        circuit.id(operation["targets"])
                 elif operation["type"] == "|0>":
                     circuit.reset(operation["targets"][0])
                 elif operation["type"] == "|1>":
                     circuit.reset(operation["targets"][0])
                     circuit.x(operation["targets"][0])
                 elif operation["type"] == "Measure":
-                    circuit.measure(operation["targets"][0], creg[operation["targets"][0]])
+                    for target in operation["targets"]:
+                        circuit.measure(target, target)
                 else:
                     msg = "Unknown operation: {}".format(operation["type"])
                     raise ValueError(msg)

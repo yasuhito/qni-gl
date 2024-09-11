@@ -33,3 +33,11 @@ class TestMeasurement(unittest.TestCase):
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 1, 0)
         assert measured_bits == {0: 1}
+
+    def test_measure_multiple_qubits(self):
+        steps = [[{"type": "X", "targets": [1]}], [{"type": "Measure", "targets": [0, 1]}]]
+
+        result = self.qiskit_runner.run_circuit(steps)
+
+        measured_bits = result[1][":measuredBits"]
+        assert measured_bits == {0: 0, 1: 1}
