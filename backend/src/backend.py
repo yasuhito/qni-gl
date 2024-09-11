@@ -1,10 +1,9 @@
 import json
 import logging
 
+from src.qiskit_runner import QiskitRunner
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
-from src.cirq_runner import CirqRunner
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
@@ -93,9 +92,9 @@ def _log_request_data(circuit_id, qubit_count, step_index, targets, steps):
 
 
 def _run_cirq(qubit_count, step_index, steps, targets):
-    cirq_runner = CirqRunner(app.logger)
+    qiskit_runner = QiskitRunner(app.logger)
 
-    results = cirq_runner.run_circuit(steps, qubit_count, step_index, targets)
+    results = qiskit_runner.run_circuit(steps, {"qubit_count": qubit_count, "step_index": step_index, "targets": targets})
 
     return [_convert_result(result) for result in results]
 

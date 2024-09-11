@@ -1,13 +1,13 @@
 import unittest
 from math import sqrt
 
-from src.cirq_runner import CirqRunner
+from src.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 
 class TestH(unittest.TestCase):
     def setUp(self):
-        self.cirq_runner = CirqRunner()
+        self.qiskit_runner = QiskitRunner()
 
     # H|0⟩=1/√2(|0⟩+|1⟩)
     def test_h_0(self):
@@ -15,7 +15,7 @@ class TestH(unittest.TestCase):
             [{"type": "H", "targets": [0]}],
         ]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
@@ -28,7 +28,7 @@ class TestH(unittest.TestCase):
             [{"type": "H", "targets": [0]}],
         ]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)

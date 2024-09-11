@@ -1,21 +1,12 @@
 import unittest
 
-from src.cirq_runner import CirqRunner
-from src.write1 import Write1
+from src.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 
 class TestWrite1(unittest.TestCase):
     def setUp(self):
-        self.cirq_runner = CirqRunner()
-
-    def test_str(self):
-        w = Write1()
-        assert str(w) == "|1>"
-
-    def test_repr(self):
-        w = Write1()
-        assert repr(w) == "Write1()"
+        self.qiskit_runner = QiskitRunner()
 
     # Write1|0⟩=|1>
     def test_write1_0(self):
@@ -23,7 +14,7 @@ class TestWrite1(unittest.TestCase):
             [{"type": "|1>", "targets": [0]}],
         ]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -36,7 +27,7 @@ class TestWrite1(unittest.TestCase):
             [{"type": "|1>", "targets": [0]}],
         ]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

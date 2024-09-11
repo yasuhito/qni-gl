@@ -1,18 +1,18 @@
 import unittest
 
-from src.cirq_runner import CirqRunner
+from src.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 
 class TestCz(unittest.TestCase):
     def setUp(self):
-        self.cirq_runner = CirqRunner()
+        self.qiskit_runner = QiskitRunner()
 
     # CZ|00⟩ = |00⟩
     def test_cz_00(self):
         steps = [[{"type": "•", "targets": [0, 1]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)
@@ -24,7 +24,7 @@ class TestCz(unittest.TestCase):
     def test_cz_01(self):
         steps = [[{"type": "X", "targets": [0]}], [{"type": "•", "targets": [0, 1]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -36,7 +36,7 @@ class TestCz(unittest.TestCase):
     def test_cz_10(self):
         steps = [[{"type": "X", "targets": [1]}], [{"type": "•", "targets": [0, 1]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -48,7 +48,7 @@ class TestCz(unittest.TestCase):
     def test_cz_11(self):
         steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "•", "targets": [0, 1]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)
@@ -60,7 +60,7 @@ class TestCz(unittest.TestCase):
     def test_cz_111(self):
         steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "•", "targets": [0, 1, 2]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

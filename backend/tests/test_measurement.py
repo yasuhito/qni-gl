@@ -1,18 +1,20 @@
 import unittest
 
-from src.cirq_runner import CirqRunner
+from src.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 
 class TestMeasurement(unittest.TestCase):
     def setUp(self):
-        self.cirq_runner = CirqRunner()
+        self.qiskit_runner = QiskitRunner()
 
     # M|0⟩=|0⟩
     def test_measurement_0(self):
         steps = [[{"type": "Measure", "targets": [0]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
+
+        print(f"result: {result}")
 
         amplitudes = result[0][":amplitude"]
         measured_bits = result[0][":measuredBits"]
@@ -24,7 +26,7 @@ class TestMeasurement(unittest.TestCase):
     def test_measurement_1(self):
         steps = [[{"type": "X", "targets": [0]}], [{"type": "Measure", "targets": [0]}]]
 
-        result = self.cirq_runner.run_circuit(steps)
+        result = self.qiskit_runner.run_circuit(steps)
 
         amplitudes = result[1][":amplitude"]
         measured_bits = result[1][":measuredBits"]
