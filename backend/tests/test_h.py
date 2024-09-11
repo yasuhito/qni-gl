@@ -33,3 +33,15 @@ class TestH(unittest.TestCase):
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 1 / sqrt(2), 0)
         assert_complex_approx(amplitudes[1], -1 / sqrt(2), 0)
+
+    def test_hh_0(self):
+        steps = [
+            [{"type": "H", "targets": [0]}],
+            [{"type": "H", "targets": [0]}],
+        ]
+
+        result = self.qiskit_runner.run_circuit(steps)
+
+        amplitudes = result[1][":amplitude"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)

@@ -40,13 +40,16 @@ class QiskitRunner:
 
         if self.logger:
             self.logger.debug(circuit.draw(output="text"))
+            self.logger.debug(circuit_partial.draw(output="text"))
 
         return self._run_qiskit(circuit, circuit_partial, steps, until_step_index, amplitude_indices)
 
     def _build_circuit(self, steps: list, qubit_count: int | None, until_step_index: int | None = None) -> tuple:
         qubit_count = qubit_count or self._get_qubit_count(steps)
-        until_step_index = until_step_index or len(steps) - 1
-        circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
+        if until_step_index is None:
+            circuit = self._process_step_operations(steps, qubit_count)
+        else:
+            circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
 
         if qubit_count > 0:
             circuit.save_statevector()
@@ -69,21 +72,21 @@ class QiskitRunner:
         # adjusted_until_step_index = self.adjusted_step_index(steps, until_step_index)
         # print(f"adjusted_until_step_index: {adjusted_until_step_index}")
 
-        # 測定があるかどうかを確認
-        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit_partial.data)
-
-        job = (
-            simulator.run(circuit_partial, shots=1, memory=True)
-            if has_measurements
-            else simulator.run(circuit_partial, shots=1)
-        )
-
+        # 状態ベクトル取得用の実行
+        job = simulator.run(circuit_partial, shots=1)
         result = job.result()
-        statevector = result.get_statevector() if circuit.depth() > 0 else None
-        memory = result.get_memory() if has_measurements else None
+        statevector = result.get_statevector() if circuit_partial.depth() > 0 else None
+
+        # 測定結果取得用の実行
+        memory = None
+        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit.data)
+        if has_measurements:
+            job = simulator.run(circuit, shots=1, memory=True)
+            result = job.result()
+            memory = result.get_memory()
 
         step_results = []
-        if circuit.depth() == 0:
+        if circuit_partial.depth() == 0:
             return step_results
 
         for step_index in range(len(steps)):

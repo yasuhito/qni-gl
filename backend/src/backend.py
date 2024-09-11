@@ -96,7 +96,7 @@ def _run_cirq(qubit_count, step_index, steps, targets):
     qiskit_runner = QiskitRunner(app.logger)
 
     results = qiskit_runner.run_circuit(
-        steps, {"qubit_count": qubit_count, "step_index": step_index, "targets": targets}
+        steps, {"qubit_count": qubit_count, "until_step_index": step_index, "targets": targets}
     )
 
     return [_convert_result(result) for result in results]
