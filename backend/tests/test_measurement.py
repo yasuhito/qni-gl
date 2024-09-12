@@ -33,9 +33,9 @@ class TestMeasurement(unittest.TestCase):
         assert measured_bits == {0: 1}
 
     def test_measure_multiple_qubits(self):
-        steps = [[{"type": "Measure", "targets": [0, 1, 2]}]]
+        steps = [[{"type": "X", "targets": [2]}], [{"type": "Measure", "targets": [0, 2]}]]
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        measured_bits = result[0][":measuredBits"]
-        assert measured_bits == {0: 0, 1: 0, 2: 0}
+        measured_bits = result[1][":measuredBits"]
+        assert measured_bits == {0: 0, 2: 1}

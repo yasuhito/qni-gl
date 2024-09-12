@@ -31,40 +31,29 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        circuit = self._build_circuit(steps, qubit_count=qubit_count)
+        step_results = []
+
+        circuit_full = self._build_circuit(steps, qubit_count=qubit_count)
         circuit_partial = self._build_circuit(steps, qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.logger:
-            self.logger.debug(circuit.draw(output="text"))
+            self.logger.debug(circuit_full.draw(output="text"))
             self.logger.debug(circuit_partial.draw(output="text"))
 
-        step_results = []
         if circuit_partial.depth() == 0:
             return step_results
 
-        simulator = Aer.get_backend("aer_simulator_statevector")
-
-        # 測定結果取得用の実行
-        memory = None
-        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit.data)
-        if has_measurements:
-            job = simulator.run(circuit, shots=1, memory=True)
-            result = job.result()
-            memory = result.get_memory()
-
-        # 状態ベクトル取得用の実行
-        job = simulator.run(circuit_partial, shots=1)
-        result = job.result()
-        statevector = result.get_statevector() if circuit_partial.depth() > 0 else None
+        measured_bits = self._get_measured_bits(circuit_full)
+        statevector = self._get_statevector(circuit_partial)
 
         if until_step_index is None:
             until_step_index = self._get_until_step_index(steps)
 
         for step_index in range(len(steps)):
-            step_result = self._process_step_result(step_index, statevector, memory, until_step_index)
+            step_result = self._process_step_result(step_index, statevector, measured_bits, until_step_index)
             step_results.append(step_result)
 
-        amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
+        amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit_full)
 
         return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
 
@@ -85,15 +74,11 @@ class QiskitRunner:
 
         return circuit
 
-    def _process_step_result(self, step_index, statevector, memory, until_step_index):
-        result = {":measuredBits": {}}
+    def _process_step_result(self, step_index, statevector, measured_bits: dict, until_step_index):
+        result = {":measuredBits": measured_bits}
 
         if step_index == until_step_index:
             result[":amplitude"] = statevector
-
-        if memory:
-            for bit_index, bit_value in enumerate(reversed(memory[0])):  # ビット列を逆にする
-                result[":measuredBits"][bit_index] = int(bit_value)
 
         return result
 
@@ -218,3 +203,29 @@ class QiskitRunner:
             circuit.append(u, qargs=operation["targets"])
         else:
             circuit.id(operation["targets"])
+
+    def _get_measured_bits(self, circuit: QuantumCircuit) -> dict[int, int]:
+        simulator = self._get_simulator()
+        bit_indices = [
+            circuit.find_bit(instr.qubits[0]).index for instr in circuit.data if isinstance(instr.operation, Measure)
+        ]
+
+        if not bit_indices:
+            return {}
+
+        job = simulator.run(circuit, shots=1, memory=True)
+        result = job.result()
+
+        memory = list(reversed(result.get_memory()[0]))
+
+        return {bit: int(memory[bit]) for bit in bit_indices}
+
+    def _get_statevector(self, circuit_partial: QuantumCircuit) -> list | None:
+        simulator = self._get_simulator()
+        job = simulator.run(circuit_partial, shots=1)
+        result = job.result()
+
+        return result.get_statevector() if circuit_partial.depth() > 0 else None
+
+    def _get_simulator(self):
+        return Aer.get_backend("aer_simulator_statevector")
