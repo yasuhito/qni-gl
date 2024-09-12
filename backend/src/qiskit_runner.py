@@ -121,12 +121,12 @@ class QiskitRunner:
 
         return step_results
 
-    def _get_until_step_index(self, until_step_index, steps):
+    def _get_until_step_index(self, until_step_index: int | None, steps: list) -> int:
         if len(steps) == 0:
             return 0
         return len(steps) - 1 if until_step_index is None else until_step_index
 
-    def _get_amplitude_indices(self, amplitude_indices, circuit):
+    def _get_amplitude_indices(self, amplitude_indices: list | None, circuit: QuantumCircuit) -> list:
         qubit_count = len(circuit.qubits)
 
         if amplitude_indices is None:
@@ -143,7 +143,7 @@ class QiskitRunner:
             + 1
         )
 
-    def _process_step_operations(self, steps, qubit_count):
+    def _process_step_operations(self, steps: list, qubit_count: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
         classical_bits = self._get_classical_bits(steps)
 
@@ -166,7 +166,7 @@ class QiskitRunner:
 
         return circuit
 
-    def _get_classical_bits(self, steps):
+    def _get_classical_bits(self, steps: list) -> int:
         classical_bits = 0
         for step in steps:
             for gate in step:
@@ -174,7 +174,7 @@ class QiskitRunner:
                     classical_bits = max(classical_bits, max(gate.get("targets", [-1])) + 1)
         return classical_bits
 
-    def _apply_operation(self, circuit, operation):
+    def _apply_operation(self, circuit: QuantumCircuit, operation: dict):
         if operation["type"] == "H":
             circuit.h(operation["targets"])
         elif operation["type"] == "X":
@@ -209,20 +209,20 @@ class QiskitRunner:
             msg = "Unknown operation: {}".format(operation["type"])
             raise ValueError(msg)
 
-    def _apply_x_operation(self, circuit, operation):
+    def _apply_x_operation(self, circuit: QuantumCircuit, operation: dict):
         if "controls" in operation:
             for target in operation["targets"]:
                 circuit.mcx(operation["controls"], target)
         else:
             circuit.x(operation["targets"])
 
-    def _apply_swap_operation(self, circuit, operation):
+    def _apply_swap_operation(self, circuit: QuantumCircuit, operation: dict):
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
             circuit.swap(operation["targets"][0], operation["targets"][1])
         else:
             circuit.id(operation["targets"])
 
-    def _apply_controlled_z_operation(self, circuit, operation):
+    def _apply_controlled_z_operation(self, circuit: QuantumCircuit, operation: dict):
         if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
             u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
             circuit.append(u, qargs=operation["targets"])
