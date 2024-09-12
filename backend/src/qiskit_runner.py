@@ -50,12 +50,15 @@ class QiskitRunner:
             until_step_index = self._get_until_step_index(steps)
 
         for step_index in range(len(steps)):
-            step_result = self._process_step_result(step_index, statevector, measured_bits, until_step_index)
+            step_result = {":measuredBits": measured_bits}
+            if step_index == until_step_index:
+                step_result[":amplitude"] = statevector
             step_results.append(step_result)
 
-        amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit_full)
+        if amplitude_indices is None:
+            return step_results
 
-        return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
+        return self._filter_amplitudes(step_results, amplitude_indices)
 
     def _build_circuit(
         self, steps: list, *, qubit_count: int | None = None, until_step_index: int | None = None
@@ -74,25 +77,12 @@ class QiskitRunner:
 
         return circuit
 
-    def _process_step_result(self, step_index, statevector, measured_bits: dict, until_step_index):
-        result = {":measuredBits": measured_bits}
-
-        if step_index == until_step_index:
-            result[":amplitude"] = statevector
-
-        return result
-
-    def _filter_amplitudes(self, step_results, until_step_index, amplitude_indices):
-        amplitudes = step_results[until_step_index][":amplitude"]
-        if amplitudes is None:
-            return step_results
-
-        filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
-        step_results[until_step_index][":amplitude"] = filtered_amplitudes
-
-        # # original_until_step_index を使用して結果を調整
-        # if until_step_index != actual_until_step_index:
-        #     step_results[actual_until_step_index] = step_results.pop(until_step_index)
+    def _filter_amplitudes(self, step_results, amplitude_indices):
+        for step_result in step_results:
+            amplitudes = step_result.get(":amplitude")
+            if amplitudes is not None:
+                filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
+                step_result[":amplitude"] = filtered_amplitudes
 
         return step_results
 
@@ -100,14 +90,6 @@ class QiskitRunner:
         if len(steps) == 0:
             return 0
         return len(steps) - 1
-
-    def _get_amplitude_indices(self, amplitude_indices: list | None, circuit: QuantumCircuit) -> list:
-        qubit_count = len(circuit.qubits)
-
-        if amplitude_indices is None:
-            amplitude_indices = list(range(2**qubit_count))
-
-        return amplitude_indices
 
     def _get_qubit_count(self, steps: list) -> int:
         return (
