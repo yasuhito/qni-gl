@@ -31,49 +31,18 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        until_step_index = self._get_until_step_index(until_step_index, steps)
-
-        circuit = self._build_circuit(steps, qubit_count)
-        circuit_partial = self._build_circuit(steps, qubit_count, until_step_index)
+        circuit = self._build_circuit(steps, qubit_count=qubit_count)
+        circuit_partial = self._build_circuit(steps, qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.logger:
             self.logger.debug(circuit.draw(output="text"))
             self.logger.debug(circuit_partial.draw(output="text"))
 
-        return self._run_qiskit(circuit, circuit_partial, steps, until_step_index, amplitude_indices)
-
-    def _build_circuit(self, steps: list, qubit_count: int | None, until_step_index: int | None = None) -> tuple:
-        qubit_count = qubit_count or self._get_qubit_count(steps)
-        if until_step_index is None:
-            circuit = self._process_step_operations(steps, qubit_count)
-        else:
-            circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
-
-        if qubit_count > 0:
-            circuit.save_statevector()
-
-        return circuit
-
-    def _run_qiskit(
-        self,
-        circuit: QuantumCircuit,
-        circuit_partial: QuantumCircuit,
-        steps: list,
-        until_step_index: int,
-        amplitude_indices: list | None = None,
-    ) -> list:
-        amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
+        step_results = []
+        if circuit_partial.depth() == 0:
+            return step_results
 
         simulator = Aer.get_backend("aer_simulator_statevector")
-
-        # 指定したステップまでの部分回路を作成
-        # adjusted_until_step_index = self.adjusted_step_index(steps, until_step_index)
-        # print(f"adjusted_until_step_index: {adjusted_until_step_index}")
-
-        # 状態ベクトル取得用の実行
-        job = simulator.run(circuit_partial, shots=1)
-        result = job.result()
-        statevector = result.get_statevector() if circuit_partial.depth() > 0 else None
 
         # 測定結果取得用の実行
         memory = None
@@ -83,15 +52,38 @@ class QiskitRunner:
             result = job.result()
             memory = result.get_memory()
 
-        step_results = []
-        if circuit_partial.depth() == 0:
-            return step_results
+        # 状態ベクトル取得用の実行
+        job = simulator.run(circuit_partial, shots=1)
+        result = job.result()
+        statevector = result.get_statevector() if circuit_partial.depth() > 0 else None
+
+        if until_step_index is None:
+            until_step_index = self._get_until_step_index(steps)
 
         for step_index in range(len(steps)):
             step_result = self._process_step_result(step_index, statevector, memory, until_step_index)
             step_results.append(step_result)
 
+        amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
+
         return self._filter_amplitudes(step_results, until_step_index, amplitude_indices)
+
+    def _build_circuit(
+        self, steps: list, *, qubit_count: int | None = None, until_step_index: int | None = None
+    ) -> tuple:
+        if qubit_count is None:
+            qubit_count = self._get_qubit_count(steps)
+
+        if until_step_index is None:
+            until_step_index = self._get_until_step_index(steps)
+            circuit = self._process_step_operations(steps, qubit_count)
+        else:
+            circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
+
+        if qubit_count > 0:
+            circuit.save_statevector()
+
+        return circuit
 
     def _process_step_result(self, step_index, statevector, memory, until_step_index):
         result = {":measuredBits": {}}
@@ -119,10 +111,10 @@ class QiskitRunner:
 
         return step_results
 
-    def _get_until_step_index(self, until_step_index: int | None, steps: list) -> int:
+    def _get_until_step_index(self, steps: list) -> int:
         if len(steps) == 0:
             return 0
-        return len(steps) - 1 if until_step_index is None else until_step_index
+        return len(steps) - 1
 
     def _get_amplitude_indices(self, amplitude_indices: list | None, circuit: QuantumCircuit) -> list:
         qubit_count = len(circuit.qubits)
