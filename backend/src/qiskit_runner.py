@@ -66,7 +66,7 @@ class QiskitRunner:
     ) -> list:
         amplitude_indices = self._get_amplitude_indices(amplitude_indices, circuit)
 
-        simulator = Aer.get_backend("aer_simulator")
+        simulator = Aer.get_backend("aer_simulator_statevector")
 
         # 指定したステップまでの部分回路を作成
         # adjusted_until_step_index = self.adjusted_step_index(steps, until_step_index)
@@ -164,52 +164,64 @@ class QiskitRunner:
                 if "controls" in operation:
                     i_targets = list(set(i_targets) - set(operation["controls"]))
 
-                if operation["type"] == "H":
-                    circuit.h(operation["targets"])
-                elif operation["type"] == "X":
-                    if "controls" in operation:
-                        for target in operation["targets"]:
-                            circuit.mcx(operation["controls"], target)
-                    else:
-                        circuit.x(operation["targets"])
-                elif operation["type"] == "Y":
-                    circuit.y(operation["targets"])
-                elif operation["type"] == "Z":
-                    circuit.z(operation["targets"])
-                elif operation["type"] == "X^½":
-                    circuit.append(XGate().power(1 / 2), operation["targets"])
-                elif operation["type"] == "S":
-                    circuit.s(operation["targets"])
-                elif operation["type"] == "S†":
-                    circuit.sdg(operation["targets"])
-                elif operation["type"] == "T":
-                    circuit.t(operation["targets"])
-                elif operation["type"] == "T†":
-                    circuit.tdg(operation["targets"])
-                elif operation["type"] == "Swap":
-                    if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
-                        circuit.swap(operation["targets"][0], operation["targets"][1])
-                    else:
-                        circuit.id(operation["targets"])
-                elif operation["type"] == "•":
-                    if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
-                        u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
-                        circuit.append(u, qargs=operation["targets"])
-                    else:
-                        circuit.id(operation["targets"])
-                elif operation["type"] == "|0>":
-                    circuit.reset(operation["targets"][0])
-                elif operation["type"] == "|1>":
-                    circuit.reset(operation["targets"][0])
-                    circuit.x(operation["targets"][0])
-                elif operation["type"] == "Measure":
-                    for target in operation["targets"]:
-                        circuit.measure(target, target)
-                else:
-                    msg = "Unknown operation: {}".format(operation["type"])
-                    raise ValueError(msg)
+                self._apply_operation(circuit, operation)
 
             for each in i_targets:
                 circuit.id(each)
 
         return circuit
+
+    def _apply_operation(self, circuit, operation):
+        if operation["type"] == "H":
+            circuit.h(operation["targets"])
+        elif operation["type"] == "X":
+            self._apply_x_operation(circuit, operation)
+        elif operation["type"] == "Y":
+            circuit.y(operation["targets"])
+        elif operation["type"] == "Z":
+            circuit.z(operation["targets"])
+        elif operation["type"] == "X^½":
+            circuit.append(XGate().power(1 / 2), operation["targets"])
+        elif operation["type"] == "S":
+            circuit.s(operation["targets"])
+        elif operation["type"] == "S†":
+            circuit.sdg(operation["targets"])
+        elif operation["type"] == "T":
+            circuit.t(operation["targets"])
+        elif operation["type"] == "T†":
+            circuit.tdg(operation["targets"])
+        elif operation["type"] == "Swap":
+            self._apply_swap_operation(circuit, operation)
+        elif operation["type"] == "•":
+            self._apply_controlled_z_operation(circuit, operation)
+        elif operation["type"] == "|0>":
+            circuit.reset(operation["targets"][0])
+        elif operation["type"] == "|1>":
+            circuit.reset(operation["targets"][0])
+            circuit.x(operation["targets"][0])
+        elif operation["type"] == "Measure":
+            for target in operation["targets"]:
+                circuit.measure(target, target)
+        else:
+            msg = "Unknown operation: {}".format(operation["type"])
+            raise ValueError(msg)
+
+    def _apply_x_operation(self, circuit, operation):
+        if "controls" in operation:
+            for target in operation["targets"]:
+                circuit.mcx(operation["controls"], target)
+        else:
+            circuit.x(operation["targets"])
+
+    def _apply_swap_operation(self, circuit, operation):
+        if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
+            circuit.swap(operation["targets"][0], operation["targets"][1])
+        else:
+            circuit.id(operation["targets"])
+
+    def _apply_controlled_z_operation(self, circuit, operation):
+        if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
+            u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
+            circuit.append(u, qargs=operation["targets"])
+        else:
+            circuit.id(operation["targets"])
