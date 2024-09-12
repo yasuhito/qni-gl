@@ -85,7 +85,7 @@ class TestCnot(unittest.TestCase):
     def test_ccnot_111(self):
         steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "X", "targets": [2], "controls": [0, 1]}]]
 
-        result = self.qiskit_runner.run_circuit(steps, options={"until_step_index": 1})
+        result = self.qiskit_runner.run_circuit(steps, until_step_index=1)
 
         amplitudes = result[1][":amplitude"]
         assert_complex_approx(amplitudes[0], 0, 0)

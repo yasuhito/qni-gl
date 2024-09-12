@@ -24,7 +24,7 @@ class TestQiskitRunner(unittest.TestCase):
             [],
         ]
 
-        results = self.qiskit_runner.run_circuit(steps, {"qubit_count": 2})
+        results = self.qiskit_runner.run_circuit(steps, qubit_count=2)
 
         assert len(results) == 5
 
@@ -35,7 +35,7 @@ class TestQiskitRunner(unittest.TestCase):
             [{"type": "H", "targets": [2]}],
         ]
 
-        result = self.qiskit_runner.run_circuit(steps, {"until_step_index": 1})
+        result = self.qiskit_runner.run_circuit(steps, until_step_index=1)
 
         assert len(result) == 3
         amplitudes = result[1][":amplitude"]

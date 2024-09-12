@@ -12,7 +12,7 @@ class TestI(unittest.TestCase):
     def test_i_0(self):
         steps = [[]]
 
-        result = self.qiskit_runner.run_circuit(steps, options={"qubit_count": 1})
+        result = self.qiskit_runner.run_circuit(steps, qubit_count=1)
 
         amplitudes = result[0][":amplitude"]
         assert_complex_approx(amplitudes[0], 1, 0)

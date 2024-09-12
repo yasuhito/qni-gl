@@ -14,25 +14,23 @@ class QiskitRunner:
     def run_circuit(
         self,
         steps: list,
-        options: dict | None = None,
+        *,
+        qubit_count: int | None = None,
+        until_step_index: int | None = None,
+        amplitude_indices: list | None = None,
     ):
         """
         Execute the specified quantum circuit and return the results of each step.
 
         Args:
             steps (list): A list of steps to execute.
-            options (dict | None, optional): A dictionary containing optional parameters such as qubit_count, until_step_index, and amplitude_indices. Defaults to None.
+            qubit_count (int | None, optional): The number of qubits. Defaults to None.
+            until_step_index (int | None, optional): The index of the step until which to execute. Defaults to None.
+            amplitude_indices (list | None, optional): The indices of the amplitudes to return. Defaults to None.
 
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        if options is None:
-            options = {}
-
-        qubit_count = options.get("qubit_count")
-        until_step_index = options.get("until_step_index")
-        amplitude_indices = options.get("amplitude_indices")
-
         until_step_index = self._get_until_step_index(until_step_index, steps)
 
         circuit = self._build_circuit(steps, qubit_count)
