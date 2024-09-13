@@ -11,6 +11,7 @@ class QiskitRunner:
 
     def __init__(self, logger=None):
         self.logger = logger
+        self.measured_bits = []
 
     def run_circuit(
         self,
@@ -43,14 +44,27 @@ class QiskitRunner:
             return step_results
 
         result = self._run_backend(circuit)
-        measured_bits = self._get_measured_bits(circuit, result)
         statevector = self._get_statevector(result)
+
+        has_measurements = any(isinstance(instr.operation, Measure) for instr in circuit.data)
+
+        if has_measurements:
+            counts = result.get_counts()
+            count = next(iter(counts.keys()))
+            bit_strings = count.split()
+
+            for measured_bits in self.measured_bits:
+                if len(measured_bits) == 0:
+                    continue
+                bit_string = bit_strings.pop()
+                for bit in measured_bits:
+                    measured_bits[bit] = int(bit_string[len(bit_string) - bit - 1])
 
         if until_step_index is None:
             until_step_index = self._last_step_index(steps)
 
         for step_index in range(len(steps)):
-            step_result = {":measuredBits": measured_bits}
+            step_result = {":measuredBits": self.measured_bits[step_index]}
             if step_index == until_step_index:
                 step_result[":amplitude"] = statevector
             step_results.append(step_result)
@@ -97,29 +111,30 @@ class QiskitRunner:
     def _process_step_operations(self, steps: list, qubit_count: int, until_step_index: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
 
-        if qubit_count > 0:
-            creg = ClassicalRegister(qubit_count)
-            circuit.add_register(creg)
+        # if qubit_count > 0:
+        #     creg = ClassicalRegister(qubit_count)
+        #     circuit.add_register(creg)
 
-        for i, step in enumerate(steps):
+        for step_index, step in enumerate(steps):
             i_targets = list(range(qubit_count))
+            self.measured_bits.append({})
 
             for operation in step:
                 i_targets = list(set(i_targets) - set(operation["targets"]))
                 if "controls" in operation:
                     i_targets = list(set(i_targets) - set(operation["controls"]))
 
-                self._apply_operation(circuit, operation)
+                self._apply_operation(circuit, operation, step_index)
 
             for each in i_targets:
                 circuit.id(each)
 
-            if i == until_step_index:
+            if step_index == until_step_index:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
         return circuit
 
-    def _apply_operation(self, circuit: QuantumCircuit, operation: dict):
+    def _apply_operation(self, circuit: QuantumCircuit, operation: dict, step_index: int):
         if operation["type"] == "H":
             circuit.h(operation["targets"])
         elif operation["type"] == "X":
@@ -148,8 +163,11 @@ class QiskitRunner:
             circuit.reset(operation["targets"][0])
             circuit.x(operation["targets"][0])
         elif operation["type"] == "Measure":
+            self.measured_bits[step_index] = {target: None for target in operation["targets"]}
+            creg = ClassicalRegister(circuit.num_qubits)
+            circuit.add_register(creg)
             for target in operation["targets"]:
-                circuit.measure(target, target)
+                circuit.measure(target, creg[target])
         else:
             msg = "Unknown operation: {}".format(operation["type"])
             raise ValueError(msg)
@@ -177,18 +195,6 @@ class QiskitRunner:
     def _run_backend(self, circuit: QuantumCircuit):
         backend = Aer.get_backend("aer_simulator_statevector")
         return backend.run(circuit, shots=1, memory=True).result()
-
-    def _get_measured_bits(self, circuit, result) -> dict[int, int]:
-        bit_indices = [
-            circuit.find_bit(instr.qubits[0]).index for instr in circuit.data if isinstance(instr.operation, Measure)
-        ]
-
-        if not bit_indices:
-            return {}
-
-        memory = list(reversed(result.get_memory()[0]))
-
-        return {bit: int(memory[bit]) for bit in bit_indices}
 
     def _get_statevector(self, result) -> list | None:
         return result.data()[self._STATEVECTOR_LABEL]
