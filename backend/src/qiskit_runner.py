@@ -168,11 +168,11 @@ class QiskitRunner:
         return measured_bits
 
     def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"][0])
+        circuit.reset(operation["targets"])
 
     def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"][0])
-        circuit.x(operation["targets"][0])
+        circuit.reset(operation["targets"])
+        circuit.x(operation["targets"])
 
     def _apply_measure_operation(
         self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
