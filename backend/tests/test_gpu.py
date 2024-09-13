@@ -19,4 +19,3 @@ class TestH(unittest.TestCase):
 
         amplitudes = result[0][":amplitude"]
         assert len(amplitudes) == 2**30
-

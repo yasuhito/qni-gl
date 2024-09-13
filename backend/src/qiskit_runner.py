@@ -160,7 +160,8 @@ class QiskitRunner:
         elif operation_type == "Measure":
             measured_bits = self._apply_measure_operation(circuit, operation, step_index, measured_bits)
         else:
-            raise ValueError(f"Unknown operation: {operation_type}")
+            value_error_message = f"Unknown operation: {operation_type}"
+            raise ValueError(value_error_message)
 
         return measured_bits
 
