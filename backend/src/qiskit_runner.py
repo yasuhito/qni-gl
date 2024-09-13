@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from qiskit.result import Result
 
@@ -211,7 +213,7 @@ class QiskitRunner:
         return backend.run(self.circuit, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list | None:
-        return result.data()[self._STATEVECTOR_LABEL]
+        return np.array(result.data()[self._STATEVECTOR_LABEL])
 
     def _extract_measurement_results(self, result: Result, measured_bits: list[dict]) -> list[dict]:
         if not self._circuit_has_measurements():
