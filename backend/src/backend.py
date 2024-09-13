@@ -47,10 +47,10 @@ def backend():
         Response: A JSON response containing the simulation results or an error message.
     """
     try:
-        circuit_id, qubit_count, step_index, steps, targets = _get_request_data()
-        _log_request_data(circuit_id, qubit_count, step_index, targets, steps)
+        circuit_id, qubit_count, step_index, steps, targets, use_gpu = _get_request_data()
+        _log_request_data(circuit_id, qubit_count, step_index, targets, steps, use_gpu)
 
-        step_results = _run_cirq(qubit_count, step_index, steps, targets)
+        step_results = _run_cirq(qubit_count, step_index, steps, targets, use_gpu)
         return jsonify(step_results)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
@@ -62,7 +62,8 @@ def _get_request_data():
     step_index = _get_int_from_request("stepIndex", 0)
     steps = _get_steps_from_request()
     targets = _get_targets_from_request()
-    return circuit_id, qubit_count, step_index, steps, targets
+    use_gpu = request.form.get("useGpu", "false").lower() == "true"
+    return circuit_id, qubit_count, step_index, steps, targets, use_gpu
 
 
 def _get_int_from_request(key, default):
@@ -84,18 +85,19 @@ def _handle_error(error_message, response_message, status_code):
     return jsonify({"error": error_message, "message": response_message}), status_code
 
 
-def _log_request_data(circuit_id, qubit_count, step_index, targets, steps):
+def _log_request_data(circuit_id, qubit_count, step_index, targets, steps, use_gpu):
     app.logger.debug("circuit_id = %s", circuit_id)
     app.logger.debug("qubit_count = %d", qubit_count)
     app.logger.debug("step_index = %d", step_index)
     app.logger.debug("targets.size = %d", len(targets))
     app.logger.debug("steps = %s", steps)
+    app.logger.debug("use_gpu = %s", use_gpu)
 
 
-def _run_cirq(qubit_count, step_index, steps, targets):
+def _run_cirq(qubit_count, step_index, steps, targets, use_gpu: bool = False):
     qiskit_runner = QiskitRunner(app.logger)
     results = qiskit_runner.run_circuit(
-        steps, qubit_count=qubit_count, until_step_index=step_index, amplitude_indices=targets
+        steps, qubit_count=qubit_count, until_step_index=step_index, amplitude_indices=targets, device="GPU" if use_gpu else "CPU"
     )
 
     return [_convert_result(result) for result in results]

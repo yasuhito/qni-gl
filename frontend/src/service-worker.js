@@ -32,6 +32,7 @@ self.addEventListener("message", (event) => {
         stepIndex: stepIndex,
         targets: targets,
         steps: JSON.stringify(steps),
+        useGpu: false,
       });
 
       const response = await fetch(BACKEND_URL, {

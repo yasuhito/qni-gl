@@ -26,6 +26,7 @@ class QiskitRunner:
         qubit_count: int | None = None,
         until_step_index: int | None = None,
         amplitude_indices: list | None = None,
+        device: str = "CPU",
     ):
         """
         Execute the specified quantum circuit and return the results of each step.
@@ -50,7 +51,7 @@ class QiskitRunner:
         if self.circuit.depth() == 0:
             return step_results
 
-        result = self._run_backend()
+        result = self._run_backend(device=device)
         statevector = self._get_statevector(result)
         measured_bits = self._extract_measurement_results(result, measured_bits)
 
@@ -203,9 +204,9 @@ class QiskitRunner:
         else:
             circuit.id(operation["targets"])
 
-    def _run_backend(self) -> Result:
+    def _run_backend(self, device: str) -> Result:
         backend = AerSimulator(method="statevector")
-        # backend = Aer.get_backend("aer_simulator_statevector", method="statevector_gpu")
+        backend.set_options(device=device)
         return backend.run(self.circuit, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list | None:
