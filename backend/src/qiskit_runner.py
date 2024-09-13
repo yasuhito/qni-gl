@@ -17,6 +17,7 @@ class QiskitRunner:
     def __init__(self, logger=None):
         self.logger = logger
         self.circuit = None
+        self.steps = []
 
     def run_circuit(
         self,
@@ -40,9 +41,8 @@ class QiskitRunner:
         """
         step_results = []
 
-        self.circuit, measured_bits = self._build_circuit(
-            steps, qubit_count=qubit_count, until_step_index=until_step_index
-        )
+        self.steps = steps
+        self.circuit, measured_bits = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.logger:
             self.logger.debug(self.circuit.draw(output="text"))
@@ -55,9 +55,9 @@ class QiskitRunner:
         measured_bits = self._extract_measurement_results(result, measured_bits)
 
         if until_step_index is None:
-            until_step_index = self._last_step_index(steps)
+            until_step_index = self._last_step_index()
 
-        for step_index in range(len(steps)):
+        for step_index in range(len(self.steps)):
             step_result = {":measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
                 step_result[":amplitude"] = statevector
@@ -69,15 +69,15 @@ class QiskitRunner:
         return self._filter_amplitudes(step_results, amplitude_indices)
 
     def _build_circuit(
-        self, steps: list, *, qubit_count: int | None = None, until_step_index: int | None = None
+        self, *, qubit_count: int | None = None, until_step_index: int | None = None
     ) -> tuple[QuantumCircuit, list[dict]]:
         if qubit_count is None:
-            qubit_count = self._get_qubit_count(steps)
+            qubit_count = self._get_qubit_count()
 
         if until_step_index is None:
-            until_step_index = self._last_step_index(steps)
+            until_step_index = self._last_step_index()
 
-        return self._process_step_operations(steps, qubit_count, until_step_index)
+        return self._process_step_operations(qubit_count, until_step_index)
 
     def _filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
         for step_result in step_results:
@@ -88,27 +88,25 @@ class QiskitRunner:
 
         return step_results
 
-    def _last_step_index(self, steps: list) -> int:
-        if len(steps) == 0:
+    def _last_step_index(self) -> int:
+        if len(self.steps) == 0:
             return 0
-        return len(steps) - 1
+        return len(self.steps) - 1
 
-    def _get_qubit_count(self, steps: list) -> int:
+    def _get_qubit_count(self) -> int:
         return (
             max(
-                max((max(gate.get("targets", [-1])) for step in steps for gate in step), default=-1),
-                max((max(gate.get("controls", [-1])) for step in steps for gate in step), default=-1),
+                max((max(gate.get("targets", [-1])) for step in self.steps for gate in step), default=-1),
+                max((max(gate.get("controls", [-1])) for step in self.steps for gate in step), default=-1),
             )
             + 1
         )
 
-    def _process_step_operations(
-        self, steps: list, qubit_count: int, until_step_index: int
-    ) -> tuple[QuantumCircuit, list[dict]]:
+    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> tuple[QuantumCircuit, list[dict]]:
         circuit = QuantumCircuit(qubit_count)
         measured_bits = []
 
-        for step_index, step in enumerate(steps):
+        for step_index, step in enumerate(self.steps):
             i_targets = list(range(qubit_count))
             measured_bits.append({})
 
