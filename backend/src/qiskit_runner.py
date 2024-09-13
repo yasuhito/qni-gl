@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from qiskit import ClassicalRegister, QuantumCircuit
 from qiskit.circuit.library import Measure, XGate, ZGate
-from qiskit_aer import Aer
+from qiskit_aer import AerSimulator
 
 
 class QiskitRunner:
@@ -204,7 +204,8 @@ class QiskitRunner:
             circuit.id(operation["targets"])
 
     def _run_backend(self) -> Result:
-        backend = Aer.get_backend("aer_simulator_statevector")
+        backend = AerSimulator(method="statevector")
+        # backend = Aer.get_backend("aer_simulator_statevector", method="statevector_gpu")
         return backend.run(self.circuit, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list | None:
