@@ -96,10 +96,9 @@ class QiskitRunner:
 
     def _process_step_operations(self, steps: list, qubit_count: int, until_step_index: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
-        classical_bits = self._get_classical_bits(steps)
 
-        if classical_bits > 0:
-            creg = ClassicalRegister(classical_bits)
+        if qubit_count > 0:
+            creg = ClassicalRegister(qubit_count)
             circuit.add_register(creg)
 
         for i, step in enumerate(steps):
@@ -119,14 +118,6 @@ class QiskitRunner:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
         return circuit
-
-    def _get_classical_bits(self, steps: list) -> int:
-        classical_bits = 0
-        for step in steps:
-            for gate in step:
-                if gate["type"] == "Measure":
-                    classical_bits = max(classical_bits, max(gate.get("targets", [-1])) + 1)
-        return classical_bits
 
     def _apply_operation(self, circuit: QuantumCircuit, operation: dict):
         if operation["type"] == "H":
