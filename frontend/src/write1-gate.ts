@@ -7,6 +7,10 @@ import { WriteGateMixin } from "./write-gate-mixin";
 export class Write1Gate extends WriteGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
 ) {
+  get operationType(): string {
+    return "Write1Gate";
+  }
+
   get label(): string {
     return "1";
   }

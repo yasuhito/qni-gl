@@ -158,7 +158,7 @@ export class OperationComponent extends IconableMixin(Container) {
   private actor!: ActorRefFrom<typeof this.stateMachine>;
 
   get operationType(): string {
-    return this.constructor.name;
+    throw new Error("operationType must be implemented in derived class");
   }
 
   get gateSource(): OperationSource | null {

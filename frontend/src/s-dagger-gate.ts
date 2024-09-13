@@ -7,6 +7,10 @@ import { SquareGateMixin } from "./square-gate-mixin";
 export class SDaggerGate extends SquareGateMixin(
   SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
 ) {
+  get operationType(): string {
+    return "SDaggerGate";
+  }
+
   get label(): string {
     return "S†";
   }

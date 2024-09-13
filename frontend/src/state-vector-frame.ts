@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Container, Graphics, Rectangle } from "pixi.js";
 import { Colors } from "./colors";
 import { StateVectorComponent } from "./state-vector-component";
 import { throttle } from "lodash";
@@ -7,7 +7,7 @@ import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 /**
  * スクロール機能つきフレーム。状態ベクトルを表示する。
  */
-export class StateVectorFrame extends PIXI.Container {
+export class StateVectorFrame extends Container {
   private static instance: StateVectorFrame | null = null;
   private static readonly PADDING_MULTIPLIER: number = 2;
 
@@ -15,9 +15,9 @@ export class StateVectorFrame extends PIXI.Container {
 
   private frameWidth: number;
   private frameHeight: number;
-  private readonly background: PIXI.Graphics;
-  private maskGraphics: PIXI.Graphics;
-  private scrollContainer: PIXI.Container;
+  private readonly background: Graphics;
+  private maskGraphics: Graphics;
+  private scrollContainer: Container;
 
   static initialize(width: number, height: number): StateVectorFrame {
     if (!this.instance) {
@@ -40,13 +40,13 @@ export class StateVectorFrame extends PIXI.Container {
 
     this.frameWidth = width;
     this.frameHeight = height;
-    this.background = new PIXI.Graphics();
+    this.background = new Graphics();
     this.stateVector = new StateVectorComponent({
       initialQubitCount: 1,
-      viewport: new PIXI.Rectangle(0, 0, width, height),
+      viewport: new Rectangle(0, 0, width, height),
     });
-    this.maskGraphics = new PIXI.Graphics();
-    this.scrollContainer = new PIXI.Container();
+    this.maskGraphics = new Graphics();
+    this.scrollContainer = new Container();
 
     this.initializeBackground();
     this.updateMask();
@@ -59,7 +59,7 @@ export class StateVectorFrame extends PIXI.Container {
     this.scrollContainer.mask = this.maskGraphics;
 
     // StateVectorComponentにスクロール位置を伝える
-    const scrollRect = new PIXI.Rectangle(
+    const scrollRect = new Rectangle(
       -this.scrollContainer.x,
       -this.scrollContainer.y,
       this.frameWidth,
@@ -173,7 +173,7 @@ export class StateVectorFrame extends PIXI.Container {
     );
 
     // StateVectorComponentにスクロール位置を伝える
-    const scrollRect = new PIXI.Rectangle(
+    const scrollRect = new Rectangle(
       -this.scrollContainer.x,
       -this.scrollContainer.y,
       this.frameWidth,

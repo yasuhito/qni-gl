@@ -25,7 +25,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "cirq>=1.1.0",
+  "qiskit>=1.2.1",
+  "qiskit-aer>=0.15.0", # If you want to use GPU, change to "qiskit-aer-gpu>=0.15.0"
   "flask-cors>=5.0.0",
   "gunicorn>=23.0.0",
   "pytest>=8.3.2",

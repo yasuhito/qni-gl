@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Container, Graphics, Rectangle } from "pixi.js";
 import { Colors } from "./colors";
 import { QubitCircle } from "./qubit-circle";
 import { QubitCircleManager } from "./qubit-circle-manager";
@@ -10,21 +10,21 @@ import { logger } from "./util";
 export class StateVectorRenderer {
   private layout: StateVectorLayout;
   private qubitCircleManager: QubitCircleManager;
-  private backgroundGraphics: PIXI.Graphics;
-  private container: PIXI.Container;
-  private currentViewport: PIXI.Rectangle;
+  private backgroundGraphics: Graphics;
+  private container: Container;
+  private currentViewport: Rectangle;
   private visibleQubitCirclesStartIndexX: number = 0;
   private visibleQubitCirclesStartIndexY: number = 0;
 
   constructor(
-    container: PIXI.Container,
+    container: Container,
     qubitCount: QubitCount,
-    viewport: PIXI.Rectangle
+    viewport: Rectangle
   ) {
     this.container = container;
     this.layout = new StateVectorLayout(qubitCount);
     this.currentViewport = viewport;
-    this.backgroundGraphics = new PIXI.Graphics();
+    this.backgroundGraphics = new Graphics();
     this.container.addChildAt(this.backgroundGraphics, 0);
     this.qubitCircleManager = new QubitCircleManager(
       this.layout,
@@ -70,7 +70,7 @@ export class StateVectorRenderer {
     this.qubitCircleManager.resizeAllQubitCircles(this.layout.qubitCircleSize);
   }
 
-  setViewport(viewport: PIXI.Rectangle): boolean {
+  setViewport(viewport: Rectangle): boolean {
     const newVisibleQubitCirclesStartIndexX =
       this.layout.visibleQubitCirclesStartIndex(viewport.x);
     const newVisibleQubitCirclesStartIndexY =

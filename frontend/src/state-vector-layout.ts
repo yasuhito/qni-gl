@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import { Point } from "pixi.js";
 import { QubitCount } from "./types";
 import { Size } from "./size";
 import { Spacing } from "./spacing";
@@ -109,7 +109,7 @@ export class StateVectorLayout {
     endIndexX: number,
     endIndexY: number
   ) {
-    const circles: { position: PIXI.Point; index: number }[] = [];
+    const circles: { position: Point; index: number }[] = [];
     const maxVisibleCircles =
       Math.ceil(this.width / this._cellSize) *
       Math.ceil(this.height / this._cellSize);
@@ -124,7 +124,7 @@ export class StateVectorLayout {
         const posX = this.padding + x * this._cellSize;
         const posY = this.padding + y * this._cellSize;
         const index = y * this.cols + x;
-        circles.push({ position: new PIXI.Point(posX, posY), index });
+        circles.push({ position: new Point(posX, posY), index });
         count++;
       }
     }
@@ -132,13 +132,13 @@ export class StateVectorLayout {
     return circles;
   }
 
-  qubitCirclePositionAt(index: number): PIXI.Point {
+  qubitCirclePositionAt(index: number): Point {
     const x = index % this.cols;
     const y = Math.floor(index / this.cols);
     const posX = this.padding + x * this._cellSize;
     const posY = this.padding + y * this._cellSize;
 
-    return new PIXI.Point(posX, posY);
+    return new Point(posX, posY);
   }
 
   private update(): void {

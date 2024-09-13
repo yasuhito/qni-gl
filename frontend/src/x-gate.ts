@@ -13,6 +13,10 @@ export class XGate extends CircularGateMixin(
 
   private _controls: number[] = [];
 
+  get operationType(): string {
+    return "XGate";
+  }
+
   get label(): string {
     return "X";
   }
