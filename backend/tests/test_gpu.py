@@ -17,6 +17,6 @@ class TestH(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps, device="GPU")
 
-        amplitudes = result[1][":amplitude"]
+        amplitudes = result[0][":amplitude"]
         assert len(amplitudes) == 2**30
 
