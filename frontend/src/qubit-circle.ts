@@ -44,7 +44,7 @@ export class QubitCircle extends Container {
   }
 
   get probability(): number {
-    return this._probability;
+    return parseFloat(this._probability.toFixed(4));
   }
 
   set probability(newValue: number) {
@@ -163,7 +163,7 @@ export class QubitCircle extends Container {
   }
 
   private borderColor(): string {
-    return this._probability === 0
+    return this.probability === 0
       ? Colors["border-component-strong-disabled"]
       : Colors["border-component-strong"];
   }

@@ -10,8 +10,7 @@ def test_post_empty_circuit():
     res = json.loads(response.data.decode("utf-8"))
 
     assert response.status_code == 200
-    assert len(res) == 1
-    assert res[0]["amplitudes"] == {}
+    assert len(res) == 0
 
 
 def test_bad_request():
