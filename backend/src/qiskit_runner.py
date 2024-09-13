@@ -130,7 +130,7 @@ class QiskitRunner:
         self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
     ) -> list[dict]:
         operation_type = operation["type"]
-        
+
         if operation_type == "H":
             circuit.h(operation["targets"])
         elif operation_type == "X":
