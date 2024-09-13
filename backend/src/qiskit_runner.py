@@ -128,42 +128,47 @@ class QiskitRunner:
     def _apply_operation(
         self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
     ) -> list[dict]:
-        measured_bits_copy = measured_bits.copy()
-
-        if operation["type"] == "H":
+        operation_type = operation["type"]
+        
+        if operation_type == "H":
             circuit.h(operation["targets"])
-        elif operation["type"] == "X":
+        elif operation_type == "X":
             self._apply_x_operation(circuit, operation)
-        elif operation["type"] == "Y":
+        elif operation_type == "Y":
             circuit.y(operation["targets"])
-        elif operation["type"] == "Z":
+        elif operation_type == "Z":
             circuit.z(operation["targets"])
-        elif operation["type"] == "X^½":
+        elif operation_type == "X^½":
             circuit.append(XGate().power(1 / 2), operation["targets"])
-        elif operation["type"] == "S":
+        elif operation_type == "S":
             circuit.s(operation["targets"])
-        elif operation["type"] == "S†":
+        elif operation_type == "S†":
             circuit.sdg(operation["targets"])
-        elif operation["type"] == "T":
+        elif operation_type == "T":
             circuit.t(operation["targets"])
-        elif operation["type"] == "T†":
+        elif operation_type == "T†":
             circuit.tdg(operation["targets"])
-        elif operation["type"] == "Swap":
+        elif operation_type == "Swap":
             self._apply_swap_operation(circuit, operation)
-        elif operation["type"] == "•":
+        elif operation_type == "•":
             self._apply_controlled_z_operation(circuit, operation)
-        elif operation["type"] == "|0>":
-            circuit.reset(operation["targets"][0])
-        elif operation["type"] == "|1>":
-            circuit.reset(operation["targets"][0])
-            circuit.x(operation["targets"][0])
-        elif operation["type"] == "Measure":
-            measured_bits_copy = self._apply_measure_operation(circuit, operation, step_index, measured_bits_copy)
+        elif operation_type == "|0>":
+            self._apply_write0(circuit, operation)
+        elif operation_type == "|1>":
+            self._apply_write1(circuit, operation)
+        elif operation_type == "Measure":
+            measured_bits = self._apply_measure_operation(circuit, operation, step_index, measured_bits)
         else:
-            msg = "Unknown operation: {}".format(operation["type"])
-            raise ValueError(msg)
+            raise ValueError(f"Unknown operation: {operation_type}")
 
-        return measured_bits_copy
+        return measured_bits
+
+    def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.reset(operation["targets"][0])
+
+    def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.reset(operation["targets"][0])
+        circuit.x(operation["targets"][0])
 
     def _apply_measure_operation(
         self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
