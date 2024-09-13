@@ -7,6 +7,7 @@ from qiskit_aer import Aer
 
 class QiskitRunner:
     _PAIR_OPERATION_COUNT = 2
+    _STATEVECTOR_LABEL = "state_at_until_step"
 
     def __init__(self, logger=None):
         self.logger = logger
@@ -33,21 +34,20 @@ class QiskitRunner:
         """
         step_results = []
 
-        circuit_full = self._build_circuit(steps, qubit_count=qubit_count)
-        circuit_partial = self._build_circuit(steps, qubit_count=qubit_count, until_step_index=until_step_index)
+        circuit = self._build_circuit(steps, qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.logger:
-            self.logger.debug(circuit_full.draw(output="text"))
-            self.logger.debug(circuit_partial.draw(output="text"))
+            self.logger.debug(circuit.draw(output="text"))
 
-        if circuit_partial.depth() == 0:
+        if circuit.depth() == 0:
             return step_results
 
-        measured_bits = self._get_measured_bits(circuit_full)
-        statevector = self._get_statevector(circuit_partial)
+        result = self._run_backend(circuit)
+        measured_bits = self._get_measured_bits(circuit, result)
+        statevector = self._get_statevector(result)
 
         if until_step_index is None:
-            until_step_index = self._get_until_step_index(steps)
+            until_step_index = self._last_step_index(steps)
 
         for step_index in range(len(steps)):
             step_result = {":measuredBits": measured_bits}
@@ -67,15 +67,9 @@ class QiskitRunner:
             qubit_count = self._get_qubit_count(steps)
 
         if until_step_index is None:
-            until_step_index = self._get_until_step_index(steps)
-            circuit = self._process_step_operations(steps, qubit_count)
-        else:
-            circuit = self._process_step_operations(steps[: until_step_index + 1], qubit_count)
+            until_step_index = self._last_step_index(steps)
 
-        if qubit_count > 0:
-            circuit.save_statevector()
-
-        return circuit
+        return self._process_step_operations(steps, qubit_count, until_step_index)
 
     def _filter_amplitudes(self, step_results, amplitude_indices):
         for step_result in step_results:
@@ -86,7 +80,7 @@ class QiskitRunner:
 
         return step_results
 
-    def _get_until_step_index(self, steps: list) -> int:
+    def _last_step_index(self, steps: list) -> int:
         if len(steps) == 0:
             return 0
         return len(steps) - 1
@@ -100,7 +94,7 @@ class QiskitRunner:
             + 1
         )
 
-    def _process_step_operations(self, steps: list, qubit_count: int) -> QuantumCircuit:
+    def _process_step_operations(self, steps: list, qubit_count: int, until_step_index: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
         classical_bits = self._get_classical_bits(steps)
 
@@ -108,7 +102,7 @@ class QiskitRunner:
             creg = ClassicalRegister(classical_bits)
             circuit.add_register(creg)
 
-        for step in steps:
+        for i, step in enumerate(steps):
             i_targets = list(range(qubit_count))
 
             for operation in step:
@@ -120,6 +114,9 @@ class QiskitRunner:
 
             for each in i_targets:
                 circuit.id(each)
+
+            if i == until_step_index:
+                circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
         return circuit
 
@@ -186,8 +183,11 @@ class QiskitRunner:
         else:
             circuit.id(operation["targets"])
 
-    def _get_measured_bits(self, circuit: QuantumCircuit) -> dict[int, int]:
-        simulator = self._get_simulator()
+    def _run_backend(self, circuit: QuantumCircuit):
+        backend = Aer.get_backend("aer_simulator_statevector")
+        return backend.run(circuit, shots=1, memory=True).result()
+
+    def _get_measured_bits(self, circuit, result) -> dict[int, int]:
         bit_indices = [
             circuit.find_bit(instr.qubits[0]).index for instr in circuit.data if isinstance(instr.operation, Measure)
         ]
@@ -195,19 +195,9 @@ class QiskitRunner:
         if not bit_indices:
             return {}
 
-        job = simulator.run(circuit, shots=1, memory=True)
-        result = job.result()
-
         memory = list(reversed(result.get_memory()[0]))
 
         return {bit: int(memory[bit]) for bit in bit_indices}
 
-    def _get_statevector(self, circuit_partial: QuantumCircuit) -> list | None:
-        simulator = self._get_simulator()
-        job = simulator.run(circuit_partial, shots=1)
-        result = job.result()
-
-        return result.get_statevector() if circuit_partial.depth() > 0 else None
-
-    def _get_simulator(self):
-        return Aer.get_backend("aer_simulator_statevector")
+    def _get_statevector(self, result) -> list | None:
+        return result.data()[self._STATEVECTOR_LABEL]
