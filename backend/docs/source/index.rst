@@ -18,26 +18,10 @@ src.backend module
    :undoc-members:
    :show-inheritance:
 
-src.cirq\_runner module
------------------------
+src.qiskit\_runner module
+-------------------------
 
-.. automodule:: src.cirq_runner
+.. automodule:: src.qiskit_runner
    :members:
    :undoc-members:
    :show-inheritance:
-
-src.write0 module
------------------
-
-.. automodule:: src.write0
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-src.write1 module
------------------
-
-.. automodule:: src.write1
-   :members:
-   :undoc-members:
-   :show-inheritance:   
