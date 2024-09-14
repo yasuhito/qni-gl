@@ -209,7 +209,9 @@ class QiskitRunner:
 
     def _run_backend(self, device: str) -> Result:
         backend = AerSimulator(method="statevector")
-        backend.set_options(device=device)
+        if device == "GPU":
+            backend.set_options(device="GPU", cuStateVec_enable=True)
+
         return backend.run(self.circuit, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list | None:
