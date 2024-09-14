@@ -15,5 +15,5 @@ gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 nginx
 
 # Execute any passed command
-cd /qni-gl/frontend
+cd /qni-gl
 exec "$@"
