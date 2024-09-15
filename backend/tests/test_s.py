@@ -14,7 +14,7 @@ class TestS(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        amplitudes = result[0][":amplitude"]
+        amplitudes = result[0]["amplitudes"]
         assert_complex_approx(amplitudes[0], 1, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
 
@@ -24,6 +24,6 @@ class TestS(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        amplitudes = result[1][":amplitude"]
+        amplitudes = result[1]["amplitudes"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 0, 1)

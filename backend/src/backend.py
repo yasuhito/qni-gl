@@ -107,10 +107,10 @@ def _run_cirq(qubit_count, step_index, steps, targets, device: str = "CPU"):
 def _convert_result(result):
     response = {}
 
-    if ":amplitude" in result:
-        response["amplitudes"] = _flatten_amplitude(result[":amplitude"])
+    if "amplitudes" in result:
+        response["amplitudes"] = _flatten_amplitude(result["amplitudes"])
 
-    response["measuredBits"] = result[":measuredBits"]
+    response["measuredBits"] = result["measuredBits"]
 
     return response
 

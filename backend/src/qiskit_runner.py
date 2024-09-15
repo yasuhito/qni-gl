@@ -63,9 +63,9 @@ class QiskitRunner:
             until_step_index = self._last_step_index()
 
         for step_index in range(len(self.steps)):
-            step_result: dict[str, dict[int, int] | list[complex]] = {":measuredBits": measured_bits[step_index]}
+            step_result: dict[str, dict[int, int] | list[complex]] = {"measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
-                step_result[":amplitude"] = self._filter_amplitudes(statevector, amplitude_indices)
+                step_result["amplitudes"] = self._filter_amplitudes(statevector, amplitude_indices)
             step_results.append(step_result)
 
         return step_results
@@ -87,10 +87,10 @@ class QiskitRunner:
 
     # def __filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
     #     for step_result in step_results:
-    #         amplitudes = step_result.get(":amplitude")
+    #         amplitudes = step_result.get("amplitudes")
     #         if amplitudes is not None:
     #             filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
-    #             step_result[":amplitude"] = filtered_amplitudes
+    #             step_result["amplitudes"] = filtered_amplitudes
 
     #     return step_results
 
