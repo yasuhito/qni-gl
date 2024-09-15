@@ -109,17 +109,11 @@ class QiskitRunner:
         circuit = QuantumCircuit(qubit_count)
 
         for step_index, step in enumerate(self.steps):
-            i_targets = list(range(qubit_count))
+            if len(step) == 0:
+                circuit.id(list(range(qubit_count)))
 
             for operation in step:
-                i_targets = list(set(i_targets) - set(operation["targets"]))
-                if "controls" in operation:
-                    i_targets = list(set(i_targets) - set(operation["controls"]))
-
                 self._apply_operation(circuit, operation)
-
-            for each in i_targets:
-                circuit.id(each)
 
             if step_index == until_step_index:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
