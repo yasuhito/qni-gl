@@ -49,10 +49,10 @@ def backend():
         Response: A JSON response containing the simulation results or an error message.
     """
     try:
-        circuit_id, qubit_count, step_index, steps, targets, device = _get_request_data()
-        _log_request_data(circuit_id, qubit_count, step_index, targets, steps, device)
+        circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device = _get_request_data()
+        _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
 
-        step_results = _run_cirq(qubit_count, step_index, steps, targets, device)
+        step_results = _run_cirq(qubit_count, until_step_index, steps, amplitude_indices, device)
         return jsonify(step_results)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
