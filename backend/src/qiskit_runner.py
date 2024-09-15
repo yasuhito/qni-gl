@@ -28,7 +28,7 @@ class QiskitRunner:
         *,
         qubit_count: int | None = None,
         until_step_index: int | None = None,
-        amplitude_indices: list | None = None,
+        amplitude_indices: list[int] | None = None,
         device: str = "CPU",
     ):
         """
@@ -38,7 +38,8 @@ class QiskitRunner:
             steps (list): A list of steps to execute.
             qubit_count (int | None, optional): The number of qubits. Defaults to None.
             until_step_index (int | None, optional): The index of the step until which to execute. Defaults to None.
-            amplitude_indices (list | None, optional): The indices of the amplitudes to return. Defaults to None.
+            amplitude_indices (list[int] | None, optional): The indices of the amplitudes to return. Defaults to None.
+            device (str, optional): The device to use ("CPU" or "GPU"). Defaults to "CPU".
 
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
@@ -208,31 +209,24 @@ class QiskitRunner:
         return statevector.tolist()
 
     def _extract_measurement_results(self, result: Result) -> list[dict[int, int]]:
-        circuit_has_measurements = False
-        measured_bits: list[dict[int, int]] = []
-        tmp_measured_bits: list[dict[int, int | None]] = []
+        measured_bits: list[dict[int, int]] = [{} for _ in self.steps]
 
-        for step_index, step in enumerate(self.steps):
-            measured_bits.append({})
-            tmp_measured_bits.append({})
-
-            for operation in step:
-                if operation["type"] == "Measure":
-                    circuit_has_measurements = True
-                    tmp_measured_bits[step_index] = {target: None for target in operation["targets"]}
+        circuit_has_measurements = any(operation["type"] == "Measure" for step in self.steps for operation in step)
 
         if not circuit_has_measurements:
             return measured_bits
 
-        count = next(iter(result.get_counts().keys()))
-        bit_strings = count.split()
+        tmp_measured_bits = [
+            {target: None for operation in step if operation["type"] == "Measure" for target in operation["targets"]}
+            for step in self.steps
+        ]
+
+        bit_strings = next(iter(result.get_counts().keys())).split()
 
         for index, each in enumerate(tmp_measured_bits):
-            if len(each) == 0:
-                continue
-
-            bit_string = bit_strings.pop()
-            for bit in each:
-                measured_bits[index][bit] = int(bit_string[len(bit_string) - bit - 1])
+            if each:
+                bit_string = bit_strings.pop()
+                for bit in each:
+                    measured_bits[index][bit] = int(bit_string[-(bit + 1)])
 
         return measured_bits
