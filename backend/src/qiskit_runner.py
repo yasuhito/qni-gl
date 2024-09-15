@@ -8,9 +8,20 @@ from qiskit.quantum_info import Statevector  # type: ignore
 if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
 
+from typing import TypedDict
+
 from qiskit import ClassicalRegister, QuantumCircuit  # type: ignore
 from qiskit.circuit.library import XGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
+
+from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes
+
+amplitude_type = complex
+
+
+class StepResultsWithAmplitudes(TypedDict):
+    amplitudes: list[amplitude_type]
+    measuredBits: MeasuredBitsType
 
 
 class QiskitRunner:
@@ -44,7 +55,7 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        step_results: list[dict[str, list[complex] | dict[int, int]]] = []
+        step_results: list[StepResultsWithAmplitudes | StepResultsWithoutAmplitudes] = []
 
         self.steps = steps
         self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
@@ -63,10 +74,15 @@ class QiskitRunner:
             until_step_index = self._last_step_index()
 
         for step_index in range(len(self.steps)):
-            step_result: dict[str, dict[int, int] | list[complex]] = {"measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
-                step_result["amplitudes"] = self._filter_amplitudes(statevector, amplitude_indices)
-            step_results.append(step_result)
+                step_results.append(
+                    StepResultsWithAmplitudes(
+                        measuredBits=measured_bits[step_index],
+                        amplitudes=self._filter_amplitudes(statevector, amplitude_indices),
+                    )
+                )
+            else:
+                step_results.append(StepResultsWithoutAmplitudes(measuredBits=measured_bits[step_index]))
 
         return step_results
 
@@ -79,7 +95,9 @@ class QiskitRunner:
 
         return self._process_step_operations(qubit_count, until_step_index)
 
-    def _filter_amplitudes(self, statevector: list[complex], amplitude_indices: list[int] | None) -> list[complex]:
+    def _filter_amplitudes(
+        self, statevector: list[amplitude_type], amplitude_indices: list[int] | None
+    ) -> list[amplitude_type]:
         if amplitude_indices is None:
             return statevector
 
@@ -189,15 +207,15 @@ class QiskitRunner:
 
         return backend.run(self.circuit, shots=1, memory=True).result()
 
-    def _get_statevector(self, result: Result) -> list[complex]:
+    def _get_statevector(self, result: Result) -> list[amplitude_type]:
         statevector = result.data().get(self._STATEVECTOR_LABEL)
         if isinstance(statevector, Statevector):
             statevector = np.asarray(statevector)
 
         return statevector.tolist()
 
-    def _extract_measurement_results(self, result: Result) -> list[dict[int, int]]:
-        measured_bits: list[dict[int, int]] = [{} for _ in self.steps]
+    def _extract_measurement_results(self, result: Result) -> list[MeasuredBitsType]:
+        measured_bits: list[MeasuredBitsType] = [{} for _ in self.steps]
 
         circuit_has_measurements = any(operation["type"] == "Measure" for step in self.steps for operation in step)
 

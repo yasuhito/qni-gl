@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import TYPE_CHECKING, TypedDict
 
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
+
+if TYPE_CHECKING:
+    from src.types import MeasuredBitsType
 
 from src.qiskit_runner import QiskitRunner
 
@@ -15,6 +19,14 @@ HTTP_BAD_REQUEST = 400
 
 app = Flask(__name__)
 CORS(app)
+
+amplitude_type = tuple[float, float]
+qubit_amplitudes_type = dict[int, amplitude_type]
+
+
+class StepResultsWithAmplitudes(TypedDict):
+    amplitudes: list[qubit_amplitudes_type]
+    measuredBits: MeasuredBitsType
 
 
 def _add_logger_handler(handler, formatter):
@@ -129,5 +141,5 @@ def _convert_result(result: dict) -> dict:
     return response
 
 
-def _flatten_amplitude(amplitude: list[complex]) -> dict[int, list[float]]:
-    return {index: [float(each.real), float(each.imag)] for index, each in enumerate(amplitude)}
+def _flatten_amplitude(amplitude: list[complex]) -> qubit_amplitudes_type:
+    return {index: (float(each.real), float(each.imag)) for index, each in enumerate(amplitude)}
