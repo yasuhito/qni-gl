@@ -3,13 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from qiskit.quantum_info import Statevector  # type: ignore
 
 if TYPE_CHECKING:
-    from qiskit.result import Result
+    from qiskit.result import Result  # type: ignore
 
-from qiskit import ClassicalRegister, QuantumCircuit
-from qiskit.circuit.library import Measure, XGate, ZGate
-from qiskit_aer import AerSimulator
+from qiskit import ClassicalRegister, QuantumCircuit  # type: ignore
+from qiskit.circuit.library import XGate, ZGate  # type: ignore
+from qiskit_aer import AerSimulator  # type: ignore
 
 
 class QiskitRunner:
@@ -42,10 +43,10 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        step_results = []
+        step_results: list[dict[str, dict[int, int] | list[complex]]] = []
 
         self.steps = steps
-        self.circuit, measured_bits = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
+        self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.logger:
             self.logger.debug(self.circuit.draw(output="text"))
@@ -55,13 +56,13 @@ class QiskitRunner:
 
         result = self._run_backend(device=device)
         statevector = self._get_statevector(result)
-        measured_bits = self._extract_measurement_results(result, measured_bits)
+        measured_bits = self._extract_measurement_results(result)
 
         if until_step_index is None:
             until_step_index = self._last_step_index()
 
         for step_index in range(len(self.steps)):
-            step_result = {":measuredBits": measured_bits[step_index]}
+            step_result: dict[str, dict[int, int] | list[complex]] = {":measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
                 step_result[":amplitude"] = statevector
             step_results.append(step_result)
@@ -71,9 +72,7 @@ class QiskitRunner:
 
         return self._filter_amplitudes(step_results, amplitude_indices)
 
-    def _build_circuit(
-        self, *, qubit_count: int | None = None, until_step_index: int | None = None
-    ) -> tuple[QuantumCircuit, list[dict]]:
+    def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None) -> QuantumCircuit:
         if qubit_count is None:
             qubit_count = self._get_qubit_count()
 
@@ -105,20 +104,18 @@ class QiskitRunner:
             + 1
         )
 
-    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> tuple[QuantumCircuit, list[dict]]:
+    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
-        measured_bits = []
 
         for step_index, step in enumerate(self.steps):
             i_targets = list(range(qubit_count))
-            measured_bits.append({})
 
             for operation in step:
                 i_targets = list(set(i_targets) - set(operation["targets"]))
                 if "controls" in operation:
                     i_targets = list(set(i_targets) - set(operation["controls"]))
 
-                measured_bits = self._apply_operation(circuit, operation, step_index, measured_bits)
+                self._apply_operation(circuit, operation)
 
             for each in i_targets:
                 circuit.id(each)
@@ -126,11 +123,9 @@ class QiskitRunner:
             if step_index == until_step_index:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
-        return circuit, measured_bits
+        return circuit
 
-    def _apply_operation(
-        self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
-    ) -> list[dict]:
+    def _apply_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         operation_type = operation["type"]
 
         if operation_type == "H":
@@ -160,12 +155,10 @@ class QiskitRunner:
         elif operation_type == "|1>":
             self._apply_write1(circuit, operation)
         elif operation_type == "Measure":
-            measured_bits = self._apply_measure_operation(circuit, operation, step_index, measured_bits)
+            self._apply_measure_operation(circuit, operation)
         else:
             value_error_message = f"Unknown operation: {operation_type}"
             raise ValueError(value_error_message)
-
-        return measured_bits
 
     def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
         circuit.reset(operation["targets"])
@@ -174,18 +167,11 @@ class QiskitRunner:
         circuit.reset(operation["targets"])
         circuit.x(operation["targets"])
 
-    def _apply_measure_operation(
-        self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
-    ) -> list[dict]:
-        measured_bits_copy = measured_bits.copy()
-        measured_bits_copy[step_index] = {target: None for target in operation["targets"]}
-
+    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         creg = ClassicalRegister(circuit.num_qubits)
         circuit.add_register(creg)
         for target in operation["targets"]:
             circuit.measure(target, creg[target])
-
-        return measured_bits_copy
 
     def _apply_x_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         if "controls" in operation:
@@ -214,26 +200,39 @@ class QiskitRunner:
 
         return backend.run(self.circuit, shots=1, memory=True).result()
 
-    def _get_statevector(self, result: Result) -> list | None:
-        return np.array(result.data()[self._STATEVECTOR_LABEL])
+    def _get_statevector(self, result: Result) -> list[complex]:
+        statevector = result.data().get(self._STATEVECTOR_LABEL)
+        if isinstance(statevector, Statevector):
+            statevector = np.asarray(statevector)
 
-    def _extract_measurement_results(self, result: Result, measured_bits: list[dict]) -> list[dict]:
-        if not self._circuit_has_measurements():
+        return statevector.tolist()
+
+    def _extract_measurement_results(self, result: Result) -> list[dict[int, int]]:
+        circuit_has_measurements = False
+        measured_bits: list[dict[int, int]] = []
+        tmp_measured_bits: list[dict[int, int | None]] = []
+
+        for step_index, step in enumerate(self.steps):
+            measured_bits.append({})
+            tmp_measured_bits.append({})
+
+            for operation in step:
+                if operation["type"] == "Measure":
+                    circuit_has_measurements = True
+                    tmp_measured_bits[step_index] = {target: None for target in operation["targets"]}
+
+        if not circuit_has_measurements:
             return measured_bits
 
-        measured_bits_copy = measured_bits.copy()
         count = next(iter(result.get_counts().keys()))
         bit_strings = count.split()
 
-        for each in measured_bits_copy:
+        for index, each in enumerate(tmp_measured_bits):
             if len(each) == 0:
                 continue
 
             bit_string = bit_strings.pop()
             for bit in each:
-                each[bit] = int(bit_string[len(bit_string) - bit - 1])
+                measured_bits[index][bit] = int(bit_string[len(bit_string) - bit - 1])
 
-        return measured_bits_copy
-
-    def _circuit_has_measurements(self) -> bool:
-        return any(isinstance(instr.operation, Measure) for instr in self.circuit.data)
+        return measured_bits
