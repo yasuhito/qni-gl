@@ -54,7 +54,7 @@ def backend():
     Handles the POST request to the /backend.json endpoint.
 
     This function processes the incoming request,
-    runs the quantum circuit simulation using Cirq,
+    runs the quantum circuit simulation using Qiskit,
     and returns the simulation results in JSON format.
 
     Returns:
@@ -64,7 +64,7 @@ def backend():
         circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device = _get_request_data()
         _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
 
-        step_results = _run_cirq(qubit_count, until_step_index, steps, amplitude_indices, device)
+        step_results = _run_qiskit(qubit_count, until_step_index, steps, amplitude_indices, device)
         return jsonify(step_results)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
@@ -116,7 +116,7 @@ def _log_request_data(
     app.logger.debug("device = %s", device)
 
 
-def _run_cirq(
+def _run_qiskit(
     qubit_count: int, until_step_index: int, steps: list, amplitude_indices: list[int], device: str
 ) -> list[dict]:
     results = QiskitRunner(app.logger).run_circuit(
