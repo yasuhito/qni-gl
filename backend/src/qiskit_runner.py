@@ -44,7 +44,7 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        step_results: list[dict[str, dict[int, int] | list[complex]]] = []
+        step_results: list[dict[str, list[complex] | dict[int, int]]] = []
 
         self.steps = steps
         self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
@@ -65,13 +65,10 @@ class QiskitRunner:
         for step_index in range(len(self.steps)):
             step_result: dict[str, dict[int, int] | list[complex]] = {":measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
-                step_result[":amplitude"] = statevector
+                step_result[":amplitude"] = self._filter_amplitudes(statevector, amplitude_indices)
             step_results.append(step_result)
 
-        if amplitude_indices is None:
-            return step_results
-
-        return self._filter_amplitudes(step_results, amplitude_indices)
+        return step_results
 
     def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None) -> QuantumCircuit:
         if qubit_count is None:
@@ -82,14 +79,20 @@ class QiskitRunner:
 
         return self._process_step_operations(qubit_count, until_step_index)
 
-    def _filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
-        for step_result in step_results:
-            amplitudes = step_result.get(":amplitude")
-            if amplitudes is not None:
-                filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
-                step_result[":amplitude"] = filtered_amplitudes
+    def _filter_amplitudes(self, statevector: list[complex], amplitude_indices: list[int] | None) -> list[complex]:
+        if amplitude_indices is None:
+            return statevector
 
-        return step_results
+        return [statevector[index] for index in amplitude_indices]
+
+    # def __filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
+    #     for step_result in step_results:
+    #         amplitudes = step_result.get(":amplitude")
+    #         if amplitudes is not None:
+    #             filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
+    #             step_result[":amplitude"] = filtered_amplitudes
+
+    #     return step_results
 
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:

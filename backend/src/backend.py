@@ -116,4 +116,4 @@ def _convert_result(result):
 
 
 def _flatten_amplitude(amplitude):
-    return {index: [float(each.real), float(each.imag)] for index, each in amplitude.items()}
+    return {index: [float(each.real), float(each.imag)] for index, each in enumerate(amplitude)}
