@@ -564,8 +564,8 @@ export class App {
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
       qubitCount: this.circuit.highestOccupiedQubitNumber,
-      stepIndex: this.circuit.activeStepIndex,
-      targets: this.stateVector.visibleQubitCircleIndices,
+      untilStepIndex: this.circuit.activeStepIndex,
+      amplitudeIndices: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
     });
   }

@@ -10,8 +10,8 @@ self.addEventListener("install", () => {
 self.addEventListener("message", (event) => {
   const circuitJson = event.data.circuitJson;
   const qubitCount = event.data.qubitCount;
-  const stepIndex = event.data.stepIndex;
-  const targets = event.data.targets;
+  const untilStepIndex = event.data.untilStepIndex;
+  const amplitudeIndices = event.data.amplitudeIndices;
   const steps = event.data.steps;
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
@@ -29,8 +29,8 @@ self.addEventListener("message", (event) => {
       const params = new URLSearchParams({
         id: circuitJson,
         qubitCount: qubitCount,
-        stepIndex: stepIndex,
-        targets: targets,
+        untilStepIndex: untilStepIndex,
+        amplitudeIndices: amplitudeIndices,
         steps: JSON.stringify(steps),
         useGpu: false,
       });
@@ -38,9 +38,9 @@ self.addEventListener("message", (event) => {
       const response = await fetch(BACKEND_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded", // URLSearchParams を使用する場合
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: params.toString(), // パラメータをボディに設定
+        body: params.toString(),
       });
 
       if (!response.ok) {

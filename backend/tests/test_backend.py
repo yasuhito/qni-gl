@@ -27,8 +27,8 @@ def test_post_simple_circuit():
     request_data = {
         "id": '{"cols": [["H", 1], [1, 1], [1, 1], [1, 1], [1, 1]]}',
         "qubitCount": 2,
-        "stepIndex": 0,
-        "targets": "0,1,2,3",
+        "untilStepIndex": 0,
+        "amplitudeIndices": "0,1,2,3",
         "steps": '[[{"type": "H", "targets": [0]}], [], [], [], []]',
     }
 
