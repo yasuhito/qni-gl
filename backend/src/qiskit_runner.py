@@ -85,15 +85,6 @@ class QiskitRunner:
 
         return [statevector[index] for index in amplitude_indices]
 
-    # def __filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
-    #     for step_result in step_results:
-    #         amplitudes = step_result.get("amplitudes")
-    #         if amplitudes is not None:
-    #             filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
-    #             step_result["amplitudes"] = filtered_amplitudes
-
-    #     return step_results
-
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:
             return 0
