@@ -183,6 +183,20 @@ export async function dragAndDrop(
   });
 }
 
+export async function activateStep(page: Page, stepIndex: number) {
+  const circuitInfo = await getCircuitInfo(page);
+  const dropzone = circuitInfo.steps[stepIndex][0];
+
+  await page.mouse.move(dropzone.x, dropzone.y);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.waitForSelector('#app[data-state="idle"]', {
+    state: "attached",
+    timeout: 5000,
+  });
+}
+
 export async function grab(page: Page, target: { x: number; y: number }) {
   // ターゲット位置に移動
   await page.mouse.move(target.x, target.y);
