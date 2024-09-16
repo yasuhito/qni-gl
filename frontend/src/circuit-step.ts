@@ -247,7 +247,7 @@ export class CircuitStep extends Container {
         operationClass === ControlGate &&
         operations.some((op) => this.isControllable(op))
       ) {
-        continue; // Skip ControlGate if X or H gate is present
+        continue;
       }
 
       // const sameOperations = sameOps as Operation[];
@@ -255,10 +255,9 @@ export class CircuitStep extends Container {
         this.dropzoneList.findIndexOf(each)
       );
       const operation = sameOps[0];
-      const serializedGate =
-        operation instanceof XGate || operation instanceof HGate
-          ? operation.serialize(targetBits, this.controlBits)
-          : operation.serialize(targetBits);
+      const serializedGate = this.isControllable(operation)
+        ? operation.serialize(targetBits, this.controlBits)
+        : operation.serialize(targetBits);
       result.push(serializedGate);
     }
 
