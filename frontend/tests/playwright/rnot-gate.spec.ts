@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { dragAndDrop, getCircuitInfo } from "./test-helpers";
+import { dragAndDrop } from "./test-helpers";
 
 test.describe("√X gate", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,37 +8,24 @@ test.describe("√X gate", () => {
 
   test("Place a √X gate on the first bit", async ({ page, circuitInfo }) => {
     const rnotGate = circuitInfo.gatePalette.rnotGate;
-    const dropzone = circuitInfo.steps[0][0];
 
-    await dragAndDrop(page, rnotGate, dropzone);
+    await dragAndDrop(page, rnotGate, { step: 0, bit: 0 });
 
     await expect(page).toHaveScreenshot("rnot-gate-bit1.png");
   });
 
   test("Place a √X gate on the second bit", async ({ page, circuitInfo }) => {
     const rnotGate = circuitInfo.gatePalette.rnotGate;
-    const dropzone = circuitInfo.steps[0][1];
 
-    await dragAndDrop(page, rnotGate, dropzone);
+    await dragAndDrop(page, rnotGate, { step: 0, bit: 1 });
 
     await expect(page).toHaveScreenshot("rnot-gate-bit2.png");
   });
 
-  test("Place a √X gate on the third bit", async ({
-    page,
-    circuitInfo,
-    idle,
-  }) => {
+  test("Place a √X gate on the third bit", async ({ page, circuitInfo }) => {
     const rnotGate = circuitInfo.gatePalette.rnotGate;
-    await page.mouse.move(rnotGate.x, rnotGate.y);
-    await page.mouse.down();
 
-    circuitInfo = await getCircuitInfo(page);
-    const dropzone = circuitInfo.steps[0][2];
-
-    await page.mouse.move(dropzone.x, dropzone.y);
-    await page.mouse.up();
-    await idle.waitFor();
+    await dragAndDrop(page, rnotGate, { step: 0, bit: 2 });
 
     await expect(page).toHaveScreenshot("rnot-gate-bit3.png");
   });
