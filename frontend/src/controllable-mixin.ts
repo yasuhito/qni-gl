@@ -42,3 +42,7 @@ export function ControllableMixin<
     }
   };
 }
+
+export function isControllable(arg: unknown): arg is Controllable {
+  return typeof arg === "object" && arg !== null && "controls" in arg;
+}

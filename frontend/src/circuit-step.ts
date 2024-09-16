@@ -8,7 +8,7 @@ import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
-import { Controllable } from "./controllable-mixin";
+import { isControllable } from "./controllable-mixin";
 
 /**
  * Represents a single step in a quantum circuit.
@@ -244,7 +244,7 @@ export class CircuitStep extends Container {
     )) {
       if (
         operationClass === ControlGate &&
-        operations.some((op) => this.isControllable(op))
+        operations.some((op) => isControllable(op))
       ) {
         continue;
       }
@@ -254,7 +254,7 @@ export class CircuitStep extends Container {
         this.dropzoneList.findIndexOf(each)
       );
       const operation = sameOps[0];
-      const serializedGate = this.isControllable(operation)
+      const serializedGate = isControllable(operation)
         ? operation.serialize(targetBits, this.controlBits)
         : operation.serialize(targetBits);
       result.push(serializedGate);
@@ -323,10 +323,7 @@ export class CircuitStep extends Container {
 
       // Set controls for XGates
       for (const each of controllableDropzones) {
-        need(
-          this.isControllable(each.operation),
-          "operation is not Controllable"
-        );
+        need(isControllable(each.operation), "operation is not Controllable");
         each.operation.controls = allControlBits;
       }
     } else {
@@ -350,7 +347,7 @@ export class CircuitStep extends Container {
 
   private controllableDropzones(): Dropzone[] {
     return this.dropzoneList.occupied.filter((dropzone) =>
-      this.isControllable(dropzone.operation)
+      isControllable(dropzone.operation)
     );
   }
 
@@ -369,9 +366,5 @@ export class CircuitStep extends Container {
     if (this.state.isHover()) {
       this.state.setIdle();
     }
-  }
-
-  private isControllable(arg: unknown): arg is Controllable {
-    return typeof arg === "object" && arg !== null && "controls" in arg;
   }
 }
