@@ -9,6 +9,7 @@ import { SwapGate } from "./swap-gate";
 import { XGate } from "./x-gate";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
+import { HGate } from "./h-gate";
 
 /**
  * Represents a single step in a quantum circuit.
@@ -244,9 +245,9 @@ export class CircuitStep extends Container {
     )) {
       if (
         operationClass === ControlGate &&
-        operations.some((op) => op instanceof XGate)
+        operations.some((op) => op instanceof XGate || op instanceof HGate)
       ) {
-        continue; // Skip ControlGate if X gate is present
+        continue; // Skip ControlGate if X or H gate is present
       }
 
       // const sameOperations = sameOps as Operation[];
@@ -255,7 +256,7 @@ export class CircuitStep extends Container {
       );
       const operation = sameOps[0];
       const serializedGate =
-        operation instanceof XGate
+        operation instanceof XGate || operation instanceof HGate
           ? operation.serialize(targetBits, this.controlBits)
           : operation.serialize(targetBits);
       result.push(serializedGate);
@@ -324,7 +325,10 @@ export class CircuitStep extends Container {
 
       // Set controls for XGates
       for (const each of controllableDropzones) {
-        need(each.operation instanceof XGate, "operation is not XGate");
+        need(
+          each.operation instanceof XGate || each.operation instanceof HGate,
+          "operation is not XGate or HGate"
+        );
         each.operation.controls = allControlBits;
       }
     } else {
@@ -347,7 +351,9 @@ export class CircuitStep extends Container {
   }
 
   private controllableDropzones(): Dropzone[] {
-    return this.dropzoneList.filterByOperationType(XGate);
+    return this.dropzoneList
+      .filterByOperationType(XGate)
+      .concat(this.dropzoneList.filterByOperationType(HGate));
   }
 
   private onDropzoneSnap(dropzone: Dropzone) {
