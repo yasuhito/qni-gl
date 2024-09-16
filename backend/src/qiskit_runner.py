@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, TypedDict, cast
 
 import numpy as np
 
 if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
-
-from typing import TypedDict
 
 from qiskit import ClassicalRegister, QuantumCircuit  # type: ignore
 from qiskit.circuit.library import XGate, ZGate  # type: ignore
@@ -18,9 +16,23 @@ from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_typ
 amplitude_type = complex
 
 
+class BasicOperation(TypedDict):
+    type: str
+    targets: list[int]
+
+
+class ControllableOperation(TypedDict):
+    type: str
+    targets: list[int]
+    controls: list[int]
+
+
 class StepResultsWithAmplitudes(TypedDict):
     amplitudes: list[amplitude_type]
     measuredBits: MeasuredBitsType
+
+
+OperationMethod = Callable[[QuantumCircuit, BasicOperation | ControllableOperation], None]
 
 
 class QiskitRunner:
@@ -135,18 +147,18 @@ class QiskitRunner:
         def __init__(self, operation_type):
             super().__init__(f"Unknown operation: {operation_type}")
 
-    def _apply_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         operation_type = operation["type"]
-        operation_methods = {
+        operation_methods: dict[str, OperationMethod] = {
             "H": self._apply_h_operation,
             "X": self._apply_x_operation,
             "Y": self._apply_y_operation,
             "Z": self._apply_z_operation,
             "X^½": self._apply_x_half_operation,
             "S": self._apply_s_operation,
-            "S†": self._apply_sdg_operation,
+            "S†": self._apply_s_dagger_operation,
             "T": self._apply_t_operation,
-            "T†": self._apply_tdg_operation,
+            "T†": self._apply_t_dagger_operation,
             "Swap": self._apply_swap_operation,
             "•": self._apply_controlled_z_operation,
             "|0>": self._apply_write0,
@@ -159,58 +171,59 @@ class QiskitRunner:
         else:
             raise self.UnknownOperationError(operation_type)
 
-    def _apply_h_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.h(operation["targets"])
 
-    def _apply_x_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_x_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
             for target in operation["targets"]:
                 circuit.mcx(operation["controls"], target)
         else:
             circuit.x(operation["targets"])
 
-    def _apply_y_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_y_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.y(operation["targets"])
 
-    def _apply_z_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.z(operation["targets"])
 
-    def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.append(XGate().power(1 / 2), operation["targets"])
 
-    def _apply_s_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_s_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.s(operation["targets"])
 
-    def _apply_sdg_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_s_dagger_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.sdg(operation["targets"])
 
-    def _apply_t_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_t_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.t(operation["targets"])
 
-    def _apply_tdg_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_t_dagger_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.tdg(operation["targets"])
 
-    def _apply_swap_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_swap_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
             circuit.swap(operation["targets"][0], operation["targets"][1])
         else:
             circuit.id(operation["targets"])
 
-    def _apply_controlled_z_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_controlled_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
             u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
             circuit.append(u, qargs=operation["targets"])
         else:
             circuit.id(operation["targets"])
 
-    def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_write0(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.reset(operation["targets"])
 
-    def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_write1(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.reset(operation["targets"])
         circuit.x(operation["targets"])
 
-    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         creg = ClassicalRegister(circuit.num_qubits)
         circuit.add_register(creg)
         for target in operation["targets"]:
