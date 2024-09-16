@@ -12,7 +12,6 @@ import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { OperationPalette } from "./operation-palette";
 import { logger, rectIntersect } from "./util";
-import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import {
   Application,
   Assets,
@@ -153,7 +152,6 @@ export class App {
 
     this.setupFrameDividerEventHandlers();
     this.setupCircuitFrameEventHandlers();
-    this.setupStateVectorEventHandlers();
   }
 
   private setupFrameDividerEventHandlers() {
@@ -217,14 +215,6 @@ export class App {
     this.circuitFrame.on(
       CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
       this.grabGate,
-      this
-    );
-  }
-
-  private setupStateVectorEventHandlers() {
-    this.stateVector.on(
-      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-      this.runSimulator,
       this
     );
   }
