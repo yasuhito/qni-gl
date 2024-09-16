@@ -6,10 +6,9 @@ import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
-import { XGate } from "./x-gate";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
-import { HGate } from "./h-gate";
+import { Controllable } from "./controllable-mixin";
 
 /**
  * Represents a single step in a quantum circuit.
@@ -325,8 +324,8 @@ export class CircuitStep extends Container {
       // Set controls for XGates
       for (const each of controllableDropzones) {
         need(
-          each.operation instanceof XGate || each.operation instanceof HGate,
-          "operation is not XGate or HGate"
+          this.isControllable(each.operation),
+          "operation is not Controllable"
         );
         each.operation.controls = allControlBits;
       }
@@ -350,9 +349,9 @@ export class CircuitStep extends Container {
   }
 
   private controllableDropzones(): Dropzone[] {
-    return this.dropzoneList
-      .filterByOperationType(XGate)
-      .concat(this.dropzoneList.filterByOperationType(HGate));
+    return this.dropzoneList.occupied.filter((dropzone) =>
+      this.isControllable(dropzone.operation)
+    );
   }
 
   private onDropzoneSnap(dropzone: Dropzone) {
@@ -372,7 +371,7 @@ export class CircuitStep extends Container {
     }
   }
 
-  private isControllable(op: Operation): boolean {
-    return "controls" in op;
+  private isControllable(arg: unknown): arg is Controllable {
+    return typeof arg === "object" && arg !== null && "controls" in arg;
   }
 }
