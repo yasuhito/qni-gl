@@ -82,3 +82,33 @@ class TestControlledH(unittest.TestCase):
         assert_complex_approx(amplitudes[5], 0, 0)
         assert_complex_approx(amplitudes[6], 0, 0)
         assert_complex_approx(amplitudes[7], 1 / sqrt(2), 0)
+
+    def test_controlled_h_1_control_2_targets(self):
+        steps = [[{"type": "H", "targets": [1, 2], "controls": [0]}]]
+
+        result = self.qiskit_runner.run_circuit(steps)
+
+        amplitudes = result[0]["amplitudes"]
+        assert_complex_approx(amplitudes[0], 1, 0)
+        assert_complex_approx(amplitudes[1], 0, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 0, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 0, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 0, 0)
+
+    def test_controlled_h_1_control_2_targets_011(self):
+        steps = [[{"type": "X", "targets": [0]}], [{"type": "H", "targets": [1, 2], "controls": [0]}]]
+
+        result = self.qiskit_runner.run_circuit(steps)
+
+        amplitudes = result[1]["amplitudes"]
+        assert_complex_approx(amplitudes[0], 0, 0)
+        assert_complex_approx(amplitudes[1], 1 / 2, 0)
+        assert_complex_approx(amplitudes[2], 0, 0)
+        assert_complex_approx(amplitudes[3], 1 / 2, 0)
+        assert_complex_approx(amplitudes[4], 0, 0)
+        assert_complex_approx(amplitudes[5], 1 / 2, 0)
+        assert_complex_approx(amplitudes[6], 0, 0)
+        assert_complex_approx(amplitudes[7], 1 / 2, 0)
