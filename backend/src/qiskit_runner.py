@@ -7,8 +7,8 @@ import numpy as np
 if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
 
-from qiskit import ClassicalRegister, QuantumCircuit  # type: ignore
-from qiskit.circuit.library import XGate, ZGate  # type: ignore
+from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
+from qiskit.circuit.library import HGate, XGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
 from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
@@ -171,8 +171,14 @@ class QiskitRunner:
         else:
             raise self.UnknownOperationError(operation_type)
 
-    def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
-        circuit.h(operation["targets"])
+    def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = HGate().control(num_ctrl_qubits=len(operation["targets"]))
+            for target in operation["targets"]:
+                circuit.append(u, operation["controls"] + [target])
+        else:
+            circuit.h(operation["targets"])
 
     def _apply_x_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         if "controls" in operation:
@@ -234,7 +240,9 @@ class QiskitRunner:
         if device == "GPU":
             backend.set_options(device="GPU", cuStateVec_enable=True)
 
-        return backend.run(self.circuit, shots=1, memory=True).result()
+        circuit_transpiled = transpile(self.circuit, backend=backend)
+
+        return backend.run(circuit_transpiled, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list[amplitude_type]:
         return np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
