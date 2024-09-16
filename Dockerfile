@@ -34,6 +34,16 @@ ENV LD_LIBRARY_PATH $CUQUANTUM_ROOT/lib:$LD_LIBRARY_PATH
 RUN apt update && \
   apt install -y git wget curl
 
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+  apt install -y --no-install-recommends nodejs
+
+# Install npm
+RUN curl -qL https://www.npmjs.com/install.sh | sh
+
+# Install yarn
+RUN npm install -g yarn
+
 # Install cuquantum and cutensor
 RUN wget https://developer.download.nvidia.com/compute/cuquantum/24.08.0/local_installers/cuquantum-local-repo-ubuntu2204-24.08.0_24.08.0-1_amd64.deb && \
   dpkg -i cuquantum-local-repo-ubuntu2204-24.08.0_24.08.0-1_amd64.deb && \
@@ -52,6 +62,9 @@ RUN apt install -y software-properties-common && \
   update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
   update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
+# Install nginx and other dependencies
+RUN apt install -y --no-install-recommends nginx apache2-utils python3-flask
+
 # Install necessary dependencies
 RUN apt install -y cmake python3-skbuild libopenblas-dev && \
   pip install hatch gunicorn flask-cors && \
@@ -59,32 +72,20 @@ RUN apt install -y cmake python3-skbuild libopenblas-dev && \
   pip install "qiskit[all]" && \
   pip uninstall -y qiskit-aer
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
-  apt install -y --no-install-recommends nodejs
+# Install qiskit-aer
+RUN git clone -b stable/0.15 https://github.com/Qiskit/qiskit-aer/ && \
+  cd qiskit-aer && \
+  python ./setup.py bdist_wheel -- -DAER_THRUST_BACKEND=CUDA -DAER_PYTHON_CUDA_ROOT=qiskit-aer-venv && \
+  pip install dist/qiskit_aer-0.15.1-cp**-cp**-linux_x86_64.whl && \
+  cd .. && \
+  rm -rf qiskit_aer
 
-# Install npm
-RUN curl -qL https://www.npmjs.com/install.sh | sh
-
-# Install yarn
-RUN npm install -g yarn
-
-# Install nginx and other dependencies
-RUN apt install -y --no-install-recommends nginx apache2-utils python3-flask && \
-  rm -rf /var/lib/apt/lists/* /var/cache/apt/archives
+# Clean up
+RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/archives  
 
 # Prepare nginx configuration
 COPY backend/merged.conf /etc/nginx/conf.d/
 RUN htpasswd -bc /etc/nginx/.htpasswd userA passA
-
-RUN git clone -b stable/0.15 https://github.com/Qiskit/qiskit-aer/ && \
-  cd qiskit-aer && \
-  python ./setup.py bdist_wheel -- -DAER_THRUST_BACKEND=CUDA -DAER_PYTHON_CUDA_ROOT=qiskit-aer-venv
-
-RUN cd qiskit-aer && \
-  pip install dist/qiskit_aer-0.15.1-cp**-cp**-linux_x86_64.whl && \
-  cd .. && \
-  rm -rf qiskit_aer
 
 # Copy the source code
 RUN mkdir /qni-gl
