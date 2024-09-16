@@ -11,9 +11,8 @@ test.describe("Control gate", () => {
     circuitInfo,
   }) => {
     const controlGate = circuitInfo.gatePalette.controlGate;
-    const dropzone = circuitInfo.steps[0][0];
 
-    await dragAndDrop(page, controlGate, dropzone);
+    await dragAndDrop(page, controlGate, { step: 0, bit: 0 });
 
     await expect(page).toHaveScreenshot("control-gate-bit1.png");
   });
@@ -23,10 +22,8 @@ test.describe("Control gate", () => {
     circuitInfo,
   }) => {
     const controlGate = circuitInfo.gatePalette.controlGate;
-    const dropzone = circuitInfo.steps[0][1];
 
-    await dragAndDrop(page, controlGate, dropzone);
-
+    await dragAndDrop(page, controlGate, { step: 0, bit: 1 });
     await expect(page).toHaveScreenshot("control-gate-bit2.png");
   });
 
