@@ -527,6 +527,11 @@ export class App {
     this.circuit.update();
 
     this.updateStateVectorComponentQubitCount();
+    this.stateVectorFrame.repositionAndResize(
+      this.frameDivider.y + this.frameDivider.height,
+      this.app.screen.width,
+      this.app.screen.height - this.frameDivider.y
+    );
     this.runSimulator();
   }
 

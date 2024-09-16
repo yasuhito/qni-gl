@@ -163,18 +163,15 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
 export async function dragAndDrop(
   page: Page,
   source: { x: number; y: number },
-  target: { x: number; y: number }
+  target: { step: number; bit: number }
 ) {
-  // ソース位置に移動
   await page.mouse.move(source.x, source.y);
-
-  // マウスボタンを押下
   await page.mouse.down();
 
-  // ターゲット位置まで複数のステップで移動
-  await page.mouse.move(target.x, target.y);
+  const circuitInfo = await getCircuitInfo(page);
+  const targetDropzone = circuitInfo.steps[target.step][target.bit];
 
-  // マウスボタンを離す
+  await page.mouse.move(targetDropzone.x, targetDropzone.y);
   await page.mouse.up();
 
   await page.waitForSelector('#app[data-state="idle"]', {
