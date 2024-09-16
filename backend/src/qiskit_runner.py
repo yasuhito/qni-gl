@@ -208,11 +208,7 @@ class QiskitRunner:
         return backend.run(self.circuit, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> list[amplitude_type]:
-        statevector = result.data().get(self._STATEVECTOR_LABEL)
-        if isinstance(statevector, Statevector):
-            statevector = np.asarray(statevector)
-
-        return statevector.tolist()
+        return np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
 
     def _extract_measurement_results(self, result: Result) -> list[MeasuredBitsType]:
         measured_bits: list[MeasuredBitsType] = [{} for _ in self.steps]
