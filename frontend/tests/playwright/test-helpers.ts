@@ -202,9 +202,15 @@ export async function grab(page: Page, target: { x: number; y: number }) {
   await page.mouse.down();
 }
 
-export async function dropAt(page: Page, target: { x: number; y: number }) {
+export async function dropAt(
+  page: Page,
+  target: { step: number; bit: number }
+) {
+  const circuitInfo = await getCircuitInfo(page);
+  const dropzone = circuitInfo.steps[target.step][target.bit];
+
   // ターゲット位置まで複数のステップで移動
-  await page.mouse.move(target.x, target.y);
+  await page.mouse.move(dropzone.x, dropzone.y);
 
   // マウスボタンを離す
   await page.mouse.up();

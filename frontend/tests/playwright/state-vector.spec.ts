@@ -24,8 +24,7 @@ test.describe("State vector", () => {
         await grab(page, hGate);
         circuitInfo = await getCircuitInfo(page);
 
-        const dropzone = circuitInfo.steps[0][i];
-        await dropAt(page, dropzone);
+        await dropAt(page, { step: 0, bit: i });
       }
 
       await expect(page).toHaveScreenshot(
