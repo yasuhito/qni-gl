@@ -245,7 +245,7 @@ export class CircuitStep extends Container {
     )) {
       if (
         operationClass === ControlGate &&
-        operations.some((op) => op instanceof XGate || op instanceof HGate)
+        operations.some((op) => this.isControllable(op))
       ) {
         continue; // Skip ControlGate if X or H gate is present
       }
@@ -371,5 +371,9 @@ export class CircuitStep extends Container {
     if (this.state.isHover()) {
       this.state.setIdle();
     }
+  }
+
+  private isControllable(op: Operation): boolean {
+    return "controls" in op;
   }
 }
