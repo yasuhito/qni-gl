@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import pytest
 
@@ -51,6 +52,16 @@ class TestQiskitRunner(unittest.TestCase):
 
         with pytest.raises(ValueError, match="Unknown operation: UnknownGate"):
             self.qiskit_runner.run_circuit(steps)
+
+    @patch("qiskit_aer.AerSimulator.set_options")
+    def test_gpu_backend(self, mock_set_options):
+        steps = [
+            [{"type": "H", "targets": [0]}],
+        ]
+
+        self.qiskit_runner.run_circuit(steps, device="GPU")
+
+        mock_set_options.assert_called_with(device="GPU", cuStateVec_enable=True)
 
 
 if __name__ == "__main__":

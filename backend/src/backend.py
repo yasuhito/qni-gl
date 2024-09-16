@@ -8,7 +8,7 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from src.types import MeasuredBitsType
+    from src.types import MeasuredBitsType, device_type
 
 from src.qiskit_runner import QiskitRunner
 
@@ -117,7 +117,7 @@ def _log_request_data(
 
 
 def _run_qiskit(
-    qubit_count: int, until_step_index: int, steps: list, amplitude_indices: list[int], device: str
+    qubit_count: int, until_step_index: int, steps: list, amplitude_indices: list[int], device: device_type
 ) -> list[dict]:
     results = QiskitRunner(app.logger).run_circuit(
         steps,

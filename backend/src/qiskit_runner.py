@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.quantum_info import Statevector  # type: ignore
 
 if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
@@ -14,7 +13,7 @@ from qiskit import ClassicalRegister, QuantumCircuit  # type: ignore
 from qiskit.circuit.library import XGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
-from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes
+from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
 
 amplitude_type = complex
 
@@ -40,7 +39,7 @@ class QiskitRunner:
         qubit_count: int | None = None,
         until_step_index: int | None = None,
         amplitude_indices: list[int] | None = None,
-        device: str = "CPU",
+        device: device_type = "CPU",
     ):
         """
         Execute the specified quantum circuit and return the results of each step.
