@@ -131,53 +131,36 @@ class QiskitRunner:
 
         return circuit
 
+    class UnknownOperationError(ValueError):
+        def __init__(self, operation_type):
+            super().__init__(f"Unknown operation: {operation_type}")
+
     def _apply_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         operation_type = operation["type"]
+        operation_methods = {
+            "H": self._apply_h_operation,
+            "X": self._apply_x_operation,
+            "Y": self._apply_y_operation,
+            "Z": self._apply_z_operation,
+            "X^½": self._apply_x_half_operation,
+            "S": self._apply_s_operation,
+            "S†": self._apply_sdg_operation,
+            "T": self._apply_t_operation,
+            "T†": self._apply_tdg_operation,
+            "Swap": self._apply_swap_operation,
+            "•": self._apply_controlled_z_operation,
+            "|0>": self._apply_write0,
+            "|1>": self._apply_write1,
+            "Measure": self._apply_measure_operation,
+        }
 
-        if operation_type == "H":
-            circuit.h(operation["targets"])
-        elif operation_type == "X":
-            self._apply_x_operation(circuit, operation)
-        elif operation_type == "Y":
-            circuit.y(operation["targets"])
-        elif operation_type == "Z":
-            circuit.z(operation["targets"])
-        elif operation_type == "X^½":
-            circuit.append(XGate().power(1 / 2), operation["targets"])
-        elif operation_type == "S":
-            circuit.s(operation["targets"])
-        elif operation_type == "S†":
-            circuit.sdg(operation["targets"])
-        elif operation_type == "T":
-            circuit.t(operation["targets"])
-        elif operation_type == "T†":
-            circuit.tdg(operation["targets"])
-        elif operation_type == "Swap":
-            self._apply_swap_operation(circuit, operation)
-        elif operation_type == "•":
-            self._apply_controlled_z_operation(circuit, operation)
-        elif operation_type == "|0>":
-            self._apply_write0(circuit, operation)
-        elif operation_type == "|1>":
-            self._apply_write1(circuit, operation)
-        elif operation_type == "Measure":
-            self._apply_measure_operation(circuit, operation)
+        if operation_type in operation_methods:
+            operation_methods[operation_type](circuit, operation)
         else:
-            value_error_message = f"Unknown operation: {operation_type}"
-            raise ValueError(value_error_message)
+            raise self.UnknownOperationError(operation_type)
 
-    def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"])
-
-    def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"])
-        circuit.x(operation["targets"])
-
-    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
-        creg = ClassicalRegister(circuit.num_qubits)
-        circuit.add_register(creg)
-        for target in operation["targets"]:
-            circuit.measure(target, creg[target])
+    def _apply_h_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.h(operation["targets"])
 
     def _apply_x_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         if "controls" in operation:
@@ -185,6 +168,27 @@ class QiskitRunner:
                 circuit.mcx(operation["controls"], target)
         else:
             circuit.x(operation["targets"])
+
+    def _apply_y_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.y(operation["targets"])
+
+    def _apply_z_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.z(operation["targets"])
+
+    def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.append(XGate().power(1 / 2), operation["targets"])
+
+    def _apply_s_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.s(operation["targets"])
+
+    def _apply_sdg_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.sdg(operation["targets"])
+
+    def _apply_t_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.t(operation["targets"])
+
+    def _apply_tdg_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.tdg(operation["targets"])
 
     def _apply_swap_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
@@ -198,6 +202,19 @@ class QiskitRunner:
             circuit.append(u, qargs=operation["targets"])
         else:
             circuit.id(operation["targets"])
+
+    def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.reset(operation["targets"])
+
+    def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
+        circuit.reset(operation["targets"])
+        circuit.x(operation["targets"])
+
+    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+        creg = ClassicalRegister(circuit.num_qubits)
+        circuit.add_register(creg)
+        for target in operation["targets"]:
+            circuit.measure(target, creg[target])
 
     def _run_backend(self, device: str) -> Result:
         backend = AerSimulator(method="statevector")
