@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { dragAndDrop, getCircuitInfo } from "./test-helpers";
+import { dragAndDrop } from "./test-helpers";
 
 test.describe("Measurement gate", () => {
   test.beforeEach(async ({ page }) => {
@@ -11,9 +11,8 @@ test.describe("Measurement gate", () => {
     circuitInfo,
   }) => {
     const measurementGate = circuitInfo.gatePalette.measurementGate;
-    const dropzone = circuitInfo.steps[0][0];
 
-    await dragAndDrop(page, measurementGate, dropzone);
+    await dragAndDrop(page, measurementGate, { step: 0, bit: 0 });
 
     await expect(page).toHaveScreenshot("measurement-gate-bit1.png");
   });
@@ -23,9 +22,8 @@ test.describe("Measurement gate", () => {
     circuitInfo,
   }) => {
     const measurementGate = circuitInfo.gatePalette.measurementGate;
-    const dropzone = circuitInfo.steps[0][1];
 
-    await dragAndDrop(page, measurementGate, dropzone);
+    await dragAndDrop(page, measurementGate, { step: 0, bit: 1 });
 
     await expect(page).toHaveScreenshot("measurement-gate-bit2.png");
   });
@@ -33,18 +31,10 @@ test.describe("Measurement gate", () => {
   test("Place a Measurement gate on the third bit", async ({
     page,
     circuitInfo,
-    idle,
   }) => {
     const measurementGate = circuitInfo.gatePalette.measurementGate;
-    await page.mouse.move(measurementGate.x, measurementGate.y);
-    await page.mouse.down();
 
-    circuitInfo = await getCircuitInfo(page);
-    const dropzone = circuitInfo.steps[0][2];
-
-    await page.mouse.move(dropzone.x, dropzone.y);
-    await page.mouse.up();
-    await idle.waitFor();
+    await dragAndDrop(page, measurementGate, { step: 0, bit: 2 });
 
     await expect(page).toHaveScreenshot("measurement-gate-bit3.png");
   });
