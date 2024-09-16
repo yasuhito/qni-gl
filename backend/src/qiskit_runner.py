@@ -174,9 +174,9 @@ class QiskitRunner:
     def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         if "controls" in operation:
             operation = cast(ControllableOperation, operation)
-            u = HGate().control(num_ctrl_qubits=len(operation["targets"]))
+            u = HGate().control(num_ctrl_qubits=len(operation["controls"]))
             for target in operation["targets"]:
-                circuit.append(u, operation["controls"] + [target])
+                circuit.append(u, qargs=operation["controls"] + [target])
         else:
             circuit.h(operation["targets"])
 
