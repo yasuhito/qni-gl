@@ -6,9 +6,9 @@ import { ControlGate } from "./control-gate";
 import { Dropzone } from "./dropzone";
 import { Operation } from "./operation";
 import { SwapGate } from "./swap-gate";
-import { XGate } from "./x-gate";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
+import { isControllable } from "./controllable-mixin";
 
 /**
  * Represents a single step in a quantum circuit.
@@ -244,9 +244,9 @@ export class CircuitStep extends Container {
     )) {
       if (
         operationClass === ControlGate &&
-        operations.some((op) => op instanceof XGate)
+        operations.some((op) => isControllable(op))
       ) {
-        continue; // Skip ControlGate if X gate is present
+        continue;
       }
 
       // const sameOperations = sameOps as Operation[];
@@ -254,10 +254,9 @@ export class CircuitStep extends Container {
         this.dropzoneList.findIndexOf(each)
       );
       const operation = sameOps[0];
-      const serializedGate =
-        operation instanceof XGate
-          ? operation.serialize(targetBits, this.controlBits)
-          : operation.serialize(targetBits);
+      const serializedGate = isControllable(operation)
+        ? operation.serialize(targetBits, this.controlBits)
+        : operation.serialize(targetBits);
       result.push(serializedGate);
     }
 
@@ -324,7 +323,7 @@ export class CircuitStep extends Container {
 
       // Set controls for XGates
       for (const each of controllableDropzones) {
-        need(each.operation instanceof XGate, "operation is not XGate");
+        need(isControllable(each.operation), "operation is not Controllable");
         each.operation.controls = allControlBits;
       }
     } else {
@@ -347,7 +346,9 @@ export class CircuitStep extends Container {
   }
 
   private controllableDropzones(): Dropzone[] {
-    return this.dropzoneList.filterByOperationType(XGate);
+    return this.dropzoneList.occupied.filter((dropzone) =>
+      isControllable(dropzone.operation)
+    );
   }
 
   private onDropzoneSnap(dropzone: Dropzone) {

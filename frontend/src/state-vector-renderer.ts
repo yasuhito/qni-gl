@@ -85,7 +85,12 @@ export class StateVectorRenderer {
       this.visibleQubitCirclesStartIndexY = newVisibleQubitCirclesStartIndexY;
       this.currentViewport = viewport.clone();
 
-      this.draw();
+      const visibleIndices = this.draw();
+
+      this.container.emit(
+        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+        Array.from(visibleIndices)
+      );
 
       return true;
     }
@@ -93,21 +98,16 @@ export class StateVectorRenderer {
     return false;
   }
 
-  draw() {
+  draw(): Set<number> {
     const startTime = performance.now();
 
     this.drawBackground();
     const visibleIndices = this.drawQubitCircles();
 
-    if (visibleIndices.size > 0) {
-      this.container.emit(
-        STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
-        Array.from(visibleIndices)
-      );
-    }
-
     const endTime = performance.now();
     logger.log(`Draw execution time: ${endTime - startTime} ms`);
+
+    return visibleIndices;
   }
 
   qubitCircleAt(index: number): QubitCircle | undefined {

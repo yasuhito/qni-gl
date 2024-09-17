@@ -6,7 +6,7 @@ test.describe("State vector", () => {
     await page.goto("/");
   });
 
-  // TODO: 32 までテスト
+  // TODO: GPU 環境で 32 までテスト
   const qubitCounts = [1, 2, 3, 4, 5, 6, 7];
 
   for (const qubitCount of qubitCounts) {
@@ -24,8 +24,7 @@ test.describe("State vector", () => {
         await grab(page, hGate);
         circuitInfo = await getCircuitInfo(page);
 
-        const dropzone = circuitInfo.steps[0][i];
-        await dropAt(page, dropzone);
+        await dropAt(page, { step: 0, bit: i });
       }
 
       await expect(page).toHaveScreenshot(

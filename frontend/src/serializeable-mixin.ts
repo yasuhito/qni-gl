@@ -4,7 +4,7 @@ import { SerializedGate } from "./types";
 
 export declare class Serializeable {
   get serializeType(): string;
-  serialize(targetBits: number[]): SerializedGate;
+  serialize(targetBits: number[], _controlBits?: number[]): SerializedGate;
 }
 
 export function SerializeableMixin<
