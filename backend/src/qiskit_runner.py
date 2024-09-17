@@ -151,7 +151,7 @@ class QiskitRunner:
             "X": self._apply_x_operation,
             "Y": self._apply_y_operation,
             "Z": self._apply_z_operation,
-            "X^½": self._apply_x_half_operation,
+            "X^½": self._apply_rnot_operation,
             "S": self._apply_s_operation,
             "S†": self._apply_s_dagger_operation,
             "T": self._apply_t_operation,
@@ -203,8 +203,14 @@ class QiskitRunner:
         else:
             circuit.z(operation["targets"])
 
-    def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
-        circuit.append(XGate().power(1 / 2), operation["targets"])
+    def _apply_rnot_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = XGate().power(1 / 2).control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.append(XGate().power(1 / 2), qargs=operation["targets"])
 
     def _apply_s_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.s(operation["targets"])
