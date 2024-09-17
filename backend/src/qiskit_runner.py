@@ -28,7 +28,7 @@ class ControllableOperation(TypedDict):
 
 
 class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: list[amplitude_type]
+    amplitudes: dict[int, amplitude_type]
     measuredBits: MeasuredBitsType
 
 
@@ -107,12 +107,12 @@ class QiskitRunner:
         return self._process_step_operations(qubit_count, until_step_index)
 
     def _filter_amplitudes(
-        self, statevector: list[amplitude_type], amplitude_indices: list[int] | None
-    ) -> list[amplitude_type]:
+        self, statevector: dict[int, amplitude_type], amplitude_indices: list[int] | None
+    ) -> dict[int, amplitude_type]:
         if amplitude_indices is None:
             return statevector
 
-        return [statevector[index] for index in amplitude_indices]
+        return {index: statevector[index] for index in amplitude_indices}
 
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:
@@ -244,8 +244,10 @@ class QiskitRunner:
 
         return backend.run(circuit_transpiled, shots=1, memory=True).result()
 
-    def _get_statevector(self, result: Result) -> list[amplitude_type]:
-        return np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
+    def _get_statevector(self, result: Result) -> dict[int, amplitude_type]:
+        amplitudes = np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
+
+        return dict(enumerate(amplitudes))
 
     def _extract_measurement_results(self, result: Result) -> list[MeasuredBitsType]:
         measured_bits: list[MeasuredBitsType] = [{} for _ in self.steps]

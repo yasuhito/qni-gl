@@ -24,6 +24,7 @@ import {
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
 } from "./events";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 declare global {
   interface Window {
@@ -152,6 +153,7 @@ export class App {
 
     this.setupFrameDividerEventHandlers();
     this.setupCircuitFrameEventHandlers();
+    this.setupStateVectorEventHandlers();
   }
 
   private setupFrameDividerEventHandlers() {
@@ -215,6 +217,14 @@ export class App {
     this.circuitFrame.on(
       CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
       this.grabGate,
+      this
+    );
+  }
+
+  private setupStateVectorEventHandlers() {
+    this.stateVector.on(
+      STATE_VECTOR_EVENTS.VISIBLE_QUBIT_CIRCLES_CHANGED,
+      this.runSimulator,
       this
     );
   }

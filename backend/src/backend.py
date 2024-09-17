@@ -25,7 +25,7 @@ qubit_amplitudes_type = dict[int, amplitude_type]
 
 
 class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: list[qubit_amplitudes_type]
+    amplitudes: dict[int, qubit_amplitudes_type]
     measuredBits: MeasuredBitsType
 
 
@@ -141,5 +141,5 @@ def _convert_result(result: dict) -> dict:
     return response
 
 
-def _flatten_amplitude(amplitude: list[complex]) -> qubit_amplitudes_type:
-    return {index: (float(each.real), float(each.imag)) for index, each in enumerate(amplitude)}
+def _flatten_amplitude(amplitude: dict[int, complex]) -> qubit_amplitudes_type:
+    return {index: (float(each.real), float(each.imag)) for index, each in amplitude.items()}
