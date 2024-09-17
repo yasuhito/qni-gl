@@ -195,10 +195,7 @@ export async function activateStep(page: Page, stepIndex: number) {
 }
 
 export async function grab(page: Page, target: { x: number; y: number }) {
-  // ターゲット位置に移動
   await page.mouse.move(target.x, target.y);
-
-  // マウスボタンを押下
   await page.mouse.down();
 }
 
@@ -209,10 +206,7 @@ export async function dropAt(
   const circuitInfo = await getCircuitInfo(page);
   const dropzone = circuitInfo.steps[target.step][target.bit];
 
-  // ターゲット位置まで複数のステップで移動
   await page.mouse.move(dropzone.x, dropzone.y);
-
-  // マウスボタンを離す
   await page.mouse.up();
 
   await page.waitForSelector('#app[data-state="idle"]', {
