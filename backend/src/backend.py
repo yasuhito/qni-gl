@@ -30,7 +30,7 @@ class StepResultsWithAmplitudes(TypedDict):
 
 
 def _add_logger_handler(handler, formatter):
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(logging.INFO)
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)
 

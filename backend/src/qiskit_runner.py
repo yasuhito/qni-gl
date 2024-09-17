@@ -71,9 +71,6 @@ class QiskitRunner:
         self.steps = steps
         self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
 
-        if self.logger:
-            self.logger.debug(self.circuit.draw(output="text"))
-
         if self.circuit.depth() == 0:
             return step_results
 
