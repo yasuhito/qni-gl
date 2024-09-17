@@ -11,7 +11,7 @@ docker build -f Dockerfile . -t qni-gl
 docker イメージを起動
 
 ```shell
-docker run -p 8000:8000 --rm -it qni-gl
+docker run --gpus all -p 8000:8000 --rm -it qni-gl
 ```
 
 ブラウザで `http://localhost:8000/` を開く
