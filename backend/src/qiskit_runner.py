@@ -194,8 +194,14 @@ class QiskitRunner:
         else:
             circuit.y(operation["targets"])
 
-    def _apply_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
-        circuit.z(operation["targets"])
+    def _apply_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = ZGate().control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.z(operation["targets"])
 
     def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.append(XGate().power(1 / 2), operation["targets"])
