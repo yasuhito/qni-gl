@@ -1,5 +1,6 @@
 import { Simulator } from "@qni/simulator";
 import { BACKEND_URL } from "./constants";
+const useGpu = import.meta.env.VITE_USE_GPU === "true";
 
 // Install SW
 self.addEventListener("install", () => {
@@ -32,7 +33,7 @@ self.addEventListener("message", (event) => {
         untilStepIndex: untilStepIndex,
         amplitudeIndices: amplitudeIndices,
         steps: JSON.stringify(steps),
-        useGpu: false,
+        useGpu: useGpu,
       });
 
       const response = await fetch(BACKEND_URL, {
