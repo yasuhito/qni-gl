@@ -18,7 +18,6 @@ LOG_FILE = "backend.log"
 HTTP_BAD_REQUEST = 400
 
 app = Flask(__name__)
-app.config.from_prefixed_env()
 CORS(app)
 
 amplitude_type = tuple[float, float]
