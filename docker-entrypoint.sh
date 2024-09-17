@@ -5,7 +5,7 @@ set -e
 
 # Build the Vite project
 cd /qni-gl/frontend
-yarn build
+VITE_USE_GPU=true yarn build
 
 # Start gunicorn
 cd /qni-gl/backend
