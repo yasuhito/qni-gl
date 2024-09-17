@@ -14,8 +14,8 @@ class TestMeasurement(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        amplitudes = result[0][":amplitude"]
-        measured_bits = result[0][":measuredBits"]
+        amplitudes = result[0]["amplitudes"]
+        measured_bits = result[0]["measuredBits"]
         assert_complex_approx(amplitudes[0], 1, 0)
         assert_complex_approx(amplitudes[1], 0, 0)
         assert measured_bits == {0: 0}
@@ -26,8 +26,8 @@ class TestMeasurement(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        amplitudes = result[1][":amplitude"]
-        measured_bits = result[1][":measuredBits"]
+        amplitudes = result[1]["amplitudes"]
+        measured_bits = result[1]["measuredBits"]
         assert_complex_approx(amplitudes[0], 0, 0)
         assert_complex_approx(amplitudes[1], 1, 0)
         assert measured_bits == {0: 1}
@@ -42,7 +42,7 @@ class TestMeasurement(unittest.TestCase):
 
         result = self.qiskit_runner.run_circuit(steps)
 
-        assert result[0][":measuredBits"] == {}
-        assert result[1][":measuredBits"] == {0: 0, 2: 1}
-        assert result[2][":measuredBits"] == {1: 1, 2: 1}
-        assert result[3][":measuredBits"] == {2: 1}
+        assert result[0]["measuredBits"] == {}
+        assert result[1]["measuredBits"] == {0: 0, 2: 1}
+        assert result[2]["measuredBits"] == {1: 1, 2: 1}
+        assert result[3]["measuredBits"] == {2: 1}

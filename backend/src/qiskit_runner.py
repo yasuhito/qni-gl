@@ -1,15 +1,38 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, TypedDict, cast
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from qiskit.result import Result
+    from qiskit.result import Result  # type: ignore
 
-from qiskit import ClassicalRegister, QuantumCircuit
-from qiskit.circuit.library import Measure, XGate, ZGate
-from qiskit_aer import AerSimulator
+from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
+from qiskit.circuit.library import HGate, XGate, YGate, ZGate  # type: ignore
+from qiskit_aer import AerSimulator  # type: ignore
+
+from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
+
+amplitude_type = complex
+
+
+class BasicOperation(TypedDict):
+    type: str
+    targets: list[int]
+
+
+class ControllableOperation(TypedDict):
+    type: str
+    targets: list[int]
+    controls: list[int]
+
+
+class StepResultsWithAmplitudes(TypedDict):
+    amplitudes: dict[int, amplitude_type]
+    measuredBits: MeasuredBitsType
+
+
+OperationMethod = Callable[[QuantumCircuit, BasicOperation | ControllableOperation], None]
 
 
 class QiskitRunner:
@@ -27,8 +50,8 @@ class QiskitRunner:
         *,
         qubit_count: int | None = None,
         until_step_index: int | None = None,
-        amplitude_indices: list | None = None,
-        device: str = "CPU",
+        amplitude_indices: list[int] | None = None,
+        device: device_type = "CPU",
     ):
         """
         Execute the specified quantum circuit and return the results of each step.
@@ -37,43 +60,41 @@ class QiskitRunner:
             steps (list): A list of steps to execute.
             qubit_count (int | None, optional): The number of qubits. Defaults to None.
             until_step_index (int | None, optional): The index of the step until which to execute. Defaults to None.
-            amplitude_indices (list | None, optional): The indices of the amplitudes to return. Defaults to None.
+            amplitude_indices (list[int] | None, optional): The indices of the amplitudes to return. Defaults to None.
+            device (str, optional): The device to use ("CPU" or "GPU"). Defaults to "CPU".
 
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        step_results = []
+        step_results: list[StepResultsWithAmplitudes | StepResultsWithoutAmplitudes] = []
 
         self.steps = steps
-        self.circuit, measured_bits = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
-
-        if self.logger:
-            self.logger.debug(self.circuit.draw(output="text"))
+        self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
 
         if self.circuit.depth() == 0:
             return step_results
 
         result = self._run_backend(device=device)
         statevector = self._get_statevector(result)
-        measured_bits = self._extract_measurement_results(result, measured_bits)
+        measured_bits = self._extract_measurement_results(result)
 
         if until_step_index is None:
             until_step_index = self._last_step_index()
 
         for step_index in range(len(self.steps)):
-            step_result = {":measuredBits": measured_bits[step_index]}
             if step_index == until_step_index:
-                step_result[":amplitude"] = statevector
-            step_results.append(step_result)
+                step_results.append(
+                    StepResultsWithAmplitudes(
+                        measuredBits=measured_bits[step_index],
+                        amplitudes=self._filter_amplitudes(statevector, amplitude_indices),
+                    )
+                )
+            else:
+                step_results.append(StepResultsWithoutAmplitudes(measuredBits=measured_bits[step_index]))
 
-        if amplitude_indices is None:
-            return step_results
+        return step_results
 
-        return self._filter_amplitudes(step_results, amplitude_indices)
-
-    def _build_circuit(
-        self, *, qubit_count: int | None = None, until_step_index: int | None = None
-    ) -> tuple[QuantumCircuit, list[dict]]:
+    def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None) -> QuantumCircuit:
         if qubit_count is None:
             qubit_count = self._get_qubit_count()
 
@@ -82,14 +103,13 @@ class QiskitRunner:
 
         return self._process_step_operations(qubit_count, until_step_index)
 
-    def _filter_amplitudes(self, step_results: list[dict], amplitude_indices: list[int]) -> list[dict]:
-        for step_result in step_results:
-            amplitudes = step_result.get(":amplitude")
-            if amplitudes is not None:
-                filtered_amplitudes = {index: amplitudes[index] for index in amplitude_indices}
-                step_result[":amplitude"] = filtered_amplitudes
+    def _filter_amplitudes(
+        self, statevector: dict[int, amplitude_type], amplitude_indices: list[int] | None
+    ) -> dict[int, amplitude_type]:
+        if amplitude_indices is None:
+            return statevector
 
-        return step_results
+        return {index: statevector[index] for index in amplitude_indices}
 
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:
@@ -105,133 +125,158 @@ class QiskitRunner:
             + 1
         )
 
-    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> tuple[QuantumCircuit, list[dict]]:
+    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
-        measured_bits = []
 
         for step_index, step in enumerate(self.steps):
-            i_targets = list(range(qubit_count))
-            measured_bits.append({})
+            if len(step) == 0:
+                circuit.id(list(range(qubit_count)))
 
             for operation in step:
-                i_targets = list(set(i_targets) - set(operation["targets"]))
-                if "controls" in operation:
-                    i_targets = list(set(i_targets) - set(operation["controls"]))
-
-                measured_bits = self._apply_operation(circuit, operation, step_index, measured_bits)
-
-            for each in i_targets:
-                circuit.id(each)
+                self._apply_operation(circuit, operation)
 
             if step_index == until_step_index:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
-        return circuit, measured_bits
+        return circuit
 
-    def _apply_operation(
-        self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
-    ) -> list[dict]:
+    class UnknownOperationError(ValueError):
+        def __init__(self, operation_type):
+            super().__init__(f"Unknown operation: {operation_type}")
+
+    def _apply_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         operation_type = operation["type"]
+        operation_methods: dict[str, OperationMethod] = {
+            "H": self._apply_h_operation,
+            "X": self._apply_x_operation,
+            "Y": self._apply_y_operation,
+            "Z": self._apply_z_operation,
+            "X^½": self._apply_x_half_operation,
+            "S": self._apply_s_operation,
+            "S†": self._apply_s_dagger_operation,
+            "T": self._apply_t_operation,
+            "T†": self._apply_t_dagger_operation,
+            "Swap": self._apply_swap_operation,
+            "•": self._apply_controlled_z_operation,
+            "|0>": self._apply_write0,
+            "|1>": self._apply_write1,
+            "Measure": self._apply_measure_operation,
+        }
 
-        if operation_type == "H":
-            circuit.h(operation["targets"])
-        elif operation_type == "X":
-            self._apply_x_operation(circuit, operation)
-        elif operation_type == "Y":
-            circuit.y(operation["targets"])
-        elif operation_type == "Z":
-            circuit.z(operation["targets"])
-        elif operation_type == "X^½":
-            circuit.append(XGate().power(1 / 2), operation["targets"])
-        elif operation_type == "S":
-            circuit.s(operation["targets"])
-        elif operation_type == "S†":
-            circuit.sdg(operation["targets"])
-        elif operation_type == "T":
-            circuit.t(operation["targets"])
-        elif operation_type == "T†":
-            circuit.tdg(operation["targets"])
-        elif operation_type == "Swap":
-            self._apply_swap_operation(circuit, operation)
-        elif operation_type == "•":
-            self._apply_controlled_z_operation(circuit, operation)
-        elif operation_type == "|0>":
-            self._apply_write0(circuit, operation)
-        elif operation_type == "|1>":
-            self._apply_write1(circuit, operation)
-        elif operation_type == "Measure":
-            measured_bits = self._apply_measure_operation(circuit, operation, step_index, measured_bits)
+        if operation_type in operation_methods:
+            operation_methods[operation_type](circuit, operation)
         else:
-            value_error_message = f"Unknown operation: {operation_type}"
-            raise ValueError(value_error_message)
+            raise self.UnknownOperationError(operation_type)
 
-        return measured_bits
-
-    def _apply_write0(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"][0])
-
-    def _apply_write1(self, circuit: QuantumCircuit, operation: dict) -> None:
-        circuit.reset(operation["targets"][0])
-        circuit.x(operation["targets"][0])
-
-    def _apply_measure_operation(
-        self, circuit: QuantumCircuit, operation: dict, step_index: int, measured_bits: list[dict]
-    ) -> list[dict]:
-        measured_bits_copy = measured_bits.copy()
-        measured_bits_copy[step_index] = {target: None for target in operation["targets"]}
-
-        creg = ClassicalRegister(circuit.num_qubits)
-        circuit.add_register(creg)
-        for target in operation["targets"]:
-            circuit.measure(target, creg[target])
-
-        return measured_bits_copy
-
-    def _apply_x_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = HGate().control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.h(operation["targets"])
+
+    def _apply_x_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
             for target in operation["targets"]:
                 circuit.mcx(operation["controls"], target)
         else:
             circuit.x(operation["targets"])
 
-    def _apply_swap_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_y_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = YGate().control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.y(operation["targets"])
+
+    def _apply_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = ZGate().control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.z(operation["targets"])
+
+    def _apply_x_half_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.append(XGate().power(1 / 2), operation["targets"])
+
+    def _apply_s_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.s(operation["targets"])
+
+    def _apply_s_dagger_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.sdg(operation["targets"])
+
+    def _apply_t_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.t(operation["targets"])
+
+    def _apply_t_dagger_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.tdg(operation["targets"])
+
+    def _apply_swap_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
             circuit.swap(operation["targets"][0], operation["targets"][1])
         else:
             circuit.id(operation["targets"])
 
-    def _apply_controlled_z_operation(self, circuit: QuantumCircuit, operation: dict) -> None:
+    def _apply_controlled_z_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
             u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
             circuit.append(u, qargs=operation["targets"])
         else:
             circuit.id(operation["targets"])
 
+    def _apply_write0(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.reset(operation["targets"])
+
+    def _apply_write1(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        circuit.reset(operation["targets"])
+        circuit.x(operation["targets"])
+
+    def _apply_measure_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+        creg = ClassicalRegister(circuit.num_qubits)
+        circuit.add_register(creg)
+        for target in operation["targets"]:
+            circuit.measure(target, creg[target])
+
     def _run_backend(self, device: str) -> Result:
         backend = AerSimulator(method="statevector")
-        backend.set_options(device=device)
-        return backend.run(self.circuit, shots=1, memory=True).result()
+        if device == "GPU":
+            backend.set_options(device="GPU", cuStateVec_enable=True)
 
-    def _get_statevector(self, result: Result) -> list | None:
-        return np.array(result.data()[self._STATEVECTOR_LABEL])
+        circuit_transpiled = transpile(self.circuit, backend=backend)
 
-    def _extract_measurement_results(self, result: Result, measured_bits: list[dict]) -> list[dict]:
-        if not self._circuit_has_measurements():
+        return backend.run(circuit_transpiled, shots=1, memory=True).result()
+
+    def _get_statevector(self, result: Result) -> dict[int, amplitude_type]:
+        amplitudes = np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
+
+        return dict(enumerate(amplitudes))
+
+    def _extract_measurement_results(self, result: Result) -> list[MeasuredBitsType]:
+        measured_bits: list[MeasuredBitsType] = [{} for _ in self.steps]
+
+        circuit_has_measurements = any(operation["type"] == "Measure" for step in self.steps for operation in step)
+
+        if not circuit_has_measurements:
             return measured_bits
 
-        measured_bits_copy = measured_bits.copy()
-        count = next(iter(result.get_counts().keys()))
-        bit_strings = count.split()
+        tmp_measured_bits = [
+            {target: None for operation in step if operation["type"] == "Measure" for target in operation["targets"]}
+            for step in self.steps
+        ]
 
-        for each in measured_bits_copy:
-            if len(each) == 0:
-                continue
+        bit_strings = next(iter(result.get_counts().keys())).split()
 
-            bit_string = bit_strings.pop()
-            for bit in each:
-                each[bit] = int(bit_string[len(bit_string) - bit - 1])
+        for index, each in enumerate(tmp_measured_bits):
+            if each:
+                bit_string = bit_strings.pop()
+                for bit in each:
+                    measured_bits[index][bit] = int(bit_string[-(bit + 1)])
 
-        return measured_bits_copy
-
-    def _circuit_has_measurements(self) -> bool:
-        return any(isinstance(instr.operation, Measure) for instr in self.circuit.data)
+        return measured_bits

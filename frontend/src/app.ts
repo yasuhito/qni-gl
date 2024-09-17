@@ -12,7 +12,6 @@ import { StateVectorComponent } from "./state-vector-component";
 import { StateVectorFrame } from "./state-vector-frame";
 import { OperationPalette } from "./operation-palette";
 import { logger, rectIntersect } from "./util";
-import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import {
   Application,
   Assets,
@@ -25,6 +24,7 @@ import {
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
 } from "./events";
+import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 
 declare global {
   interface Window {
@@ -537,6 +537,11 @@ export class App {
     this.circuit.update();
 
     this.updateStateVectorComponentQubitCount();
+    this.stateVectorFrame.repositionAndResize(
+      this.frameDivider.y + this.frameDivider.height,
+      this.app.screen.width,
+      this.app.screen.height - this.frameDivider.y
+    );
     this.runSimulator();
   }
 
@@ -564,8 +569,8 @@ export class App {
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
       qubitCount: this.circuit.highestOccupiedQubitNumber,
-      stepIndex: this.circuit.activeStepIndex,
-      targets: this.stateVector.visibleQubitCircleIndices,
+      untilStepIndex: this.circuit.activeStepIndex,
+      amplitudeIndices: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
     });
   }
