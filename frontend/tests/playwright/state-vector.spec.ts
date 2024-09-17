@@ -6,7 +6,7 @@ test.describe("State vector", () => {
     await page.goto("/");
   });
 
-  // TODO: 32 までテスト
+  // TODO: GPU 環境で 32 までテスト
   const qubitCounts = [1, 2, 3, 4, 5, 6, 7];
 
   for (const qubitCount of qubitCounts) {
