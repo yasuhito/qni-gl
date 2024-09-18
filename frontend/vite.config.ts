@@ -1,10 +1,10 @@
 import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vitest/config";
+import { UserConfig } from "vite";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-export default defineConfig({
+export default {
   build: {
     rollupOptions: {
       output: {
@@ -31,20 +31,7 @@ export default defineConfig({
       },
     }),
   ],
-  test: {
-    coverage: {
-      provider: "istanbul",
-      reporter: ["json", "html"],
-      include: ["src/**"],
-    },
-    browser: {
-      provider: "playwright", // or 'webdriverio'
-      enabled: true,
-      name: "chromium", // browser name is required
-      headless: true,
-    },
-  },
   optimizeDeps: {
     exclude: ["fsevents"],
   },
-});
+} satisfies UserConfig;
