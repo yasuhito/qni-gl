@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "@playwright/test": "^1.46.1",
+    "@playwright/test": "^1.47.1",
     "@types/eslint__js": "^8.42.3",
     "@types/lodash": "^4.17.7",
     "@types/node": "^22.5.5",
@@ -25,7 +25,7 @@
     "dotenv": "^16.4.5",
     "eslint": "^9.10.0",
     "jsdom": "^25.0.0",
-    "playwright": "^1.46.1",
+    "playwright": "^1.47.1",
     "start-server-and-test": "^2.0.8",
     "strip-ansi": "~7.1.0",
     "typedoc": "~0.26.7",
