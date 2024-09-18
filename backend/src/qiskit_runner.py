@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
 
 from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
-from qiskit.circuit.library import HGate, SdgGate, SGate, TGate, XGate, YGate, ZGate  # type: ignore
+from qiskit.circuit.library import HGate, SdgGate, SGate, TdgGate, TGate, XGate, YGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
 from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
@@ -241,8 +241,16 @@ class QiskitRunner:
         else:
             circuit.t(operation["targets"])
 
-    def _apply_t_dagger_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
-        circuit.tdg(operation["targets"])
+    def _apply_t_dagger_operation(
+        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation
+    ) -> None:
+        if "controls" in operation:
+            operation = cast(ControllableOperation, operation)
+            u = TdgGate().control(num_ctrl_qubits=len(operation["controls"]))
+            for target in operation["targets"]:
+                circuit.append(u, qargs=operation["controls"] + [target])
+        else:
+            circuit.tdg(operation["targets"])
 
     def _apply_swap_operation(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
