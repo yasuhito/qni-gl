@@ -346,8 +346,13 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
+    gate.insertable = false;
 
     this.grabbedGate.on(OPERATION_EVENTS.DISCARDED, (gate) => {
+      if (gate.insertable) {
+        console.log(`ゲートを挿入! ${gate.insertStepPosition}`);
+      }
+
       this.activeGate = null;
       this.grabbedGate = null;
       this.circuitFrame!.removeChild(gate);
@@ -547,8 +552,11 @@ export class App {
   private moveGate(gate: OperationComponent, pointerPosition: Point) {
     let snapDropzone: Dropzone | null = null;
     let insertablePosition: Point | null = null;
+    let insertStepPosition = 0;
 
-    for (const circuitStep of this.circuit.steps) {
+    for (let index = 0; index < this.circuit.steps.length; index++) {
+      const circuitStep = this.circuit.steps[index];
+
       for (const dropzone of circuitStep.dropzones) {
         let isSnappable = this.isSnappable(
           gate,
@@ -592,6 +600,13 @@ export class App {
                 dropzone.getGlobalPosition().y + dropzone.height / 2
               )
             : null;
+
+          if (leftInsertablePosition) {
+            insertStepPosition = index;
+          }
+          if (rightInsertablePosition) {
+            insertStepPosition = index + 1;
+          }
 
           const snappableDistance = snappablePosition
             ? Math.sqrt(
@@ -646,8 +661,12 @@ export class App {
     }
 
     if (snapDropzone) {
+      gate.insertable = false;
+      gate.insertStepPosition = null;
       snapDropzone.addChild(gate);
     } else if (insertablePosition !== null) {
+      gate.insertable = true;
+      gate.insertStepPosition = insertStepPosition;
       gate.move(insertablePosition);
     } else {
       gate.move(pointerPosition);
@@ -663,6 +682,10 @@ export class App {
   private releaseGate() {
     if (this.grabbedGate === null) {
       return;
+    }
+
+    if (this.grabbedGate.insertable) {
+      console.log(`ゲートを挿入! ${this.grabbedGate.insertStepPosition}`);
     }
 
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)

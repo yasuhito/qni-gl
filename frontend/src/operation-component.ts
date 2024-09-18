@@ -48,6 +48,9 @@ export class OperationComponent extends IconableMixin(Container) {
   size: Size = "base";
   sizeInPx = OperationComponent.sizeInPx[this.size];
 
+  insertable = false;
+  insertStepPosition: number | null = null;
+
   debug = false;
 
   protected _shape!: Graphics;
