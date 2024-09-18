@@ -496,6 +496,40 @@ export class App {
     );
   }
 
+  private isGateHoveringAtRightInsertPosition(
+    gateCenterX: number,
+    gateCenterY: number,
+    gateWidth: number,
+    gateHeight: number,
+    dropzone: Dropzone
+  ): boolean {
+    const snapRatio = 0.5;
+    const gateX = gateCenterX - gateWidth / 2;
+    const gateY = gateCenterY - gateHeight / 2;
+    const dropzonePosition = dropzone.getGlobalPosition();
+
+    const snapzoneX =
+      dropzonePosition.x +
+      dropzone.gateSize / 4 +
+      ((1 - snapRatio) * dropzone.gateSize) / 2 +
+      dropzone.width / 2;
+    const snapzoneY =
+      dropzonePosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+    const snapzoneWidth = dropzone.gateSize * snapRatio;
+    const snapzoneHeight = dropzone.gateSize * snapRatio;
+
+    return rectIntersect(
+      gateX,
+      gateY,
+      gateWidth,
+      gateHeight,
+      snapzoneX,
+      snapzoneY,
+      snapzoneWidth,
+      snapzoneHeight
+    );
+  }
+
   private maybeMoveGate(event: FederatedPointerEvent) {
     if (this.grabbedGate === null) {
       return;
@@ -531,8 +565,15 @@ export class App {
           gate.height,
           dropzone
         );
+        const isGateInsertableRight = this.isGateHoveringAtRightInsertPosition(
+          pointerPosition.x,
+          pointerPosition.y,
+          gate.width,
+          gate.height,
+          dropzone
+        );
 
-        if (isSnappable || isGateInsertableLeft) {
+        if (isSnappable || isGateInsertableLeft || isGateInsertableRight) {
           const snappablePosition = isSnappable
             ? new Point(
                 dropzone.getGlobalPosition().x + dropzone.width / 2,
@@ -545,8 +586,13 @@ export class App {
                 dropzone.getGlobalPosition().y + dropzone.height / 2
               )
             : null;
+          const rightInsertablePosition = isGateInsertableRight
+            ? new Point(
+                dropzone.getGlobalPosition().x + dropzone.width,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
+            : null;
 
-          // pointerPosition.x, pointerPosition.y と、snappablePosition の距離を計算
           const snappableDistance = snappablePosition
             ? Math.sqrt(
                 Math.pow(pointerPosition.x - snappablePosition.x, 2) +
@@ -559,12 +605,24 @@ export class App {
                   Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
               )
             : Infinity;
+          const rightInsertableDistance = rightInsertablePosition
+            ? Math.sqrt(
+                Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
+              )
+            : Infinity;
 
-          if (snappableDistance < leftInsertableDistance) {
+          if (
+            snappableDistance < leftInsertableDistance &&
+            snappableDistance < rightInsertableDistance
+          ) {
             snapDropzone = dropzone;
-          } else {
+          } else if (leftInsertableDistance < rightInsertableDistance) {
             isSnappable = false;
             insertablePosition = leftInsertablePosition;
+          } else {
+            isSnappable = false;
+            insertablePosition = rightInsertablePosition;
           }
         }
 
