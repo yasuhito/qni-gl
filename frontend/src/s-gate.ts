@@ -3,9 +3,12 @@ import { JsonableMixin } from "./jsonable-mixin";
 import { LabelableMixin } from "./labelable-mixin";
 import { SerializeableMixin } from "./serializeable-mixin";
 import { SquareGateMixin } from "./square-gate-mixin";
+import { ControllableMixin } from "./controllable-mixin";
 
 export class SGate extends SquareGateMixin(
-  SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
+  ControllableMixin(
+    SerializeableMixin(JsonableMixin(LabelableMixin(OperationComponent)))
+  )
 ) {
   get operationType(): string {
     return "SGate";
