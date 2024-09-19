@@ -329,7 +329,7 @@ export class Circuit extends Container {
     }
   }
 
-  private updateConnections() {
+  updateConnections() {
     this.steps.forEach((each) => {
       each.updateConnections();
     });

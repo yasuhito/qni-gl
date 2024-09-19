@@ -670,8 +670,15 @@ export class App {
       snapDropzone.addChild(gate);
     } else if (insertablePosition !== null) {
       gate.insertable = true;
-      gate.insertStepPosition = insertStepPosition;
-      gate.insertQubitIndex = insertedOperationQubitIndex;
+      if (
+        gate.insertStepPosition !== insertStepPosition ||
+        gate.insertQubitIndex !== insertedOperationQubitIndex
+      ) {
+        gate.insertStepPosition = insertStepPosition;
+        gate.insertQubitIndex = insertedOperationQubitIndex;
+        gate.emit(OPERATION_EVENTS.SNAPPED, gate, null);
+        this.circuit.updateConnections();
+      }
       gate.move(insertablePosition);
     } else {
       gate.move(pointerPosition);
@@ -693,6 +700,7 @@ export class App {
       const insertedStep = this.circuit.insertStepAt(
         this.grabbedGate.insertStepPosition!
       );
+      // dropzone.on(DROPZONE_EVENTS.OPERATION_SNAPPED, this.onDropzoneSnap, this);
       this.grabbedGate.position.set(8, 8);
       this.grabbedGate.insert(
         insertedStep.fetchDropzone(this.grabbedGate.insertQubitIndex!)

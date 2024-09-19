@@ -258,7 +258,6 @@ export class OperationComponent extends IconableMixin(Container) {
 
   insert(dropzone: Dropzone) {
     dropzone.assign(this);
-    this.emit(OPERATION_EVENTS.INSERTED, this, dropzone);
   }
 
   snap(dropzone: Dropzone) {

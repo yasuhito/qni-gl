@@ -71,11 +71,6 @@ export class OperationSource extends Container {
       this.removeOperationEventListeners,
       this
     );
-    operation.on(
-      OPERATION_EVENTS.INSERTED,
-      this.removeOperationEventListeners,
-      this
-    );
     operation.on(OPERATION_EVENTS.DISCARDED, this.discardOperation, this);
     operation.on(
       OPERATION_EVENTS.MOUSE_LEFT,
