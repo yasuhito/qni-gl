@@ -79,6 +79,28 @@ def _setup_custom_logger():
 _setup_custom_logger()
 
 
+class RequestData:
+    def __init__(self, form):
+        self.circuit_id = form.get("id", "")
+        self.qubit_count = self._get_int_from_request(form, "qubitCount", 0)
+        self.until_step_index = self._get_int_from_request(form, "untilStepIndex", 0)
+        self.steps = self._get_steps_from_request(form)
+        self.amplitude_indices = self._get_amplitude_indices_from_request(form)
+        self.device = "GPU" if form.get("useGpu", "false").lower() == "true" else "CPU"
+
+    @staticmethod
+    def _get_int_from_request(form, key: str, default: int) -> int:
+        return int(form.get(key, default))
+
+    @staticmethod
+    def _get_amplitude_indices_from_request(form) -> list[int]:
+        return [int(each) for each in form.get("amplitudeIndices", "").split(",") if each.isdigit()]
+
+    @staticmethod
+    def _get_steps_from_request(form) -> list[dict]:
+        return json.loads(form.get("steps", "[]"))
+
+
 @app.route("/backend.json", methods=["POST"])
 def backend():
     """
@@ -92,38 +114,28 @@ def backend():
         Response: A JSON response containing the simulation results or an error message.
     """
     try:
-        circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device = _get_request_data()
-        _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
+        request_data = RequestData(request.form)
+        _log_request_data(
+            request_data.circuit_id,
+            request_data.qubit_count,
+            request_data.until_step_index,
+            request_data.amplitude_indices,
+            request_data.steps,
+            request_data.device,
+        )
 
-        step_results = cached_qiskit_runner.run(circuit_id, qubit_count, until_step_index, steps, device)
-        step_results_filtered = [_convert_result(result, amplitude_indices) for result in step_results]
+        step_results = cached_qiskit_runner.run(
+            request_data.circuit_id,
+            request_data.qubit_count,
+            request_data.until_step_index,
+            request_data.steps,
+            request_data.device,
+        )
+        step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
 
         return jsonify(step_results_filtered)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
-
-
-def _get_request_data() -> tuple[str, int, int, list[dict], list[int], str]:
-    circuit_id = request.form.get("id", "")
-    qubit_count = _get_int_from_request("qubitCount", 0)
-    until_step_index = _get_int_from_request("untilStepIndex", 0)
-    steps = _get_steps_from_request()
-    amplitude_indices = _get_amplitude_indices_from_request()
-    use_gpu = request.form.get("useGpu", "false").lower() == "true"
-    device = "GPU" if use_gpu else "CPU"
-    return circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device
-
-
-def _get_int_from_request(key: str, default: int) -> int:
-    return int(request.form.get(key, default))
-
-
-def _get_amplitude_indices_from_request() -> list[int]:
-    return [int(each) for each in request.form.get("amplitudeIndices", "").split(",") if each.isdigit()]
-
-
-def _get_steps_from_request() -> list[dict]:
-    return json.loads(request.form.get("steps", "[]"))
 
 
 def _handle_error(error_message: str, response_message: str, status_code: int) -> tuple[Response, int]:
