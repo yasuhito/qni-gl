@@ -681,6 +681,7 @@ export class App {
       }
       gate.move(insertablePosition);
     } else {
+      gate.insertable = false;
       gate.move(pointerPosition);
     }
   }
