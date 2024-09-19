@@ -8,7 +8,7 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from src.types import MeasuredBitsType, device_type
+    from src.types import MeasuredBitsType
 
 from src.qiskit_runner import QiskitRunner
 
@@ -27,6 +27,35 @@ qubit_amplitudes_type = dict[int, amplitude_type]
 class StepResultsWithAmplitudes(TypedDict):
     amplitudes: dict[int, qubit_amplitudes_type]
     measuredBits: MeasuredBitsType
+
+
+class CachedQiskitRunner:
+    def __init__(self):
+        self.cache = {}
+        self.last_cache_key = None
+
+    def run(self, circuit_id, qubit_count, until_step_index, steps, device):
+        cache_key = (circuit_id, until_step_index)
+
+        if self.last_cache_key == cache_key:
+            app.logger.info("Cache hit for circuit_key: %s", cache_key)
+            return self.cache
+
+        app.logger.info("Cache miss for circuit_key: %s", cache_key)
+
+        result = QiskitRunner(app.logger).run_circuit(
+            steps,
+            qubit_count=qubit_count,
+            until_step_index=until_step_index,
+            device=device,
+        )
+        self.cache = result
+        self.last_cache_key = cache_key
+
+        return result
+
+
+cached_qiskit_runner = CachedQiskitRunner()
 
 
 def _add_logger_handler(handler, formatter):
@@ -64,8 +93,11 @@ def backend():
         circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device = _get_request_data()
         _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
 
-        step_results = _run_qiskit(qubit_count, until_step_index, steps, amplitude_indices, device)
-        return jsonify(step_results)
+        step_results = cached_qiskit_runner.run(circuit_id, qubit_count, until_step_index, steps, device)
+
+        step_results_filtered = [_convert_result(result, amplitude_indices) for result in step_results]
+
+        return jsonify(step_results_filtered)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
 
@@ -114,19 +146,6 @@ def _log_request_data(
     app.logger.debug("amplitude_indices = %s", amplitude_indices)
     app.logger.debug("steps = %s", steps)
     app.logger.debug("device = %s", device)
-
-
-def _run_qiskit(
-    qubit_count: int, until_step_index: int, steps: list, amplitude_indices: list[int], device: device_type
-) -> list[dict]:
-    results = QiskitRunner(app.logger).run_circuit(
-        steps,
-        qubit_count=qubit_count,
-        until_step_index=until_step_index,
-        device=device,
-    )
-
-    return [_convert_result(result, amplitude_indices) for result in results]
 
 
 def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
