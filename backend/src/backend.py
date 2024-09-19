@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
@@ -30,11 +30,13 @@ class StepResultsWithAmplitudes(TypedDict):
 
 
 class CachedQiskitRunner:
-    def __init__(self):
-        self.cache = {}
-        self.last_cache_key = None
+    def __init__(self) -> None:
+        self.cache: dict = {}
+        self.last_cache_key: tuple | None = None
 
-    def run(self, circuit_id, qubit_count, until_step_index, steps, device):
+    def run(
+        self, circuit_id: str, qubit_count: int, until_step_index: int, steps: list[dict], device: Literal["CPU", "GPU"]
+    ) -> dict:
         cache_key = (circuit_id, until_step_index)
 
         if self.last_cache_key == cache_key:
@@ -94,7 +96,6 @@ def backend():
         _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
 
         step_results = cached_qiskit_runner.run(circuit_id, qubit_count, until_step_index, steps, device)
-
         step_results_filtered = [_convert_result(result, amplitude_indices) for result in step_results]
 
         return jsonify(step_results_filtered)
