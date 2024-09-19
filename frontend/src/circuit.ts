@@ -272,23 +272,21 @@ export class Circuit extends Container {
     this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
   }
 
-  private redrawDropzoneInputAndOutputWires() {
+  redrawDropzoneInputAndOutputWires() {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
       this.steps.forEach((each) => {
         const dropzone = each.fetchDropzone(wireIndex);
 
-        if (dropzone.isOccupied()) {
-          if (dropzone.hasWriteGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Quantum;
-            dropzone.outputWireType = wireType;
-          } else if (dropzone.hasMeasurementGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Classical;
-            dropzone.outputWireType = wireType;
-          }
+        if (dropzone.hasWriteGate()) {
+          dropzone.inputWireType = wireType;
+          wireType = WireType.Quantum;
+          dropzone.outputWireType = wireType;
+        } else if (dropzone.hasMeasurementGate()) {
+          dropzone.inputWireType = wireType;
+          wireType = WireType.Classical;
+          dropzone.outputWireType = wireType;
         } else {
           dropzone.inputWireType = wireType;
           dropzone.outputWireType = wireType;

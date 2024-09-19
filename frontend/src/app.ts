@@ -677,6 +677,7 @@ export class App {
         gate.insertStepPosition = insertStepPosition;
         gate.insertQubitIndex = insertedOperationQubitIndex;
         gate.emit(OPERATION_EVENTS.SNAPPED, gate, null);
+        this.circuit.redrawDropzoneInputAndOutputWires();
         this.circuit.updateConnections();
       }
       gate.move(insertablePosition);
