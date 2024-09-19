@@ -302,6 +302,7 @@ export class Circuit extends Container {
     for (const each of this.emptySteps) {
       each.destroy();
     }
+    this.stepList.arrangeChildren();
   }
 
   private appendMinimumSteps(): void {
