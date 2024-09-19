@@ -20,6 +20,7 @@ export const OPERATION_SOURCE_EVENTS = {
 export const OPERATION_EVENTS = {
   GRABBED: "operation.grabbed",
   SNAPPED: "operation.snapped",
+  INSERTED: "operation.inserted",
   DISCARDED: "operation.discarded",
   MOUSE_LEFT: "operation.mouse-left",
 } as const;

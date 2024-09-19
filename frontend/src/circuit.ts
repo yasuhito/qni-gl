@@ -189,6 +189,39 @@ export class Circuit extends Container {
     return output.join("\n").trim();
   }
 
+  /**
+   * Inserts a new {@link CircuitStep} at the specified index.
+   *
+   * @param {number} index - The index at which to insert the new step.
+   */
+  insertStepAt(index: number): CircuitStep {
+    if (index < 0 || index > this.steps.length) {
+      throw new Error(`Index out of bounds: ${index}`);
+    }
+
+    const wireCount =
+      this.steps.length > 0 ? this.steps[0].wireCount : this.minWireCount;
+    const circuitStep = new CircuitStep(wireCount);
+    this.stepList.addChildAt(circuitStep, index);
+
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
+      this.onGateSnapToDropzone,
+      this
+    );
+    circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
+    circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+      this.emitOnGateGrabSignal,
+      this
+    );
+
+    this.markerManager.update(this.steps);
+
+    return circuitStep;
+  }
+
   private appendStep(wireCount = this.minWireCount) {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChild(circuitStep);

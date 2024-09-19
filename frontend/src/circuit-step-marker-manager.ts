@@ -20,6 +20,7 @@ export class CircuitStepMarkerManager extends Container {
 
   update(steps: CircuitStep[]): void {
     this.steps = steps;
+    this.adjustMarkers();
     this.updateMarkerPositions();
     this.updateMarkerVisibility();
   }
@@ -114,5 +115,25 @@ export class CircuitStepMarkerManager extends Container {
         width: CircuitStepMarkerManager.MARKER_WIDTH,
       });
     marker.alpha = NO_OPACITY;
+  }
+
+  private adjustMarkers(): void {
+    const stepCount = this.steps.length;
+    const markerCount = this.markers.length;
+
+    if (markerCount < stepCount) {
+      for (let i = markerCount; i < stepCount; i++) {
+        const marker = new Graphics();
+        this.addChild(marker);
+        this.markers.push(marker);
+      }
+    } else if (markerCount > stepCount) {
+      for (let i = markerCount - 1; i >= stepCount; i--) {
+        const marker = this.markers.pop();
+        if (marker) {
+          this.removeChild(marker);
+        }
+      }
+    }
   }
 }

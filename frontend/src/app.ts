@@ -349,10 +349,6 @@ export class App {
     gate.insertable = false;
 
     this.grabbedGate.on(OPERATION_EVENTS.DISCARDED, (gate) => {
-      if (gate.insertable) {
-        console.log(`ゲートを挿入! ${gate.insertStepPosition}`);
-      }
-
       this.activeGate = null;
       this.grabbedGate = null;
       this.circuitFrame!.removeChild(gate);
@@ -553,11 +549,17 @@ export class App {
     let snapDropzone: Dropzone | null = null;
     let insertablePosition: Point | null = null;
     let insertStepPosition = 0;
+    let insertedOperationQubitIndex = 0;
 
     for (let index = 0; index < this.circuit.steps.length; index++) {
       const circuitStep = this.circuit.steps[index];
 
-      for (const dropzone of circuitStep.dropzones) {
+      for (
+        let qubitIndex = 0;
+        qubitIndex < circuitStep.dropzones.length;
+        qubitIndex++
+      ) {
+        const dropzone = circuitStep.dropzones[qubitIndex];
         let isSnappable = this.isSnappable(
           gate,
           pointerPosition.x,
@@ -635,9 +637,11 @@ export class App {
           } else if (leftInsertableDistance < rightInsertableDistance) {
             isSnappable = false;
             insertablePosition = leftInsertablePosition;
+            insertedOperationQubitIndex = qubitIndex;
           } else {
             isSnappable = false;
             insertablePosition = rightInsertablePosition;
+            insertedOperationQubitIndex = qubitIndex;
           }
         }
 
@@ -667,6 +671,7 @@ export class App {
     } else if (insertablePosition !== null) {
       gate.insertable = true;
       gate.insertStepPosition = insertStepPosition;
+      gate.insertQubitIndex = insertedOperationQubitIndex;
       gate.move(insertablePosition);
     } else {
       gate.move(pointerPosition);
@@ -685,7 +690,13 @@ export class App {
     }
 
     if (this.grabbedGate.insertable) {
-      console.log(`ゲートを挿入! ${this.grabbedGate.insertStepPosition}`);
+      const insertedStep = this.circuit.insertStepAt(
+        this.grabbedGate.insertStepPosition!
+      );
+      this.grabbedGate.position.set(8, 8);
+      this.grabbedGate.insert(
+        insertedStep.fetchDropzone(this.grabbedGate.insertQubitIndex!)
+      );
     }
 
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
