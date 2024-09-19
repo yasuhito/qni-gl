@@ -123,22 +123,28 @@ def _run_qiskit(
         steps,
         qubit_count=qubit_count,
         until_step_index=until_step_index,
-        amplitude_indices=amplitude_indices,
         device=device,
     )
 
-    return [_convert_result(result) for result in results]
+    return [_convert_result(result, amplitude_indices) for result in results]
 
 
-def _convert_result(result: dict) -> dict:
+def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
     response = {}
 
     if "amplitudes" in result:
-        response["amplitudes"] = _flatten_amplitude(result["amplitudes"])
+        response["amplitudes"] = _flatten_amplitude(_filter_amplitudes(result["amplitudes"], amplitude_indices))
 
     response["measuredBits"] = result["measuredBits"]
 
     return response
+
+
+def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[int] | None) -> dict[int, complex]:
+    if amplitude_indices is None:
+        return statevector
+
+    return {index: statevector[index] for index in amplitude_indices}
 
 
 def _flatten_amplitude(amplitude: dict[int, complex]) -> qubit_amplitudes_type:
