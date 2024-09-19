@@ -189,6 +189,39 @@ export class Circuit extends Container {
     return output.join("\n").trim();
   }
 
+  /**
+   * Inserts a new {@link CircuitStep} at the specified index.
+   *
+   * @param {number} index - The index at which to insert the new step.
+   */
+  insertStepAt(index: number): CircuitStep {
+    if (index < 0 || index > this.steps.length) {
+      throw new Error(`Index out of bounds: ${index}`);
+    }
+
+    const wireCount =
+      this.steps.length > 0 ? this.steps[0].wireCount : this.minWireCount;
+    const circuitStep = new CircuitStep(wireCount);
+    this.stepList.addChildAt(circuitStep, index);
+
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
+      this.onGateSnapToDropzone,
+      this
+    );
+    circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
+    circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
+    circuitStep.on(
+      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
+      this.emitOnGateGrabSignal,
+      this
+    );
+
+    this.markerManager.update(this.steps);
+
+    return circuitStep;
+  }
+
   private appendStep(wireCount = this.minWireCount) {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChild(circuitStep);
@@ -239,23 +272,21 @@ export class Circuit extends Container {
     this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
   }
 
-  private redrawDropzoneInputAndOutputWires() {
+  redrawDropzoneInputAndOutputWires() {
     for (let wireIndex = 0; wireIndex < this.wireCount; wireIndex++) {
       let wireType = WireType.Classical;
 
       this.steps.forEach((each) => {
         const dropzone = each.fetchDropzone(wireIndex);
 
-        if (dropzone.isOccupied()) {
-          if (dropzone.hasWriteGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Quantum;
-            dropzone.outputWireType = wireType;
-          } else if (dropzone.hasMeasurementGate()) {
-            dropzone.inputWireType = wireType;
-            wireType = WireType.Classical;
-            dropzone.outputWireType = wireType;
-          }
+        if (dropzone.hasWriteGate()) {
+          dropzone.inputWireType = wireType;
+          wireType = WireType.Quantum;
+          dropzone.outputWireType = wireType;
+        } else if (dropzone.hasMeasurementGate()) {
+          dropzone.inputWireType = wireType;
+          wireType = WireType.Classical;
+          dropzone.outputWireType = wireType;
         } else {
           dropzone.inputWireType = wireType;
           dropzone.outputWireType = wireType;
@@ -296,7 +327,7 @@ export class Circuit extends Container {
     }
   }
 
-  private updateConnections() {
+  updateConnections() {
     this.steps.forEach((each) => {
       each.updateConnections();
     });

@@ -48,6 +48,10 @@ export class OperationComponent extends IconableMixin(Container) {
   size: Size = "base";
   sizeInPx = OperationComponent.sizeInPx[this.size];
 
+  insertable = false;
+  insertStepPosition: number | null = null;
+  insertQubitIndex: number | null = null;
+
   debug = false;
 
   protected _shape!: Graphics;
@@ -252,6 +256,10 @@ export class OperationComponent extends IconableMixin(Container) {
     });
   }
 
+  insert(dropzone: Dropzone) {
+    dropzone.assign(this);
+  }
+
   snap(dropzone: Dropzone) {
     dropzone.snap(this);
     this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
@@ -293,6 +301,9 @@ export class OperationComponent extends IconableMixin(Container) {
 
   private onPointerUp() {
     if (this.dropzone) {
+      return;
+    }
+    if (this.insertable) {
       return;
     }
 

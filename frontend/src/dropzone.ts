@@ -100,6 +100,17 @@ export class Dropzone extends Container {
     return this._connectBottom;
   }
 
+  assign(gate: OperationComponent) {
+    gate.insertable = false;
+
+    this.addChild(gate);
+    if (this.operation === null) {
+      throw new Error("Operation is null");
+    }
+    this.operation.on(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
+    this.redrawWires();
+  }
+
   snap(gate: OperationComponent) {
     this.addChild(gate);
     if (this.operation === null) {

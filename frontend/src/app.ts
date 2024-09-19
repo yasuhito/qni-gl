@@ -346,6 +346,7 @@ export class App {
     // we want to track the movement of this particular touch
     this.activeGate = gate;
     this.grabbedGate = gate;
+    gate.insertable = false;
 
     this.grabbedGate.on(OPERATION_EVENTS.DISCARDED, (gate) => {
       this.activeGate = null;
@@ -439,14 +440,82 @@ export class App {
     const snapRatio = 0.5;
     const gateX = gateCenterX - gateWidth / 2;
     const gateY = gateCenterY - gateHeight / 2;
-    const dropboxPosition = dropzone.getGlobalPosition();
+    const dropzonePosition = dropzone.getGlobalPosition();
 
     const snapzoneX =
-      dropboxPosition.x +
+      dropzonePosition.x +
       dropzone.gateSize / 4 +
       ((1 - snapRatio) * dropzone.gateSize) / 2;
     const snapzoneY =
-      dropboxPosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+      dropzonePosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+    const snapzoneWidth = dropzone.gateSize * snapRatio;
+    const snapzoneHeight = dropzone.gateSize * snapRatio;
+
+    return rectIntersect(
+      gateX,
+      gateY,
+      gateWidth,
+      gateHeight,
+      snapzoneX,
+      snapzoneY,
+      snapzoneWidth,
+      snapzoneHeight
+    );
+  }
+
+  private isGateHoveringAtLeftInsertPosition(
+    gateCenterX: number,
+    gateCenterY: number,
+    gateWidth: number,
+    gateHeight: number,
+    dropzone: Dropzone
+  ): boolean {
+    const snapRatio = 0.5;
+    const gateX = gateCenterX - gateWidth / 2;
+    const gateY = gateCenterY - gateHeight / 2;
+    const dropzonePosition = dropzone.getGlobalPosition();
+
+    const snapzoneX =
+      dropzonePosition.x +
+      dropzone.gateSize / 4 +
+      ((1 - snapRatio) * dropzone.gateSize) / 2 -
+      dropzone.width / 2;
+    const snapzoneY =
+      dropzonePosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
+    const snapzoneWidth = dropzone.gateSize * snapRatio;
+    const snapzoneHeight = dropzone.gateSize * snapRatio;
+
+    return rectIntersect(
+      gateX,
+      gateY,
+      gateWidth,
+      gateHeight,
+      snapzoneX,
+      snapzoneY,
+      snapzoneWidth,
+      snapzoneHeight
+    );
+  }
+
+  private isGateHoveringAtRightInsertPosition(
+    gateCenterX: number,
+    gateCenterY: number,
+    gateWidth: number,
+    gateHeight: number,
+    dropzone: Dropzone
+  ): boolean {
+    const snapRatio = 0.5;
+    const gateX = gateCenterX - gateWidth / 2;
+    const gateY = gateCenterY - gateHeight / 2;
+    const dropzonePosition = dropzone.getGlobalPosition();
+
+    const snapzoneX =
+      dropzonePosition.x +
+      dropzone.gateSize / 4 +
+      ((1 - snapRatio) * dropzone.gateSize) / 2 +
+      dropzone.width / 2;
+    const snapzoneY =
+      dropzonePosition.y + ((1 - snapRatio) * dropzone.gateSize * 1.5) / 2;
     const snapzoneWidth = dropzone.gateSize * snapRatio;
     const snapzoneHeight = dropzone.gateSize * snapRatio;
 
@@ -478,19 +547,105 @@ export class App {
    */
   private moveGate(gate: OperationComponent, pointerPosition: Point) {
     let snapDropzone: Dropzone | null = null;
+    let insertablePosition: Point | null = null;
+    let insertStepPosition = 0;
+    let insertedOperationQubitIndex = 0;
 
-    for (const circuitStep of this.circuit.steps) {
-      for (const dropzone of circuitStep.dropzones) {
-        if (
-          this.isSnappable(
-            gate,
-            pointerPosition.x,
-            pointerPosition.y,
-            gate.width,
-            gate.height,
-            dropzone
-          )
-        ) {
+    for (let index = 0; index < this.circuit.steps.length; index++) {
+      const circuitStep = this.circuit.steps[index];
+
+      for (
+        let qubitIndex = 0;
+        qubitIndex < circuitStep.dropzones.length;
+        qubitIndex++
+      ) {
+        const dropzone = circuitStep.dropzones[qubitIndex];
+        let isSnappable = this.isSnappable(
+          gate,
+          pointerPosition.x,
+          pointerPosition.y,
+          gate.width,
+          gate.height,
+          dropzone
+        );
+        const isGateInsertableLeft = this.isGateHoveringAtLeftInsertPosition(
+          pointerPosition.x,
+          pointerPosition.y,
+          gate.width,
+          gate.height,
+          dropzone
+        );
+        const isGateInsertableRight = this.isGateHoveringAtRightInsertPosition(
+          pointerPosition.x,
+          pointerPosition.y,
+          gate.width,
+          gate.height,
+          dropzone
+        );
+
+        if (isSnappable || isGateInsertableLeft || isGateInsertableRight) {
+          const snappablePosition = isSnappable
+            ? new Point(
+                dropzone.getGlobalPosition().x + dropzone.width / 2,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
+            : null;
+          const leftInsertablePosition = isGateInsertableLeft
+            ? new Point(
+                dropzone.getGlobalPosition().x,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
+            : null;
+          const rightInsertablePosition = isGateInsertableRight
+            ? new Point(
+                dropzone.getGlobalPosition().x + dropzone.width,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
+            : null;
+
+          if (leftInsertablePosition) {
+            insertStepPosition = index;
+          }
+          if (rightInsertablePosition) {
+            insertStepPosition = index + 1;
+          }
+
+          const snappableDistance = snappablePosition
+            ? Math.sqrt(
+                Math.pow(pointerPosition.x - snappablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - snappablePosition.y, 2)
+              )
+            : Infinity;
+          const leftInsertableDistance = leftInsertablePosition
+            ? Math.sqrt(
+                Math.pow(pointerPosition.x - leftInsertablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
+              )
+            : Infinity;
+          const rightInsertableDistance = rightInsertablePosition
+            ? Math.sqrt(
+                Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
+              )
+            : Infinity;
+
+          if (
+            snappableDistance < leftInsertableDistance &&
+            snappableDistance < rightInsertableDistance
+          ) {
+            snapDropzone = dropzone;
+          } else if (leftInsertableDistance < rightInsertableDistance) {
+            isSnappable = false;
+            insertablePosition = leftInsertablePosition;
+            insertedOperationQubitIndex = qubitIndex;
+          } else {
+            isSnappable = false;
+            insertablePosition = rightInsertablePosition;
+            insertedOperationQubitIndex = qubitIndex;
+          }
+        }
+
+        if (isSnappable) {
           snapDropzone = dropzone;
           gate.snapToDropzone(dropzone, pointerPosition);
         }
@@ -509,10 +664,25 @@ export class App {
       this.unsnapGateFromDropzone(gate);
     }
 
-    // gate.dropzone = snapDropzone;
     if (snapDropzone) {
+      gate.insertable = false;
+      gate.insertStepPosition = null;
       snapDropzone.addChild(gate);
+    } else if (insertablePosition !== null) {
+      gate.insertable = true;
+      if (
+        gate.insertStepPosition !== insertStepPosition ||
+        gate.insertQubitIndex !== insertedOperationQubitIndex
+      ) {
+        gate.insertStepPosition = insertStepPosition;
+        gate.insertQubitIndex = insertedOperationQubitIndex;
+        gate.emit(OPERATION_EVENTS.SNAPPED, gate, null);
+        this.circuit.redrawDropzoneInputAndOutputWires();
+        this.circuit.updateConnections();
+      }
+      gate.move(insertablePosition);
     } else {
+      gate.insertable = false;
       gate.move(pointerPosition);
     }
   }
@@ -526,6 +696,17 @@ export class App {
   private releaseGate() {
     if (this.grabbedGate === null) {
       return;
+    }
+
+    if (this.grabbedGate.insertable) {
+      const insertedStep = this.circuit.insertStepAt(
+        this.grabbedGate.insertStepPosition!
+      );
+      // dropzone.on(DROPZONE_EVENTS.OPERATION_SNAPPED, this.onDropzoneSnap, this);
+      this.grabbedGate.position.set(8, 8);
+      this.grabbedGate.insert(
+        insertedStep.fetchDropzone(this.grabbedGate.insertQubitIndex!)
+      );
     }
 
     // TODO: 以下の this.circuit... 以下と同様の粒度にする (関数に切り分ける)
