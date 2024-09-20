@@ -21,7 +21,7 @@ src.backend module
 src.qiskit\_runner module
 -------------------------
 
-.. automodule:: src.qiskit_runner
+.. automodule:: qni.qiskit_runner
    :members:
    :undoc-members:
    :show-inheritance:

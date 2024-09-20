@@ -1,6 +1,6 @@
 import unittest
 
-from src.qiskit_runner import QiskitRunner
+from qni.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 

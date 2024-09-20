@@ -8,9 +8,9 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from src.types import MeasuredBitsType
+    from qni.types import MeasuredBitsType
 
-from src.qiskit_runner import QiskitRunner
+from qni.qiskit_runner import QiskitRunner
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"

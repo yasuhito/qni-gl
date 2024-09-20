@@ -1,7 +1,7 @@
 import json
 from math import sqrt
 
-from src.backend import app
+from qni.backend import app
 from tests.conftest import assert_amplitudes_approx
 
 

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.qiskit_runner import QiskitRunner
+from qni.qiskit_runner import QiskitRunner
 from tests.conftest import assert_complex_approx
 
 
