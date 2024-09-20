@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from qni.types import MeasuredBitsType
 
 from qni.qiskit_runner import QiskitRunner
+from qni.request_data import RequestData
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
@@ -77,28 +78,6 @@ def _setup_custom_logger():
 
 
 _setup_custom_logger()
-
-
-class RequestData:
-    def __init__(self, form):
-        self.circuit_id = form.get("id", "")
-        self.qubit_count = self._get_int_from_request(form, "qubitCount", 0)
-        self.until_step_index = self._get_int_from_request(form, "untilStepIndex", 0)
-        self.steps = self._get_steps_from_request(form)
-        self.amplitude_indices = self._get_amplitude_indices_from_request(form)
-        self.device = "GPU" if form.get("useGpu", "false").lower() == "true" else "CPU"
-
-    @staticmethod
-    def _get_int_from_request(form, key: str, default: int) -> int:
-        return int(form.get(key, default))
-
-    @staticmethod
-    def _get_amplitude_indices_from_request(form) -> list[int]:
-        return [int(each) for each in form.get("amplitudeIndices", "").split(",") if each.isdigit()]
-
-    @staticmethod
-    def _get_steps_from_request(form) -> list[dict]:
-        return json.loads(form.get("steps", "[]"))
 
 
 @app.route("/backend.json", methods=["POST"])
