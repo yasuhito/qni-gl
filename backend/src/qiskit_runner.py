@@ -50,7 +50,6 @@ class QiskitRunner:
         *,
         qubit_count: int | None = None,
         until_step_index: int | None = None,
-        amplitude_indices: list[int] | None = None,
         device: device_type = "CPU",
     ):
         """
@@ -60,7 +59,6 @@ class QiskitRunner:
             steps (list): A list of steps to execute.
             qubit_count (int | None, optional): The number of qubits. Defaults to None.
             until_step_index (int | None, optional): The index of the step until which to execute. Defaults to None.
-            amplitude_indices (list[int] | None, optional): The indices of the amplitudes to return. Defaults to None.
             device (str, optional): The device to use ("CPU" or "GPU"). Defaults to "CPU".
 
         Returns:
@@ -86,7 +84,7 @@ class QiskitRunner:
                 step_results.append(
                     StepResultsWithAmplitudes(
                         measuredBits=measured_bits[step_index],
-                        amplitudes=self._filter_amplitudes(statevector, amplitude_indices),
+                        amplitudes=statevector,
                     )
                 )
             else:
@@ -102,14 +100,6 @@ class QiskitRunner:
             until_step_index = self._last_step_index()
 
         return self._process_step_operations(qubit_count, until_step_index)
-
-    def _filter_amplitudes(
-        self, statevector: dict[int, amplitude_type], amplitude_indices: list[int] | None
-    ) -> dict[int, amplitude_type]:
-        if amplitude_indices is None:
-            return statevector
-
-        return {index: statevector[index] for index in amplitude_indices}
 
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:

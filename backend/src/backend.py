@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from src.types import MeasuredBitsType, device_type
+    from src.types import MeasuredBitsType
 
 from src.qiskit_runner import QiskitRunner
 
@@ -27,6 +27,37 @@ qubit_amplitudes_type = dict[int, amplitude_type]
 class StepResultsWithAmplitudes(TypedDict):
     amplitudes: dict[int, qubit_amplitudes_type]
     measuredBits: MeasuredBitsType
+
+
+class CachedQiskitRunner:
+    def __init__(self) -> None:
+        self.cache: dict = {}
+        self.last_cache_key: tuple | None = None
+
+    def run(
+        self, circuit_id: str, qubit_count: int, until_step_index: int, steps: list[dict], device: Literal["CPU", "GPU"]
+    ) -> dict:
+        cache_key = (circuit_id, until_step_index)
+
+        if self.last_cache_key == cache_key:
+            app.logger.info("Cache hit for circuit_key: %s", cache_key)
+            return self.cache
+
+        app.logger.info("Cache miss for circuit_key: %s", cache_key)
+
+        result = QiskitRunner(app.logger).run_circuit(
+            steps,
+            qubit_count=qubit_count,
+            until_step_index=until_step_index,
+            device=device,
+        )
+        self.cache = result
+        self.last_cache_key = cache_key
+
+        return result
+
+
+cached_qiskit_runner = CachedQiskitRunner()
 
 
 def _add_logger_handler(handler, formatter):
@@ -48,6 +79,28 @@ def _setup_custom_logger():
 _setup_custom_logger()
 
 
+class RequestData:
+    def __init__(self, form):
+        self.circuit_id = form.get("id", "")
+        self.qubit_count = self._get_int_from_request(form, "qubitCount", 0)
+        self.until_step_index = self._get_int_from_request(form, "untilStepIndex", 0)
+        self.steps = self._get_steps_from_request(form)
+        self.amplitude_indices = self._get_amplitude_indices_from_request(form)
+        self.device = "GPU" if form.get("useGpu", "false").lower() == "true" else "CPU"
+
+    @staticmethod
+    def _get_int_from_request(form, key: str, default: int) -> int:
+        return int(form.get(key, default))
+
+    @staticmethod
+    def _get_amplitude_indices_from_request(form) -> list[int]:
+        return [int(each) for each in form.get("amplitudeIndices", "").split(",") if each.isdigit()]
+
+    @staticmethod
+    def _get_steps_from_request(form) -> list[dict]:
+        return json.loads(form.get("steps", "[]"))
+
+
 @app.route("/backend.json", methods=["POST"])
 def backend():
     """
@@ -61,36 +114,28 @@ def backend():
         Response: A JSON response containing the simulation results or an error message.
     """
     try:
-        circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device = _get_request_data()
-        _log_request_data(circuit_id, qubit_count, until_step_index, amplitude_indices, steps, device)
+        request_data = RequestData(request.form)
+        _log_request_data(
+            request_data.circuit_id,
+            request_data.qubit_count,
+            request_data.until_step_index,
+            request_data.amplitude_indices,
+            request_data.steps,
+            request_data.device,
+        )
 
-        step_results = _run_qiskit(qubit_count, until_step_index, steps, amplitude_indices, device)
-        return jsonify(step_results)
+        step_results = cached_qiskit_runner.run(
+            request_data.circuit_id,
+            request_data.qubit_count,
+            request_data.until_step_index,
+            request_data.steps,
+            request_data.device,
+        )
+        step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
+
+        return jsonify(step_results_filtered)
     except json.decoder.JSONDecodeError as e:
         return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
-
-
-def _get_request_data() -> tuple[str, int, int, list[dict], list[int], str]:
-    circuit_id = request.form.get("id", "")
-    qubit_count = _get_int_from_request("qubitCount", 0)
-    until_step_index = _get_int_from_request("untilStepIndex", 0)
-    steps = _get_steps_from_request()
-    amplitude_indices = _get_amplitude_indices_from_request()
-    use_gpu = request.form.get("useGpu", "false").lower() == "true"
-    device = "GPU" if use_gpu else "CPU"
-    return circuit_id, qubit_count, until_step_index, steps, amplitude_indices, device
-
-
-def _get_int_from_request(key: str, default: int) -> int:
-    return int(request.form.get(key, default))
-
-
-def _get_amplitude_indices_from_request() -> list[int]:
-    return [int(each) for each in request.form.get("amplitudeIndices", "").split(",") if each.isdigit()]
-
-
-def _get_steps_from_request() -> list[dict]:
-    return json.loads(request.form.get("steps", "[]"))
 
 
 def _handle_error(error_message: str, response_message: str, status_code: int) -> tuple[Response, int]:
@@ -116,29 +161,22 @@ def _log_request_data(
     app.logger.debug("device = %s", device)
 
 
-def _run_qiskit(
-    qubit_count: int, until_step_index: int, steps: list, amplitude_indices: list[int], device: device_type
-) -> list[dict]:
-    results = QiskitRunner(app.logger).run_circuit(
-        steps,
-        qubit_count=qubit_count,
-        until_step_index=until_step_index,
-        amplitude_indices=amplitude_indices,
-        device=device,
-    )
-
-    return [_convert_result(result) for result in results]
-
-
-def _convert_result(result: dict) -> dict:
+def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
     response = {}
 
     if "amplitudes" in result:
-        response["amplitudes"] = _flatten_amplitude(result["amplitudes"])
+        response["amplitudes"] = _flatten_amplitude(_filter_amplitudes(result["amplitudes"], amplitude_indices))
 
     response["measuredBits"] = result["measuredBits"]
 
     return response
+
+
+def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[int] | None) -> dict[int, complex]:
+    if amplitude_indices is None:
+        return statevector
+
+    return {index: statevector[index] for index in amplitude_indices}
 
 
 def _flatten_amplitude(amplitude: dict[int, complex]) -> qubit_amplitudes_type:
