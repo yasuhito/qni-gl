@@ -10,15 +10,15 @@ Qni documentation
    :maxdepth: 2
    :caption: Contents:
 
-src.backend module
+qni.backend module
 ------------------
 
-.. automodule:: src.backend
+.. automodule:: qni.backend
    :members:
    :undoc-members:
    :show-inheritance:
 
-src.qiskit\_runner module
+qni.qiskit\_runner module
 -------------------------
 
 .. automodule:: qni.qiskit_runner
