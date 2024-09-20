@@ -1,4 +1,4 @@
-wsgi_app = "src.backend:app"
+wsgi_app = "qni.backend:app"
 
 accesslog = "access.log"
 errorlog = "error.log"

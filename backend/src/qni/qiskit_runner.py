@@ -11,7 +11,7 @@ from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
 from qiskit.circuit.library import HGate, SdgGate, SGate, TdgGate, TGate, XGate, YGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
-from src.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
+from qni.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
 
 amplitude_type = complex
 
