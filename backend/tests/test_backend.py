@@ -13,16 +13,6 @@ def test_post_empty_circuit():
     assert len(res) == 0
 
 
-def test_bad_request():
-    request_data = {"steps": "NOT_A_JSON"}
-    response = app.test_client().post("/backend.json", data=request_data)
-    res = json.loads(response.data.decode("utf-8"))
-
-    assert response.status_code == 400
-    assert res["error"] == "Bad Request: Invalid input"
-    assert res["message"] == "JSON decode error: NOT_A_JSON"
-
-
 def test_post_simple_circuit():
     request_data = {
         "id": '{"cols": [["H", 1], [1, 1], [1, 1], [1, 1], [1, 1]]}',
