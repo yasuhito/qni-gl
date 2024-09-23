@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from qni.types import DeviceType, MeasuredBitsType
+    from qni.types import MeasuredBitsType
 
 from qni.qiskit_runner import QiskitRunner
 from qni.request_data import RequestData
@@ -34,10 +34,8 @@ class CachedQiskitRunner:
         self.cache: dict = {}
         self.last_cache_key: tuple | None = None
 
-    def run(
-        self, circuit_id: str, qubit_count: int, until_step_index: int, steps: list[dict], device: DeviceType
-    ) -> dict:
-        cache_key = (circuit_id, until_step_index)
+    def run(self, request_data: RequestData) -> dict:
+        cache_key = (request_data.circuit_id, request_data.until_step_index)
 
         if self.last_cache_key == cache_key:
             app.logger.info("Cache hit for circuit_key: %s", cache_key)
@@ -46,10 +44,10 @@ class CachedQiskitRunner:
         app.logger.info("Cache miss for circuit_key: %s", cache_key)
 
         result = QiskitRunner(app.logger).run_circuit(
-            steps,
-            qubit_count=qubit_count,
-            until_step_index=until_step_index,
-            device=device,
+            request_data.steps,
+            qubit_count=request_data.qubit_count,
+            until_step_index=request_data.until_step_index,
+            device=request_data.device,
         )
         self.cache = result
         self.last_cache_key = cache_key
@@ -92,41 +90,21 @@ def backend():
         Response: A JSON response containing the simulation results or an error message.
     """
     request_data = RequestData(request.form)
-    _log_request_data(
-        request_data.circuit_id,
-        request_data.qubit_count,
-        request_data.until_step_index,
-        request_data.amplitude_indices,
-        request_data.steps,
-        request_data.device,
-    )
+    _log_request_data(request_data)
 
-    step_results = cached_qiskit_runner.run(
-        request_data.circuit_id,
-        request_data.qubit_count,
-        request_data.until_step_index,
-        request_data.steps,
-        request_data.device,
-    )
+    step_results = cached_qiskit_runner.run(request_data)
     step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
 
     return jsonify(step_results_filtered)
 
 
-def _log_request_data(
-    circuit_id: str,
-    qubit_count: int,
-    until_step_index: int,
-    amplitude_indices: list[int],
-    steps: list[dict],
-    device: str,
-):
-    app.logger.debug("circuit_id = %s", circuit_id)
-    app.logger.debug("qubit_count = %d", qubit_count)
-    app.logger.debug("until_step_index = %d", until_step_index)
-    app.logger.debug("amplitude_indices = %s", amplitude_indices)
-    app.logger.debug("steps = %s", steps)
-    app.logger.debug("device = %s", device)
+def _log_request_data(request_data: RequestData):
+    app.logger.debug("circuit_id = %s", request_data.circuit_id)
+    app.logger.debug("qubit_count = %d", request_data.qubit_count)
+    app.logger.debug("until_step_index = %d", request_data.until_step_index)
+    app.logger.debug("amplitude_indices = %s", request_data.amplitude_indices)
+    app.logger.debug("steps = %s", request_data.steps)
+    app.logger.debug("device = %s", request_data.device)
 
 
 def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
