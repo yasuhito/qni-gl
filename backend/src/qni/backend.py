@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, TypedDict
 import os
 import pickle
 import tempfile
+from typing import TYPE_CHECKING, TypedDict
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -47,7 +47,7 @@ class DiskCachedQiskitRunner:
         if os.path.exists(cache_path):
             app.logger.info("Cache hit for circuit_key: %s", cache_key)
             with open(cache_path, "rb") as f:
-                return pickle.load(f)
+                return pickle.load(f)  # noqa: S301
 
         app.logger.info("Cache miss for circuit_key: %s", cache_key)
 
@@ -62,6 +62,7 @@ class DiskCachedQiskitRunner:
             pickle.dump(result, f)
 
         return result
+
 
 cached_qiskit_runner = DiskCachedQiskitRunner()
 
