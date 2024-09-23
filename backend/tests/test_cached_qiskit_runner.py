@@ -1,11 +1,12 @@
-import unittest
-from unittest.mock import patch, MagicMock
 import shutil
+import unittest
+from unittest.mock import MagicMock, patch
 
 from werkzeug.datastructures import ImmutableMultiDict
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.request_data import RequestData
+
 
 class TestCachedQiskitRunner(unittest.TestCase):
     def setUp(self):
@@ -33,7 +34,7 @@ class TestCachedQiskitRunner(unittest.TestCase):
         mock_run_circuit.return_value = {"result": "test_result"}
 
         result = self.cached_runner.run(self.request_data)
-        self.assertEqual(result, {"result": "test_result"})
+        assert result == {"result": "test_result"}
         self.logger.info.assert_called_with("Cache miss for circuit_key: %s", ("test_circuit", 3))
 
     @patch("qni.qiskit_runner.QiskitRunner.run_circuit")
@@ -42,11 +43,11 @@ class TestCachedQiskitRunner(unittest.TestCase):
 
         # First run to populate the cache
         result = self.cached_runner.run(self.request_data)
-        self.assertEqual(result, {"result": "test_result"})
+        assert result == {"result": "test_result"}
 
         # Second run to test cache hit
         result = self.cached_runner.run(self.request_data)
-        self.assertEqual(result, {"result": "test_result"})
+        assert result == {"result": "test_result"}
         self.logger.info.assert_called_with("Cache hit for circuit_key: %s", ("test_circuit", 3))
 
     @patch("qni.qiskit_runner.QiskitRunner.run_circuit")
@@ -55,7 +56,8 @@ class TestCachedQiskitRunner(unittest.TestCase):
         mock_run_circuit.return_value = {"result": "test_result"}
 
         result = self.cached_runner.run(self.request_data)
-        self.assertEqual(result, {"result": "test_result"})
+        assert result == {"result": "test_result"}
+
 
 if __name__ == "__main__":
     unittest.main()

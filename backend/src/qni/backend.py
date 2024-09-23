@@ -81,7 +81,7 @@ def _log_request_data(request_data: RequestData):
     app.logger.debug("device = %s", request_data.device)
 
 
-def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
+def _convert_result(result: dict, amplitude_indices: list[int]) -> dict:
     response = {}
 
     if "amplitudes" in result:
@@ -92,8 +92,8 @@ def _convert_result(result: dict, amplitude_indices: list[int] | None) -> dict:
     return response
 
 
-def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[int] | None) -> dict[int, complex]:
-    if amplitude_indices is None:
+def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[int]) -> dict[int, complex]:
+    if len(amplitude_indices) == 0:
         return statevector
 
     return {index: statevector[index] for index in amplitude_indices}

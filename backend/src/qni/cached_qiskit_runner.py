@@ -1,10 +1,16 @@
-import logging
+from __future__ import annotations
+
 import os
 import pickle
 import tempfile
+from typing import TYPE_CHECKING
 
 from qni.qiskit_runner import QiskitRunner
-from qni.request_data import RequestData
+
+if TYPE_CHECKING:
+    import logging
+
+    from qni.request_data import RequestData
 
 
 class CachedQiskitRunner:
@@ -19,7 +25,7 @@ class CachedQiskitRunner:
             cached_result = self._load_from_cache(cache_key)
             if cached_result is not None:
                 return cached_result
- 
+
         result = QiskitRunner(self.logger).run_circuit(
             request_data.steps,
             qubit_count=request_data.qubit_count,
@@ -35,14 +41,14 @@ class CachedQiskitRunner:
     def _get_cache_path(self, cache_key: tuple) -> str:
         return os.path.join(self.cache_dir, f"{hash(cache_key)}.pkl")
 
-    def _load_from_cache(self, cache_key: tuple) -> dict:
+    def _load_from_cache(self, cache_key: tuple) -> dict | None:
         cache_path = self._get_cache_path(cache_key)
         if os.path.exists(cache_path):
             self.logger.info("Cache hit for circuit_key: %s", cache_key)
             with open(cache_path, "rb") as f:
                 return pickle.load(f)  # noqa: S301
         self.logger.info("Cache miss for circuit_key: %s", cache_key)
-            
+
         return None
 
     def _save_to_cache(self, cache_key: tuple, result: dict) -> None:

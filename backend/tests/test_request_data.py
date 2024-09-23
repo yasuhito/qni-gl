@@ -31,6 +31,7 @@ def test_request_data_initialization(form_data):
     assert request_data.device == DeviceType.GPU
     assert request_data.cache_enabled is True
 
+
 def test_request_data_default_values():
     form_data = ImmutableMultiDict()
     request_data = RequestData(form_data)
