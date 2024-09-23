@@ -32,7 +32,7 @@ class StepResultsWithAmplitudes(TypedDict):
     measuredBits: MeasuredBitsType
 
 
-class DiskCachedQiskitRunner:
+class CachedQiskitRunner:
     def __init__(self) -> None:
         self.cache_dir = tempfile.mkdtemp()
         app.logger.info("Cache directory created at: %s", self.cache_dir)
@@ -64,7 +64,7 @@ class DiskCachedQiskitRunner:
         return result
 
 
-cached_qiskit_runner = DiskCachedQiskitRunner()
+cached_qiskit_runner = CachedQiskitRunner()
 
 
 def _add_logger_handler(handler, formatter):
