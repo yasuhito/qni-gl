@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, TypedDict
+import os
+import pickle
+import tempfile
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -29,17 +32,22 @@ class StepResultsWithAmplitudes(TypedDict):
     measuredBits: MeasuredBitsType
 
 
-class CachedQiskitRunner:
+class DiskCachedQiskitRunner:
     def __init__(self) -> None:
-        self.cache: dict = {}
-        self.last_cache_key: tuple | None = None
+        self.cache_dir = tempfile.mkdtemp()
+        app.logger.info("Cache directory created at: %s", self.cache_dir)
+
+    def _get_cache_path(self, cache_key: tuple) -> str:
+        return os.path.join(self.cache_dir, f"{hash(cache_key)}.pkl")
 
     def run(self, request_data: RequestData) -> dict:
         cache_key = (request_data.circuit_id, request_data.until_step_index)
+        cache_path = self._get_cache_path(cache_key)
 
-        if self.last_cache_key == cache_key:
+        if os.path.exists(cache_path):
             app.logger.info("Cache hit for circuit_key: %s", cache_key)
-            return self.cache
+            with open(cache_path, "rb") as f:
+                return pickle.load(f)
 
         app.logger.info("Cache miss for circuit_key: %s", cache_key)
 
@@ -49,13 +57,13 @@ class CachedQiskitRunner:
             until_step_index=request_data.until_step_index,
             device=request_data.device,
         )
-        self.cache = result
-        self.last_cache_key = cache_key
+
+        with open(cache_path, "wb") as f:
+            pickle.dump(result, f)
 
         return result
 
-
-cached_qiskit_runner = CachedQiskitRunner()
+cached_qiskit_runner = DiskCachedQiskitRunner()
 
 
 def _add_logger_handler(handler, formatter):
