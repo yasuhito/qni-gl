@@ -29,7 +29,6 @@ class StepResultsWithAmplitudes(TypedDict):
     measuredBits: MeasuredBitsType
 
 
-
 cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 
