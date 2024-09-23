@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from qni.qiskit_runner import QiskitRunner
+from qni.types import DeviceType
 from tests.conftest import assert_complex_approx
 
 
@@ -59,7 +60,7 @@ class TestQiskitRunner(unittest.TestCase):
             [{"type": "H", "targets": [0]}],
         ]
 
-        self.qiskit_runner.run_circuit(steps, device="GPU")
+        self.qiskit_runner.run_circuit(steps, device=DeviceType.GPU)
 
         mock_set_options.assert_called_with(device="GPU", cuStateVec_enable=True)
 

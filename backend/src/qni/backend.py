@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from qni.types import MeasuredBitsType
+    from qni.types import DeviceType, MeasuredBitsType
 
 from qni.qiskit_runner import QiskitRunner
 from qni.request_data import RequestData
@@ -36,7 +36,7 @@ class CachedQiskitRunner:
         self.last_cache_key: tuple | None = None
 
     def run(
-        self, circuit_id: str, qubit_count: int, until_step_index: int, steps: list[dict], device: Literal["CPU", "GPU"]
+        self, circuit_id: str, qubit_count: int, until_step_index: int, steps: list[dict], device: DeviceType
     ) -> dict:
         cache_key = (circuit_id, until_step_index)
 

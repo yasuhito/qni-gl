@@ -11,7 +11,7 @@ from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
 from qiskit.circuit.library import HGate, SdgGate, SGate, TdgGate, TGate, XGate, YGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
-from qni.types import MeasuredBitsType, StepResultsWithoutAmplitudes, device_type
+from qni.types import DeviceType, MeasuredBitsType, StepResultsWithoutAmplitudes
 
 amplitude_type = complex
 
@@ -50,7 +50,7 @@ class QiskitRunner:
         *,
         qubit_count: int | None = None,
         until_step_index: int | None = None,
-        device: device_type = "CPU",
+        device: DeviceType = DeviceType.CPU,
     ):
         """
         Execute the specified quantum circuit and return the results of each step.
@@ -252,9 +252,9 @@ class QiskitRunner:
         for target in operation["targets"]:
             circuit.append(u, qargs=operation["controls"] + [target])
 
-    def _run_backend(self, device: str) -> Result:
+    def _run_backend(self, device: DeviceType) -> Result:
         backend = AerSimulator(method="statevector")
-        if device == "GPU":
+        if device == DeviceType.GPU:
             backend.set_options(device="GPU", cuStateVec_enable=True)
 
         circuit_transpiled = transpile(self.circuit, backend=backend)
