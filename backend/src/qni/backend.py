@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import json
 import logging
 from typing import TYPE_CHECKING, TypedDict
 
-from flask import Flask, Response, jsonify, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
@@ -92,36 +91,26 @@ def backend():
     Returns:
         Response: A JSON response containing the simulation results or an error message.
     """
-    try:
-        request_data = RequestData(request.form)
-        _log_request_data(
-            request_data.circuit_id,
-            request_data.qubit_count,
-            request_data.until_step_index,
-            request_data.amplitude_indices,
-            request_data.steps,
-            request_data.device,
-        )
+    request_data = RequestData(request.form)
+    _log_request_data(
+        request_data.circuit_id,
+        request_data.qubit_count,
+        request_data.until_step_index,
+        request_data.amplitude_indices,
+        request_data.steps,
+        request_data.device,
+    )
 
-        step_results = cached_qiskit_runner.run(
-            request_data.circuit_id,
-            request_data.qubit_count,
-            request_data.until_step_index,
-            request_data.steps,
-            request_data.device,
-        )
-        step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
+    step_results = cached_qiskit_runner.run(
+        request_data.circuit_id,
+        request_data.qubit_count,
+        request_data.until_step_index,
+        request_data.steps,
+        request_data.device,
+    )
+    step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
 
-        return jsonify(step_results_filtered)
-    except json.decoder.JSONDecodeError as e:
-        return _handle_error("Bad Request: Invalid input", f"JSON decode error: {e.doc}", HTTP_BAD_REQUEST)
-
-
-def _handle_error(error_message: str, response_message: str, status_code: int) -> tuple[Response, int]:
-    app.logger.exception(error_message)
-    app.logger.exception(response_message)
-
-    return jsonify({"error": error_message, "message": response_message}), status_code
+    return jsonify(step_results_filtered)
 
 
 def _log_request_data(
