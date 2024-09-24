@@ -37,10 +37,6 @@ class RequestData:
     def device(self) -> DeviceType:
         return self._form.get("device", DeviceType.CPU, type=self._device_type)
 
-    @property
-    def cache_enabled(self) -> bool:
-        return self._form.get("cacheEnabled", False, type=bool)
-
     def _steps_type(self, parameter: str) -> list[dict]:
         return json.loads(parameter)
 
