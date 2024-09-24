@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import logging
 
-    from qni.request_data import RequestData
+    from qni.circuit_request_data import CircuitRequestData
 
 
 from qni.qiskit_runner import QiskitRunner
@@ -17,7 +17,7 @@ class CachedQiskitRunner:
         self.cache: dict = {}
         self.last_cache_key: tuple | None = None
 
-    def run(self, request_data: RequestData) -> dict:
+    def run(self, request_data: CircuitRequestData) -> dict:
         cache_key = (request_data.circuit_id, request_data.until_step_index)
 
         if self.last_cache_key == cache_key:
