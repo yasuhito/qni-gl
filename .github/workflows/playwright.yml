@@ -15,10 +15,10 @@ jobs:
           node-version: 18
       - name: Install Hatch
         uses: pypa/hatch@install
-      - name: Hatch fmt
+      - name: Check code formatting
         run: hatch fmt
         working-directory: ./backend
-      - name: Hatch run types:check
+      - name: Check Python types
         run: hatch run types:check
         working-directory: ./backend
       - name: Run backend tests
