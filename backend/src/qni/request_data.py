@@ -11,12 +11,31 @@ from qni.types import DeviceType
 
 class RequestData:
     def __init__(self, form: ImmutableMultiDict[str, str]):
-        self.circuit_id: str = form.get("id", "")
-        self.qubit_count: int = form.get("qubitCount", 0, type=int)
-        self.until_step_index: int = form.get("untilStepIndex", 0, type=int)
-        self.steps: list[dict] = form.get("steps", [], type=self._steps_type)
-        self.amplitude_indices: list[int] = form.get("amplitudeIndices", [], type=self._amplitude_indices_type)
-        self.device: DeviceType = form.get("device", DeviceType.CPU, type=self._device_type)
+        self._form = form
+
+    @property
+    def circuit_id(self) -> str:
+        return self._form.get("id", "")
+
+    @property
+    def qubit_count(self) -> int:
+        return self._form.get("qubitCount", 0, type=int)
+
+    @property
+    def until_step_index(self) -> int:
+        return self._form.get("untilStepIndex", 0, type=int)
+
+    @property
+    def steps(self) -> list[dict]:
+        return self._form.get("steps", [], type=self._steps_type)
+
+    @property
+    def amplitude_indices(self) -> list[int]:
+        return self._form.get("amplitudeIndices", [], type=self._amplitude_indices_type)
+
+    @property
+    def device(self) -> DeviceType:
+        return self._form.get("device", DeviceType.CPU, type=self._device_type)
 
     def _steps_type(self, parameter: str) -> list[dict]:
         return json.loads(parameter)
