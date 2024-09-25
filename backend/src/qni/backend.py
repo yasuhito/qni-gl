@@ -57,7 +57,7 @@ def backend():
     _log_request_data(circuit_request_data)
 
     step_results = cached_qiskit_runner.run(circuit_request_data)
-    step_results_filtered = [_convert_result(result, circuit_request_data.amplitude_indices) for result in step_results]
+    step_results_filtered = _filter_and_convert_step_results(step_results, circuit_request_data)
 
     return jsonify(step_results_filtered)
 
@@ -71,15 +71,21 @@ def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("device = %s", request_data.device)
 
 
-def _convert_result(result: dict, amplitude_indices: list[int]) -> dict:
-    response = {}
+def _filter_and_convert_step_results(step_results: list[dict], circuit_request_data: CircuitRequestData) -> list[dict]:
+    return [_convert_step_result(result, circuit_request_data) for result in step_results]
 
-    if "amplitudes" in result:
-        response["amplitudes"] = _flatten_amplitude(_filter_amplitudes(result["amplitudes"], amplitude_indices))
 
-    response["measuredBits"] = result["measuredBits"]
+def _convert_step_result(step_result: dict, circuit_request_data: CircuitRequestData) -> dict:
+    new_step_result = {}
 
-    return response
+    if "amplitudes" in step_result:
+        new_step_result["amplitudes"] = _flatten_amplitude(
+            _filter_amplitudes(step_result["amplitudes"], circuit_request_data.amplitude_indices)
+        )
+
+    new_step_result["measuredBits"] = step_result["measuredBits"]
+
+    return new_step_result
 
 
 def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[int]) -> dict[int, complex]:
