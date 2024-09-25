@@ -7,7 +7,6 @@ from flask_cors import CORS
 
 if TYPE_CHECKING:
     from qni.types import (
-        MeasuredBitsType,
         QiskitStepAmplitudesType,
         QiskitStepResult,
         StepAmplitudesType,
@@ -66,24 +65,18 @@ def _convert_step_result(
     step_result: QiskitStepResult,
     circuit_request_data: CircuitRequestData,
 ) -> StepResult:
-    amplitudes: StepAmplitudesType = {}
-    measured_bits: MeasuredBitsType = step_result.get("measuredBits", {})
+    measured_bits = step_result["measuredBits"]
 
-    amplitudes_qiskit = step_result.get("amplitudes")
+    amplitudes_qiskit = step_result.get("amplitudes", None)
     if amplitudes_qiskit is None:
         return {"measuredBits": measured_bits}
 
-    amplitudes = _flatten_amplitude(
-        _filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices)  # type: ignore
-    )
+    amplitudes = _flatten_amplitude(_filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices))
     return {"amplitudes": amplitudes, "measuredBits": measured_bits}
 
 
 def _filter_amplitudes(statevector: QiskitStepAmplitudesType, amplitude_indices: list[int]) -> QiskitStepAmplitudesType:
-    if len(amplitude_indices) == 0:
-        return statevector
-
-    return {index: statevector[index] for index in amplitude_indices}
+    return {index: statevector[index] for index in amplitude_indices} if amplitude_indices else statevector
 
 
 def _flatten_amplitude(amplitude: QiskitStepAmplitudesType) -> StepAmplitudesType:

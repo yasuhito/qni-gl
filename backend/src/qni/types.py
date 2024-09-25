@@ -25,7 +25,11 @@ class QiskitStepResultWithAmplitudes(TypedDict):
 
 
 StepResult: TypeAlias = StepResultWithAmplitudes | StepResultWithoutAmplitudes
-QiskitStepResult: TypeAlias = QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes
+
+
+class QiskitStepResult(TypedDict, total=False):
+    amplitudes: QiskitStepAmplitudesType | None
+    measuredBits: MeasuredBitsType
 
 
 class DeviceType(Enum):
