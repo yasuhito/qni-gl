@@ -147,7 +147,7 @@ export class OperationSource extends Container {
   private emitMouseLeaveOperationEvent(
     operation: InstanceType<OperationClass>
   ): void {
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_MOUSE_LEFT, operation);
+    this.emit(OPERATION_EVENTS.MOUSE_LEFT, operation);
   }
 
   private grabOperation(

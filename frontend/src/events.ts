@@ -6,13 +6,10 @@ export const CIRCUIT_STEP_EVENTS = {
   ACTIVATED: "circuit-step.activated",
   HOVERED: "circuit-step.hovered",
   OPERATION_SNAPPED: "circuit-step.operation-snapped",
-  OPERATION_GRABBED: "circuit-step.operation-grabbed",
 } as const;
 
 export const OPERATION_SOURCE_EVENTS = {
   OPERATION_CREATED: "operation-source.operation-created",
-  OPERATION_DISCARDED: "operation-source.operation-discarded",
-  OPERATION_MOUSE_LEFT: "operation-source.operation-mouse-left",
 } as const;
 
 export const OPERATION_EVENTS = {
