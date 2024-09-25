@@ -28,7 +28,6 @@ export const OPERATION_PALETTE_EVENTS = {
 } as const;
 
 export const CIRCUIT_FRAME_EVENTS = {
-  PALETTE_OPERATION_GRABBED: "circuit-frame.palette-operation-grabbed",
   PALETTE_OPERATION_MOUSE_LEFT: "circuit-frame.palette-operation-mouse-left",
   PALETTE_OPERATION_DISCARDED: "circuit-frame.palette-operation-discarded",
   CIRCUIT_OPERATION_GRABBED: "circuit-frame.circuit-operation-grabbed",

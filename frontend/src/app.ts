@@ -193,11 +193,7 @@ export class App {
   }
 
   private setupCircuitFrameEventHandlers() {
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
-      this.grabGate,
-      this
-    );
+    this.circuitFrame.on(OPERATION_EVENTS.GRABBED, this.grabGate, this);
     this.circuitFrame.on(
       CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT,
       this.resetCursor,

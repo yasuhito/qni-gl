@@ -3,7 +3,6 @@ import {
   CIRCUIT_EVENTS,
   CIRCUIT_FRAME_EVENTS,
   OPERATION_EVENTS,
-  OPERATION_PALETTE_EVENTS,
 } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
@@ -115,11 +114,7 @@ export class CircuitFrame extends Container {
     pointerPosition: Point
   ): void {
     this.addChild(operation);
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
-      operation,
-      pointerPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
   private emitMouseLeavePaletteOperationEvent(): void {
