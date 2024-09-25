@@ -7,9 +7,9 @@ from flask_cors import CORS
 
 if TYPE_CHECKING:
     from qni.types import (
-        QiskitStepAmplitudesType,
+        QiskitStepAmplitudes,
         QiskitStepResult,
-        StepAmplitudesType,
+        StepAmplitudes,
         StepResult,
     )
 
@@ -75,9 +75,9 @@ def _convert_qiskit_step_result(
     return {"amplitudes": amplitudes, "measuredBits": measured_bits}
 
 
-def _filter_amplitudes(statevector: QiskitStepAmplitudesType, amplitude_indices: list[int]) -> QiskitStepAmplitudesType:
-    return {each: statevector[each] for each in amplitude_indices} if amplitude_indices else statevector
+def _filter_amplitudes(qiskit_amplitudes: QiskitStepAmplitudes, amplitude_indices: list[int]) -> QiskitStepAmplitudes:
+    return {each: qiskit_amplitudes[each] for each in amplitude_indices} if amplitude_indices else qiskit_amplitudes
 
 
-def _flatten_amplitudes(amplitude: QiskitStepAmplitudesType) -> StepAmplitudesType:
-    return {index: (float(each.real), float(each.imag)) for index, each in amplitude.items()}
+def _flatten_amplitudes(qiskit_amplitudes: QiskitStepAmplitudes) -> StepAmplitudes:
+    return {index: (float(each.real), float(each.imag)) for index, each in qiskit_amplitudes.items()}

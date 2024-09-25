@@ -3,33 +3,33 @@ from __future__ import annotations
 from enum import Enum
 from typing import TypeAlias, TypedDict
 
-MeasuredBitsType: TypeAlias = dict[int, int]
-AmplitudeType: TypeAlias = tuple[float, float]
-QiskitAmplitudeType: TypeAlias = complex
-QiskitStepAmplitudesType: TypeAlias = dict[int, QiskitAmplitudeType]
-StepAmplitudesType: TypeAlias = dict[int, AmplitudeType]
+MeasuredBits: TypeAlias = dict[int, int]
+Amplitude: TypeAlias = tuple[float, float]
+QiskitAmplitude: TypeAlias = complex
+QiskitStepAmplitudes: TypeAlias = dict[int, QiskitAmplitude]
+StepAmplitudes: TypeAlias = dict[int, Amplitude]
 
 
 class StepResultWithoutAmplitudes(TypedDict):
-    measuredBits: MeasuredBitsType
+    measuredBits: MeasuredBits
 
 
 class StepResultWithAmplitudes(TypedDict):
-    amplitudes: StepAmplitudesType
-    measuredBits: MeasuredBitsType
+    amplitudes: StepAmplitudes
+    measuredBits: MeasuredBits
 
 
 class QiskitStepResultWithAmplitudes(TypedDict):
-    amplitudes: QiskitStepAmplitudesType
-    measuredBits: MeasuredBitsType
+    amplitudes: QiskitStepAmplitudes
+    measuredBits: MeasuredBits
 
 
 StepResult: TypeAlias = StepResultWithAmplitudes | StepResultWithoutAmplitudes
 
 
 class QiskitStepResult(TypedDict, total=False):
-    amplitudes: QiskitStepAmplitudesType | None
-    measuredBits: MeasuredBitsType
+    amplitudes: QiskitStepAmplitudes | None
+    measuredBits: MeasuredBits
 
 
 class DeviceType(Enum):

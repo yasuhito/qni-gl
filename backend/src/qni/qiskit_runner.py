@@ -13,8 +13,8 @@ from qiskit_aer import AerSimulator  # type: ignore
 
 from qni.types import (
     DeviceType,
-    MeasuredBitsType,
-    QiskitAmplitudeType,
+    MeasuredBits,
+    QiskitAmplitude,
     QiskitStepResultWithAmplitudes,
     StepResultWithoutAmplitudes,
 )
@@ -267,13 +267,13 @@ class QiskitRunner:
 
         return backend.run(circuit_transpiled, shots=1, memory=True).result()
 
-    def _get_statevector(self, result: Result) -> dict[int, QiskitAmplitudeType]:
+    def _get_statevector(self, result: Result) -> dict[int, QiskitAmplitude]:
         amplitudes = np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
 
         return dict(enumerate(amplitudes))
 
-    def _extract_measurement_results(self, result: Result) -> list[MeasuredBitsType]:
-        measured_bits: list[MeasuredBitsType] = [{} for _ in self.steps]
+    def _extract_measurement_results(self, result: Result) -> list[MeasuredBits]:
+        measured_bits: list[MeasuredBits] = [{} for _ in self.steps]
 
         circuit_has_measurements = any(operation["type"] == "Measure" for step in self.steps for operation in step)
 
