@@ -118,7 +118,7 @@ export class CircuitFrame extends Container {
   }
 
   private emitMouseLeavePaletteOperationEvent(): void {
-    this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT);
+    this.emit(OPERATION_EVENTS.MOUSE_LEFT);
   }
 
   private removeGrabbedPaletteOperation(
