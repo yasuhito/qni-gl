@@ -125,7 +125,7 @@ export class CircuitFrame extends Container {
     operation: InstanceType<OperationClass>
   ): void {
     this.removeChild(operation);
-    this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED, operation);
+    this.emit(OPERATION_EVENTS.DISCARDED, operation);
   }
 
   private emitStepActivatedEvent(circuitStep: CircuitStep): void {
