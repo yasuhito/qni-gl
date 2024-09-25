@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     import logging
 
     from qni.circuit_request_data import CircuitRequestData
-
+    from qni.types import QiskitStepResultWithAmplitudes, StepResultWithoutAmplitudes
 
 from qni.qiskit_runner import QiskitRunner
 
@@ -14,10 +14,12 @@ from qni.qiskit_runner import QiskitRunner
 class CachedQiskitRunner:
     def __init__(self, logger: logging.Logger) -> None:
         self.logger = logger
-        self.cache: dict = {}
+        self.cache: list[QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes] = []
         self.last_cache_key: tuple | None = None
 
-    def run(self, request_data: CircuitRequestData) -> dict:
+    def run(
+        self, request_data: CircuitRequestData
+    ) -> list[QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes]:
         cache_key = (request_data.circuit_id, request_data.until_step_index)
 
         if self.last_cache_key == cache_key:

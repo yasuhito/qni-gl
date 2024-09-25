@@ -5,16 +5,27 @@ from typing import TypeAlias, TypedDict
 
 MeasuredBitsType: TypeAlias = dict[int, int]
 AmplitudeType: TypeAlias = tuple[float, float]
-QubitAmplitudesType: TypeAlias = dict[int, AmplitudeType]
+QiskitAmplitudeType: TypeAlias = complex
+QiskitStepAmplitudesType: TypeAlias = dict[int, QiskitAmplitudeType]
+StepAmplitudesType: TypeAlias = dict[int, AmplitudeType]
 
 
-class StepResultsWithoutAmplitudes(TypedDict):
+class StepResultWithoutAmplitudes(TypedDict):
     measuredBits: MeasuredBitsType
 
 
-class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: dict[int, QubitAmplitudesType]
+class StepResultWithAmplitudes(TypedDict):
+    amplitudes: StepAmplitudesType
     measuredBits: MeasuredBitsType
+
+
+class QiskitStepResultWithAmplitudes(TypedDict):
+    amplitudes: QiskitStepAmplitudesType
+    measuredBits: MeasuredBitsType
+
+
+StepResult: TypeAlias = StepResultWithAmplitudes | StepResultWithoutAmplitudes
+QiskitStepResult: TypeAlias = QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes
 
 
 class DeviceType(Enum):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, TypeAlias, TypedDict, cast
+from typing import TYPE_CHECKING, Callable, TypedDict, cast
 
 import numpy as np
 
@@ -11,9 +11,13 @@ from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
 from qiskit.circuit.library import HGate, SdgGate, SGate, TdgGate, TGate, XGate, YGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
-from qni.types import DeviceType, MeasuredBitsType, StepResultsWithoutAmplitudes
-
-QiskitAmplitudeType: TypeAlias = complex
+from qni.types import (
+    DeviceType,
+    MeasuredBitsType,
+    QiskitAmplitudeType,
+    QiskitStepResultWithAmplitudes,
+    StepResultWithoutAmplitudes,
+)
 
 
 class BasicOperation(TypedDict):
@@ -25,11 +29,6 @@ class ControllableOperation(TypedDict):
     type: str
     targets: list[int]
     controls: list[int]
-
-
-class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: dict[int, QiskitAmplitudeType]
-    measuredBits: MeasuredBitsType
 
 
 OperationMethod = Callable[[QuantumCircuit, BasicOperation | ControllableOperation], None]
@@ -51,7 +50,7 @@ class QiskitRunner:
         qubit_count: int | None = None,
         until_step_index: int | None = None,
         device: DeviceType = DeviceType.CPU,
-    ):
+    ) -> list[QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes]:
         """
         Execute the specified quantum circuit and return the results of each step.
 
@@ -64,7 +63,7 @@ class QiskitRunner:
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
         """
-        step_results: list[StepResultsWithAmplitudes | StepResultsWithoutAmplitudes] = []
+        step_results: list[QiskitStepResultWithAmplitudes | StepResultWithoutAmplitudes] = []
 
         self.steps = steps
         self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
@@ -82,13 +81,13 @@ class QiskitRunner:
         for step_index in range(len(self.steps)):
             if step_index == until_step_index:
                 step_results.append(
-                    StepResultsWithAmplitudes(
+                    QiskitStepResultWithAmplitudes(
                         measuredBits=measured_bits[step_index],
                         amplitudes=statevector,
                     )
                 )
             else:
-                step_results.append(StepResultsWithoutAmplitudes(measuredBits=measured_bits[step_index]))
+                step_results.append(StepResultWithoutAmplitudes(measuredBits=measured_bits[step_index]))
 
         return step_results
 
