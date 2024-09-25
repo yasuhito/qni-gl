@@ -8,19 +8,11 @@ export const CIRCUIT_STEP_EVENTS = {
   OPERATION_SNAPPED: "circuit-step.operation-snapped",
 } as const;
 
-export const OPERATION_SOURCE_EVENTS = {
-  OPERATION_CREATED: "operation-source.operation-created",
-} as const;
-
 export const OPERATION_EVENTS = {
   GRABBED: "operation.grabbed",
   SNAPPED: "operation.snapped",
   DISCARDED: "operation.discarded",
   MOUSE_LEFT: "operation.mouse-left",
-} as const;
-
-export const OPERATION_PALETTE_EVENTS = {
-  OPERATION_CREATED: "operation-palette.operation-created",
 } as const;
 
 export const CIRCUIT_FRAME_EVENTS = {

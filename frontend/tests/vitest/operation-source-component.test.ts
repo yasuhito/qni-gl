@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import { OPERATION_EVENTS, OPERATION_SOURCE_EVENTS } from "../../src/events";
+import { OPERATION_EVENTS } from "../../src/events";
 import { OperationClass } from "../../src/operation";
 import { OperationSource } from "../../src/operation-source";
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -25,16 +25,6 @@ describe("OperationSourceComponent", () => {
 
     expect(newOperation).toBeInstanceOf(MockOperation);
     expect(addedOperation).toBe(newOperation);
-  });
-
-  it("should emit OPERATION_CREATED event when a new operation is generated", () => {
-    const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_CREATED, spy);
-
-    operationSource.generateNewOperation();
-
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(expect.any(MockOperation));
   });
 
   it("should handle GRABBED event and generate a new operation", () => {

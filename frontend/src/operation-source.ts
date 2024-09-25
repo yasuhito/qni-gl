@@ -1,6 +1,6 @@
 import { Colors } from "./colors";
 import { Container, Graphics, Point } from "pixi.js";
-import { OPERATION_EVENTS, OPERATION_SOURCE_EVENTS } from "./events";
+import { OPERATION_EVENTS } from "./events";
 import { OperationClass } from "./operation";
 import { need } from "./util";
 
@@ -60,7 +60,6 @@ export class OperationSource extends Container {
     this.setupOperationEventListeners(operation);
     this.drawBorder(operation);
     this.validateBounds(operation);
-    this.emitOperationCreatedEvent(operation);
   }
 
   private setupOperationEventListeners(
@@ -120,12 +119,6 @@ export class OperationSource extends Container {
       bounds.x === 0 && bounds.y === 0,
       `Position is incorrect: (${bounds.x}, ${bounds.y}), expected: (0, 0)`
     );
-  }
-
-  private emitOperationCreatedEvent(
-    operation: InstanceType<OperationClass>
-  ): void {
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_CREATED, operation);
   }
 
   private removeOperationEventListeners(
