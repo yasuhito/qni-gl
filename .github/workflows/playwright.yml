@@ -34,11 +34,11 @@ jobs:
         run: |
           hatch run gunicorn --daemon
         working-directory: ./backend
-      - name: Run frontend tests
+      - name: Run frontend unit tests
         run: yarn test:unit
         working-directory: ./frontend
-      - name: Run frontend tests (headless)
-        run: yarn test:unit:system
+      - name: Run frontend system tests
+        run: yarn test:system
         working-directory: ./frontend
       - uses: actions/upload-artifact@v4
         if: always()
