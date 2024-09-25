@@ -20,20 +20,20 @@ export function centerPosition(gate: OperationComponent) {
 
 interface CircuitInfo {
   gatePalette: {
-    hGate: { x: number; y: number };
-    xGate: { x: number; y: number };
-    yGate: { x: number; y: number };
-    zGate: { x: number; y: number };
-    rnotGate: { x: number; y: number };
-    sGate: { x: number; y: number };
-    sDaggerGate: { x: number; y: number };
-    tGate: { x: number; y: number };
-    tDaggerGate: { x: number; y: number };
-    swapGate: { x: number; y: number };
-    controlGate: { x: number; y: number };
-    write0Gate: { x: number; y: number };
-    write1Gate: { x: number; y: number };
-    measurementGate: { x: number; y: number };
+    hGate: { x: number; y: number; size: number };
+    xGate: { x: number; y: number; size: number };
+    yGate: { x: number; y: number; size: number };
+    zGate: { x: number; y: number; size: number };
+    rnotGate: { x: number; y: number; size: number };
+    sGate: { x: number; y: number; size: number };
+    sDaggerGate: { x: number; y: number; size: number };
+    tGate: { x: number; y: number; size: number };
+    tDaggerGate: { x: number; y: number; size: number };
+    swapGate: { x: number; y: number; size: number };
+    controlGate: { x: number; y: number; size: number };
+    write0Gate: { x: number; y: number; size: number };
+    write1Gate: { x: number; y: number; size: number };
+    measurementGate: { x: number; y: number; size: number };
   };
   steps: { x: number; y: number }[][];
 }
@@ -89,6 +89,7 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
         return {
           x: bounds.x + bounds.width / 2,
           y: bounds.y + bounds.height / 2,
+          size: bounds.width,
         };
       };
 
@@ -163,13 +164,25 @@ export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
 export async function dragAndDrop(
   page: Page,
   source: { x: number; y: number },
-  target: { step: number; bit: number }
+  target:
+    | { step: number; bit: number }
+    | { beforeStep: number; bit: number }
+    | { afterStep: number; bit: number }
 ) {
   await page.mouse.move(source.x, source.y);
   await page.mouse.down();
 
+  let targetDropzone: { x: number; y: number };
   const circuitInfo = await getCircuitInfo(page);
-  const targetDropzone = circuitInfo.steps[target.step][target.bit];
+  if ("step" in target) {
+    targetDropzone = circuitInfo.steps[target.step][target.bit];
+  } else if ("beforeStep" in target) {
+    targetDropzone = circuitInfo.steps[target.beforeStep][target.bit];
+    targetDropzone.x -= circuitInfo.gatePalette.hGate.size / 2;
+  } else {
+    targetDropzone = circuitInfo.steps[target.afterStep][target.bit];
+    targetDropzone.x += circuitInfo.gatePalette.hGate.size / 2;
+  }
 
   await page.mouse.move(targetDropzone.x, targetDropzone.y);
   await page.mouse.up();
