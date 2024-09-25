@@ -33,3 +33,11 @@ qni.circuit\_request\_data module
    :members:
    :undoc-members:
    :show-inheritance:
+
+qni.types module
+----------------
+
+.. automodule:: qni.types
+   :members:
+   :undoc-members:
+   :show-inheritance:

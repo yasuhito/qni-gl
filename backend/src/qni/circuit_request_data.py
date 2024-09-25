@@ -28,6 +28,7 @@ class CircuitRequestData:
     def circuit_id(self) -> str:
         """
         Retrieves the circuit ID from the form data.
+        Default: "" (empty string)
 
         :return: The circuit ID.
         :rtype: str
@@ -38,6 +39,7 @@ class CircuitRequestData:
     def qubit_count(self) -> int:
         """
         Retrieves the qubit count from the form data.
+        Default: 0
 
         :return: The qubit count.
         :rtype: int
@@ -48,6 +50,7 @@ class CircuitRequestData:
     def until_step_index(self) -> int:
         """
         Retrieves the index of the last step to be executed from the form data.
+        Default: 0
 
         :return: The index of the last step.
         :rtype: int
@@ -58,6 +61,7 @@ class CircuitRequestData:
     def steps(self) -> list[dict]:
         """
         Retrieves the list of steps from the form data.
+        Default: [] (empty list)
 
         :return: The list of steps.
         :rtype: list[dict]
@@ -68,6 +72,7 @@ class CircuitRequestData:
     def amplitude_indices(self) -> list[int]:
         """
         Retrieves the list of amplitude indices from the form data.
+        Default: [] (empty list)
 
         :return: The list of amplitude indices.
         :rtype: list[int]
@@ -78,6 +83,7 @@ class CircuitRequestData:
     def device(self) -> DeviceType:
         """
         Retrieves the device type (CPU or GPU) from the form data.
+        Default: DeviceType.CPU
 
         :return: The device type.
         :rtype: DeviceType
