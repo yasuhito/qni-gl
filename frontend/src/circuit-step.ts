@@ -1,8 +1,4 @@
-import {
-  CIRCUIT_STEP_EVENTS,
-  DROPZONE_EVENTS,
-  OPERATION_EVENTS,
-} from "./events";
+import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { DropzoneList } from "./dropzone-list";
 import { CircuitStepState } from "./circuit-step-state";
 import { Container } from "pixi.js";
@@ -172,7 +168,7 @@ export class CircuitStep extends Container {
   appendNewDropzone() {
     const dropzone = this.dropzoneList.append();
 
-    dropzone.on(DROPZONE_EVENTS.OPERATION_SNAPPED, this.onDropzoneSnap, this);
+    dropzone.on(OPERATION_EVENTS.SNAPPED, this.onDropzoneSnap, this);
     dropzone.on(OPERATION_EVENTS.GRABBED, (operation, globalPosition) => {
       this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
     });
@@ -349,7 +345,7 @@ export class CircuitStep extends Container {
   }
 
   private onDropzoneSnap(dropzone: Dropzone) {
-    this.emit(CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED, this, dropzone);
+    this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
   }
 
   private maybeSetHoverState() {

@@ -1,11 +1,6 @@
-export const DROPZONE_EVENTS = {
-  OPERATION_SNAPPED: "dropzone.operation-snapped",
-} as const;
-
 export const CIRCUIT_STEP_EVENTS = {
   ACTIVATED: "circuit-step.activated",
   HOVERED: "circuit-step.hovered",
-  OPERATION_SNAPPED: "circuit-step.operation-snapped",
 } as const;
 
 export const OPERATION_EVENTS = {

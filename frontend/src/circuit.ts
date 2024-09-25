@@ -208,11 +208,7 @@ export class Circuit extends Container {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChildAt(circuitStep, index);
 
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
-      this.onGateSnapToDropzone,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
@@ -226,11 +222,7 @@ export class Circuit extends Container {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChild(circuitStep);
 
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
-      this.onGateSnapToDropzone,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
