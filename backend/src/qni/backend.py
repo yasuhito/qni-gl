@@ -39,10 +39,10 @@ def backend():
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
-    step_results = cached_qiskit_runner.run(circuit_request_data)
-    step_results_filtered = _filter_and_convert_step_results(step_results, circuit_request_data)
+    qiskit_step_results = cached_qiskit_runner.run(circuit_request_data)
+    step_results = _convert_and_filter_qiskit_step_results(qiskit_step_results, circuit_request_data)
 
-    return jsonify(step_results_filtered)
+    return jsonify(step_results)
 
 
 def _log_request_data(request_data: CircuitRequestData):
@@ -54,30 +54,30 @@ def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("device = %s", request_data.device)
 
 
-def _filter_and_convert_step_results(
-    step_results: list[QiskitStepResult],
+def _convert_and_filter_qiskit_step_results(
+    qiskit_step_results: list[QiskitStepResult],
     circuit_request_data: CircuitRequestData,
 ) -> list[StepResult]:
-    return [_convert_step_result(result, circuit_request_data) for result in step_results]
+    return [_convert_qiskit_step_result(each, circuit_request_data) for each in qiskit_step_results]
 
 
-def _convert_step_result(
-    step_result: QiskitStepResult,
+def _convert_qiskit_step_result(
+    qiskit_step_result: QiskitStepResult,
     circuit_request_data: CircuitRequestData,
 ) -> StepResult:
-    measured_bits = step_result["measuredBits"]
+    measured_bits = qiskit_step_result["measuredBits"]
 
-    amplitudes_qiskit = step_result.get("amplitudes", None)
+    amplitudes_qiskit = qiskit_step_result.get("amplitudes", None)
     if amplitudes_qiskit is None:
         return {"measuredBits": measured_bits}
 
-    amplitudes = _flatten_amplitude(_filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices))
+    amplitudes = _flatten_amplitudes(_filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices))
     return {"amplitudes": amplitudes, "measuredBits": measured_bits}
 
 
 def _filter_amplitudes(statevector: QiskitStepAmplitudesType, amplitude_indices: list[int]) -> QiskitStepAmplitudesType:
-    return {index: statevector[index] for index in amplitude_indices} if amplitude_indices else statevector
+    return {each: statevector[each] for each in amplitude_indices} if amplitude_indices else statevector
 
 
-def _flatten_amplitude(amplitude: QiskitStepAmplitudesType) -> StepAmplitudesType:
+def _flatten_amplitudes(amplitude: QiskitStepAmplitudesType) -> StepAmplitudesType:
     return {index: (float(each.real), float(each.imag)) for index, each in amplitude.items()}
