@@ -25,3 +25,19 @@ qni.qiskit\_runner module
    :members:
    :undoc-members:
    :show-inheritance:
+
+qni.circuit\_request\_data module
+---------------------------------
+
+.. automodule:: qni.circuit_request_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qni.types module
+----------------
+
+.. automodule:: qni.types
+   :members:
+   :undoc-members:
+   :show-inheritance:

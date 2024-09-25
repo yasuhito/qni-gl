@@ -4,14 +4,14 @@ from unittest.mock import MagicMock, patch
 from werkzeug.datastructures import ImmutableMultiDict
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
-from qni.request_data import RequestData
+from qni.circuit_request_data import CircuitRequestData
 
 
 class TestCachedQiskitRunner(unittest.TestCase):
     def setUp(self):
         self.logger = MagicMock()
         self.cached_runner = CachedQiskitRunner(self.logger)
-        self.request_data = RequestData(
+        self.request_data = CircuitRequestData(
             ImmutableMultiDict(
                 [
                     ("id", "test_circuit"),

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from qni.types import MeasuredBitsType
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
-from qni.request_data import RequestData
+from qni.circuit_request_data import CircuitRequestData
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
@@ -63,16 +63,16 @@ def backend():
     Returns:
         Response: A JSON response containing the simulation results or an error message.
     """
-    request_data = RequestData(request.form)
-    _log_request_data(request_data)
+    circuit_request_data = CircuitRequestData(request.form)
+    _log_request_data(circuit_request_data)
 
-    step_results = cached_qiskit_runner.run(request_data)
-    step_results_filtered = [_convert_result(result, request_data.amplitude_indices) for result in step_results]
+    step_results = cached_qiskit_runner.run(circuit_request_data)
+    step_results_filtered = [_convert_result(result, circuit_request_data.amplitude_indices) for result in step_results]
 
     return jsonify(step_results_filtered)
 
 
-def _log_request_data(request_data: RequestData):
+def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("circuit_id = %s", request_data.circuit_id)
     app.logger.debug("qubit_count = %d", request_data.qubit_count)
     app.logger.debug("until_step_index = %d", request_data.until_step_index)

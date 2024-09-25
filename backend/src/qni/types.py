@@ -11,5 +11,9 @@ class StepResultsWithoutAmplitudes(TypedDict):
 
 
 class DeviceType(Enum):
+    """
+    DeviceType is an enumeration that represents the type of device (CPU or GPU) used for quantum circuit simulation.
+    """
+
     CPU = "CPU"
     GPU = "GPU"

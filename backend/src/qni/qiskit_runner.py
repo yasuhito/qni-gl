@@ -131,6 +131,13 @@ class QiskitRunner:
         return circuit
 
     class UnknownOperationError(ValueError):
+        """
+        Raised when an unknown operation is specified.
+
+        Attributes:
+            operation_type (str): The type of the unknown operation.
+        """
+
         def __init__(self, operation_type):
             super().__init__(f"Unknown operation: {operation_type}")
 

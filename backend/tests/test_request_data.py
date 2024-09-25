@@ -1,7 +1,7 @@
 import pytest
 from werkzeug.datastructures import ImmutableMultiDict
 
-from qni.request_data import RequestData
+from qni.circuit_request_data import CircuitRequestData
 from qni.types import DeviceType
 
 
@@ -20,7 +20,7 @@ def form_data():
 
 
 def test_request_data_initialization(form_data):
-    request_data = RequestData(form_data)
+    request_data = CircuitRequestData(form_data)
 
     assert request_data.circuit_id == "test_circuit"
     assert request_data.qubit_count == 5
@@ -32,7 +32,7 @@ def test_request_data_initialization(form_data):
 
 def test_request_data_default_values():
     form_data = ImmutableMultiDict()
-    request_data = RequestData(form_data)
+    request_data = CircuitRequestData(form_data)
 
     assert request_data.circuit_id == ""
     assert request_data.qubit_count == 0
