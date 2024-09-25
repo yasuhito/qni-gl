@@ -12,7 +12,6 @@ export const CIRCUIT_STEP_EVENTS = {
 
 export const OPERATION_SOURCE_EVENTS = {
   OPERATION_CREATED: "operation-source.operation-created",
-  OPERATION_GRABBED: "operation-source.operation-grabbed",
   OPERATION_DISCARDED: "operation-source.operation-discarded",
   OPERATION_MOUSE_LEFT: "operation-source.operation-mouse-left",
 } as const;
@@ -26,7 +25,6 @@ export const OPERATION_EVENTS = {
 
 export const OPERATION_PALETTE_EVENTS = {
   OPERATION_CREATED: "operation-palette.operation-created",
-  OPERATION_GRABBED: "operation-palette.operation-grabbed",
   OPERATION_MOUSE_LEFT: "operation-palette.operation-mouse-left",
   OPERATION_DISCARDED: "operation-palette.operation-discarded",
 } as const;

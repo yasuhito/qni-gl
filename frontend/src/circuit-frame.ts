@@ -1,5 +1,11 @@
 import { Circuit } from "./circuit";
-import { CIRCUIT_EVENTS, CIRCUIT_FRAME_EVENTS, OPERATION_PALETTE_EVENTS } from "./events";
+import {
+  CIRCUIT_EVENTS,
+  CIRCUIT_FRAME_EVENTS,
+  OPERATION_EVENTS,
+  OPERATION_PALETTE_EVENTS,
+  OPERATION_SOURCE_EVENTS,
+} from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
@@ -38,6 +44,8 @@ export class CircuitFrame extends Container {
   private constructor(width: number, height: number) {
     super();
 
+    this.interactive = true;
+
     this.background = new Graphics();
     this.operationPalette = new OperationPalette();
     this.circuit = new Circuit({ minWireCount: 2, stepCount: 5 });
@@ -70,7 +78,7 @@ export class CircuitFrame extends Container {
     this.operationPalette.y = OPERATION_PALETTE_Y;
 
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_GRABBED,
+      OPERATION_EVENTS.GRABBED,
       this.grabPaletteOperation,
       this
     );

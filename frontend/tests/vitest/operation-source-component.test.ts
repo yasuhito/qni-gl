@@ -40,7 +40,7 @@ describe("OperationSourceComponent", () => {
   it("should handle GRABBED event and generate a new operation", () => {
     const operation = operationSource.generateNewOperation();
     const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_GRABBED, spy);
+    operationSource.on(OPERATION_EVENTS.GRABBED, spy);
 
     operation.emit(OPERATION_EVENTS.GRABBED, operation, { x: 0, y: 0 });
 

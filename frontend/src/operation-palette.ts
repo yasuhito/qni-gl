@@ -5,7 +5,11 @@ import { DropShadowFilter } from "pixi-filters";
 import { HGate } from "./h-gate";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import { OPERATION_PALETTE_EVENTS, OPERATION_SOURCE_EVENTS } from "./events";
+import {
+  OPERATION_EVENTS,
+  OPERATION_PALETTE_EVENTS,
+  OPERATION_SOURCE_EVENTS,
+} from "./events";
 import { OperationClass } from "./operation";
 import { OperationComponent } from "./operation-component";
 import { OperationSource } from "./operation-source";
@@ -60,6 +64,8 @@ export class OperationPalette extends Container {
   constructor() {
     super();
 
+    this.interactive = true;
+
     this.body = new Graphics();
     this.addChild(this.body);
 
@@ -110,13 +116,9 @@ export class OperationPalette extends Container {
       }
     );
     operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
+      OPERATION_EVENTS.GRABBED,
       (operation, globalPosition) => {
-        this.emit(
-          OPERATION_PALETTE_EVENTS.OPERATION_GRABBED,
-          operation,
-          globalPosition
-        );
+        this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
       }
     );
     operationSource.on(

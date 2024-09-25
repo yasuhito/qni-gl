@@ -34,6 +34,7 @@ export class OperationSource extends Container {
   constructor(operationClass: OperationClass) {
     super();
 
+    this.interactive = true;
     this.operationClass = operationClass;
     this.border = new Graphics();
     this.addChild(this.border);
@@ -155,11 +156,7 @@ export class OperationSource extends Container {
   ): void {
     this.generateNewOperation();
     this.removeChild(operation);
-    this.emit(
-      OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
-      operation,
-      globalPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
   }
 
   private discardOperation(operation: InstanceType<OperationClass>): void {
