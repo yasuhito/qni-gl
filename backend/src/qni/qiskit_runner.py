@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, TypedDict, cast
+from typing import TYPE_CHECKING, Callable, TypeAlias, TypedDict, cast
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from qiskit_aer import AerSimulator  # type: ignore
 
 from qni.types import DeviceType, MeasuredBitsType, StepResultsWithoutAmplitudes
 
-amplitude_type = complex
+QiskitAmplitudeType: TypeAlias = complex
 
 
 class BasicOperation(TypedDict):
@@ -28,7 +28,7 @@ class ControllableOperation(TypedDict):
 
 
 class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: dict[int, amplitude_type]
+    amplitudes: dict[int, QiskitAmplitudeType]
     measuredBits: MeasuredBitsType
 
 
@@ -268,7 +268,7 @@ class QiskitRunner:
 
         return backend.run(circuit_transpiled, shots=1, memory=True).result()
 
-    def _get_statevector(self, result: Result) -> dict[int, amplitude_type]:
+    def _get_statevector(self, result: Result) -> dict[int, QiskitAmplitudeType]:
         amplitudes = np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
 
         return dict(enumerate(amplitudes))

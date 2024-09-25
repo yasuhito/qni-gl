@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 if TYPE_CHECKING:
-    from qni.types import MeasuredBitsType
+    from qni.types import QubitAmplitudesType
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
@@ -15,19 +15,9 @@ from qni.circuit_request_data import CircuitRequestData
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
 LOG_FILE = "backend.log"
-HTTP_BAD_REQUEST = 400
 
 app = Flask(__name__)
 CORS(app)
-
-amplitude_type = tuple[float, float]
-qubit_amplitudes_type = dict[int, amplitude_type]
-
-
-class StepResultsWithAmplitudes(TypedDict):
-    amplitudes: dict[int, qubit_amplitudes_type]
-    measuredBits: MeasuredBitsType
-
 
 cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
@@ -99,5 +89,5 @@ def _filter_amplitudes(statevector: dict[int, complex], amplitude_indices: list[
     return {index: statevector[index] for index in amplitude_indices}
 
 
-def _flatten_amplitude(amplitude: dict[int, complex]) -> qubit_amplitudes_type:
+def _flatten_amplitude(amplitude: dict[int, complex]) -> QubitAmplitudesType:
     return {index: (float(each.real), float(each.imag)) for index, each in amplitude.items()}
