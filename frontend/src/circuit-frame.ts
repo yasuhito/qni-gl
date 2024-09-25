@@ -4,7 +4,6 @@ import {
   CIRCUIT_FRAME_EVENTS,
   OPERATION_EVENTS,
   OPERATION_PALETTE_EVENTS,
-  OPERATION_SOURCE_EVENTS,
 } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
@@ -88,7 +87,7 @@ export class CircuitFrame extends Container {
       this
     );
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_DISCARDED,
+      OPERATION_EVENTS.DISCARDED,
       this.removeGrabbedPaletteOperation,
       this
     );

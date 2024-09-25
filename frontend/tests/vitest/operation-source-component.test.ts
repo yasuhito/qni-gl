@@ -51,7 +51,7 @@ describe("OperationSourceComponent", () => {
   it("should handle DISCARDED event and remove the operation", () => {
     const operation = operationSource.generateNewOperation();
     const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED, spy);
+    operationSource.on(OPERATION_EVENTS.DISCARDED, spy);
 
     operation.emit(OPERATION_EVENTS.DISCARDED, operation);
 

@@ -26,7 +26,6 @@ export const OPERATION_EVENTS = {
 export const OPERATION_PALETTE_EVENTS = {
   OPERATION_CREATED: "operation-palette.operation-created",
   OPERATION_MOUSE_LEFT: "operation-palette.operation-mouse-left",
-  OPERATION_DISCARDED: "operation-palette.operation-discarded",
 } as const;
 
 export const CIRCUIT_FRAME_EVENTS = {

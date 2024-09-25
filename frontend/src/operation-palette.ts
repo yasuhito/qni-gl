@@ -127,13 +127,10 @@ export class OperationPalette extends Container {
         this.emit(OPERATION_PALETTE_EVENTS.OPERATION_MOUSE_LEFT, operation);
       }
     );
-    operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED,
-      (operation) => {
-        this.operations[operation.operationType] = null;
-        this.emit(OPERATION_PALETTE_EVENTS.OPERATION_DISCARDED, operation);
-      }
-    );
+    operationSource.on(OPERATION_EVENTS.DISCARDED, (operation) => {
+      this.operations[operation.operationType] = null;
+      this.emit(OPERATION_EVENTS.DISCARDED, operation);
+    });
   }
 
   private draw(): void {

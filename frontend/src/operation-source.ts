@@ -161,6 +161,6 @@ export class OperationSource extends Container {
 
   private discardOperation(operation: InstanceType<OperationClass>): void {
     this.removeChild(operation);
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED, operation);
+    this.emit(OPERATION_EVENTS.DISCARDED, operation);
   }
 }
