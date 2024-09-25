@@ -20,7 +20,7 @@ import {
   Renderer,
 } from "pixi.js";
 import {
-  CIRCUIT_FRAME_EVENTS,
+  CIRCUIT_STEP_EVENTS,
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
 } from "./events";
@@ -198,7 +198,7 @@ export class App {
     this.circuitFrame.on(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
 
     this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
+      CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.runSimulator,
       this
     );

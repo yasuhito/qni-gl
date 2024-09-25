@@ -3,11 +3,7 @@ import { Container, Point } from "pixi.js";
 import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import {
-  CIRCUIT_EVENTS,
-  CIRCUIT_STEP_EVENTS,
-  OPERATION_EVENTS,
-} from "./events";
+import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 import { OperationComponent } from "./operation-component";
 
@@ -250,7 +246,7 @@ export class Circuit extends Container {
     });
     this.markerManager.update(this.steps);
 
-    this.emit(CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED, circuitStep);
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, circuitStep);
   }
 
   private emitOnGateGrabSignal(

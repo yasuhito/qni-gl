@@ -10,14 +10,6 @@ export const OPERATION_EVENTS = {
   MOUSE_LEFT: "operation.mouse-left",
 } as const;
 
-export const CIRCUIT_FRAME_EVENTS = {
-  CIRCUIT_STEP_ACTIVATED: "circuit-frame.circuit-step-activated",
-} as const;
-
 export const FRAME_DIVIDER_EVENTS = {
   DRAG_STARTED: "frame-divider.drag-started",
 } as const;
-
-export const CIRCUIT_EVENTS = {
-  CIRCUIT_STEP_ACTIVATED: "circuit.circuit-step-activated",
-};

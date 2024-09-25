@@ -1,9 +1,5 @@
 import { Circuit } from "./circuit";
-import {
-  CIRCUIT_EVENTS,
-  CIRCUIT_FRAME_EVENTS,
-  OPERATION_EVENTS,
-} from "./events";
+import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
@@ -98,7 +94,7 @@ export class CircuitFrame extends Container {
       OPERATION_PALETTE_Y + this.operationPalette.height + OPERATION_PALETTE_Y;
 
     this.circuit.on(
-      CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED,
+      CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.emitStepActivatedEvent,
       this
     );
@@ -125,11 +121,7 @@ export class CircuitFrame extends Container {
   }
 
   private emitStepActivatedEvent(circuitStep: CircuitStep): void {
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
-      this.circuit,
-      circuitStep
-    );
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, circuitStep);
   }
 
   private grabCircuitOperation(
