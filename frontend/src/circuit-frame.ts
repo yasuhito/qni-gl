@@ -82,7 +82,7 @@ export class CircuitFrame extends Container {
       this
     );
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_MOUSE_LEFT,
+      OPERATION_EVENTS.MOUSE_LEFT,
       this.emitMouseLeavePaletteOperationEvent,
       this
     );
