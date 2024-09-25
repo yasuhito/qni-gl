@@ -102,11 +102,7 @@ export class CircuitFrame extends Container {
       this.emitStepActivatedEvent,
       this
     );
-    this.circuit.on(
-      CIRCUIT_EVENTS.OPERATION_GRABBED,
-      this.grabCircuitOperation,
-      this
-    );
+    this.circuit.on(OPERATION_EVENTS.GRABBED, this.grabCircuitOperation, this);
   }
 
   private grabPaletteOperation(
@@ -140,11 +136,7 @@ export class CircuitFrame extends Container {
     operation: InstanceType<OperationClass>,
     pointerPosition: Point
   ): void {
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
-      operation,
-      pointerPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
   private initScrollEvents(): void {

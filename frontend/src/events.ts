@@ -1,6 +1,5 @@
 export const DROPZONE_EVENTS = {
   OPERATION_SNAPPED: "dropzone.operation-snapped",
-  OPERATION_GRABBED: "dropzone.operation-grabbed",
 } as const;
 
 export const CIRCUIT_STEP_EVENTS = {
@@ -28,7 +27,6 @@ export const OPERATION_PALETTE_EVENTS = {
 } as const;
 
 export const CIRCUIT_FRAME_EVENTS = {
-  CIRCUIT_OPERATION_GRABBED: "circuit-frame.circuit-operation-grabbed",
   CIRCUIT_STEP_ACTIVATED: "circuit-frame.circuit-step-activated",
 } as const;
 
@@ -37,6 +35,5 @@ export const FRAME_DIVIDER_EVENTS = {
 } as const;
 
 export const CIRCUIT_EVENTS = {
-  OPERATION_GRABBED: "circuit.operation-grabbed",
   CIRCUIT_STEP_ACTIVATED: "circuit.circuit-step-activated",
 };

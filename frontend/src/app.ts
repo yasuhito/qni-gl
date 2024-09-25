@@ -202,11 +202,6 @@ export class App {
       this.runSimulator,
       this
     );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
-      this.grabGate,
-      this
-    );
   }
 
   private setupStateVectorEventHandlers() {
