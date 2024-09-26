@@ -1,5 +1,5 @@
 import { Circuit } from "./circuit";
-import { CIRCUIT_EVENTS, CIRCUIT_FRAME_EVENTS, OPERATION_PALETTE_EVENTS } from "./events";
+import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
@@ -38,6 +38,8 @@ export class CircuitFrame extends Container {
   private constructor(width: number, height: number) {
     super();
 
+    this.interactive = true;
+
     this.background = new Graphics();
     this.operationPalette = new OperationPalette();
     this.circuit = new Circuit({ minWireCount: 2, stepCount: 5 });
@@ -70,17 +72,17 @@ export class CircuitFrame extends Container {
     this.operationPalette.y = OPERATION_PALETTE_Y;
 
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_GRABBED,
+      OPERATION_EVENTS.GRABBED,
       this.grabPaletteOperation,
       this
     );
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_MOUSE_LEFT,
+      OPERATION_EVENTS.MOUSE_LEFT,
       this.emitMouseLeavePaletteOperationEvent,
       this
     );
     this.operationPalette.on(
-      OPERATION_PALETTE_EVENTS.OPERATION_DISCARDED,
+      OPERATION_EVENTS.DISCARDED,
       this.removeGrabbedPaletteOperation,
       this
     );
@@ -92,15 +94,11 @@ export class CircuitFrame extends Container {
       OPERATION_PALETTE_Y + this.operationPalette.height + OPERATION_PALETTE_Y;
 
     this.circuit.on(
-      CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED,
+      CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.emitStepActivatedEvent,
       this
     );
-    this.circuit.on(
-      CIRCUIT_EVENTS.OPERATION_GRABBED,
-      this.grabCircuitOperation,
-      this
-    );
+    this.circuit.on(OPERATION_EVENTS.GRABBED, this.grabCircuitOperation, this);
   }
 
   private grabPaletteOperation(
@@ -108,41 +106,29 @@ export class CircuitFrame extends Container {
     pointerPosition: Point
   ): void {
     this.addChild(operation);
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
-      operation,
-      pointerPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
   private emitMouseLeavePaletteOperationEvent(): void {
-    this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT);
+    this.emit(OPERATION_EVENTS.MOUSE_LEFT);
   }
 
   private removeGrabbedPaletteOperation(
     operation: InstanceType<OperationClass>
   ): void {
     this.removeChild(operation);
-    this.emit(CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED, operation);
+    this.emit(OPERATION_EVENTS.DISCARDED, operation);
   }
 
   private emitStepActivatedEvent(circuitStep: CircuitStep): void {
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
-      this.circuit,
-      circuitStep
-    );
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, circuitStep);
   }
 
   private grabCircuitOperation(
     operation: InstanceType<OperationClass>,
     pointerPosition: Point
   ): void {
-    this.emit(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
-      operation,
-      pointerPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
   private initScrollEvents(): void {

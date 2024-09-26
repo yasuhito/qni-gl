@@ -20,7 +20,7 @@ import {
   Renderer,
 } from "pixi.js";
 import {
-  CIRCUIT_FRAME_EVENTS,
+  CIRCUIT_STEP_EVENTS,
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
 } from "./events";
@@ -193,30 +193,13 @@ export class App {
   }
 
   private setupCircuitFrameEventHandlers() {
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_GRABBED,
-      this.grabGate,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_MOUSE_LEFT,
-      this.resetCursor,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.PALETTE_OPERATION_DISCARDED,
-      this.gateDiscarded,
-      this
-    );
+    this.circuitFrame.on(OPERATION_EVENTS.GRABBED, this.grabGate, this);
+    this.circuitFrame.on(OPERATION_EVENTS.MOUSE_LEFT, this.resetCursor, this);
+    this.circuitFrame.on(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
 
     this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_STEP_ACTIVATED,
+      CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.runSimulator,
-      this
-    );
-    this.circuitFrame.on(
-      CIRCUIT_FRAME_EVENTS.CIRCUIT_OPERATION_GRABBED,
-      this.grabGate,
       this
     );
   }

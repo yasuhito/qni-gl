@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import { OPERATION_EVENTS, OPERATION_SOURCE_EVENTS } from "../../src/events";
+import { OPERATION_EVENTS } from "../../src/events";
 import { OperationClass } from "../../src/operation";
 import { OperationSource } from "../../src/operation-source";
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -27,20 +27,10 @@ describe("OperationSourceComponent", () => {
     expect(addedOperation).toBe(newOperation);
   });
 
-  it("should emit OPERATION_CREATED event when a new operation is generated", () => {
-    const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_CREATED, spy);
-
-    operationSource.generateNewOperation();
-
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(expect.any(MockOperation));
-  });
-
   it("should handle GRABBED event and generate a new operation", () => {
     const operation = operationSource.generateNewOperation();
     const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_GRABBED, spy);
+    operationSource.on(OPERATION_EVENTS.GRABBED, spy);
 
     operation.emit(OPERATION_EVENTS.GRABBED, operation, { x: 0, y: 0 });
 
@@ -51,7 +41,7 @@ describe("OperationSourceComponent", () => {
   it("should handle DISCARDED event and remove the operation", () => {
     const operation = operationSource.generateNewOperation();
     const spy = vi.fn();
-    operationSource.on(OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED, spy);
+    operationSource.on(OPERATION_EVENTS.DISCARDED, spy);
 
     operation.emit(OPERATION_EVENTS.DISCARDED, operation);
 

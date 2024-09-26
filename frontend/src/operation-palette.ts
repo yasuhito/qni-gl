@@ -5,7 +5,7 @@ import { DropShadowFilter } from "pixi-filters";
 import { HGate } from "./h-gate";
 import { List } from "@pixi/ui";
 import { MeasurementGate } from "./measurement-gate";
-import { OPERATION_PALETTE_EVENTS, OPERATION_SOURCE_EVENTS } from "./events";
+import { OPERATION_EVENTS } from "./events";
 import { OperationClass } from "./operation";
 import { OperationComponent } from "./operation-component";
 import { OperationSource } from "./operation-source";
@@ -60,6 +60,8 @@ export class OperationPalette extends Container {
   constructor() {
     super();
 
+    this.interactive = true;
+
     this.body = new Graphics();
     this.addChild(this.body);
 
@@ -104,34 +106,18 @@ export class OperationPalette extends Container {
 
   private setupOperationSourceEvents(operationSource: OperationSource) {
     operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_CREATED,
-      (newOperation) => {
-        this.emit(OPERATION_PALETTE_EVENTS.OPERATION_CREATED, newOperation);
-      }
-    );
-    operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
+      OPERATION_EVENTS.GRABBED,
       (operation, globalPosition) => {
-        this.emit(
-          OPERATION_PALETTE_EVENTS.OPERATION_GRABBED,
-          operation,
-          globalPosition
-        );
+        this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
       }
     );
-    operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_MOUSE_LEFT,
-      (operation) => {
-        this.emit(OPERATION_PALETTE_EVENTS.OPERATION_MOUSE_LEFT, operation);
-      }
-    );
-    operationSource.on(
-      OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED,
-      (operation) => {
-        this.operations[operation.operationType] = null;
-        this.emit(OPERATION_PALETTE_EVENTS.OPERATION_DISCARDED, operation);
-      }
-    );
+    operationSource.on(OPERATION_EVENTS.MOUSE_LEFT, (operation) => {
+      this.emit(OPERATION_EVENTS.MOUSE_LEFT, operation);
+    });
+    operationSource.on(OPERATION_EVENTS.DISCARDED, (operation) => {
+      this.operations[operation.operationType] = null;
+      this.emit(OPERATION_EVENTS.DISCARDED, operation);
+    });
   }
 
   private draw(): void {

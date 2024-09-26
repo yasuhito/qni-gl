@@ -2,7 +2,7 @@ import { Container, Point } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
 import { WireType } from "./types";
-import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
+import { OPERATION_EVENTS } from "./events";
 import { spacingInPx } from "./util";
 import { Operation } from "./operation";
 
@@ -118,7 +118,7 @@ export class Dropzone extends Container {
     }
     this.operation.on(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
     this.redrawWires();
-    this.emit(DROPZONE_EVENTS.OPERATION_SNAPPED, this);
+    this.emit(OPERATION_EVENTS.SNAPPED, this);
   }
 
   unsnap() {
@@ -130,7 +130,7 @@ export class Dropzone extends Container {
   }
 
   private emitGrabGateEvent(gate: OperationComponent, globalPosition: Point) {
-    this.emit(DROPZONE_EVENTS.OPERATION_GRABBED, gate, globalPosition);
+    this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition);
   }
 
   redrawWires() {

@@ -1,4 +1,4 @@
-import { DROPZONE_EVENTS, OPERATION_EVENTS } from "../../src/events";
+import { OPERATION_EVENTS } from "../../src/events";
 import { Dropzone } from "../../src/dropzone";
 import { HGate } from "../../src/h-gate";
 import { MeasurementGate } from "../../src/measurement-gate";
@@ -38,10 +38,7 @@ describe("DropzoneComponent", () => {
         expect.any(Function),
         dropzone
       );
-      expect(emitSpy).toHaveBeenCalledWith(
-        DROPZONE_EVENTS.OPERATION_SNAPPED,
-        dropzone
-      );
+      expect(emitSpy).toHaveBeenCalledWith(OPERATION_EVENTS.SNAPPED, dropzone);
     });
 
     it("should remove gate listener when unsnapping", () => {

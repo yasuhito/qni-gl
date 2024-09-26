@@ -3,7 +3,7 @@ import { Container, Point } from "pixi.js";
 import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import { CIRCUIT_EVENTS, CIRCUIT_STEP_EVENTS } from "./events";
+import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 import { OperationComponent } from "./operation-component";
 
@@ -204,18 +204,10 @@ export class Circuit extends Container {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChildAt(circuitStep, index);
 
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
-      this.onGateSnapToDropzone,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
-      this.emitOnGateGrabSignal,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
 
     this.markerManager.update(this.steps);
 
@@ -226,18 +218,10 @@ export class Circuit extends Container {
     const circuitStep = new CircuitStep(wireCount);
     this.stepList.addChild(circuitStep);
 
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_SNAPPED,
-      this.onGateSnapToDropzone,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-    circuitStep.on(
-      CIRCUIT_STEP_EVENTS.OPERATION_GRABBED,
-      this.emitOnGateGrabSignal,
-      this
-    );
+    circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
   }
 
   private onGateSnapToDropzone() {
@@ -262,14 +246,14 @@ export class Circuit extends Container {
     });
     this.markerManager.update(this.steps);
 
-    this.emit(CIRCUIT_EVENTS.CIRCUIT_STEP_ACTIVATED, circuitStep);
+    this.emit(CIRCUIT_STEP_EVENTS.ACTIVATED, circuitStep);
   }
 
   private emitOnGateGrabSignal(
     gate: OperationComponent,
     globalPosition: Point
   ) {
-    this.emit(CIRCUIT_EVENTS.OPERATION_GRABBED, gate, globalPosition);
+    this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition);
   }
 
   redrawDropzoneInputAndOutputWires() {

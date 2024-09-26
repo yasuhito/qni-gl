@@ -1,6 +1,6 @@
 import { Colors } from "./colors";
 import { Container, Graphics, Point } from "pixi.js";
-import { OPERATION_EVENTS, OPERATION_SOURCE_EVENTS } from "./events";
+import { OPERATION_EVENTS } from "./events";
 import { OperationClass } from "./operation";
 import { need } from "./util";
 
@@ -34,6 +34,7 @@ export class OperationSource extends Container {
   constructor(operationClass: OperationClass) {
     super();
 
+    this.interactive = true;
     this.operationClass = operationClass;
     this.border = new Graphics();
     this.addChild(this.border);
@@ -59,7 +60,6 @@ export class OperationSource extends Container {
     this.setupOperationEventListeners(operation);
     this.drawBorder(operation);
     this.validateBounds(operation);
-    this.emitOperationCreatedEvent(operation);
   }
 
   private setupOperationEventListeners(
@@ -121,12 +121,6 @@ export class OperationSource extends Container {
     );
   }
 
-  private emitOperationCreatedEvent(
-    operation: InstanceType<OperationClass>
-  ): void {
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_CREATED, operation);
-  }
-
   private removeOperationEventListeners(
     operation: InstanceType<OperationClass>
   ): void {
@@ -146,7 +140,7 @@ export class OperationSource extends Container {
   private emitMouseLeaveOperationEvent(
     operation: InstanceType<OperationClass>
   ): void {
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_MOUSE_LEFT, operation);
+    this.emit(OPERATION_EVENTS.MOUSE_LEFT, operation);
   }
 
   private grabOperation(
@@ -155,15 +149,11 @@ export class OperationSource extends Container {
   ): void {
     this.generateNewOperation();
     this.removeChild(operation);
-    this.emit(
-      OPERATION_SOURCE_EVENTS.OPERATION_GRABBED,
-      operation,
-      globalPosition
-    );
+    this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
   }
 
   private discardOperation(operation: InstanceType<OperationClass>): void {
     this.removeChild(operation);
-    this.emit(OPERATION_SOURCE_EVENTS.OPERATION_DISCARDED, operation);
+    this.emit(OPERATION_EVENTS.DISCARDED, operation);
   }
 }
