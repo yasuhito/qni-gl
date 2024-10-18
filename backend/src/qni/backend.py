@@ -51,7 +51,7 @@ def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("until_step_index = %d", request_data.until_step_index)
     app.logger.debug("amplitude_indices = %s", request_data.amplitude_indices)
     app.logger.debug("steps = %s", request_data.steps)
-    app.logger.debug("device = %s", request_data.device)
+    app.logger.info("device = %s", request_data.device)
 
 
 def _convert_and_filter_qiskit_step_results(
