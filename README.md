@@ -24,3 +24,27 @@ docker run --gpus all -p 8000:8000 --rm -it qni-gl
 # auth_basic "Restricted";
 # auth_basic_user_file /etc/nginx/.htpasswd;
 ```
+
+## error.logに ModuleNotFoundError: No module named 'qni'エラーが出たとき
+
+`docker-entrypoint.sh` に以下を追加してください。
+
+```shell
+# Set PYTHONPATH to include the qni module
+export PYTHONPATH=/qni-gl/backend/src:$PYTHONPATH
+```
+
+## backend.logに RuntimeError: No CUDA device available! エラーが出たとき
+
+`docker-entrypoint.sh` に以下を追加して,CPUを使用するようにしてください。
+`VITE_USE_GPU=true yarn build`　をコメントアウト
+
+```shell
+yarn build
+```
+
+` --gpus all `  オプションをはずしてrun
+
+```shell
+docker run -p 8000:8000 --rm -it -v $(pwd):/qni-gl qni-gl
+```
