@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 from qiskit import ClassicalRegister, QuantumCircuit, transpile  # type: ignore
 from qiskit.circuit.library import HGate, SdgGate, SGate, TdgGate, TGate, XGate, YGate, ZGate  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
+from qiskit.qasm3 import dumps  # type: ignore
 
 from qni.types import (
     DeviceType,
@@ -49,7 +50,7 @@ class QiskitRunner:
         qubit_count: int | None = None,
         until_step_index: int | None = None,
         device: DeviceType = DeviceType.CPU,
-    ) -> list[QiskitStepResult]:
+    ) -> list[QiskitStepResult] | str:
         """
         Execute the specified quantum circuit and return the results of each step.
 
@@ -90,14 +91,21 @@ class QiskitRunner:
 
         return step_results
 
-    def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None) -> QuantumCircuit:
+    def build_circuit_for_export(self, steps: list, qubit_count: int, until_step_index: int) -> QuantumCircuit:
+        self.steps = steps
+        return self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index, export_mode=True)
+
+    def convert_to_qasm3(self, circuit: QuantumCircuit) -> str:
+        return dumps(circuit)
+
+    def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None, export_mode: bool = False) -> QuantumCircuit:
         if qubit_count is None:
             qubit_count = self._get_qubit_count()
 
         if until_step_index is None:
             until_step_index = self._last_step_index()
 
-        return self._process_step_operations(qubit_count, until_step_index)
+        return self._process_step_operations(qubit_count, until_step_index, export_mode)
 
     def _last_step_index(self) -> int:
         if len(self.steps) == 0:
@@ -113,7 +121,7 @@ class QiskitRunner:
             + 1
         )
 
-    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> QuantumCircuit:
+    def _process_step_operations(self, qubit_count: int, until_step_index: int, export_mode: bool) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
 
         for step_index, step in enumerate(self.steps):
@@ -123,7 +131,7 @@ class QiskitRunner:
             for operation in step:
                 self._apply_operation(circuit, operation)
 
-            if step_index == until_step_index:
+            if step_index == until_step_index and not export_mode:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
         return circuit
