@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import json
 
 if TYPE_CHECKING:
     from qni.types import (
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
+from qni.qiskit_runner import QiskitRunner
 
 app = Flask(__name__)
 CORS(app)
@@ -36,14 +38,30 @@ def backend():
     Returns:
         Response: A JSON response containing the simulation results or an error message.
     """
+    request_type = request.form.get("requestType", "circuit")
+
+    if request_type == "circuit":
+        return handle_circuit_request()
+    if request_type == "export":
+        return handle_export_request()
+
+def handle_circuit_request():
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
     qiskit_step_results = cached_qiskit_runner.run(circuit_request_data)
     step_results = _convert_and_filter_qiskit_step_results(qiskit_step_results, circuit_request_data)
-
+    app.logger.info("step_results = %s", step_results)
     return jsonify(step_results)
 
+def handle_export_request():
+    steps = json.loads(request.form.get("steps"))
+    qubit_count = int(request.form.get("qubitCount"))
+    until_step_index = int(request.form.get("untilStepIndex", 1))
+    qiskit_runner = QiskitRunner(app.logger)
+    circuit = qiskit_runner.build_circuit_for_export(steps, qubit_count, until_step_index)
+    qasm3 = qiskit_runner.convert_to_qasm3(circuit)
+    return jsonify({"qasm3": qasm3})
 
 def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("circuit_id = %s", request_data.circuit_id)
