@@ -122,6 +122,12 @@ export class App {
 
       this.nameMap.set(this.app.stage, "stage");
 
+      // エクスポートボタンのイベントリスナー
+      const exportButton = document.getElementById("exportButton");
+      if (exportButton) {
+        exportButton.addEventListener("click", this.exportCircuit.bind(this));
+      }
+
       // テスト用
       window.pixiApp = this;
     });
@@ -569,21 +575,21 @@ export class App {
         if (isSnappable || isGateInsertableLeft || isGateInsertableRight) {
           const snappablePosition = isSnappable
             ? new Point(
-                dropzone.getGlobalPosition().x + dropzone.width / 2,
-                dropzone.getGlobalPosition().y + dropzone.height / 2
-              )
+              dropzone.getGlobalPosition().x + dropzone.width / 2,
+              dropzone.getGlobalPosition().y + dropzone.height / 2
+            )
             : null;
           const leftInsertablePosition = isGateInsertableLeft
             ? new Point(
-                dropzone.getGlobalPosition().x,
-                dropzone.getGlobalPosition().y + dropzone.height / 2
-              )
+              dropzone.getGlobalPosition().x,
+              dropzone.getGlobalPosition().y + dropzone.height / 2
+            )
             : null;
           const rightInsertablePosition = isGateInsertableRight
             ? new Point(
-                dropzone.getGlobalPosition().x + dropzone.width,
-                dropzone.getGlobalPosition().y + dropzone.height / 2
-              )
+              dropzone.getGlobalPosition().x + dropzone.width,
+              dropzone.getGlobalPosition().y + dropzone.height / 2
+            )
             : null;
 
           if (leftInsertablePosition) {
@@ -595,21 +601,21 @@ export class App {
 
           const snappableDistance = snappablePosition
             ? Math.sqrt(
-                Math.pow(pointerPosition.x - snappablePosition.x, 2) +
-                  Math.pow(pointerPosition.y - snappablePosition.y, 2)
-              )
+              Math.pow(pointerPosition.x - snappablePosition.x, 2) +
+              Math.pow(pointerPosition.y - snappablePosition.y, 2)
+            )
             : Infinity;
           const leftInsertableDistance = leftInsertablePosition
             ? Math.sqrt(
-                Math.pow(pointerPosition.x - leftInsertablePosition.x, 2) +
-                  Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
-              )
+              Math.pow(pointerPosition.x - leftInsertablePosition.x, 2) +
+              Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
+            )
             : Infinity;
           const rightInsertableDistance = rightInsertablePosition
             ? Math.sqrt(
-                Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
-                  Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
-              )
+              Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
+              Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
+            )
             : Infinity;
 
           if (
@@ -724,18 +730,50 @@ export class App {
   }
 
   protected runSimulator() {
+    this.setAppStateToRunning();
+    this.postMessageToWorker();
+  }
+
+  private setAppStateToRunning() {
     // ページの <div id="app"></div> を
     // <div id="app" data-state="running"></div> に変更
     this.element.dataset.state = "running";
 
     logger.log(this.circuit.toString());
+  }
 
+  private postMessageToWorker(requestType: string = "circuit") {
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
       qubitCount: this.circuit.highestOccupiedQubitNumber,
       untilStepIndex: this.circuit.activeStepIndex,
       amplitudeIndices: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
+      requestType: requestType,
     });
+  }
+
+  private async exportCircuit() {
+    this.setAppStateToRunning();
+    this.postMessageToWorker("export");
+
+    this.worker.addEventListener("message", (event) => {
+      if (event.data.type === "export") {
+        const qasm3 = event.data.qasm3;
+        this.downloadQasm3File(qasm3);
+      }
+    });
+  }
+
+  private downloadQasm3File(qasm3: string) {
+    const blob = new Blob([qasm3], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "circuit.qasm";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }
