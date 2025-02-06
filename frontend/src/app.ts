@@ -575,21 +575,21 @@ export class App {
         if (isSnappable || isGateInsertableLeft || isGateInsertableRight) {
           const snappablePosition = isSnappable
             ? new Point(
-              dropzone.getGlobalPosition().x + dropzone.width / 2,
-              dropzone.getGlobalPosition().y + dropzone.height / 2
-            )
+                dropzone.getGlobalPosition().x + dropzone.width / 2,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
             : null;
           const leftInsertablePosition = isGateInsertableLeft
             ? new Point(
-              dropzone.getGlobalPosition().x,
-              dropzone.getGlobalPosition().y + dropzone.height / 2
-            )
+                dropzone.getGlobalPosition().x,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
             : null;
           const rightInsertablePosition = isGateInsertableRight
             ? new Point(
-              dropzone.getGlobalPosition().x + dropzone.width,
-              dropzone.getGlobalPosition().y + dropzone.height / 2
-            )
+                dropzone.getGlobalPosition().x + dropzone.width,
+                dropzone.getGlobalPosition().y + dropzone.height / 2
+              )
             : null;
 
           if (leftInsertablePosition) {
@@ -601,21 +601,21 @@ export class App {
 
           const snappableDistance = snappablePosition
             ? Math.sqrt(
-              Math.pow(pointerPosition.x - snappablePosition.x, 2) +
-              Math.pow(pointerPosition.y - snappablePosition.y, 2)
-            )
+                Math.pow(pointerPosition.x - snappablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - snappablePosition.y, 2)
+              )
             : Infinity;
           const leftInsertableDistance = leftInsertablePosition
             ? Math.sqrt(
-              Math.pow(pointerPosition.x - leftInsertablePosition.x, 2) +
-              Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
-            )
+                Math.pow(pointerPosition.x - leftInsertablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - leftInsertablePosition.y, 2)
+              )
             : Infinity;
           const rightInsertableDistance = rightInsertablePosition
             ? Math.sqrt(
-              Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
-              Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
-            )
+                Math.pow(pointerPosition.x - rightInsertablePosition.x, 2) +
+                  Math.pow(pointerPosition.y - rightInsertablePosition.y, 2)
+              )
             : Infinity;
 
           if (
