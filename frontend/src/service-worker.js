@@ -62,19 +62,19 @@ self.addEventListener("message", (event) => {
 
       const jsondata = await response.json();
 
-      for (let i = 0; i < jsondata.length; i++) {
-        const stepResult = jsondata[i];
-        self.postMessage({
-          type: "step",
-          step: i,
-          amplitudes: stepResult["amplitudes"],
-          blochVectors: stepResult["blochVectors"],
-          measuredBits: stepResult["measuredBits"],
-          flags: {},
-        });
-      }
-
-      if (requestType === "export") {
+      if (requestType === "circuit") {
+        for (let i = 0; i < jsondata.length; i++) {
+          const stepResult = jsondata[i];
+          self.postMessage({
+            type: "step",
+            step: i,
+            amplitudes: stepResult["amplitudes"],
+            blochVectors: stepResult["blochVectors"],
+            measuredBits: stepResult["measuredBits"],
+            flags: {},
+          });
+        }
+      } else if (requestType === "export") {
         self.postMessage({
           type: "export",
           qasm3: jsondata.qasm3,
