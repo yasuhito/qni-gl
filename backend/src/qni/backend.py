@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request , Response
 from flask_cors import CORS
 import json
 
@@ -27,7 +27,7 @@ cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 
 @app.route("/backend.json", methods=["POST"])
-def backend():
+def backend()-> Response:
     """
     Handles the POST request to the /backend.json endpoint.
 
@@ -50,7 +50,7 @@ def backend():
         return handler()
     return jsonify({"error": "Invalid request type"}), 400
 
-def handle_circuit_request():
+def handle_circuit_request()-> Response:
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
@@ -59,7 +59,7 @@ def handle_circuit_request():
     app.logger.info("step_results = %s", step_results)
     return jsonify(step_results)
 
-def handle_export_request():
+def handle_export_request()-> Response:
     steps = json.loads(request.form.get("steps"))
     qubit_count = int(request.form.get("qubitCount"))
     until_step_index = int(request.form.get("untilStepIndex", 1))
