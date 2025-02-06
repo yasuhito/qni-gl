@@ -40,10 +40,15 @@ def backend():
     """
     request_type = request.form.get("requestType", "circuit")
 
-    if request_type == "circuit":
-        return handle_circuit_request()
-    if request_type == "export":
-        return handle_export_request()
+    request_handlers = {
+        "circuit": handle_circuit_request,
+        "export": handle_export_request,
+    }
+
+    handler = request_handlers.get(request_type)
+    if handler:
+        return handler()
+    return jsonify({"error": "Invalid request type"}), 400
 
 def handle_circuit_request():
     circuit_request_data = CircuitRequestData(request.form)
