@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
-from qni.qiskit_runner import QiskitRunner
+from qni.qiskit_circuit_builder import QiskitCircuitBuilder
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +27,7 @@ cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 
 @app.route("/backend.json", methods=["POST"])
-def backend()-> Response:
+def backend() -> Response:
     """
     Handles the POST request to the /backend.json endpoint.
 
@@ -50,7 +50,7 @@ def backend()-> Response:
         return handler()
     return jsonify({"error": "Invalid request type"}), 400
 
-def handle_circuit_request()-> Response:
+def handle_circuit_request() -> Response:
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
@@ -59,13 +59,12 @@ def handle_circuit_request()-> Response:
     app.logger.info("step_results = %s", step_results)
     return jsonify(step_results)
 
-def handle_export_request()-> Response:
+def handle_export_request() -> Response:
     steps = json.loads(request.form.get("steps"))
     qubit_count = int(request.form.get("qubitCount"))
-    until_step_index = int(request.form.get("untilStepIndex", 1))
-    qiskit_runner = QiskitRunner(app.logger)
-    circuit = qiskit_runner.build_circuit_for_export(steps, qubit_count, until_step_index)
-    qasm3 = qiskit_runner.convert_to_qasm3(circuit)
+    qiskit_circuit_builder = QiskitCircuitBuilder()
+    circuit = qiskit_circuit_builder.build_circuit_for_export(steps, qubit_count)
+    qasm3 = qiskit_circuit_builder.convert_to_qasm3(circuit)
     return jsonify({"qasm3": qasm3})
 
 def _log_request_data(request_data: CircuitRequestData):
