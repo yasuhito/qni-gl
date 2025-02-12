@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
-from qni.qiskit_circuit_builder import QiskitCircuitBuilder
+from qni.qiskit_runner import QiskitRunner
 
 app = Flask(__name__)
 CORS(app)
@@ -62,9 +62,9 @@ def handle_circuit_request() -> Response:
 def handle_export_request() -> Response:
     steps = json.loads(request.form.get("steps"))
     qubit_count = int(request.form.get("qubitCount"))
-    qiskit_circuit_builder = QiskitCircuitBuilder()
-    circuit = qiskit_circuit_builder.build_circuit_for_export(steps, qubit_count)
-    qasm3 = qiskit_circuit_builder.convert_to_qasm3(circuit)
+    qiskit_runner = QiskitRunner()
+    circuit = qiskit_runner.build_circuit_for_export(steps, qubit_count)
+    qasm3 = qiskit_runner.convert_to_qasm3(circuit)
     return jsonify({"qasm3": qasm3})
 
 def _log_request_data(request_data: CircuitRequestData):
