@@ -89,7 +89,11 @@ class CircuitRequestData:
         :rtype: DeviceType
         """
         use_gpu = self._form.get("useGpu", "false").lower() == "true"
-        return DeviceType.GPU if use_gpu else self._form.get("device", DeviceType.CPU, type=self._device_type)
+        return (
+            DeviceType.GPU
+            if use_gpu
+            else self._form.get("device", DeviceType.CPU, type=self._device_type)
+        )
 
     def _steps_type(self, parameter: str) -> list[dict]:
         return json.loads(parameter)

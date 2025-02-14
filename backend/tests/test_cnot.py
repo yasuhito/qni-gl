@@ -20,7 +20,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_01(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0]}],
+            [{"type": "X", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -31,7 +34,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 1, 0)
 
     def test_cnot_10(self):
-        steps = [[{"type": "X", "targets": [1]}], [{"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [1]}],
+            [{"type": "X", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -42,7 +48,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_cnot_11(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "X", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1]}],
+            [{"type": "X", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -68,7 +77,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_ccnot_011(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "X", "targets": [2], "controls": [0, 1]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1]}],
+            [{"type": "X", "targets": [2], "controls": [0, 1]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -83,7 +95,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 1, 0)
 
     def test_ccnot_111(self):
-        steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "X", "targets": [2], "controls": [0, 1]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1, 2]}],
+            [{"type": "X", "targets": [2], "controls": [0, 1]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps, until_step_index=1)
 
@@ -113,7 +128,10 @@ class TestCnot(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_cxx_001(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "X", "targets": [1, 2], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0]}],
+            [{"type": "X", "targets": [1, 2], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 

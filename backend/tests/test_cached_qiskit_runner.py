@@ -12,16 +12,14 @@ class TestCachedQiskitRunner(unittest.TestCase):
         self.logger = MagicMock()
         self.cached_runner = CachedQiskitRunner(self.logger)
         self.request_data = CircuitRequestData(
-            ImmutableMultiDict(
-                [
-                    ("id", "test_circuit"),
-                    ("qubitCount", "5"),
-                    ("untilStepIndex", "3"),
-                    ("steps", '[{"type": "H", "targets": [0]}]'),
-                    ("amplitudeIndices", "0,1,2,3"),
-                    ("device", "GPU"),
-                ]
-            )
+            ImmutableMultiDict([
+                ("id", "test_circuit"),
+                ("qubitCount", "5"),
+                ("untilStepIndex", "3"),
+                ("steps", '[{"type": "H", "targets": [0]}]'),
+                ("amplitudeIndices", "0,1,2,3"),
+                ("device", "GPU"),
+            ])
         )
 
     @patch("qni.qiskit_runner.QiskitRunner.run_circuit")
@@ -30,7 +28,9 @@ class TestCachedQiskitRunner(unittest.TestCase):
 
         result = self.cached_runner.run(self.request_data)
         assert result == {"result": "test_result"}
-        self.logger.info.assert_called_with("Cache miss for circuit_key: %s", ("test_circuit", 3))
+        self.logger.info.assert_called_with(
+            "Cache miss for circuit_key: %s", ("test_circuit", 3)
+        )
 
     @patch("qni.qiskit_runner.QiskitRunner.run_circuit")
     def test_run_and_cache_hit(self, mock_run_circuit):
@@ -43,4 +43,6 @@ class TestCachedQiskitRunner(unittest.TestCase):
         # Second run to test cache hit
         result = self.cached_runner.run(self.request_data)
         assert result == {"result": "test_result"}
-        self.logger.info.assert_called_with("Cache hit for circuit_key: %s", ("test_circuit", 3))
+        self.logger.info.assert_called_with(
+            "Cache hit for circuit_key: %s", ("test_circuit", 3)
+        )

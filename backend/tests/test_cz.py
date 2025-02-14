@@ -58,7 +58,10 @@ class TestCz(unittest.TestCase):
 
     # CZ|111⟩ = -|111⟩
     def test_cz_111(self):
-        steps = [[{"type": "X", "targets": [0, 1, 2]}], [{"type": "•", "targets": [0, 1, 2]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1, 2]}],
+            [{"type": "•", "targets": [0, 1, 2]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
