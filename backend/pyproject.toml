@@ -33,6 +33,11 @@ dependencies = [
   "coverage>=7.6.1",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "ruff",
+]
+
 [project.urls]
 Documentation = "https://github.com/yasuhito/qni#readme"
 Issues = "https://github.com/yasuhito/qni/issues"
@@ -81,3 +86,12 @@ build = "sphinx-build -M html docs/source docs/build"
 exclude = [
     "docs",
 ]
+preview = true
+include = [
+  "src/**/*.py",
+  "tests/**/*.py",
+]
+
+[tool.hatch.envs.dev.scripts]
+format = "ruff format"
+
