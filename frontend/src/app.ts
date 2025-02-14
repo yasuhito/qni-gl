@@ -122,6 +122,12 @@ export class App {
 
       this.nameMap.set(this.app.stage, "stage");
 
+      // エクスポートボタンのイベントリスナー
+      const exportButton = document.getElementById("exportButton");
+      if (exportButton) {
+        exportButton.addEventListener("click", this.exportCircuit.bind(this));
+      }
+
       // テスト用
       window.pixiApp = this;
     });
@@ -724,18 +730,50 @@ export class App {
   }
 
   protected runSimulator() {
+    this.setAppStateToRunning();
+    this.postMessageToWorker();
+  }
+
+  private setAppStateToRunning() {
     // ページの <div id="app"></div> を
     // <div id="app" data-state="running"></div> に変更
     this.element.dataset.state = "running";
 
     logger.log(this.circuit.toString());
+  }
 
+  private postMessageToWorker(requestType: string = "circuit") {
     this.worker.postMessage({
       circuitJson: this.circuit.toJSON(),
       qubitCount: this.circuit.highestOccupiedQubitNumber,
       untilStepIndex: this.circuit.activeStepIndex,
       amplitudeIndices: this.stateVector.visibleQubitCircleIndices,
       steps: this.circuit.serialize(),
+      requestType: requestType,
     });
+  }
+
+  private async exportCircuit() {
+    this.setAppStateToRunning();
+    this.postMessageToWorker("export");
+
+    this.worker.addEventListener("message", (event) => {
+      if (event.data.type === "export") {
+        const qasm3 = event.data.qasm3;
+        this.downloadQasm3File(qasm3);
+      }
+    });
+  }
+
+  private downloadQasm3File(qasm3: string) {
+    const blob = new Blob([qasm3], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "circuit.qasm";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }

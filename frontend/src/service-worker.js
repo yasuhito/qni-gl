@@ -14,6 +14,7 @@ self.addEventListener("message", (event) => {
   const untilStepIndex = event.data.untilStepIndex;
   const amplitudeIndices = event.data.amplitudeIndices;
   const steps = event.data.steps;
+  const requestType = event.data.requestType || "circuit";
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
   const amplitudes = [];
@@ -34,6 +35,7 @@ self.addEventListener("message", (event) => {
         amplitudeIndices: amplitudeIndices,
         steps: JSON.stringify(steps),
         useGpu: useGpu,
+        requestType: requestType,
       });
 
       const response = await fetch(BACKEND_URL, {
@@ -60,15 +62,22 @@ self.addEventListener("message", (event) => {
 
       const jsondata = await response.json();
 
-      for (let i = 0; i < jsondata.length; i++) {
-        const stepResult = jsondata[i];
+      if (requestType === "circuit") {
+        for (let i = 0; i < jsondata.length; i++) {
+          const stepResult = jsondata[i];
+          self.postMessage({
+            type: "step",
+            step: i,
+            amplitudes: stepResult["amplitudes"],
+            blochVectors: stepResult["blochVectors"],
+            measuredBits: stepResult["measuredBits"],
+            flags: {},
+          });
+        }
+      } else if (requestType === "export") {
         self.postMessage({
-          type: "step",
-          step: i,
-          amplitudes: stepResult["amplitudes"],
-          blochVectors: stepResult["blochVectors"],
-          measuredBits: stepResult["measuredBits"],
-          flags: {},
+          type: "export",
+          qasm3: jsondata.qasm3,
         });
       }
     } catch (error) {
