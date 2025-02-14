@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
 
 from qiskit import QuantumCircuit, transpile  # type: ignore
-from qiskit.qasm3 import dumps  # type: ignore
 from qiskit_aer import AerSimulator  # type: ignore
 
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
@@ -128,37 +127,6 @@ class QiskitRunner:
                 circuit.save_statevector(label=self._STATEVECTOR_LABEL)
 
         return circuit
-
-    def build_circuit_for_export(
-        self,
-        steps: list,
-        qubit_count: int,
-    ) -> QuantumCircuit:
-        circuit = QuantumCircuit(qubit_count)
-        circuit_builder = QiskitCircuitBuilder()
-
-        for step in steps:
-            if len(step) == 0:
-                circuit.id(list(range(qubit_count)))
-
-            for operation in step:
-                circuit_builder.apply_operation(circuit, operation)
-
-        return circuit
-
-    def convert_to_qasm3(self, circuit: QuantumCircuit) -> str:
-        return dumps(circuit)
-
-    class UnknownOperationError(ValueError):
-        """
-        Raised when an unknown operation is specified.
-
-        Attributes:
-            operation_type (str): The type of the unknown operation.
-        """
-
-        def __init__(self, operation_type):
-            super().__init__(f"Unknown operation: {operation_type}")
 
     def _run_backend(self, device: DeviceType) -> Result:
         backend = AerSimulator(method="statevector")

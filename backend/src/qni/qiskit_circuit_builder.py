@@ -22,6 +22,22 @@ OperationMethod = Callable[[QuantumCircuit, BasicOperation | ControllableOperati
 class QiskitCircuitBuilder:
     _PAIR_OPERATION_COUNT = 2
 
+    def build_circuit_for_export(
+        self,
+        steps: list,
+        qubit_count: int,
+    ) -> QuantumCircuit:
+        circuit = QuantumCircuit(qubit_count)
+
+        for step in steps:
+            if len(step) == 0:
+                circuit.id(list(range(qubit_count)))
+
+            for operation in step:
+                self.apply_operation(circuit, operation)
+
+        return circuit
+    
     def apply_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         operation_type = operation["type"]
         operation_methods: dict[str, OperationMethod] = {
@@ -45,6 +61,17 @@ class QiskitCircuitBuilder:
             operation_methods[operation_type](circuit, operation)
         else:
             raise self.UnknownOperationError(operation_type)
+        
+    class UnknownOperationError(ValueError):
+        """
+        Raised when an unknown operation is specified.
+
+        Attributes:
+            operation_type (str): The type of the unknown operation.
+        """
+
+        def __init__(self, operation_type):
+            super().__init__(f"Unknown operation: {operation_type}")
 
     def _apply_h_operation(self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation) -> None:
         if "controls" in operation:

@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
-from qni.qiskit_runner import QiskitRunner
+from qni.qiskit_circuit_builder import QiskitCircuitBuilder
+from qiskit.qasm3 import dumps  # type: ignore
 
 app = Flask(__name__)
 CORS(app)
@@ -60,12 +61,25 @@ def handle_circuit_request() -> Response:
     return jsonify(step_results)
 
 def handle_export_request() -> Response:
-    steps = json.loads(request.form.get("steps"))
-    qubit_count = int(request.form.get("qubitCount"))
-    qiskit_runner = QiskitRunner()
-    circuit = qiskit_runner.build_circuit_for_export(steps, qubit_count)
-    qasm3 = qiskit_runner.convert_to_qasm3(circuit)
-    return jsonify({"qasm3": qasm3})
+    try:
+        steps = json.loads(request.form.get("steps", "[]"))
+        qubit_count = int(request.form.get("qubitCount", "0"))
+        
+        if not steps or qubit_count <= 0:
+            return jsonify({"error": "Invalid input parameters"}), 400
+            
+        qiskit_circuit_builder = QiskitCircuitBuilder()
+        circuit = qiskit_circuit_builder.build_circuit_for_export(steps, qubit_count)
+        
+        qasm3 = dumps(circuit)
+        
+        return jsonify({"qasm3": qasm3})
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON format"}), 400
+    except ValueError:
+        return jsonify({"error": "Invalid qubit count"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def _log_request_data(request_data: CircuitRequestData):
     app.logger.debug("circuit_id = %s", request_data.circuit_id)
