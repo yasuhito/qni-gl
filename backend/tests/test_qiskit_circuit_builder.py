@@ -1,11 +1,27 @@
 import pytest
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import HGate, XGate, ZGate, SGate, SdgGate, TGate, TdgGate, YGate, SwapGate
-from qni.qiskit_circuit_builder import QiskitCircuitBuilder, BasicOperation, ControllableOperation
+from qiskit.circuit.library import (
+    HGate,
+    XGate,
+    ZGate,
+    SGate,
+    SdgGate,
+    TGate,
+    TdgGate,
+    YGate,
+    SwapGate,
+)
+from qni.qiskit_circuit_builder import (
+    QiskitCircuitBuilder,
+    BasicOperation,
+    ControllableOperation,
+)
+
 
 @pytest.fixture
 def builder():
     return QiskitCircuitBuilder()
+
 
 def test_build_circuit_for_export(builder):
     steps = [
@@ -26,11 +42,13 @@ def test_build_circuit_for_export(builder):
     assert circuit.num_qubits == qubit_count
     assert len(circuit.data) == len(steps)
 
+
 def test_apply_h_operation(builder):
     circuit = QuantumCircuit(1)
     operation = BasicOperation(type="H", targets=[0])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == HGate()
+
 
 def test_apply_x_operation(builder):
     circuit = QuantumCircuit(1)
@@ -38,11 +56,13 @@ def test_apply_x_operation(builder):
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == XGate()
 
+
 def test_apply_z_operation(builder):
     circuit = QuantumCircuit(1)
     operation = BasicOperation(type="Z", targets=[0])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == ZGate()
+
 
 def test_apply_s_operation(builder):
     circuit = QuantumCircuit(1)
@@ -50,11 +70,13 @@ def test_apply_s_operation(builder):
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == SGate()
 
+
 def test_apply_s_dagger_operation(builder):
     circuit = QuantumCircuit(1)
     operation = BasicOperation(type="S†", targets=[0])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == SdgGate()
+
 
 def test_apply_t_operation(builder):
     circuit = QuantumCircuit(1)
@@ -62,11 +84,13 @@ def test_apply_t_operation(builder):
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == TGate()
 
+
 def test_apply_t_dagger_operation(builder):
     circuit = QuantumCircuit(1)
     operation = BasicOperation(type="T†", targets=[0])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == TdgGate()
+
 
 def test_apply_y_operation(builder):
     circuit = QuantumCircuit(1)
@@ -74,17 +98,20 @@ def test_apply_y_operation(builder):
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == YGate()
 
+
 def test_apply_swap_operation(builder):
     circuit = QuantumCircuit(2)
     operation = BasicOperation(type="Swap", targets=[0, 1])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation == SwapGate()
 
+
 def test_apply_controlled_x_operation(builder):
     circuit = QuantumCircuit(2)
     operation = ControllableOperation(type="X", targets=[1], controls=[0])
     builder.apply_operation(circuit, operation)
     assert circuit.data[0].operation.name == "cx"
+
 
 def test_apply_unknown_operation(builder):
     circuit = QuantumCircuit(1)

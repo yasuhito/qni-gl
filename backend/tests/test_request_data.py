@@ -7,16 +7,14 @@ from qni.types import DeviceType
 
 @pytest.fixture
 def form_data():
-    return ImmutableMultiDict(
-        [
-            ("id", "test_circuit"),
-            ("qubitCount", "5"),
-            ("untilStepIndex", "3"),
-            ("steps", '[{"type": "H", "targets": [0]}]'),
-            ("amplitudeIndices", "0,1,2,3"),
-            ("device", "GPU"),
-        ]
-    )
+    return ImmutableMultiDict([
+        ("id", "test_circuit"),
+        ("qubitCount", "5"),
+        ("untilStepIndex", "3"),
+        ("steps", '[{"type": "H", "targets": [0]}]'),
+        ("amplitudeIndices", "0,1,2,3"),
+        ("device", "GPU"),
+    ])
 
 
 def test_request_data_initialization(form_data):

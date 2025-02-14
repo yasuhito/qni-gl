@@ -56,7 +56,10 @@ class TestSwap(unittest.TestCase):
 
     # (Swap,Swap)|11> = |11>
     def test_swap_swap_11(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "Swap", "targets": [0, 1]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1]}],
+            [{"type": "Swap", "targets": [0, 1]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 

@@ -29,7 +29,8 @@ def test_post_simple_circuit():
     assert response.status_code == 200
     assert len(res) == 5
     assert_amplitudes_approx(
-        res[0]["amplitudes"], {"0": [1 / sqrt(2), 0], "1": [1 / sqrt(2), 0], "2": [0, 0], "3": [0, 0.0]}
+        res[0]["amplitudes"],
+        {"0": [1 / sqrt(2), 0], "1": [1 / sqrt(2), 0], "2": [0, 0], "3": [0, 0.0]},
     )
 
 
@@ -48,5 +49,6 @@ def test_post_simple_circuit_no_amplitude_indices():
     assert response.status_code == 200
     assert len(res) == 5
     assert_amplitudes_approx(
-        res[0]["amplitudes"], {"0": [1 / sqrt(2), 0], "1": [1 / sqrt(2), 0], "2": [0, 0], "3": [0, 0.0]}
+        res[0]["amplitudes"],
+        {"0": [1 / sqrt(2), 0], "1": [1 / sqrt(2), 0], "2": [0, 0], "3": [0, 0.0]},
     )

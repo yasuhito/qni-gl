@@ -20,7 +20,10 @@ class TestControlledZ(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_controlled_z_01(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "Z", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0]}],
+            [{"type": "Z", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -31,7 +34,10 @@ class TestControlledZ(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_controlled_z_10(self):
-        steps = [[{"type": "X", "targets": [1]}], [{"type": "Z", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [1]}],
+            [{"type": "Z", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -42,7 +48,10 @@ class TestControlledZ(unittest.TestCase):
         assert_complex_approx(amplitudes[3], 0, 0)
 
     def test_controlled_z_11(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "Z", "targets": [1], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1]}],
+            [{"type": "Z", "targets": [1], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -68,7 +77,10 @@ class TestControlledZ(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_controlled_z_2_controls_011(self):
-        steps = [[{"type": "X", "targets": [0, 1]}], [{"type": "Z", "targets": [2], "controls": [0, 1]}]]
+        steps = [
+            [{"type": "X", "targets": [0, 1]}],
+            [{"type": "Z", "targets": [2], "controls": [0, 1]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 
@@ -98,7 +110,10 @@ class TestControlledZ(unittest.TestCase):
         assert_complex_approx(amplitudes[7], 0, 0)
 
     def test_controlled_z_1_control_2_targets_011(self):
-        steps = [[{"type": "X", "targets": [0]}], [{"type": "Z", "targets": [1, 2], "controls": [0]}]]
+        steps = [
+            [{"type": "X", "targets": [0]}],
+            [{"type": "Z", "targets": [1, 2], "controls": [0]}],
+        ]
 
         result = self.qiskit_runner.run_circuit(steps)
 

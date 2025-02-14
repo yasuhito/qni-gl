@@ -30,7 +30,9 @@ class ControllableOperation(TypedDict):
     controls: list[int]
 
 
-OperationMethod = Callable[[QuantumCircuit, BasicOperation | ControllableOperation], None]
+OperationMethod = Callable[
+    [QuantumCircuit, BasicOperation | ControllableOperation], None
+]
 
 
 class QiskitRunner:
@@ -64,7 +66,9 @@ class QiskitRunner:
         step_results: list[QiskitStepResult] = []
 
         self.steps = steps
-        self.circuit = self._build_circuit(qubit_count=qubit_count, until_step_index=until_step_index)
+        self.circuit = self._build_circuit(
+            qubit_count=qubit_count, until_step_index=until_step_index
+        )
 
         if self.circuit.depth() == 0:
             return step_results
@@ -85,11 +89,15 @@ class QiskitRunner:
                     )
                 )
             else:
-                step_results.append(QiskitStepResult(measuredBits=measured_bits[step_index]))
+                step_results.append(
+                    QiskitStepResult(measuredBits=measured_bits[step_index])
+                )
 
         return step_results
 
-    def _build_circuit(self, *, qubit_count: int | None = None, until_step_index: int | None = None) -> QuantumCircuit:
+    def _build_circuit(
+        self, *, qubit_count: int | None = None, until_step_index: int | None = None
+    ) -> QuantumCircuit:
         if qubit_count is None:
             qubit_count = self._get_qubit_count()
 
@@ -106,13 +114,29 @@ class QiskitRunner:
     def _get_qubit_count(self) -> int:
         return (
             max(
-                max((max(gate.get("targets", [-1])) for step in self.steps for gate in step), default=-1),
-                max((max(gate.get("controls", [-1])) for step in self.steps for gate in step), default=-1),
+                max(
+                    (
+                        max(gate.get("targets", [-1]))
+                        for step in self.steps
+                        for gate in step
+                    ),
+                    default=-1,
+                ),
+                max(
+                    (
+                        max(gate.get("controls", [-1]))
+                        for step in self.steps
+                        for gate in step
+                    ),
+                    default=-1,
+                ),
             )
             + 1
         )
 
-    def _process_step_operations(self, qubit_count: int, until_step_index: int) -> QuantumCircuit:
+    def _process_step_operations(
+        self, qubit_count: int, until_step_index: int
+    ) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
         circuit_builder = QiskitCircuitBuilder()
 
@@ -145,13 +169,20 @@ class QiskitRunner:
     def _extract_measurement_results(self, result: Result) -> list[MeasuredBits]:
         measured_bits: list[MeasuredBits] = [{} for _ in self.steps]
 
-        circuit_has_measurements = any(operation["type"] == "Measure" for step in self.steps for operation in step)
+        circuit_has_measurements = any(
+            operation["type"] == "Measure" for step in self.steps for operation in step
+        )
 
         if not circuit_has_measurements:
             return measured_bits
 
         tmp_measured_bits = [
-            {target: None for operation in step if operation["type"] == "Measure" for target in operation["targets"]}
+            {
+                target: None
+                for operation in step
+                if operation["type"] == "Measure"
+                for target in operation["targets"]
+            }
             for step in self.steps
         ]
 
