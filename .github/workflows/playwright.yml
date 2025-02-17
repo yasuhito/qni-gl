@@ -38,24 +38,24 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-python-${{ matrix.python-version }}
           path: frontend/playwright-report/
           retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: access-log
+          name: access-log-python-${{ matrix.python-version }}
           path: backend/access.log
           retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: error-log
+          name: error-log-python-${{ matrix.python-version }}
           path: backend/error.log
           retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: backend-log
+          name: backend-log-python-${{ matrix.python-version }}
           path: backend/backend.log
           retention-days: 30
