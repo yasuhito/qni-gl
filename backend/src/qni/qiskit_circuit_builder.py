@@ -31,7 +31,8 @@ class ControllableOperation(TypedDict):
 
 
 OperationMethod = Callable[
-    [QuantumCircuit, BasicOperation | ControllableOperation], None,
+    [QuantumCircuit, BasicOperation | ControllableOperation],
+    None,
 ]
 
 
@@ -55,7 +56,9 @@ class QiskitCircuitBuilder:
         return circuit
 
     def apply_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         operation_type = operation["type"]
         operation_methods: dict[str, OperationMethod] = {
@@ -92,7 +95,9 @@ class QiskitCircuitBuilder:
             super().__init__(f"Unknown operation: {operation_type}")
 
     def _apply_h_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, HGate())
@@ -100,7 +105,9 @@ class QiskitCircuitBuilder:
             circuit.h(operation["targets"])
 
     def _apply_x_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             operation = cast("ControllableOperation", operation)
@@ -110,7 +117,9 @@ class QiskitCircuitBuilder:
             circuit.x(operation["targets"])
 
     def _apply_y_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, YGate())
@@ -118,7 +127,9 @@ class QiskitCircuitBuilder:
             circuit.y(operation["targets"])
 
     def _apply_z_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, ZGate())
@@ -126,7 +137,9 @@ class QiskitCircuitBuilder:
             circuit.z(operation["targets"])
 
     def _apply_rnot_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, XGate().power(1 / 2))
@@ -134,7 +147,9 @@ class QiskitCircuitBuilder:
             circuit.append(XGate().power(1 / 2), qargs=operation["targets"])
 
     def _apply_s_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, SGate())
@@ -142,7 +157,9 @@ class QiskitCircuitBuilder:
             circuit.s(operation["targets"])
 
     def _apply_s_dagger_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, SdgGate())
@@ -150,7 +167,9 @@ class QiskitCircuitBuilder:
             circuit.sdg(operation["targets"])
 
     def _apply_t_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, TGate())
@@ -158,7 +177,9 @@ class QiskitCircuitBuilder:
             circuit.t(operation["targets"])
 
     def _apply_t_dagger_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation | ControllableOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
             self._apply_controlled_u(circuit, operation, TdgGate())
@@ -166,7 +187,9 @@ class QiskitCircuitBuilder:
             circuit.tdg(operation["targets"])
 
     def _apply_swap_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation,
     ) -> None:
         if len(operation["targets"]) == self._PAIR_OPERATION_COUNT:
             circuit.swap(operation["targets"][0], operation["targets"][1])
@@ -174,7 +197,9 @@ class QiskitCircuitBuilder:
             circuit.id(operation["targets"])
 
     def _apply_controlled_z_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation,
     ) -> None:
         if len(operation["targets"]) >= self._PAIR_OPERATION_COUNT:
             u = ZGate().control(num_ctrl_qubits=len(operation["targets"]) - 1)
@@ -190,7 +215,9 @@ class QiskitCircuitBuilder:
         circuit.x(operation["targets"])
 
     def _apply_measure_operation(
-        self, circuit: QuantumCircuit, operation: BasicOperation,
+        self,
+        circuit: QuantumCircuit,
+        operation: BasicOperation,
     ) -> None:
         creg = ClassicalRegister(circuit.num_qubits)
         circuit.add_register(creg)

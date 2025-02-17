@@ -33,8 +33,7 @@ class QiskitStepResult(TypedDict, total=False):
 
 
 class DeviceType(Enum):
-    """DeviceType is an enumeration that represents the type of device (CPU or GPU) used for quantum circuit simulation.
-    """
+    """DeviceType is an enumeration that represents the type of device (CPU or GPU) used for quantum circuit simulation."""
 
     CPU = "CPU"
     GPU = "GPU"

@@ -59,7 +59,8 @@ def handle_circuit_request() -> tuple[Response, int]:
 
     qiskit_step_results = cached_qiskit_runner.run(circuit_request_data)
     step_results = _convert_and_filter_qiskit_step_results(
-        qiskit_step_results, circuit_request_data,
+        qiskit_step_results,
+        circuit_request_data,
     )
     app.logger.info("step_results = %s", step_results)
     return jsonify(step_results), 200
@@ -123,7 +124,8 @@ def _convert_qiskit_step_result(
 
 
 def _filter_amplitudes(
-    qiskit_amplitudes: QiskitStepAmplitudes, amplitude_indices: list[int],
+    qiskit_amplitudes: QiskitStepAmplitudes,
+    amplitude_indices: list[int],
 ) -> QiskitStepAmplitudes:
     return (
         {each: qiskit_amplitudes[each] for each in amplitude_indices}

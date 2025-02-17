@@ -29,7 +29,8 @@ class TestCachedQiskitRunner(unittest.TestCase):
         result = self.cached_runner.run(self.request_data)
         assert result == {"result": "test_result"}
         self.logger.info.assert_called_with(
-            "Cache miss for circuit_key: %s", ("test_circuit", 3),
+            "Cache miss for circuit_key: %s",
+            ("test_circuit", 3),
         )
 
     @patch("qni.qiskit_runner.QiskitRunner.run_circuit")
@@ -44,5 +45,6 @@ class TestCachedQiskitRunner(unittest.TestCase):
         result = self.cached_runner.run(self.request_data)
         assert result == {"result": "test_result"}
         self.logger.info.assert_called_with(
-            "Cache hit for circuit_key: %s", ("test_circuit", 3),
+            "Cache hit for circuit_key: %s",
+            ("test_circuit", 3),
         )
