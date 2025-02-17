@@ -1,10 +1,10 @@
 [project]
 name = "qni"
-dynamic = ["version"]
+version = "0.1.0"
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = { file = "../LICENSE" }
 keywords = []
 authors = [
   { name = "Yasuhito Takamiya", email = "yasuhito@hey.com" },
@@ -41,12 +41,8 @@ dev-dependencies = [
 ]
 
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = ["qni"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 preview = true
@@ -101,4 +97,4 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=src --cov-report=xml"
-pythonpath = ["src"]
+pythonpath = "src"
