@@ -52,7 +52,6 @@ include = [
 ]
 lint.select = ["ALL"]
 lint.ignore = [
-  "ANN001",
   "ANN201",
   "ANN202",
   "ANN204",

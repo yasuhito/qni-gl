@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TypedDict, cast
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from qiskit import (  # type: ignore
     ClassicalRegister,
@@ -17,6 +17,9 @@ from qiskit.circuit.library import (  # type: ignore
     YGate,
     ZGate,
 )
+
+if TYPE_CHECKING:
+    from qiskit.circuit import ControlledGate  # type: ignore
 
 
 class BasicOperation(TypedDict):
@@ -91,7 +94,7 @@ class QiskitCircuitBuilder:
 
         """
 
-        def __init__(self, operation_type):
+        def __init__(self, operation_type: str) -> None:
             super().__init__(f"Unknown operation: {operation_type}")
 
     def _apply_h_operation(
@@ -228,7 +231,7 @@ class QiskitCircuitBuilder:
         self,
         circuit: QuantumCircuit,
         operation: BasicOperation | ControllableOperation,
-        gate,
+        gate: ControlledGate,
     ) -> None:
         operation = cast("ControllableOperation", operation)
         u = gate.control(num_ctrl_qubits=len(operation["controls"]))

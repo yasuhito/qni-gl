@@ -5,7 +5,10 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
 LOG_FILE = "backend.log"
 
 
-def _add_logger_handler(handler, formatter):
+def _add_logger_handler(
+    handler: logging.Handler,
+    formatter: logging.Formatter,
+) -> None:
     handler.setLevel(logging.INFO)
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)

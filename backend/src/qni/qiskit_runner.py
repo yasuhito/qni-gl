@@ -7,6 +7,8 @@ import numpy as np
 import numpy.typing as npt
 
 if TYPE_CHECKING:
+    import logging
+
     from qiskit.result import Result  # type: ignore
 
 from qiskit import QuantumCircuit, transpile  # type: ignore
@@ -41,7 +43,7 @@ OperationMethod = Callable[
 class QiskitRunner:
     _STATEVECTOR_LABEL = "state_at_until_step"
 
-    def __init__(self, logger=None):
+    def __init__(self, logger: logging.Logger | None = None):
         self.logger = logger
         self.circuit: QuantumCircuit | None = None
         self.steps: list = []
