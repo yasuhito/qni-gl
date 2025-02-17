@@ -28,7 +28,7 @@ cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 
 @app.route("/backend.json", methods=["POST"])
-def backend() -> Response:
+def backend() -> tuple[Response, int]:
     """
     Handles the POST request to the /backend.json endpoint.
 
@@ -52,7 +52,7 @@ def backend() -> Response:
     return jsonify({"error": "Invalid request type"}), 400
 
 
-def handle_circuit_request() -> Response:
+def handle_circuit_request() -> tuple[Response, int]:
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
@@ -61,10 +61,10 @@ def handle_circuit_request() -> Response:
         qiskit_step_results, circuit_request_data
     )
     app.logger.info("step_results = %s", step_results)
-    return jsonify(step_results)
+    return jsonify(step_results), 200
 
 
-def handle_export_request() -> Response:
+def handle_export_request() -> tuple[Response, int]:
     try:
         steps = json.loads(request.form.get("steps", "[]"))
         qubit_count = int(request.form.get("qubitCount", "0"))
@@ -77,7 +77,7 @@ def handle_export_request() -> Response:
 
         qasm3 = dumps(circuit)
 
-        return jsonify({"qasm3": qasm3})
+        return jsonify({"qasm3": qasm3}), 200
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid JSON format"}), 400
     except ValueError:

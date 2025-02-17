@@ -1,6 +1,6 @@
 import pytest
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import (
+from qiskit import QuantumCircuit  # type: ignore
+from qiskit.circuit.library import (  # type: ignore
     HGate,
     XGate,
     ZGate,

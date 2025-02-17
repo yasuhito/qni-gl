@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable, TypedDict
 
 import numpy as np
+import numpy.typing as npt
 
 if TYPE_CHECKING:
     from qiskit.result import Result  # type: ignore
@@ -162,7 +163,9 @@ class QiskitRunner:
         return backend.run(circuit_transpiled, shots=1, memory=True).result()
 
     def _get_statevector(self, result: Result) -> dict[int, QiskitAmplitude]:
-        amplitudes = np.asarray(result.data().get(self._STATEVECTOR_LABEL)).tolist()
+        amplitudes: npt.NDArray[np.complex128] = np.asarray(
+            result.data().get(self._STATEVECTOR_LABEL), dtype=np.complex128
+        )
 
         return dict(enumerate(amplitudes))
 

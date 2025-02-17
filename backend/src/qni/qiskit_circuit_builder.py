@@ -6,7 +6,7 @@ from qiskit import (  # type: ignore
     ClassicalRegister,
     QuantumCircuit,  # type: ignore
 )
-from qiskit.circuit.library import (
+from qiskit.circuit.library import (  # type: ignore
     HGate,
     SdgGate,
     SGate,
@@ -15,7 +15,7 @@ from qiskit.circuit.library import (
     XGate,
     YGate,
     ZGate,
-)  # type: ignore
+)
 
 
 class BasicOperation(TypedDict):
