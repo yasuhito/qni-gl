@@ -8,31 +8,29 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Install Hatch
-        uses: pypa/hatch@install
-      - name: Check code formatting
-        run: hatch fmt
-        working-directory: ./backend
-      - name: Check Python types
-        run: hatch run types:check
-        working-directory: ./backend
-      - name: Run backend tests
-        run: hatch test -c
-        working-directory: ./backend
       - name: Install dependencies (yarn)
         run: yarn
         working-directory: ./frontend
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps
         working-directory: ./frontend
+      - name: Setup Python ${{ matrix.python-version }} with uv
+        uses: ./.github/actions/setup-python-with-uv
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Run backend server
         run: |
-          hatch run gunicorn --daemon
+          uv run gunicorn --daemon
         working-directory: ./backend
       - name: Run frontend tests
         run: yarn test:unit
