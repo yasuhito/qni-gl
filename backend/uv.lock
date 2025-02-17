@@ -436,11 +436,9 @@ name = "qni"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "coverage" },
     { name = "flask-cors" },
     { name = "gunicorn" },
     { name = "numpy" },
-    { name = "pytest" },
     { name = "qiskit" },
     { name = "qiskit-aer" },
 ]
@@ -452,23 +450,27 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "coverage" },
+    { name = "pytest" },
     { name = "ruff" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "coverage", specifier = ">=7.6.1" },
     { name = "flask-cors", specifier = ">=5.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "numpy", specifier = ">=1.26.0" },
-    { name = "pytest", specifier = ">=8.3.2" },
     { name = "qiskit", specifier = ">=1.2.1" },
     { name = "qiskit-aer", specifier = ">=0.15.0" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ruff", specifier = ">=0.9.6" }]
+dev = [
+    { name = "coverage", specifier = ">=7.6.1" },
+    { name = "pytest", specifier = ">=8.3.2" },
+    { name = "ruff", specifier = ">=0.9.6" },
+]
 
 [[package]]
 name = "ruff"

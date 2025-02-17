@@ -27,14 +27,19 @@ dependencies = [
   "qiskit-aer>=0.15.0", # If you want to use GPU, change to "qiskit-aer-gpu>=0.15.0"
   "flask-cors>=5.0.0",
   "gunicorn>=23.0.0",
-  "pytest>=8.3.2",
-  "coverage>=7.6.1",
   "numpy>=1.26.0"
 ]
+
+[project.urls]
+Documentation = "https://github.com/yasuhito/qni#readme"
+Issues = "https://github.com/yasuhito/qni/issues"
+Source = "https://github.com/yasuhito/qni"
 
 [tool.uv]
 dev-dependencies = [
   "ruff>=0.9.6",
+  "pytest>=8.3.2",
+  "coverage>=7.6.1",
 ]
 
 [project.optional-dependencies]
@@ -42,10 +47,16 @@ dev = [
   "ruff",
 ]
 
-[project.urls]
-Documentation = "https://github.com/yasuhito/qni#readme"
-Issues = "https://github.com/yasuhito/qni/issues"
-Source = "https://github.com/yasuhito/qni"
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "docs",
+]
+preview = true
+include = [
+  "src/**/*.py",
+  "tests/**/*.py",
+]
 
 [tool.hatch.version]
 path = "src/qni/__about__.py"
@@ -84,17 +95,6 @@ extra-dependencies = [
 ]
 [tool.hatch.envs.docs.scripts]
 build = "sphinx-build -M html docs/source docs/build"
-
-[tool.ruff]
-# Exclude a variety of commonly ignored directories.
-exclude = [
-    "docs",
-]
-preview = true
-include = [
-  "src/**/*.py",
-  "tests/**/*.py",
-]
 
 [tool.hatch.envs.dev.scripts]
 format = "ruff format"
