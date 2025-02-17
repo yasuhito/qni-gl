@@ -25,3 +25,4 @@ jobs:
 
       - name: Format
         run: uv run ruff format . --check --diff
+        working-directory: backend
