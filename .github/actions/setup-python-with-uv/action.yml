@@ -30,3 +30,4 @@ runs:
     - name: Install Dependencies
       run: uv sync
       shell: bash
+      working-directory: backend
