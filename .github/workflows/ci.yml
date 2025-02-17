@@ -33,6 +33,7 @@ jobs:
 
       - name: Check Python types
         run: uv run mypy
+        working-directory: backend
 
       - name: Test
         run: uv run pytest
