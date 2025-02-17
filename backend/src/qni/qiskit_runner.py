@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, TypedDict
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypedDict
 
 import numpy as np
 import numpy.typing as npt
@@ -32,7 +33,7 @@ class ControllableOperation(TypedDict):
 
 
 OperationMethod = Callable[
-    [QuantumCircuit, BasicOperation | ControllableOperation], None
+    [QuantumCircuit, BasicOperation | ControllableOperation], None,
 ]
 
 
@@ -52,8 +53,7 @@ class QiskitRunner:
         until_step_index: int | None = None,
         device: DeviceType = DeviceType.CPU,
     ) -> list[QiskitStepResult]:
-        """
-        Execute the specified quantum circuit and return the results of each step.
+        """Execute the specified quantum circuit and return the results of each step.
 
         Args:
             steps (list): A list of steps to execute.
@@ -63,12 +63,13 @@ class QiskitRunner:
 
         Returns:
             list: A list containing the results of each step. Each result is a dictionary including measured bits and amplitudes.
+
         """
         step_results: list[QiskitStepResult] = []
 
         self.steps = steps
         self.circuit = self._build_circuit(
-            qubit_count=qubit_count, until_step_index=until_step_index
+            qubit_count=qubit_count, until_step_index=until_step_index,
         )
 
         if self.circuit.depth() == 0:
@@ -87,17 +88,17 @@ class QiskitRunner:
                     QiskitStepResult(
                         measuredBits=measured_bits[step_index],
                         amplitudes=statevector,
-                    )
+                    ),
                 )
             else:
                 step_results.append(
-                    QiskitStepResult(measuredBits=measured_bits[step_index])
+                    QiskitStepResult(measuredBits=measured_bits[step_index]),
                 )
 
         return step_results
 
     def _build_circuit(
-        self, *, qubit_count: int | None = None, until_step_index: int | None = None
+        self, *, qubit_count: int | None = None, until_step_index: int | None = None,
     ) -> QuantumCircuit:
         if qubit_count is None:
             qubit_count = self._get_qubit_count()
@@ -136,7 +137,7 @@ class QiskitRunner:
         )
 
     def _process_step_operations(
-        self, qubit_count: int, until_step_index: int
+        self, qubit_count: int, until_step_index: int,
     ) -> QuantumCircuit:
         circuit = QuantumCircuit(qubit_count)
         circuit_builder = QiskitCircuitBuilder()
@@ -164,7 +165,7 @@ class QiskitRunner:
 
     def _get_statevector(self, result: Result) -> dict[int, QiskitAmplitude]:
         amplitudes: npt.NDArray[np.complex128] = np.asarray(
-            result.data().get(self._STATEVECTOR_LABEL), dtype=np.complex128
+            result.data().get(self._STATEVECTOR_LABEL), dtype=np.complex128,
         )
 
         return dict(enumerate(amplitudes))

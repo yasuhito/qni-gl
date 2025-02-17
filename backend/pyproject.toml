@@ -49,14 +49,51 @@ package-dir = {"" = "src"}
 packages = ["qni"]
 
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
-exclude = [
-  "docs",
-]
 preview = true
 include = [
   "src/**/*.py",
   "tests/**/*.py",
+]
+lint.select = ["ALL"]
+lint.ignore = [
+  "ANN001",
+  "ANN201",
+  "ANN202",
+  "ANN204",
+  "BLE001",
+  "CPY001",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D107",
+  "D200",
+  "D205",
+  "D400",
+  "D401",
+  "D415",
+  "E501",
+  "PGH003",
+  "PLR6301",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+  "ANN001",
+  "ANN201",
+  "ANN205",
+  "ANN401",
+  "CPY001",
+  "D",
+  "D101",
+  "D200",
+  "PLC1901",
+  "PLR2004",
+  "PLR6301",
+  "S101",
+  "PT011",
+  "PGH003",
 ]
 
 [tool.mypy]
