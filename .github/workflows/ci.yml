@@ -9,6 +9,9 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     strategy:
       matrix:
@@ -25,16 +28,12 @@ jobs:
 
       - name: Lint
         run: uv run ruff check --output-format=github .
-        working-directory: backend
 
       - name: Format
         run: uv run ruff format . --check --diff
-        working-directory: backend
 
       - name: Check Python types
         run: uv run mypy
-        working-directory: backend
 
       - name: Test
         run: uv run pytest
-        working-directory: backend
