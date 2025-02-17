@@ -1,0 +1,5 @@
+qiskit>=1.2.1
+qiskit-aer>=0.15.0
+flask-cors>=5.0.0
+gunicorn>=23.0.0
+numpy>=1.26.0

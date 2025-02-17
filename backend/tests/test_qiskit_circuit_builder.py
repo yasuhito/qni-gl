@@ -1,20 +1,21 @@
 import pytest
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import (
+from qiskit import QuantumCircuit  # type: ignore
+from qiskit.circuit.library import (  # type: ignore
     HGate,
-    XGate,
-    ZGate,
-    SGate,
     SdgGate,
-    TGate,
-    TdgGate,
-    YGate,
+    SGate,
     SwapGate,
+    TdgGate,
+    TGate,
+    XGate,
+    YGate,
+    ZGate,
 )
+
 from qni.qiskit_circuit_builder import (
-    QiskitCircuitBuilder,
     BasicOperation,
     ControllableOperation,
+    QiskitCircuitBuilder,
 )
 
 

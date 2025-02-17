@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
-from flask import Flask, jsonify, request, Response
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-import json
 
 if TYPE_CHECKING:
     from qni.types import (
@@ -14,11 +14,12 @@ if TYPE_CHECKING:
         StepResult,
     )
 
+from qiskit.qasm3 import dumps  # type: ignore
+
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
-from qiskit.qasm3 import dumps  # type: ignore
 
 app = Flask(__name__)
 CORS(app)
@@ -28,9 +29,8 @@ cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 
 @app.route("/backend.json", methods=["POST"])
-def backend() -> Response:
-    """
-    Handles the POST request to the /backend.json endpoint.
+def backend() -> tuple[Response, int]:
+    """Handles the POST request to the /backend.json endpoint.
 
     This function processes the incoming request,
     runs the quantum circuit simulation using Qiskit,
@@ -38,6 +38,7 @@ def backend() -> Response:
 
     Returns:
         Response: A JSON response containing the simulation results or an error message.
+
     """
     request_type = request.form.get("requestType", "circuit")
 
@@ -52,19 +53,20 @@ def backend() -> Response:
     return jsonify({"error": "Invalid request type"}), 400
 
 
-def handle_circuit_request() -> Response:
+def handle_circuit_request() -> tuple[Response, int]:
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
     qiskit_step_results = cached_qiskit_runner.run(circuit_request_data)
     step_results = _convert_and_filter_qiskit_step_results(
-        qiskit_step_results, circuit_request_data
+        qiskit_step_results,
+        circuit_request_data,
     )
     app.logger.info("step_results = %s", step_results)
-    return jsonify(step_results)
+    return jsonify(step_results), 200
 
 
-def handle_export_request() -> Response:
+def handle_export_request() -> tuple[Response, int]:
     try:
         steps = json.loads(request.form.get("steps", "[]"))
         qubit_count = int(request.form.get("qubitCount", "0"))
@@ -77,7 +79,7 @@ def handle_export_request() -> Response:
 
         qasm3 = dumps(circuit)
 
-        return jsonify({"qasm3": qasm3})
+        return jsonify({"qasm3": qasm3}), 200
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid JSON format"}), 400
     except ValueError:
@@ -116,13 +118,14 @@ def _convert_qiskit_step_result(
         return {"measuredBits": measured_bits}
 
     amplitudes = _flatten_amplitudes(
-        _filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices)
+        _filter_amplitudes(amplitudes_qiskit, circuit_request_data.amplitude_indices),
     )
     return {"amplitudes": amplitudes, "measuredBits": measured_bits}
 
 
 def _filter_amplitudes(
-    qiskit_amplitudes: QiskitStepAmplitudes, amplitude_indices: list[int]
+    qiskit_amplitudes: QiskitStepAmplitudes,
+    amplitude_indices: list[int],
 ) -> QiskitStepAmplitudes:
     return (
         {each: qiskit_amplitudes[each] for each in amplitude_indices}

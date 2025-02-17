@@ -10,14 +10,12 @@ from qni.types import DeviceType
 
 
 class CircuitRequestData:
-    """
-    The `CircuitRequestData` class is designed to encapsulate and manage the quantum circuit data received from a service worker.
+    """The `CircuitRequestData` class is designed to encapsulate and manage the quantum circuit data received from a service worker.
     It provides properties to access various parameters of the request in a structured manner.
     """
 
     def __init__(self, form: ImmutableMultiDict[str, str]):
-        """
-        Initialize the CircuitRequestData object with form data.
+        """Initialize the CircuitRequestData object with form data.
 
         :param form: The form data received from the request.
         :type form: ImmutableMultiDict[str, str]
@@ -26,8 +24,7 @@ class CircuitRequestData:
 
     @property
     def circuit_id(self) -> str:
-        """
-        Retrieves the circuit ID from the form data.
+        """Retrieves the circuit ID from the form data.
         Default: "" (empty string)
 
         :return: The circuit ID.
@@ -37,8 +34,7 @@ class CircuitRequestData:
 
     @property
     def qubit_count(self) -> int:
-        """
-        Retrieves the qubit count from the form data.
+        """Retrieves the qubit count from the form data.
         Default: 0
 
         :return: The qubit count.
@@ -48,8 +44,7 @@ class CircuitRequestData:
 
     @property
     def until_step_index(self) -> int:
-        """
-        Retrieves the index of the last step to be executed from the form data.
+        """Retrieves the index of the last step to be executed from the form data.
         Default: 0
 
         :return: The index of the last step.
@@ -59,8 +54,7 @@ class CircuitRequestData:
 
     @property
     def steps(self) -> list[dict]:
-        """
-        Retrieves the list of steps from the form data.
+        """Retrieves the list of steps from the form data.
         Default: [] (empty list)
 
         :return: The list of steps.
@@ -70,8 +64,7 @@ class CircuitRequestData:
 
     @property
     def amplitude_indices(self) -> list[int]:
-        """
-        Retrieves the list of amplitude indices from the form data.
+        """Retrieves the list of amplitude indices from the form data.
         Default: [] (empty list)
 
         :return: The list of amplitude indices.
@@ -81,8 +74,7 @@ class CircuitRequestData:
 
     @property
     def device(self) -> DeviceType:
-        """
-        Retrieves the device type (CPU or GPU) from the form data.
+        """Retrieves the device type (CPU or GPU) from the form data.
         Default: DeviceType.CPU
 
         :return: The device type.
