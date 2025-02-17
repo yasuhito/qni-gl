@@ -25,6 +25,7 @@ jobs:
 
       - name: Lint
         run: uv run ruff check --output-format=github .
+        working-directory: backend
 
       - name: Format
         run: uv run ruff format . --check --diff
