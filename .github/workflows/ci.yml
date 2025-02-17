@@ -30,3 +30,7 @@ jobs:
       - name: Format
         run: uv run ruff format . --check --diff
         working-directory: backend
+
+      - name: Test
+        run: uv run pytest
+        working-directory: backend
