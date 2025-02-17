@@ -43,8 +43,8 @@ class QiskitRunner:
 
     def __init__(self, logger=None):
         self.logger = logger
-        self.circuit = None
-        self.steps = []
+        self.circuit: QuantumCircuit | None = None
+        self.steps: list = []
 
     def run_circuit(
         self,
