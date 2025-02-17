@@ -1,0 +1,21 @@
+Metadata-Version: 2.2
+Name: qni
+Version: 0.0.0
+Author-email: Yasuhito Takamiya <yasuhito@hey.com>
+Project-URL: Documentation, https://github.com/yasuhito/qni#readme
+Project-URL: Issues, https://github.com/yasuhito/qni/issues
+Project-URL: Source, https://github.com/yasuhito/qni
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: qiskit>=1.2.1
+Requires-Dist: qiskit-aer>=0.15.0
+Requires-Dist: flask-cors>=5.0.0
+Requires-Dist: gunicorn>=23.0.0
+Requires-Dist: numpy>=1.26.0

@@ -1,14 +1,10 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "qni"
 dynamic = ["version"]
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = { file = "LICENSE" }
 keywords = []
 authors = [
   { name = "Yasuhito Takamiya", email = "yasuhito@hey.com" },
@@ -38,19 +34,24 @@ Source = "https://github.com/yasuhito/qni"
 [tool.uv]
 dev-dependencies = [
   "ruff>=0.9.6",
-  "pytest>=8.3.2",
-  "coverage>=7.6.1",
+  "pytest>=8.3.4",
+  "coverage>=7.6.12",
+  "mypy>=1.15.0",
+  "types-flask-cors"
 ]
 
-[project.optional-dependencies]
-dev = [
-  "ruff",
-]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["qni"]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
-    "docs",
+  "docs",
 ]
 preview = true
 include = [
@@ -58,44 +59,9 @@ include = [
   "tests/**/*.py",
 ]
 
-[tool.hatch.version]
-path = "src/qni/__about__.py"
+[tool.mypy]
+files = ["src", "tests"]
 
-[tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
-]
-
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/qni tests}"
-
-[tool.coverage.run]
-source_pkgs = ["qni", "tests"]
-branch = true
-parallel = true
-omit = [
-  "src/qni/__about__.py",
-  "tests/__init__.py",
-]
-
-[tool.coverage.paths]
-qni = ["src/qni", "*/qni/src/qni"]
-tests = ["tests", "*/qni/tests"]
-
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
-
-[tool.hatch.envs.docs]
-extra-dependencies = [
-  "sphinx"
-]
-[tool.hatch.envs.docs.scripts]
-build = "sphinx-build -M html docs/source docs/build"
-
-[tool.hatch.envs.dev.scripts]
-format = "ruff format"
-
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=xml"
+pythonpath = ["src"]
