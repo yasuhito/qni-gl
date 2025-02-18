@@ -167,6 +167,12 @@ class QiskitCircuitBuilder:
         """
 
         def __init__(self, operation_type: str) -> None:
+            """Initialize UnknownOperationError with the unknown operation type.
+
+            Args:
+                operation_type (str): The type of the unknown operation that caused the error.
+
+            """
             super().__init__(f"Unknown operation: {operation_type}")
 
     def _apply_h_operation(
