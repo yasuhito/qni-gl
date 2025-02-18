@@ -60,6 +60,17 @@ def backend() -> tuple[Response, int]:
 
 
 def handle_circuit_request() -> tuple[Response, int]:
+    """Handle quantum circuit execution requests.
+
+    Processes the circuit data from the request form, executes the circuit
+    using the cached Qiskit runner, and returns the simulation results.
+
+    Returns:
+        tuple[Response, int]: A tuple containing:
+            - JSON response with circuit execution results
+            - HTTP status code 200
+
+    """
     circuit_request_data = CircuitRequestData(request.form)
     _log_request_data(circuit_request_data)
 
@@ -87,6 +98,17 @@ class InvalidQubitCountError(ValueError):
 
 
 def handle_export_request() -> tuple[Response, int]:
+    """Handle QASM export requests.
+
+    Converts the quantum circuit specified in the request to QASM format.
+    Validates input parameters and handles potential errors.
+
+    Returns:
+        tuple[Response, int]: A tuple containing:
+            - JSON response with QASM representation or error message
+            - HTTP status code (200 for success, 400 for errors)
+
+    """
     try:
         steps, qubit_count = _parse_and_validate_export_parameters()
 
