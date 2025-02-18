@@ -28,10 +28,10 @@ import numpy.typing as npt
 if TYPE_CHECKING:
     import logging
 
-    from qiskit.result import Result  # type: ignore
+    from qiskit.result import Result  # type: ignore[attr-defined]
 
-from qiskit import QuantumCircuit, transpile  # type: ignore
-from qiskit_aer import AerSimulator  # type: ignore
+from qiskit import QuantumCircuit, transpile  # type: ignore[attr-defined]
+from qiskit_aer import AerSimulator  # type: ignore[attr-defined]
 
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
 from qni.types import (
