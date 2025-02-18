@@ -98,11 +98,14 @@ class CircuitRequestData:
             else self._form.get("device", DeviceType.CPU, type=self._device_type)
         )
 
-    def _steps_type(self, parameter: str) -> list[dict]:
+    @staticmethod
+    def _steps_type(parameter: str) -> list[dict]:
         return json.loads(parameter)
 
-    def _amplitude_indices_type(self, parameter: str) -> list[int]:
+    @staticmethod
+    def _amplitude_indices_type(parameter: str) -> list[int]:
         return [int(each) for each in parameter.split(",") if each.isdigit()]
 
-    def _device_type(self, parameter: str) -> DeviceType:
+    @staticmethod
+    def _device_type(parameter: str) -> DeviceType:
         return DeviceType(parameter)
