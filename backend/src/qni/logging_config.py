@@ -14,7 +14,7 @@ def _add_logger_handler(
     logging.getLogger().addHandler(handler)
 
 
-def setup_custom_logger():
+def setup_custom_logger() -> None:
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
