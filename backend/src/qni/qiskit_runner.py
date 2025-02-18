@@ -90,6 +90,12 @@ class QiskitRunner:
     _STATEVECTOR_LABEL = "state_at_until_step"
 
     def __init__(self, logger: logging.Logger | None = None) -> None:
+        """Initialize QiskitRunner with an optional logger.
+
+        Args:
+            logger (logging.Logger | None, optional): Logger instance for debug output. Defaults to None.
+
+        """
         self.logger = logger
         self.circuit: QuantumCircuit | None = None
         self.steps: list = []

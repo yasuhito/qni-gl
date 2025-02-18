@@ -84,9 +84,15 @@ def handle_circuit_request() -> tuple[Response, int]:
 
 
 class EmptyStepsError(ValueError):
-    """Exception raised when steps list is empty"""
+    """Exception raised when steps list is empty."""
 
     def __init__(self, steps: list) -> None:
+        """Initialize EmptyStepsError with the empty steps list.
+
+        Args:
+            steps (list): The empty steps list that caused the error.
+
+        """
         super().__init__(f"Steps cannot be empty (got {steps})")
 
 
@@ -94,6 +100,12 @@ class InvalidQubitCountError(ValueError):
     """Exception raised when qubit count is invalid"""
 
     def __init__(self, qubit_count: int) -> None:
+        """Initialize InvalidQubitCountError with the invalid qubit count.
+
+        Args:
+            qubit_count (int): The invalid qubit count that caused the error.
+
+        """
         super().__init__(f"Qubit count must be greater than 0 (got {qubit_count})")
 
 
