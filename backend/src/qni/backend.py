@@ -66,21 +66,21 @@ def handle_circuit_request() -> tuple[Response, int]:
     return jsonify(step_results), 200
 
 
-class InvalidExportParametersError(ValueError):
-    """Exception raised when circuit export parameters are invalid"""
+class EmptyStepsError(ValueError):
+    """Exception raised when steps list is empty"""
 
-    pass
+    def __init__(self, steps: list) -> None:
+        super().__init__(f"Steps cannot be empty (got {steps})")
+
+
+class InvalidQubitCountError(ValueError):
+    """Exception raised when qubit count is invalid"""
+
+    def __init__(self, qubit_count: int) -> None:
+        super().__init__(f"Qubit count must be greater than 0 (got {qubit_count})")
 
 
 def handle_export_request() -> tuple[Response, int]:
-    """Handle request to export quantum circuit to QASM3 format.
-
-    Returns:
-        tuple[Response, int]: Circuit data in QASM3 format and status code
-
-    Raises:
-        InvalidExportParametersError: When input parameters are invalid
-    """
     try:
         steps, qubit_count = _parse_and_validate_export_parameters()
 
@@ -92,26 +92,18 @@ def handle_export_request() -> tuple[Response, int]:
 
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid JSON format"}), 400
-    except InvalidExportParametersError as e:
+    except (EmptyStepsError, InvalidQubitCountError) as e:
         return jsonify({"error": str(e)}), 400
 
 
 def _parse_and_validate_export_parameters() -> tuple[list, int]:
-    """Parse and validate export request parameters.
-
-    Returns:
-        tuple[list, int]: Validated steps list and qubit count
-
-    Raises:
-        InvalidExportParametersError: When parameters are invalid
-    """
     steps = json.loads(request.form.get("steps", "[]"))
     qubit_count = int(request.form.get("qubitCount", "0"))
 
     if not steps:
-        raise InvalidExportParametersError("Steps cannot be empty")
+        raise EmptyStepsError(steps)
     if qubit_count <= 0:
-        raise InvalidExportParametersError("Qubit count must be greater than 0")
+        raise InvalidQubitCountError(qubit_count)
 
     return steps, qubit_count
 
