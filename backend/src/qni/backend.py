@@ -88,7 +88,7 @@ def handle_export_request() -> tuple[Response, int]:
         return jsonify({"error": str(e)}), 500
 
 
-def _log_request_data(request_data: CircuitRequestData):
+def _log_request_data(request_data: CircuitRequestData) -> None:
     app.logger.debug("circuit_id = %s", request_data.circuit_id)
     app.logger.debug("qubit_count = %d", request_data.qubit_count)
     app.logger.debug("until_step_index = %d", request_data.until_step_index)
