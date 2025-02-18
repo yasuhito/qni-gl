@@ -1,3 +1,13 @@
+"""Caching layer for quantum circuit execution results.
+
+This module provides the CachedQiskitRunner class which:
+1. Caches circuit execution results to avoid redundant computations
+2. Manages cache invalidation based on circuit ID and step index
+3. Delegates actual circuit execution to QiskitRunner
+
+Used by backend.py to optimize performance of repeated circuit executions.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
