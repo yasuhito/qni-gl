@@ -36,7 +36,7 @@ cached_qiskit_runner = CachedQiskitRunner(app.logger)
 
 @app.route("/backend.json", methods=["POST"])
 def backend() -> tuple[Response, int]:
-    """Handles the POST request to the /backend.json endpoint.
+    """Handle the POST request to the /backend.json endpoint.
 
     This function processes the incoming request,
     runs the quantum circuit simulation using Qiskit,
