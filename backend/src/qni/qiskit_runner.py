@@ -115,13 +115,13 @@ class QiskitRunner:
             steps (list): A list of steps to execute.
             qubit_count (int | None, optional): The number of qubits. Defaults to None.
             until_step_index (int | None, optional): The index of the step until which
-            to execute. Defaults to None.
+                to execute. Defaults to None.
             device (str, optional): The device to use ("CPU" or "GPU").
             Defaults to "CPU".
 
         Returns:
             list: A list containing the results of each step. Each result is
-            a dictionary including measured bits and amplitudes.
+                a dictionary including measured bits and amplitudes.
 
         """
         step_results: list[QiskitStepResult] = []

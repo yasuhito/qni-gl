@@ -82,7 +82,7 @@ class QiskitCircuitBuilder:
 
     Attributes:
         _PAIR_OPERATION_COUNT: Constant defining the number of qubits for
-        two-qubit gates
+                two-qubit gates
 
     """
 
@@ -172,7 +172,7 @@ class QiskitCircuitBuilder:
 
             Args:
                 operation_type (str): The type of the unknown operation that
-                caused the error.
+                    caused the error.
 
             """
             super().__init__(f"Unknown operation: {operation_type}")
