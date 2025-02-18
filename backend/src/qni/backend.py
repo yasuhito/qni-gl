@@ -97,7 +97,7 @@ class EmptyStepsError(ValueError):
 
 
 class InvalidQubitCountError(ValueError):
-    """Exception raised when qubit count is invalid"""
+    """Exception raised when qubit count is invalid."""
 
     def __init__(self, qubit_count: int) -> None:
         """Initialize InvalidQubitCountError with the invalid qubit count.
