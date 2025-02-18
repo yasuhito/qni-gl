@@ -58,7 +58,6 @@ lint.ignore = [
   "D400",
   "D401",
   "D415",
-  "E501",
 ]
 
 [tool.ruff.lint.per-file-ignores]
