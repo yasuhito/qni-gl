@@ -66,26 +66,54 @@ def handle_circuit_request() -> tuple[Response, int]:
     return jsonify(step_results), 200
 
 
-def handle_export_request() -> tuple[Response, int]:
-    try:
-        steps = json.loads(request.form.get("steps", "[]"))
-        qubit_count = int(request.form.get("qubitCount", "0"))
+class InvalidExportParametersError(ValueError):
+    """Exception raised when circuit export parameters are invalid"""
 
-        if not steps or qubit_count <= 0:
-            return jsonify({"error": "Invalid input parameters"}), 400
+    pass
+
+
+def handle_export_request() -> tuple[Response, int]:
+    """Handle request to export quantum circuit to QASM3 format.
+
+    Returns:
+        tuple[Response, int]: Circuit data in QASM3 format and status code
+
+    Raises:
+        InvalidExportParametersError: When input parameters are invalid
+    """
+    try:
+        steps, qubit_count = _parse_and_validate_export_parameters()
 
         qiskit_circuit_builder = QiskitCircuitBuilder()
         circuit = qiskit_circuit_builder.build_circuit_for_export(steps, qubit_count)
-
         qasm3 = dumps(circuit)
 
         return jsonify({"qasm3": qasm3}), 200
+
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid JSON format"}), 400
-    except ValueError:
-        return jsonify({"error": "Invalid qubit count"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except InvalidExportParametersError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+def _parse_and_validate_export_parameters() -> tuple[list, int]:
+    """Parse and validate export request parameters.
+
+    Returns:
+        tuple[list, int]: Validated steps list and qubit count
+
+    Raises:
+        InvalidExportParametersError: When parameters are invalid
+    """
+    steps = json.loads(request.form.get("steps", "[]"))
+    qubit_count = int(request.form.get("qubitCount", "0"))
+
+    if not steps:
+        raise InvalidExportParametersError("Steps cannot be empty")
+    if qubit_count <= 0:
+        raise InvalidExportParametersError("Qubit count must be greater than 0")
+
+    return steps, qubit_count
 
 
 def _log_request_data(request_data: CircuitRequestData) -> None:
