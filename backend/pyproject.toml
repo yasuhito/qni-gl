@@ -53,7 +53,6 @@ include = [
 lint.select = ["ALL"]
 lint.ignore = [
   "CPY001",
-  "D200",
   "D205",
   "D400",
   "D401",
