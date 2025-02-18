@@ -1,11 +1,7 @@
-"""Caching layer for quantum circuit execution results.
+"""Performance optimization layer for quantum circuit execution.
 
-This module provides the CachedQiskitRunner class which:
-1. Caches circuit execution results to avoid redundant computations
-2. Manages cache invalidation based on circuit ID and step index
-3. Delegates actual circuit execution to QiskitRunner
-
-Used by backend.py to optimize performance of repeated circuit executions.
+Provides caching mechanisms to avoid redundant circuit computations
+in the Qni simulator.
 """
 
 from __future__ import annotations
@@ -22,7 +18,30 @@ from qni.qiskit_runner import QiskitRunner
 
 
 class CachedQiskitRunner:
+    """A caching wrapper for the QiskitRunner.
+
+    Implements a caching layer to optimize repeated circuit executions by:
+    - Storing results based on circuit ID and step index
+    - Managing cache invalidation
+    - Delegating actual execution to QiskitRunner
+
+    The cache is invalidated when either the circuit ID or step index changes,
+    ensuring that modified circuits are properly re-executed.
+
+    Attributes:
+        logger: Logger instance for tracking cache hits/misses
+        cache: List of cached quantum circuit results
+        last_cache_key: Tuple of (circuit_id, step_index) for the last execution
+
+    """
+
     def __init__(self, logger: logging.Logger) -> None:
+        """Initialize the cached runner.
+
+        Args:
+            logger: Logger instance for recording cache events
+
+        """
         self.logger = logger
         self.cache: list[QiskitStepResult] = []
         self.last_cache_key: tuple | None = None

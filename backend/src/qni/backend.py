@@ -1,18 +1,7 @@
-"""A Flask-based backend server for the Qni quantum circuit simulator.
+"""REST API server for the Qni quantum circuit simulator.
 
-This module provides a REST API for executing quantum circuits using Qiskit.
-It handles two types of requests:
-1. Circuit execution requests - Simulates quantum circuits and returns their state vectors
-2. Export requests - Converts circuits to QASM 3.0 format
-
-The module uses Flask for HTTP request handling and CORS for cross-origin resource sharing.
-It includes error handling for invalid requests and provides logging capabilities.
-
-Key components:
-- Flask application setup with CORS support
-- Request handlers for circuit execution and QASM export
-- Circuit simulation using CachedQiskitRunner
-- Custom error classes for request validation
+Provides HTTP endpoints for circuit execution and QASM export,
+using Flask and Qiskit for quantum computations.
 """
 
 from __future__ import annotations
