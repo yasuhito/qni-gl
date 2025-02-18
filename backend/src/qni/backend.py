@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         StepResult,
     )
 
-from qiskit.qasm3 import dumps  # type: ignore[attr-defined]
+from qiskit.qasm3 import dumps  # type: ignore[import-untyped]
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
