@@ -1,3 +1,14 @@
+"""Data class module for handling quantum circuit request parameters.
+
+This module provides the CircuitRequestData class which:
+1. Parses and validates form data from HTTP requests
+2. Provides type-safe access to circuit parameters
+3. Handles data conversion for circuit execution
+
+The class works with QiskitRunner to execute quantum circuits and is used
+by the backend API to process incoming requests.
+"""
+
 from __future__ import annotations
 
 import json

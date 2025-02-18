@@ -1,3 +1,13 @@
+"""Logging configuration module for the Qni backend server.
+
+This module provides:
+1. Custom log format configuration
+2. File and console logging handlers setup
+3. Log level management (INFO/DEBUG)
+
+Used by backend.py to control application-wide logging behavior.
+"""
+
 import logging
 
 LOG_FORMAT = "[%(asctime)s] [%(levelname)s] %(message)s"

@@ -1,3 +1,21 @@
+"""A builder class for constructing Qiskit quantum circuits from a sequence of quantum operations.
+
+This module provides the QiskitCircuitBuilder class which is responsible for:
+1. Converting high-level quantum operations into Qiskit circuit instructions
+2. Supporting both basic and controlled quantum gates
+3. Handling measurement operations and state preparation
+
+The builder supports various quantum gates including:
+- Basic gates (H, X, Y, Z, S, T and their conjugates)
+- Controlled operations (CNOT, controlled-Y, controlled-Z)
+- State preparation (|0⟩, |1⟩)
+- Measurement operations
+- Multi-qubit operations (SWAP)
+
+Each operation is represented as a dictionary containing the operation type
+and target qubits, with optional control qubits for controlled operations.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Callable

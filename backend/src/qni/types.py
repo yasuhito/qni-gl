@@ -1,3 +1,21 @@
+"""Type definitions and data structures for the Qni quantum circuit simulator.
+
+This module defines the core data types and structures used throughout the Qni system:
+1. Quantum circuit execution results (StepResult, QiskitStepResult)
+2. Amplitude representations for both internal and Qiskit-compatible formats
+3. Measurement results data structures
+4. Device type specifications (CPU/GPU)
+
+Key type definitions:
+- MeasuredBits: Dictionary mapping qubit indices to measured values (0 or 1)
+- Amplitude: Complex numbers represented as (real, imaginary) tuples
+- StepResult: Results from executing a single step in a quantum circuit
+- QiskitStepResult: Qiskit-specific version of step execution results
+
+The module uses TypedDict for structured dictionary types and TypeAlias for type aliases,
+ensuring type safety throughout the application.
+"""
+
 from __future__ import annotations
 
 from enum import Enum

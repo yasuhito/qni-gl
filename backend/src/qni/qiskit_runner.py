@@ -1,3 +1,22 @@
+"""A Qiskit-based quantum circuit execution engine for the Qni simulator.
+
+This module provides the QiskitRunner class which is responsible for:
+1. Building and executing quantum circuits using Qiskit
+2. Managing circuit execution state and measurement results
+3. Supporting both CPU and GPU-based simulation
+4. Extracting and processing simulation results (state vectors and measurements)
+
+Key features:
+- Step-by-step circuit execution with state vector extraction
+- Support for measurement operations and result processing
+- Automatic qubit count detection from circuit operations
+- GPU acceleration support through Qiskit-Aer
+- Caching of intermediate results for performance optimization
+
+The runner works in conjunction with QiskitCircuitBuilder to convert
+high-level quantum operations into executable Qiskit circuits.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Callable
