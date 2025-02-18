@@ -92,6 +92,21 @@ class QiskitCircuitBuilder:
         steps: list,
         qubit_count: int,
     ) -> QuantumCircuit:
+        """Builds a Qiskit quantum circuit for export from a list of quantum operations.
+
+        Constructs a quantum circuit by applying the specified quantum operations
+        in sequence. Each step can contain multiple operations that are applied
+        in parallel.
+
+        Args:
+            steps: A list of quantum operations to be applied to the circuit.
+                  Each step is a list of operations that can be executed in parallel.
+            qubit_count: The number of qubits in the circuit.
+
+        Returns:
+            A Qiskit QuantumCircuit object containing all the specified operations.
+
+        """
         circuit = QuantumCircuit(qubit_count)
 
         for step in steps:
@@ -108,6 +123,18 @@ class QiskitCircuitBuilder:
         circuit: QuantumCircuit,
         operation: BasicOperation | ControllableOperation,
     ) -> None:
+        """Applies a quantum operation to the given circuit.
+
+        Takes a quantum operation specified as a dictionary and applies it to the circuit.
+        Supports both basic operations (single-qubit gates, multi-qubit gates) and
+        controlled operations.
+
+        Args:
+            circuit: The Qiskit quantum circuit to apply the operation to.
+            operation: A dictionary describing the quantum operation to apply.
+                      Can be either a BasicOperation or ControllableOperation.
+
+        """
         operation_type = operation["type"]
         operation_methods: dict[str, OperationMethod] = {
             "H": self._apply_h_operation,

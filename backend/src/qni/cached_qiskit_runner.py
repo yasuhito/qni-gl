@@ -47,6 +47,25 @@ class CachedQiskitRunner:
         self.last_cache_key: tuple | None = None
 
     def run(self, request_data: CircuitRequestData) -> list[QiskitStepResult]:
+        """Execute quantum circuit with caching optimization.
+
+        Returns cached results if available for the given circuit_id and step_index
+        combination. Otherwise, executes the circuit using QiskitRunner, caches the
+        results, and returns them.
+
+        Args:
+            request_data: Circuit request data containing circuit_id, steps,
+                         qubit_count, until_step_index, device, and other parameters.
+
+        Returns:
+            list[QiskitStepResult]: List of execution results for each step, containing
+                                   measurement results and state vector amplitudes.
+
+        Note:
+            Cache key is a tuple of (circuit_id, until_step_index). Cache is invalidated
+            when either circuit_id or until_step_index changes.
+
+        """
         cache_key = (request_data.circuit_id, request_data.until_step_index)
 
         if self.last_cache_key == cache_key:
