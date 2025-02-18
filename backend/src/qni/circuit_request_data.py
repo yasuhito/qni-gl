@@ -14,7 +14,7 @@ class CircuitRequestData:
     It provides properties to access various parameters of the request in a structured manner.
     """
 
-    def __init__(self, form: ImmutableMultiDict[str, str]):
+    def __init__(self, form: ImmutableMultiDict[str, str]) -> None:
         """Initialize the CircuitRequestData object with form data.
 
         :param form: The form data received from the request.
