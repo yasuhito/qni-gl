@@ -34,7 +34,8 @@ class BasicOperation(TypedDict):
 
     Represents single-qubit gates and non-controlled multi-qubit operations.
 
-    Attributes:
+    Attributes
+    ----------
         type: The type of quantum operation (e.g., "H", "X", "Y", "Z", "Swap")
         targets: List of target qubit indices the operation acts on
 
@@ -50,7 +51,8 @@ class ControllableOperation(TypedDict):
     Represents quantum operations that can be controlled by other qubits,
     such as controlled-NOT, controlled-Y, and controlled-Z gates.
 
-    Attributes:
+    Attributes
+    ----------
         type: The type of quantum operation (e.g., "X", "Y", "Z")
         targets: List of target qubit indices the operation acts on
         controls: List of control qubit indices
@@ -80,7 +82,8 @@ class QiskitRunner:
     The runner works with QiskitCircuitBuilder to convert high-level quantum
     operations into executable Qiskit circuits.
 
-    Attributes:
+    Attributes
+    ----------
         logger: Optional logging instance for debug output
         circuit: Current quantum circuit being executed
         steps: List of quantum operations to execute
@@ -93,6 +96,7 @@ class QiskitRunner:
         """Initialize QiskitRunner with an optional logger.
 
         Args:
+        ----
             logger (logging.Logger | None, optional): Logger instance for debug output.
             Defaults to None.
 
@@ -112,6 +116,7 @@ class QiskitRunner:
         """Execute the specified quantum circuit and return the results of each step.
 
         Args:
+        ----
             steps (list): A list of steps to execute.
             qubit_count (int | None, optional): The number of qubits. Defaults to None.
             until_step_index (int | None, optional): The index of the step until which
@@ -120,6 +125,7 @@ class QiskitRunner:
             Defaults to "CPU".
 
         Returns:
+        -------
             list: A list containing the results of each step. Each result is
                 a dictionary including measured bits and amplitudes.
 

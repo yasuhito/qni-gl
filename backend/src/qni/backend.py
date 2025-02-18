@@ -42,7 +42,8 @@ def backend() -> tuple[Response, int]:
     runs the quantum circuit simulation using Qiskit,
     and returns the simulation results in JSON format.
 
-    Returns:
+    Returns
+    -------
         Response: A JSON response containing the simulation results or an error message.
 
     """
@@ -65,7 +66,8 @@ def handle_circuit_request() -> tuple[Response, int]:
     Processes the circuit data from the request form, executes the circuit
     using the cached Qiskit runner, and returns the simulation results.
 
-    Returns:
+    Returns
+    -------
         tuple[Response, int]: A tuple containing:
             - JSON response with circuit execution results
             - HTTP status code 200
@@ -90,6 +92,7 @@ class EmptyStepsError(ValueError):
         """Initialize EmptyStepsError with the empty steps list.
 
         Args:
+        ----
             steps (list): The empty steps list that caused the error.
 
         """
@@ -103,6 +106,7 @@ class InvalidQubitCountError(ValueError):
         """Initialize InvalidQubitCountError with the invalid qubit count.
 
         Args:
+        ----
             qubit_count (int): The invalid qubit count that caused the error.
 
         """
@@ -115,7 +119,8 @@ def handle_export_request() -> tuple[Response, int]:
     Converts the quantum circuit specified in the request to QASM format.
     Validates input parameters and handles potential errors.
 
-    Returns:
+    Returns
+    -------
         tuple[Response, int]: A tuple containing:
             - JSON response with QASM representation or error message
             - HTTP status code (200 for success, 400 for errors)

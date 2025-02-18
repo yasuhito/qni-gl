@@ -22,7 +22,8 @@ class CircuitRequestData:
     - Providing type-safe access to circuit parameters
     - Converting data types for circuit execution
 
-    Attributes:
+    Attributes
+    ----------
         _form: ImmutableMultiDict containing the raw form data
 
     """

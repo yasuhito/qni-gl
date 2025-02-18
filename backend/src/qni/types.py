@@ -22,7 +22,8 @@ class StepResultWithoutAmplitudes(TypedDict):
     Used when only measurement results are needed, typically for intermediate
     steps in circuit execution.
 
-    Attributes:
+    Attributes
+    ----------
         measuredBits: Dictionary mapping qubit indices to their measured values (0 or 1)
 
     """
@@ -36,7 +37,8 @@ class StepResultWithAmplitudes(TypedDict):
     Used for steps where both measurement results and quantum state amplitudes
     are required.
 
-    Attributes:
+    Attributes
+    ----------
         amplitudes: Dictionary mapping basis state indices to their complex amplitudes
         measuredBits: Dictionary mapping qubit indices to their measured values (0 or 1)
 
@@ -52,7 +54,8 @@ class QiskitStepResultWithAmplitudes(TypedDict):
     Similar to StepResultWithAmplitudes but uses Qiskit's complex number format
     for amplitude representation.
 
-    Attributes:
+    Attributes
+    ----------
         amplitudes: Dictionary mapping basis state indices to Qiskit complex amplitudes
         measuredBits: Dictionary mapping qubit indices to their measured values (0 or 1)
 
@@ -71,7 +74,8 @@ class QiskitStepResult(TypedDict, total=False):
     Allows optional amplitude information while maintaining type safety.
     Used by QiskitRunner to return execution results.
 
-    Attributes:
+    Attributes
+    ----------
         amplitudes: Optional dictionary of Qiskit complex amplitudes
         measuredBits: Dictionary mapping qubit indices to their measured values (0 or 1)
 

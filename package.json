@@ -8,7 +8,7 @@
     "test:backend": "cd backend && uv run pytest",
     "test:frontend": "cd frontend && yarn test",
     "test": "npm run test:backend && npm run test:frontend",
-    "lint:backend": "cd backend && hatch fmt",
+    "lint:backend": "cd backend && uv run ruff check . && uv run ruff format .",
     "lint:frontend": "cd frontend && yarn lint",
     "lint": "npm run lint:backend && npm run lint:frontend",
     "doc:backend": "cd backend && hatch run docs:build",

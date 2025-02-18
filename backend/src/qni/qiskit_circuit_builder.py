@@ -33,7 +33,8 @@ class BasicOperation(TypedDict):
 
     Used for single-qubit gates and non-controlled multi-qubit operations.
 
-    Attributes:
+    Attributes
+    ----------
         type: The type of quantum operation (e.g., "H", "X", "Y", "Z", "Swap")
         targets: List of target qubit indices the operation acts on
 
@@ -48,7 +49,8 @@ class ControllableOperation(TypedDict):
 
     Used for quantum operations that can be controlled by other qubits.
 
-    Attributes:
+    Attributes
+    ----------
         type: The type of quantum operation (e.g., "X", "Y", "Z")
         targets: List of target qubit indices the operation acts on
         controls: List of control qubit indices
@@ -80,7 +82,8 @@ class QiskitCircuitBuilder:
     Each operation is represented as a dictionary containing the operation type
     and target qubits, with optional control qubits for controlled operations.
 
-    Attributes:
+    Attributes
+    ----------
         _PAIR_OPERATION_COUNT: Constant defining the number of qubits for
                 two-qubit gates
 
@@ -100,11 +103,13 @@ class QiskitCircuitBuilder:
         in parallel.
 
         Args:
+        ----
             steps: A list of quantum operations to be applied to the circuit.
                   Each step is a list of operations that can be executed in parallel.
             qubit_count: The number of qubits in the circuit.
 
         Returns:
+        -------
             A Qiskit QuantumCircuit object containing all the specified operations.
 
         """
@@ -131,6 +136,7 @@ class QiskitCircuitBuilder:
         multi-qubit gates) and controlled operations.
 
         Args:
+        ----
             circuit: The Qiskit quantum circuit to apply the operation to.
             operation: A dictionary describing the quantum operation to apply.
                       Can be either a BasicOperation or ControllableOperation.
@@ -162,7 +168,8 @@ class QiskitCircuitBuilder:
     class UnknownOperationError(ValueError):
         """Exception raised when an unknown operation type is encountered.
 
-        Attributes:
+        Attributes
+        ----------
             operation_type: The type of the unknown operation
 
         """
@@ -171,6 +178,7 @@ class QiskitCircuitBuilder:
             """Initialize UnknownOperationError with the unknown operation type.
 
             Args:
+            ----
                 operation_type (str): The type of the unknown operation that
                     caused the error.
 

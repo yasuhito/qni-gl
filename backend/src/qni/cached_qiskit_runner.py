@@ -28,7 +28,8 @@ class CachedQiskitRunner:
     The cache is invalidated when either the circuit ID or step index changes,
     ensuring that modified circuits are properly re-executed.
 
-    Attributes:
+    Attributes
+    ----------
         logger: Logger instance for tracking cache hits/misses
         cache: List of cached quantum circuit results
         last_cache_key: Tuple of (circuit_id, step_index) for the last execution
@@ -39,6 +40,7 @@ class CachedQiskitRunner:
         """Initialize the cached runner.
 
         Args:
+        ----
             logger: Logger instance for recording cache events
 
         """
@@ -54,14 +56,17 @@ class CachedQiskitRunner:
         results, and returns them.
 
         Args:
+        ----
             request_data: Circuit request data containing circuit_id, steps,
                          qubit_count, until_step_index, device, and other parameters.
 
         Returns:
+        -------
             list[QiskitStepResult]: List of execution results for each step, containing
                                    measurement results and state vector amplitudes.
 
         Note:
+        ----
             Cache key is a tuple of (circuit_id, until_step_index). Cache is invalidated
             when either circuit_id or until_step_index changes.
 
