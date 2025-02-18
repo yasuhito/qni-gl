@@ -107,8 +107,8 @@ class QiskitCircuitBuilder:
         else:
             circuit.h(operation["targets"])
 
+    @staticmethod
     def _apply_x_operation(
-        self,
         circuit: QuantumCircuit,
         operation: BasicOperation | ControllableOperation,
     ) -> None:
@@ -210,15 +210,17 @@ class QiskitCircuitBuilder:
         else:
             circuit.id(operation["targets"])
 
-    def _apply_write0(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+    @staticmethod
+    def _apply_write0(circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.reset(operation["targets"])
 
-    def _apply_write1(self, circuit: QuantumCircuit, operation: BasicOperation) -> None:
+    @staticmethod
+    def _apply_write1(circuit: QuantumCircuit, operation: BasicOperation) -> None:
         circuit.reset(operation["targets"])
         circuit.x(operation["targets"])
 
+    @staticmethod
     def _apply_measure_operation(
-        self,
         circuit: QuantumCircuit,
         operation: BasicOperation,
     ) -> None:
@@ -227,8 +229,8 @@ class QiskitCircuitBuilder:
         for target in operation["targets"]:
             circuit.measure(target, creg[target])
 
+    @staticmethod
     def _apply_controlled_u(
-        self,
         circuit: QuantumCircuit,
         operation: BasicOperation | ControllableOperation,
         gate: ControlledGate,
