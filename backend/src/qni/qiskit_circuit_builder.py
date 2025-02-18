@@ -9,11 +9,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypedDict, cast
 
-from qiskit import (  # type: ignore
+from qiskit import (  # type: ignore[import-untyped]
     ClassicalRegister,
-    QuantumCircuit,  # type: ignore
+    QuantumCircuit,  # type: ignore[import-untyped]
 )
-from qiskit.circuit.library import (  # type: ignore
+from qiskit.circuit.library import (  # type: ignore[import-untyped]
     HGate,
     SdgGate,
     SGate,
@@ -25,7 +25,7 @@ from qiskit.circuit.library import (  # type: ignore
 )
 
 if TYPE_CHECKING:
-    from qiskit.circuit import ControlledGate  # type: ignore
+    from qiskit.circuit import ControlledGate  # type: ignore[import-untyped]
 
 
 class BasicOperation(TypedDict):
