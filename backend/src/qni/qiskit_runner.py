@@ -1,20 +1,7 @@
-"""A Qiskit-based quantum circuit execution engine for the Qni simulator.
+"""Core quantum circuit execution engine for the Qni simulator.
 
-This module provides the QiskitRunner class which is responsible for:
-1. Building and executing quantum circuits using Qiskit
-2. Managing circuit execution state and measurement results
-3. Supporting both CPU and GPU-based simulation
-4. Extracting and processing simulation results (state vectors and measurements)
-
-Key features:
-- Step-by-step circuit execution with state vector extraction
-- Support for measurement operations and result processing
-- Automatic qubit count detection from circuit operations
-- GPU acceleration support through Qiskit-Aer
-- Caching of intermediate results for performance optimization
-
-The runner works in conjunction with QiskitCircuitBuilder to convert
-high-level quantum operations into executable Qiskit circuits.
+Provides the QiskitRunner class which serves as the primary interface between
+Qni's high-level circuit operations and Qiskit's execution environment.
 """
 
 from __future__ import annotations
@@ -43,11 +30,33 @@ from qni.types import (
 
 
 class BasicOperation(TypedDict):
+    """A dictionary type representing a basic quantum operation.
+
+    Represents single-qubit gates and non-controlled multi-qubit operations.
+
+    Attributes:
+        type: The type of quantum operation (e.g., "H", "X", "Y", "Z", "Swap")
+        targets: List of target qubit indices the operation acts on
+
+    """
+
     type: str
     targets: list[int]
 
 
 class ControllableOperation(TypedDict):
+    """A dictionary type representing a controlled quantum operation.
+
+    Represents quantum operations that can be controlled by other qubits,
+    such as controlled-NOT, controlled-Y, and controlled-Z gates.
+
+    Attributes:
+        type: The type of quantum operation (e.g., "X", "Y", "Z")
+        targets: List of target qubit indices the operation acts on
+        controls: List of control qubit indices
+
+    """
+
     type: str
     targets: list[int]
     controls: list[int]
@@ -60,6 +69,24 @@ OperationMethod = Callable[
 
 
 class QiskitRunner:
+    """A Qiskit-based quantum circuit execution engine.
+
+    Responsible for:
+    - Building and executing quantum circuits using Qiskit
+    - Managing circuit execution state and measurement results
+    - Supporting both CPU and GPU-based simulation
+    - Extracting simulation results (state vectors and measurements)
+
+    The runner works with QiskitCircuitBuilder to convert high-level quantum
+    operations into executable Qiskit circuits.
+
+    Attributes:
+        logger: Optional logging instance for debug output
+        circuit: Current quantum circuit being executed
+        steps: List of quantum operations to execute
+
+    """
+
     _STATEVECTOR_LABEL = "state_at_until_step"
 
     def __init__(self, logger: logging.Logger | None = None) -> None:

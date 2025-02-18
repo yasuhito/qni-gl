@@ -1,12 +1,6 @@
-"""Data class module for handling quantum circuit request parameters.
+"""Request data handling for the Qni quantum circuit simulator.
 
-This module provides the CircuitRequestData class which:
-1. Parses and validates form data from HTTP requests
-2. Provides type-safe access to circuit parameters
-3. Handles data conversion for circuit execution
-
-The class works with QiskitRunner to execute quantum circuits and is used
-by the backend API to process incoming requests.
+Provides type-safe access to HTTP form data for quantum circuit execution.
 """
 
 from __future__ import annotations
@@ -21,8 +15,16 @@ from qni.types import DeviceType
 
 
 class CircuitRequestData:
-    """The `CircuitRequestData` class is designed to encapsulate and manage the quantum circuit data received from a service worker.
-    It provides properties to access various parameters of the request in a structured manner.
+    """A data class for handling quantum circuit request parameters.
+
+    Responsible for:
+    - Parsing and validating HTTP form data
+    - Providing type-safe access to circuit parameters
+    - Converting data types for circuit execution
+
+    Attributes:
+        _form: ImmutableMultiDict containing the raw form data
+
     """
 
     def __init__(self, form: ImmutableMultiDict[str, str]) -> None:

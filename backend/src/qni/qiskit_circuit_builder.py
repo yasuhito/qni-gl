@@ -1,19 +1,7 @@
-"""A builder class for constructing Qiskit quantum circuits from a sequence of quantum operations.
+"""Qiskit circuit construction utilities for the Qni simulator.
 
-This module provides the QiskitCircuitBuilder class which is responsible for:
-1. Converting high-level quantum operations into Qiskit circuit instructions
-2. Supporting both basic and controlled quantum gates
-3. Handling measurement operations and state preparation
-
-The builder supports various quantum gates including:
-- Basic gates (H, X, Y, Z, S, T and their conjugates)
-- Controlled operations (CNOT, controlled-Y, controlled-Z)
-- State preparation (|0⟩, |1⟩)
-- Measurement operations
-- Multi-qubit operations (SWAP)
-
-Each operation is represented as a dictionary containing the operation type
-and target qubits, with optional control qubits for controlled operations.
+Provides builder classes to convert Qni's high-level quantum operations
+into executable Qiskit circuits.
 """
 
 from __future__ import annotations
@@ -41,11 +29,32 @@ if TYPE_CHECKING:
 
 
 class BasicOperation(TypedDict):
+    """A dictionary type representing a basic quantum operation.
+
+    Used for single-qubit gates and non-controlled multi-qubit operations.
+
+    Attributes:
+        type: The type of quantum operation (e.g., "H", "X", "Y", "Z", "Swap")
+        targets: List of target qubit indices the operation acts on
+
+    """
+
     type: str
     targets: list[int]
 
 
 class ControllableOperation(TypedDict):
+    """A dictionary type representing a controlled quantum operation.
+
+    Used for quantum operations that can be controlled by other qubits.
+
+    Attributes:
+        type: The type of quantum operation (e.g., "X", "Y", "Z")
+        targets: List of target qubit indices the operation acts on
+        controls: List of control qubit indices
+
+    """
+
     type: str
     targets: list[int]
     controls: list[int]
@@ -58,6 +67,24 @@ OperationMethod = Callable[
 
 
 class QiskitCircuitBuilder:
+    """A builder for constructing Qiskit quantum circuits.
+
+    Converts high-level quantum operations into Qiskit circuit instructions.
+    Supports a wide range of quantum gates and operations:
+    - Basic gates (H, X, Y, Z, S, T and conjugates)
+    - Controlled operations (CNOT, controlled-Y, controlled-Z)
+    - State preparation (|0⟩, |1⟩)
+    - Measurement operations
+    - Multi-qubit operations (SWAP)
+
+    Each operation is represented as a dictionary containing the operation type
+    and target qubits, with optional control qubits for controlled operations.
+
+    Attributes:
+        _PAIR_OPERATION_COUNT: Constant defining the number of qubits for two-qubit gates
+
+    """
+
     _PAIR_OPERATION_COUNT = 2
 
     def build_circuit_for_export(
@@ -105,10 +132,10 @@ class QiskitCircuitBuilder:
             raise self.UnknownOperationError(operation_type)
 
     class UnknownOperationError(ValueError):
-        """Raised when an unknown operation is specified.
+        """Exception raised when an unknown operation type is encountered.
 
         Attributes:
-            operation_type (str): The type of the unknown operation.
+            operation_type: The type of the unknown operation
 
         """
 

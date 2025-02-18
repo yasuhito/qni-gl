@@ -1,11 +1,6 @@
-"""Logging configuration module for the Qni backend server.
+"""Logging configuration for the Qni quantum circuit simulator.
 
-This module provides:
-1. Custom log format configuration
-2. File and console logging handlers setup
-3. Log level management (INFO/DEBUG)
-
-Used by backend.py to control application-wide logging behavior.
+Configures file and console logging handlers with custom formatting.
 """
 
 import logging
