@@ -81,7 +81,8 @@ class QiskitCircuitBuilder:
     and target qubits, with optional control qubits for controlled operations.
 
     Attributes:
-        _PAIR_OPERATION_COUNT: Constant defining the number of qubits for two-qubit gates
+        _PAIR_OPERATION_COUNT: Constant defining the number of qubits for
+                two-qubit gates
 
     """
 
@@ -125,9 +126,9 @@ class QiskitCircuitBuilder:
     ) -> None:
         """Apply a quantum operation to the given circuit.
 
-        Takes a quantum operation specified as a dictionary and applies it to the circuit.
-        Supports both basic operations (single-qubit gates, multi-qubit gates) and
-        controlled operations.
+        Takes a quantum operation specified as a dictionary and applies it to
+        the circuit. Supports both basic operations (single-qubit gates,
+        multi-qubit gates) and controlled operations.
 
         Args:
             circuit: The Qiskit quantum circuit to apply the operation to.
@@ -170,7 +171,8 @@ class QiskitCircuitBuilder:
             """Initialize UnknownOperationError with the unknown operation type.
 
             Args:
-                operation_type (str): The type of the unknown operation that caused the error.
+                operation_type (str): The type of the unknown operation that
+                    caused the error.
 
             """
             super().__init__(f"Unknown operation: {operation_type}")
