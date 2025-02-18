@@ -66,26 +66,46 @@ def handle_circuit_request() -> tuple[Response, int]:
     return jsonify(step_results), 200
 
 
+class EmptyStepsError(ValueError):
+    """Exception raised when steps list is empty"""
+
+    def __init__(self, steps: list) -> None:
+        super().__init__(f"Steps cannot be empty (got {steps})")
+
+
+class InvalidQubitCountError(ValueError):
+    """Exception raised when qubit count is invalid"""
+
+    def __init__(self, qubit_count: int) -> None:
+        super().__init__(f"Qubit count must be greater than 0 (got {qubit_count})")
+
+
 def handle_export_request() -> tuple[Response, int]:
     try:
-        steps = json.loads(request.form.get("steps", "[]"))
-        qubit_count = int(request.form.get("qubitCount", "0"))
-
-        if not steps or qubit_count <= 0:
-            return jsonify({"error": "Invalid input parameters"}), 400
+        steps, qubit_count = _parse_and_validate_export_parameters()
 
         qiskit_circuit_builder = QiskitCircuitBuilder()
         circuit = qiskit_circuit_builder.build_circuit_for_export(steps, qubit_count)
-
         qasm3 = dumps(circuit)
 
         return jsonify({"qasm3": qasm3}), 200
+
     except json.JSONDecodeError:
         return jsonify({"error": "Invalid JSON format"}), 400
-    except ValueError:
-        return jsonify({"error": "Invalid qubit count"}), 400
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (EmptyStepsError, InvalidQubitCountError) as e:
+        return jsonify({"error": str(e)}), 400
+
+
+def _parse_and_validate_export_parameters() -> tuple[list, int]:
+    steps = json.loads(request.form.get("steps", "[]"))
+    qubit_count = int(request.form.get("qubitCount", "0"))
+
+    if not steps:
+        raise EmptyStepsError(steps)
+    if qubit_count <= 0:
+        raise InvalidQubitCountError(qubit_count)
+
+    return steps, qubit_count
 
 
 def _log_request_data(request_data: CircuitRequestData) -> None:
