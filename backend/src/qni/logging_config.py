@@ -20,6 +20,18 @@ def _add_logger_handler(
 
 
 def setup_custom_logger() -> None:
+    """Configure and initialize the application's logging system.
+
+    Sets up both console and file logging handlers with custom formatting:
+    - Console handler: Outputs logs to stdout
+    - File handler: Writes logs to 'backend.log'
+
+    Both handlers are configured with:
+    - Log level: INFO for handlers, DEBUG for root logger
+    - Format: "[timestamp] [level] message"
+    - Timestamp format: "YYYY-MM-DD HH:MM:SS TZ"
+
+    """
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
