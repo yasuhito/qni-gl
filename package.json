@@ -11,7 +11,7 @@
     "lint:backend": "cd backend && uv run ruff check . && uv run ruff format .",
     "lint:frontend": "cd frontend && yarn lint",
     "lint": "npm run lint:backend && npm run lint:frontend",
-    "doc:backend": "cd backend && hatch run docs:build",
+    "doc:backend": "cd backend && PYTHONPATH=src uv run pdoc qni --html --output-dir docs/ --force",
     "doc:frontend": "cd frontend && yarn doc",
     "doc": "npm run doc:backend && npm run doc:frontend"
   },

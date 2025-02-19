@@ -58,12 +58,12 @@ class CachedQiskitRunner:
         Args:
         ----
             request_data: Circuit request data containing circuit_id, steps,
-                         qubit_count, until_step_index, device, and other parameters.
+                qubit_count, until_step_index, device, and other parameters.
 
         Returns:
         -------
             list[QiskitStepResult]: List of execution results for each step, containing
-                                   measurement results and state vector amplitudes.
+                measurement results and state vector amplitudes.
 
         Note:
         ----

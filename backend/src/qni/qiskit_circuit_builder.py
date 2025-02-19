@@ -85,7 +85,7 @@ class QiskitCircuitBuilder:
     Attributes
     ----------
         _PAIR_OPERATION_COUNT: Constant defining the number of qubits for
-                two-qubit gates
+            two-qubit gates
 
     """
 
@@ -105,7 +105,7 @@ class QiskitCircuitBuilder:
         Args:
         ----
             steps: A list of quantum operations to be applied to the circuit.
-                  Each step is a list of operations that can be executed in parallel.
+                Each step is a list of operations that can be executed in parallel.
             qubit_count: The number of qubits in the circuit.
 
         Returns:
@@ -139,7 +139,7 @@ class QiskitCircuitBuilder:
         ----
             circuit: The Qiskit quantum circuit to apply the operation to.
             operation: A dictionary describing the quantum operation to apply.
-                      Can be either a BasicOperation or ControllableOperation.
+                Can be either a BasicOperation or ControllableOperation.
 
         """
         operation_type = operation["type"]
