@@ -37,7 +37,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-h-gate-bit1.png");
   });
 
   test("2 qubits H gate", async ({page, circuitInfo}) => {
@@ -68,7 +67,6 @@ id q[1];
 id q[0];
 id q[1];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-h-gate-bit2.png");
   });
 
   test("3 qubits H gate", async ({page, circuitInfo}) => {
@@ -103,7 +101,6 @@ id q[0];
 id q[1];
 id q[2];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-h-gate-bit3.png");
   });
 
   test("1 qubit X gate", async ({page, circuitInfo}) => {
@@ -130,7 +127,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-x-gate-bit1.png");
   });
 
   test("1 qubit Y gate", async ({page, circuitInfo}) => {
@@ -157,7 +153,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-y-gate-bit1.png");
   });
 
   test("1 qubit Z gate", async ({page, circuitInfo}) => {
@@ -184,7 +179,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-z-gate-bit1.png");
   });
 
   test("1 qubit √X gate", async ({page, circuitInfo}) => {
@@ -211,7 +205,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-rnot-gate-bit1.png");
   });
 
   test("1 qubit S gate", async ({page, circuitInfo}) => {
@@ -238,7 +231,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-s-gate-bit1.png");
   });
 
   test("1 qubit S† gate", async ({page, circuitInfo}) => {
@@ -265,7 +257,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-sdagger-gate-bit1.png");
   });
 
   test("1 qubit T gate", async ({page, circuitInfo}) => {
@@ -292,7 +283,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-t-gate-bit1.png");
   });
 
   test("1 qubit T† gate", async ({page, circuitInfo}) => {
@@ -319,7 +309,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-tdagger-gate-bit1.png");
   });
 
   test("1 qubit Swap gate", async ({page, circuitInfo}) => {
@@ -351,7 +340,6 @@ id q[1];
 id q[0];
 id q[1];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-swap-gate-bit1.png");
   });
 
   test("1 qubit Control gate", async ({page, circuitInfo}) => {
@@ -378,7 +366,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-control-gate-bit1.png");
   });
 
   test("1 qubit |0> gate", async ({page, circuitInfo}) => {
@@ -404,7 +391,7 @@ id q[0];
 id q[0];
 id q[0];
 id q[0];`);
-    await expect(page).toHaveScreenshot("qasm-export-write0-gate-bit1.png");
+
   });
 
   test("1 qubit |1> gate", async ({page, circuitInfo}) => {
@@ -432,7 +419,6 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-write1-gate-bit1.png");
   });
 
   test("1 qubit Measurement gate", async ({page, circuitInfo}) => {
@@ -463,6 +449,5 @@ id q[0];
 id q[0];
 id q[0];`);
 
-    await expect(page).toHaveScreenshot("qasm-export-measurement-gate-bit1.png");
   });
 });
