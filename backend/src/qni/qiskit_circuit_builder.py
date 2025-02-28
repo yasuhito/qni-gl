@@ -9,17 +9,18 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypedDict, cast
 
+import numpy as np  # type: ignore[import-untyped]
 from qiskit import (  # type: ignore[import-untyped]
     ClassicalRegister,
     QuantumCircuit,  # type: ignore[import-untyped]
 )
 from qiskit.circuit.library import (  # type: ignore[import-untyped]
     HGate,
+    RXGate,
     SdgGate,
     SGate,
     TdgGate,
     TGate,
-    XGate,
     YGate,
     ZGate,
 )
@@ -233,9 +234,9 @@ class QiskitCircuitBuilder:
         operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
-            self._apply_controlled_u(circuit, operation, XGate().power(1 / 2))
+            self._apply_controlled_u(circuit, operation, RXGate(np.pi / 2))
         else:
-            circuit.append(XGate().power(1 / 2), qargs=operation["targets"])
+            circuit.append(RXGate(np.pi / 2), qargs=operation["targets"])
 
     def _apply_s_operation(
         self,
