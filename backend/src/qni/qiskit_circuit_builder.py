@@ -17,9 +17,9 @@ from qiskit.circuit.library import (  # type: ignore[import-untyped]
     HGate,
     SdgGate,
     SGate,
+    SXGate,
     TdgGate,
     TGate,
-    XGate,
     YGate,
     ZGate,
 )
@@ -233,9 +233,9 @@ class QiskitCircuitBuilder:
         operation: BasicOperation | ControllableOperation,
     ) -> None:
         if "controls" in operation:
-            self._apply_controlled_u(circuit, operation, XGate().power(1 / 2))
+            self._apply_controlled_u(circuit, operation, SXGate())
         else:
-            circuit.append(XGate().power(1 / 2), qargs=operation["targets"])
+            circuit.append(SXGate(), qargs=operation["targets"])
 
     def _apply_s_operation(
         self,
