@@ -14,6 +14,12 @@ docker イメージを起動
 docker run --gpus all -p 8000:8000 --rm -it qni-gl
 ```
 
+ログを取得するには
+
+```shell
+docker build --progress=plain -f Dockerfile . -t qni-gl
+```
+
 ブラウザで `http://localhost:8000/` を開く
 
 ## .htpasswd 認証を有効にするには

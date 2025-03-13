@@ -1,1 +1,14 @@
 node_modules
+frontend/output.css
+.git
+.gitignore
+.vscode
+node_modules
+*.log
+*.tmp
+*.bak
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
