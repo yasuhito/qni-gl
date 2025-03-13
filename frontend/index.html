@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <title>Qni GL</title>
+    <link href="/frontend/output.css" rel="stylesheet">
   </head>
-  <body style="margin: 0">
-    <div id="app">
-      <!-- TODO: Tailwind CSSクラスに書き換える -->
-      <button id="exportButton" style="position: absolute; top: 16px; right: 16px;">Export to QASM</button>
+  <body class="m-0">
+    <div id="app" class="relative">
+      <button
+      id="exportButton"
+      class="absolute top-16 right-10 bg-sky-500 hover:bg-sky-600 active:bg-purple-500 border-2 border-sky-700 hover:border-purple-500 active:border-purple-700 text-white font-semibold h-8 px-1 rounded-sm shadow-2xl active:shadow-none"
+      >
+        Export to QASM
+      </button>
     </div>
     <script type="module" src="/main.ts"></script>
   </body>

@@ -1,4 +1,5 @@
-import { App } from "./src/app";
+import {App} from "./src/app";
+import "./input.css";
 
 /** The PixiJS app Application instance, shared across the project */
 export const app = App.instance;
