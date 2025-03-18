@@ -27,9 +27,7 @@ test.describe("QASM Export", () => {
     if (buttonBox) {
       await page.mouse.move(buttonBox.x + buttonBox.width / 2, buttonBox.y + buttonBox.height / 2);
       await page.mouse.down();
-      await page.waitForTimeout(1000);
       await expect(page).toHaveScreenshot("qasm-export-button-click.png");
-      await page.waitForTimeout(1000);
       await page.mouse.up();
     }
   });
