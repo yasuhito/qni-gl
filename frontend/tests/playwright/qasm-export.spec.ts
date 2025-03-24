@@ -7,11 +7,31 @@ test.describe("QASM Export", () => {
     await page.goto("/");
   });
 
+  test("Button default state", async ({page}) => {
+    const exportButton = page.locator('#exportButton');
+
+
+    await expect(page).toHaveScreenshot("qasm-export-button-default.png");
+  });
+
   test("Button hover", async ({page}) => {
     const exportButton = page.locator('button:has-text("Export to QASM")');
     await exportButton.hover();
     await expect(page).toHaveScreenshot("qasm-export-button-hover.png");
   });
+
+  test("Button click", async ({page}) => {
+    const exportButton = page.locator('#exportButton');
+    const buttonBox = await exportButton.boundingBox();
+
+    if (buttonBox) {
+      await page.mouse.move(buttonBox.x + buttonBox.width / 2, buttonBox.y + buttonBox.height / 2);
+      await page.mouse.down();
+      await expect(page).toHaveScreenshot("qasm-export-button-click.png");
+      await page.mouse.up();
+    }
+  });
+
 
   test("1 qubit H gate", async ({page, circuitInfo}) => {
     const hGate = circuitInfo.gatePalette.hGate;
@@ -199,7 +219,7 @@ id q[0];`);
     expect(fileContent).toContain(`OPENQASM 3.0;
 include "stdgates.inc";
 qubit[1] q;
-rx(pi/2) q[0];
+sx q[0];
 id q[0];
 id q[0];
 id q[0];
