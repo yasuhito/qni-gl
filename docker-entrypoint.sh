@@ -9,7 +9,7 @@ VITE_USE_GPU=true yarn build
 
 # Start gunicorn
 cd /qni-gl/backend
-gunicorn --bind unix:/tmp/gunicorn.sock --daemon
+uv run gunicorn --bind unix:/tmp/gunicorn.sock --daemon
 
 # Start nginx
 nginx
