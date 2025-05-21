@@ -208,6 +208,7 @@ export class App {
       this.runSimulator,
       this
     );
+    this.circuitFrame.circuit.on(OPERATION_EVENTS.SNAPPED, this.handleCircuitChange, this);
   }
 
   private setupStateVectorEventHandlers() {
@@ -706,6 +707,8 @@ export class App {
 
     this.circuit.update();
 
+    this.updateUrlWithCircuit();
+
     this.updateStateVectorComponentQubitCount();
     this.stateVectorFrame.repositionAndResize(
       this.frameDivider.y + this.frameDivider.height,
@@ -775,5 +778,23 @@ export class App {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+ // 量子回路変更時に呼び出されるハンドラ
+  private handleCircuitChange() {
+    this.updateUrlWithCircuit();
+  }
+
+  // 量子回路状態をURLにエンコードして更新する
+  private updateUrlWithCircuit(): void {
+    const circuitJson = this.circuit.toJSON();
+    const encodedJson = encodeURIComponent(circuitJson);
+
+    // 相対パスでURLを更新する
+    const currentPath = location.pathname;
+    const lastSlashIndex = currentPath.lastIndexOf('/');
+    const basePath = lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : '/';
+    const newPath = basePath + encodedJson;
+    history.pushState('', '', newPath);
   }
 }
