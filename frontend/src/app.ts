@@ -116,6 +116,8 @@ export class App {
 
       this.setupFrames();
 
+      this.loadCircuitFromUrl();
+
       // 回路の最初のステップをアクティブにする
       // これによって、最初のステップの状態ベクトルが表示される
       this.circuit.fetchStep(0).activate();
@@ -796,5 +798,21 @@ export class App {
     const basePath = lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : '/';
     const newPath = basePath + encodedJson;
     history.pushState('', '', newPath);
+  }
+
+   /**
+   * URLのパスから量子回路の状態をデコードしロードする
+   */
+   private loadCircuitFromUrl(): void {
+    const currentPath = location.pathname;
+    const lastSlashIndex = currentPath.lastIndexOf('/');
+    const encodedCircuitJson = lastSlashIndex >= 0 ? currentPath.substring(lastSlashIndex + 1) : '';
+
+    //TODO:例外処理の追加
+    if (encodedCircuitJson) {
+        const circuitJson = decodeURIComponent(encodedCircuitJson);
+        console.log("Decoded circuit JSON from URL:", circuitJson); 
+        this.circuit.fromJSON(circuitJson);
+      }
   }
 }

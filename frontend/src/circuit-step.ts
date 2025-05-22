@@ -9,6 +9,19 @@ import { SwapGate } from "./swap-gate";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
 import { isControllable } from "./controllable-mixin";
+import { OperationComponent } from "./operation-component"; 
+import { HGate } from "./h-gate"; 
+import { XGate } from "./x-gate"; 
+import { YGate } from "./y-gate";
+import { ZGate } from "./z-gate"; 
+import { SGate } from "./s-gate";
+import { SDaggerGate } from "./s-dagger-gate"; 
+import { TGate } from "./t-gate"; 
+import { TDaggerGate } from "./t-dagger-gate"; 
+import { RnotGate } from "./rnot-gate"; 
+import { Write0Gate } from "./write0-gate"; 
+import { Write1Gate } from "./write1-gate"; 
+import { MeasurementGate } from "./measurement-gate"; 
 
 /**
  * Represents a single step in a quantum circuit.
@@ -259,6 +272,58 @@ export class CircuitStep extends Container {
   toJSON() {
     const jsons = this.dropzones.map((each) => each.toJSON());
     return `[${jsons.join(",")}]`;
+  }
+
+  /**
+   * JSONデータからCircuitStepのインスタンスを生成する
+   *
+   * @param stepJson ステップのJSONデータ
+   * @returns 復元されたCircuitStepのインスタンス
+   */
+  static fromJSON(stepJson: any[]): CircuitStep {
+    if (!Array.isArray(stepJson)) {
+      console.error("Invalid step data format:", stepJson);
+      return new CircuitStep(1);
+    }
+
+    const wireCount = stepJson.length;
+    const circuitStep = new CircuitStep(wireCount);
+
+    stepJson.forEach((dropzoneState: any, index) => {
+      const dropzone = circuitStep.fetchDropzone(index);
+
+      if (typeof dropzoneState === 'string') {
+        const operationInstance: OperationComponent | null = this.createOperationFromLabel(dropzoneState); 
+        if (operationInstance) {
+          dropzone.assign(operationInstance);
+        }
+      } 
+    });
+
+    circuitStep.updateConnections();
+
+    return circuitStep;
+  }
+
+  private static createOperationFromLabel(label: string): OperationComponent | null {
+    switch (label) {
+      case "H": return new HGate();
+      case "X": return new XGate();
+      case "Y": return new YGate();
+      case "Z": return new ZGate();
+      case "S": return new SGate();
+      case "S†": return new SDaggerGate();
+      case "T": return new TGate();
+      case "T†": return new TDaggerGate();
+      case "√X": return new RnotGate();
+      case "|0>": return new Write0Gate();
+      case "|1>": return new Write1Gate();
+      case "Measure": return new MeasurementGate();
+      //TODO: 複数量子ゲートの対応
+      default:
+        console.warn(`Unknown operation label in JSON: ${label}. Skipping.`);
+        return null; 
+    }
   }
 
   private qubitNumberOf(dropzone: Dropzone): number {
