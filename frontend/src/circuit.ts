@@ -113,10 +113,12 @@ export class Circuit extends Container {
   }
 
   update(): void {
-    const activeStepIndex = this.activeStepIndex;
-    if (activeStepIndex == null) {
-      throw new Error("activeStepIndex == null");
-    }
+    const activeStepIndex = this.activeStepIndex !== null ? this.activeStepIndex : 0;
+    if (this.steps.length === 0) {
+      console.warn("Circuit has no steps to update.");
+      this.markerManager.update([]);
+      return;
+   }
 
     this.removeEmptySteps();
     this.appendMinimumSteps();
@@ -124,7 +126,15 @@ export class Circuit extends Container {
     this.redrawDropzoneInputAndOutputWires();
     this.updateConnections();
 
-    this.fetchStep(activeStepIndex).activate();
+    // 計算された activeStepIndex を使用してステップをアクティブにする
+    if (activeStepIndex >= 0 && activeStepIndex < this.steps.length) {
+      this.fetchStep(activeStepIndex).activate();
+    } else {
+      // activeStepIndex が範囲外の場合は最初のステップをアクティブにする
+      console.warn(`Active step index ${activeStepIndex} out of bounds. Activating first step (0).`);
+      this.fetchStep(0).activate();
+    } 
+
     this.markerManager.update(this.steps);
   }
 
@@ -178,6 +188,10 @@ export class Circuit extends Container {
         circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
         circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
       });
+
+      if (this.steps.length > 0) {
+        this.fetchStep(0).activate();
+      }
 
       this.update();
   }
