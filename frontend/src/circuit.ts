@@ -151,7 +151,9 @@ export class Circuit extends Container {
   toJSON() {
     const cols: string[] = [];
     for (const each of this.steps) {
-      cols.push(each.toJSON());
+      if (!each.isEmpty) {
+        cols.push(each.toJSON());
+      }
     }
     return `{"cols":[${cols.join(",")}]}`;
   }
