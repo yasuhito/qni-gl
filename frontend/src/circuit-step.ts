@@ -302,9 +302,6 @@ static fromJSON(stepJson: any[]): CircuitStep {
   const swapIdx = ops
     .map((op, i) => (op instanceof SwapGate ? i : -1))
     .filter(i => i !== -1);
-  if (swapIdx.length === 2) {
-    // TODO:ops[swapIdx[0]].pairIndex = swapIdx[1]; など
-  }
 
   // コントロールゲートとXゲートの関係
   const controlIdx = ops
@@ -344,14 +341,11 @@ private static createOperationFromLabel(label: string): OperationComponent | nul
     case "S†": return new SDaggerGate();
     case "T": return new TGate();
     case "T†": return new TDaggerGate();
-    case "√X": return new RnotGate();
     case "X^½": return new RnotGate();
     case "|0>": return new Write0Gate();
     case "|1>": return new Write1Gate();
     case "Measure": return new MeasurementGate();
-    case "@": return new ControlGate();
     case "•": return new ControlGate();
-    case "×": return new SwapGate();
     case "Swap": return new SwapGate();
     default:
       console.warn(`Unknown operation label in JSON: ${label}. Skipping.`);
