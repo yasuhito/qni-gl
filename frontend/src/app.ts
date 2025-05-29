@@ -816,11 +816,13 @@ export class App {
     const encodedCircuitJson =
       lastSlashIndex >= 0 ? currentPath.substring(lastSlashIndex + 1) : "";
 
-    //TODO:例外処理の追加
     if (encodedCircuitJson) {
       const circuitJson = decodeURIComponent(encodedCircuitJson);
-      console.log("Decoded circuit JSON from URL:", circuitJson);
-      this.circuit.fromJSON(circuitJson);
+      try {
+        this.circuit.fromJSON(circuitJson);
+      } catch (error) {
+        console.error("Failed to load circuit from URL:", error);
+      }
     }
   }
 }
