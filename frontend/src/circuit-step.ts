@@ -329,7 +329,9 @@ export class CircuitStep extends Container {
   }
 
   /**
-   * ラベルからゲートインスタンスを生成
+   * 指定された文字列ラベルに対応するゲートインスタンスを生成する
+   * @param label ゲートのラベル文字列
+   * @returns 生成されたOperationComponentインスタンス、または対応するラベルがない場合はnull
    */
   private static createOperationFromLabel(
     label: string

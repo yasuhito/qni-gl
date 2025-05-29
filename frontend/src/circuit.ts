@@ -161,6 +161,10 @@ export class Circuit extends Container {
     return this.steps.map((each) => each.serialize());
   }
 
+  /**
+   * Circuitインスタンスの状態をJSON文字列としてシリアライズする
+   * @returns 回路全体のJSON文字列
+   */
   toJSON() {
     const cols: string[] = [];
     for (const each of this.steps) {
@@ -173,7 +177,6 @@ export class Circuit extends Container {
 
   /**
    * JSONデータからCircuitのインスタンスの状態を復元する
-   *
    * @param jsonString 回路全体のJSONデータ文字列
    */
   fromJSON(jsonString: string): void {

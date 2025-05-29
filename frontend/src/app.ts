@@ -791,7 +791,9 @@ export class App {
     this.updateUrlWithCircuit();
   }
 
-  // 量子回路状態をURLにエンコードして更新する
+  /**
+   * 量子回路の状態をURLにエンコードする
+   */
   private updateUrlWithCircuit(): void {
     const circuitJson = this.circuit.toJSON();
     const encodedJson = encodeURIComponent(circuitJson);
