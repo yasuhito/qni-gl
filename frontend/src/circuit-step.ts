@@ -7,19 +7,19 @@ import { Operation } from "./operation";
 import { groupBy, need } from "./util";
 import { SerializedOperation } from "./types";
 import { isControllable } from "./controllable-mixin";
-import { OperationComponent } from "./operation-component"; 
-import { HGate } from "./h-gate"; 
-import { XGate } from "./x-gate"; 
+import { OperationComponent } from "./operation-component";
+import { HGate } from "./h-gate";
+import { XGate } from "./x-gate";
 import { YGate } from "./y-gate";
-import { ZGate } from "./z-gate"; 
+import { ZGate } from "./z-gate";
 import { SGate } from "./s-gate";
-import { SDaggerGate } from "./s-dagger-gate"; 
-import { TGate } from "./t-gate"; 
-import { TDaggerGate } from "./t-dagger-gate"; 
-import { RnotGate } from "./rnot-gate"; 
-import { Write0Gate } from "./write0-gate"; 
-import { Write1Gate } from "./write1-gate"; 
-import { MeasurementGate } from "./measurement-gate"; 
+import { SDaggerGate } from "./s-dagger-gate";
+import { TGate } from "./t-gate";
+import { TDaggerGate } from "./t-dagger-gate";
+import { RnotGate } from "./rnot-gate";
+import { Write0Gate } from "./write0-gate";
+import { Write1Gate } from "./write1-gate";
+import { MeasurementGate } from "./measurement-gate";
 import { ControlGate } from "./control-gate";
 import { SwapGate } from "./swap-gate";
 
@@ -274,85 +274,100 @@ export class CircuitStep extends Container {
     return `[${jsons.join(",")}]`;
   }
 
-/**
- * JSONデータからCircuitStepのインスタンスを生成する
- * @param stepJson ステップのJSONデータ
- * @returns 復元されたCircuitStepのインスタンス
- */
-static fromJSON(stepJson: any[]): CircuitStep {
-  if (!Array.isArray(stepJson)) {
-    console.error("Invalid step data format:", stepJson);
-    return new CircuitStep(1);
-  }
-
-  const circuitStep = new CircuitStep(stepJson.length);
-
-  // 各ドロップゾーンにゲートを生成
-  const ops: (OperationComponent | null)[] = stepJson.map((state) => {
-    let label: string | null = null;
-    if (typeof state === 'string') {
-      label = state;
-    } else if (Array.isArray(state) && typeof state[0] === 'string') {
-      label = state[0];
+  /**
+   * JSONデータからCircuitStepのインスタンスを生成する
+   * @param stepJson ステップのJSONデータ
+   * @returns 復元されたCircuitStepのインスタンス
+   */
+  static fromJSON(stepJson: any[]): CircuitStep {
+    if (!Array.isArray(stepJson)) {
+      console.error("Invalid step data format:", stepJson);
+      return new CircuitStep(1);
     }
-    return label ? this.createOperationFromLabel(label) : null;
-  });
 
-  // Swapゲートのペアリング
-  const swapIdx = ops
-    .map((op, i) => (op instanceof SwapGate ? i : -1))
-    .filter(i => i !== -1);
+    const circuitStep = new CircuitStep(stepJson.length);
 
-  // コントロールゲートとXゲートの関係
-  const controlIdx = ops
-    .map((op, i) => (op instanceof ControlGate ? i : -1))
-    .filter(i => i !== -1);
-  const xIdx = ops
-    .map((op, i) => (op instanceof XGate ? i : -1))
-    .filter(i => i !== -1);
-  if (controlIdx.length > 0 && xIdx.length > 0) {
-    for (const i of xIdx) {
-      const xOp = ops[i];
-      if (xOp && "controls" in xOp) {
-        xOp.controls = controlIdx;
+    // 各ドロップゾーンにゲートを生成
+    const ops: (OperationComponent | null)[] = stepJson.map((state) => {
+      let label: string | null = null;
+      if (typeof state === "string") {
+        label = state;
+      } else if (Array.isArray(state) && typeof state[0] === "string") {
+        label = state[0];
+      }
+      return label ? this.createOperationFromLabel(label) : null;
+    });
+
+    // Swapゲートのペアリング
+    const swapIdx = ops
+      .map((op, i) => (op instanceof SwapGate ? i : -1))
+      .filter((i) => i !== -1);
+
+    // コントロールゲートとXゲートの関係
+    const controlIdx = ops
+      .map((op, i) => (op instanceof ControlGate ? i : -1))
+      .filter((i) => i !== -1);
+    const xIdx = ops
+      .map((op, i) => (op instanceof XGate ? i : -1))
+      .filter((i) => i !== -1);
+    if (controlIdx.length > 0 && xIdx.length > 0) {
+      for (const i of xIdx) {
+        const xOp = ops[i];
+        if (xOp && "controls" in xOp) {
+          xOp.controls = controlIdx;
+        }
       }
     }
+
+    // ゲートをドロップゾーンに配置
+    ops.forEach((op, i) => {
+      if (op) circuitStep.fetchDropzone(i).assign(op);
+    });
+    circuitStep.updateOperationAttributes();
+    circuitStep.updateConnections();
+    return circuitStep;
   }
 
-  // ゲートをドロップゾーンに配置
-  ops.forEach((op, i) => {
-    if (op) circuitStep.fetchDropzone(i).assign(op);
-  });
-  circuitStep.updateOperationAttributes();
-  circuitStep.updateConnections();
-  return circuitStep;
-}
-
-/**
- * ラベルからゲートインスタンスを生成
- */
-private static createOperationFromLabel(label: string): OperationComponent | null {
-  switch (label) {
-    case "H": return new HGate();
-    case "X": return new XGate();
-    case "Y": return new YGate();
-    case "Z": return new ZGate();
-    case "S": return new SGate();
-    case "S†": return new SDaggerGate();
-    case "T": return new TGate();
-    case "T†": return new TDaggerGate();
-    case "X^½": return new RnotGate();
-    case "|0>": return new Write0Gate();
-    case "|1>": return new Write1Gate();
-    case "Measure": return new MeasurementGate();
-    case "•": return new ControlGate();
-    case "Swap": return new SwapGate();
-    default:
-      console.warn(`Unknown operation label in JSON: ${label}. Skipping.`);
-      return null;
+  /**
+   * ラベルからゲートインスタンスを生成
+   */
+  private static createOperationFromLabel(
+    label: string
+  ): OperationComponent | null {
+    switch (label) {
+      case "H":
+        return new HGate();
+      case "X":
+        return new XGate();
+      case "Y":
+        return new YGate();
+      case "Z":
+        return new ZGate();
+      case "S":
+        return new SGate();
+      case "S†":
+        return new SDaggerGate();
+      case "T":
+        return new TGate();
+      case "T†":
+        return new TDaggerGate();
+      case "X^½":
+        return new RnotGate();
+      case "|0>":
+        return new Write0Gate();
+      case "|1>":
+        return new Write1Gate();
+      case "Measure":
+        return new MeasurementGate();
+      case "•":
+        return new ControlGate();
+      case "Swap":
+        return new SwapGate();
+      default:
+        console.warn(`Unknown operation label in JSON: ${label}. Skipping.`);
+        return null;
+    }
   }
-}
-
 
   /**
    * ゲート間の接続やコントロール関係を再構築する
@@ -364,7 +379,8 @@ private static createOperationFromLabel(label: string): OperationComponent | nul
       dropzone.connectBottom = false;
     }
 
-    const controlDropzones = this.dropzoneList.filterByOperationType(ControlGate);
+    const controlDropzones =
+      this.dropzoneList.filterByOperationType(ControlGate);
     const controllableDropzones = this.controllableDropzones();
 
     // コントロールゲートの初期化
@@ -393,14 +409,17 @@ private static createOperationFromLabel(label: string): OperationComponent | nul
   }
 
   /**
-  * コントロールゲート同士の上下接続を更新
-  */  
+   * コントロールゲート同士の上下接続を更新
+   */
   private updateControlControlConnections(): void {
-    const controlDropzones = this.dropzoneList.filterByOperationType(ControlGate);
-    const controlBits = controlDropzones.map(dz => this.qubitNumberOf(dz));
+    const controlDropzones =
+      this.dropzoneList.filterByOperationType(ControlGate);
+    const controlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
     for (const dz of controlDropzones) {
-      dz.connectTop = controlBits.some(bit => this.qubitNumberOf(dz) > bit);
-      dz.connectBottom = controlBits.some(bit => this.qubitNumberOf(dz) < bit);
+      dz.connectTop = controlBits.some((bit) => this.qubitNumberOf(dz) > bit);
+      dz.connectBottom = controlBits.some(
+        (bit) => this.qubitNumberOf(dz) < bit
+      );
     }
   }
 

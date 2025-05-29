@@ -210,7 +210,11 @@ export class App {
       this.runSimulator,
       this
     );
-    this.circuitFrame.circuit.on(OPERATION_EVENTS.SNAPPED, this.handleCircuitChange, this);
+    this.circuitFrame.circuit.on(
+      OPERATION_EVENTS.SNAPPED,
+      this.handleCircuitChange,
+      this
+    );
   }
 
   private setupStateVectorEventHandlers() {
@@ -782,7 +786,7 @@ export class App {
     URL.revokeObjectURL(url);
   }
 
- // 量子回路変更時に呼び出されるハンドラ
+  // 量子回路変更時に呼び出されるハンドラ
   private handleCircuitChange() {
     this.updateUrlWithCircuit();
   }
@@ -794,25 +798,27 @@ export class App {
 
     // 相対パスでURLを更新する
     const currentPath = location.pathname;
-    const lastSlashIndex = currentPath.lastIndexOf('/');
-    const basePath = lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : '/';
+    const lastSlashIndex = currentPath.lastIndexOf("/");
+    const basePath =
+      lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : "/";
     const newPath = basePath + encodedJson;
-    history.pushState('', '', newPath);
+    history.pushState("", "", newPath);
   }
 
-   /**
+  /**
    * URLのパスから量子回路の状態をデコードしロードする
    */
-   private loadCircuitFromUrl(): void {
+  private loadCircuitFromUrl(): void {
     const currentPath = location.pathname;
-    const lastSlashIndex = currentPath.lastIndexOf('/');
-    const encodedCircuitJson = lastSlashIndex >= 0 ? currentPath.substring(lastSlashIndex + 1) : '';
+    const lastSlashIndex = currentPath.lastIndexOf("/");
+    const encodedCircuitJson =
+      lastSlashIndex >= 0 ? currentPath.substring(lastSlashIndex + 1) : "";
 
     //TODO:例外処理の追加
     if (encodedCircuitJson) {
-        const circuitJson = decodeURIComponent(encodedCircuitJson);
-        console.log("Decoded circuit JSON from URL:", circuitJson); 
-        this.circuit.fromJSON(circuitJson);
-      }
+      const circuitJson = decodeURIComponent(encodedCircuitJson);
+      console.log("Decoded circuit JSON from URL:", circuitJson);
+      this.circuit.fromJSON(circuitJson);
+    }
   }
 }

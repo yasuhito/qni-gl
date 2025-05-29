@@ -113,12 +113,13 @@ export class Circuit extends Container {
   }
 
   update(): void {
-    const activeStepIndex = this.activeStepIndex !== null ? this.activeStepIndex : 0;
+    const activeStepIndex =
+      this.activeStepIndex !== null ? this.activeStepIndex : 0;
     if (this.steps.length === 0) {
       console.warn("Circuit has no steps to update.");
       this.markerManager.update([]);
       return;
-   }
+    }
 
     this.removeEmptySteps();
     this.appendMinimumSteps();
@@ -131,9 +132,11 @@ export class Circuit extends Container {
       this.fetchStep(activeStepIndex).activate();
     } else {
       // activeStepIndex が範囲外の場合は最初のステップをアクティブにする
-      console.warn(`Active step index ${activeStepIndex} out of bounds. Activating first step (0).`);
+      console.warn(
+        `Active step index ${activeStepIndex} out of bounds. Activating first step (0).`
+      );
       this.fetchStep(0).activate();
-    } 
+    }
 
     this.markerManager.update(this.steps);
   }
@@ -168,32 +171,32 @@ export class Circuit extends Container {
     return `{"cols":[${cols.join(",")}]}`;
   }
 
-   /**
+  /**
    * JSONデータからCircuitのインスタンスの状態を復元する
    *
    * @param jsonString 回路全体のJSONデータ文字列
    */
-   fromJSON(jsonString: string): void {
-      const circuitData = JSON.parse(jsonString);
+  fromJSON(jsonString: string): void {
+    const circuitData = JSON.parse(jsonString);
 
-      this.steps.forEach(step => step.destroy());
-      this.stepList.removeChildren();
+    this.steps.forEach((step) => step.destroy());
+    this.stepList.removeChildren();
 
-      circuitData.cols.forEach((stepJson: any[]) => {
-        const circuitStep = CircuitStep.fromJSON(stepJson);
-        this.stepList.addChild(circuitStep);
+    circuitData.cols.forEach((stepJson: any[]) => {
+      const circuitStep = CircuitStep.fromJSON(stepJson);
+      this.stepList.addChild(circuitStep);
 
-        circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
-        circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
-        circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
-        circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
-      });
+      circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
+      circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
+      circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
+      circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+    });
 
-      if (this.steps.length > 0) {
-        this.fetchStep(0).activate();
-      }
+    if (this.steps.length > 0) {
+      this.fetchStep(0).activate();
+    }
 
-      this.update();
+    this.update();
   }
 
   toString() {
@@ -263,11 +266,11 @@ export class Circuit extends Container {
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
 
-     // 復元された各オペレーションにインタラクティブ性を設定する
-     circuitStep.dropzones.forEach(dropzone => {
-      circuitStep.dropzones.forEach(dropzone => {
+    // 復元された各オペレーションにインタラクティブ性を設定する
+    circuitStep.dropzones.forEach((dropzone) => {
+      circuitStep.dropzones.forEach((dropzone) => {
         if (dropzone.operation) {
-            dropzone.operation.eventMode = 'static'; 
+          dropzone.operation.eventMode = "static";
         }
       });
     });

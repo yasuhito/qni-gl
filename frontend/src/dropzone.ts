@@ -104,7 +104,7 @@ export class Dropzone extends Container {
     gate.insertable = false;
 
     this.addChild(gate);
-    gate.position.set(this.gateSize / 4, this.gateSize / 4); 
+    gate.position.set(this.gateSize / 4, this.gateSize / 4);
     if (this.operation === null) {
       throw new Error("Operation is null");
     }
