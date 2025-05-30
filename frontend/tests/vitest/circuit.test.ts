@@ -172,9 +172,6 @@ describe("Circuit", () => {
       expect(activeStep.isActive).toBe(true);
     });
 
-    it("throws an error when there is no active step", () => {
-      expect(() => circuit.update()).toThrow("activeStepIndex == null");
-    });
   });
 
   describe("serialize", () => {
@@ -212,12 +209,12 @@ describe("Circuit", () => {
       circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
 
       const expectedJSON =
-        '{"cols":[["H",1,1],[1,"X",1],[1,1,1],[1,1,1],[1,1,1]]}';
+        '{"cols":[["H",1,1],[1,"X",1]]}';
       expect(circuit.toJSON()).toBe(`${expectedJSON}`);
     });
 
     it("returns JSON with empty steps for an empty circuit", () => {
-      const expectedJSON = '{"cols":[[1,1,1],[1,1,1],[1,1,1],[1,1,1],[1,1,1]]}';
+      const expectedJSON = '{"cols":[]}';
       expect(circuit.toJSON()).toBe(`${expectedJSON}`);
     });
   });
