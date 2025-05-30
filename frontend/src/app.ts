@@ -804,7 +804,7 @@ export class App {
     const basePath =
       lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : "/";
     const newPath = basePath + encodedJson;
-    history.pushState("", "", newPath);
+    history.replaceState("", "", newPath);
   }
 
   /**

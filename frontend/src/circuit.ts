@@ -271,11 +271,9 @@ export class Circuit extends Container {
 
     // 復元された各オペレーションにインタラクティブ性を設定する
     circuitStep.dropzones.forEach((dropzone) => {
-      circuitStep.dropzones.forEach((dropzone) => {
-        if (dropzone.operation) {
-          dropzone.operation.eventMode = "static";
-        }
-      });
+      if (dropzone.operation) {
+        dropzone.operation.eventMode = "static";
+      }
     });
   }
 
