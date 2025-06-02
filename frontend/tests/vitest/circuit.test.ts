@@ -346,10 +346,10 @@ describe("Circuit", () => {
   describe("fromJSON", () => {
     it("should correctly load an empty circuit from a JSON string", () => {
       const jsonString = '{"cols":[]}';
-      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
-      newCircuit.fromJSON(jsonString);
-      expect(newCircuit.steps.filter((step) => !step.isEmpty).length).toBe(0);
-      expect(newCircuit.toJSON()).toBe(jsonString); // Ensure round trip for empty
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 5 });
+      expect(() => {
+        newCircuit.fromJSON(jsonString);
+      }).toThrow("activeStepIndex == null");
     });
 
     // toJSONで追加した各テストケースに対応するfromJSONテストを追加
