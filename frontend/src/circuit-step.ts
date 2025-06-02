@@ -295,7 +295,15 @@ export class CircuitStep extends Container {
       } else if (Array.isArray(state) && typeof state[0] === "string") {
         label = state[0];
       }
-      return label ? this.createOperationFromLabel(label) : null;
+      if (label) {
+        const operation = this.createOperationFromLabel(label);
+        if (!operation) {
+          // エラーメッセージとともに例外を投げる
+          throw new Error(`Unknown operation label encountered during deserialization: ${label}`);
+        }
+        return operation;
+      }
+      return null;
     });
 
     // Swapゲートのペアリング
