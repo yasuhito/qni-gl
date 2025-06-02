@@ -7,9 +7,15 @@ import { XGate } from "../../src/x-gate";
 import { YGate } from "../../src/y-gate";
 import { ZGate } from "../../src/z-gate";
 import { TGate } from "../../src/t-gate";
+import { TDaggerGate } from "../../src";
+import { SGate } from "../../src";
 import { SDaggerGate } from "../../src/s-dagger-gate";
 import { RnotGate } from "../../src/rnot-gate";
 import { Write0Gate } from "../../src/write0-gate";
+import { Write1Gate } from "../../src/write1-gate";
+import { MeasurementGate } from "../../src/measurement-gate";
+import { ControlGate } from "../../src/control-gate";
+import { SwapGate } from "../../src/swap-gate";
 import { WireType } from "../../src/types";
 
 describe("Circuit", () => {
@@ -201,21 +207,469 @@ describe("Circuit", () => {
   });
 
   describe("toJSON", () => {
-    it("returns a correctly formatted JSON string", () => {
-      const hGate = new HGate();
-      const xGate = new XGate();
-
-      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
-      circuit.fetchStep(1).fetchDropzone(1).addChild(xGate);
-
-      const expectedJSON =
-        '{"cols":[["H",1,1],[1,"X",1]]}';
+    // 空の回路のテストケース
+    it("rreturns a correctly formatted JSON string for an empty circuit", () => {
+      const expectedJSON = '{"cols":[]}';
       expect(circuit.toJSON()).toBe(`${expectedJSON}`);
     });
 
-    it("returns JSON with empty steps for an empty circuit", () => {
-      const expectedJSON = '{"cols":[]}';
-      expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    // 単一ステップ内の単一量子ビットゲートのテストケース
+    it("returns a correctly formatted JSON string for a circuit with a single H gate", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      const expectedJSON = '{"cols":[["H",1,1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single X gate", () => {
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new XGate());
+      const expectedJSON = '{"cols":[[1,"X",1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Y gate", () => {
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new YGate());
+      const expectedJSON = '{"cols":[[1,1,"Y"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Z gate", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new ZGate());
+      const expectedJSON = '{"cols":[["Z",1,1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single S gate", () => {
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new SGate());
+      const expectedJSON = '{"cols":[[1,"S",1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single S† gate", () => {
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new SDaggerGate());
+      const expectedJSON = '{"cols":[[1,1,"S†"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single T gate", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new TGate());
+      const expectedJSON = '{"cols":[["T",1,1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single T† gate", () => {
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new TDaggerGate());
+      const expectedJSON = '{"cols":[[1,"T†",1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Rnot gate (X^½)", () => {
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new RnotGate());
+      const expectedJSON = '{"cols":[[1,1,"X^½"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Write0 gate (|0>)", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new Write0Gate());
+      const expectedJSON = '{"cols":[["|0>",1,1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Write1 gate (|1>)", () => {
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new Write1Gate());
+      const expectedJSON = '{"cols":[[1,"|1>",1]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a circuit with a single Measurement gate", () => {
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new MeasurementGate());
+      const expectedJSON = '{"cols":[[1,1,"Measure"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    // 単一ステップ内の複数量子ビットゲートのテストケース
+    it("returns a correctly formatted JSON string for a CNOT gate (Control + X)", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new XGate());
+      const expectedJSON = '{"cols":[["•",1,"X"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a Toffoli gate (two Controls + X)", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new XGate());
+      const expectedJSON = '{"cols":[["•","•","X"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    it("returns a correctly formatted JSON string for a Swap gate", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new SwapGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new SwapGate());
+      const expectedJSON = '{"cols":[["Swap",1,"Swap"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    // 同じステップ内に複数のゲートがある場合のテストケース
+    it("returns a correctly formatted JSON string for multiple single-qubit gates in the same step", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new TGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new MeasurementGate());
+      const expectedJSON = '{"cols":[["H","T","Measure"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    // 異なるステップにゲートがある場合のテストケース
+    it("returns a correctly formatted JSON string for multiple gates in different steps", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new XGate());
+      circuit.fetchStep(2).fetchDropzone(2).addChild(new YGate());
+      const expectedJSON = '{"cols":[["H",1,1],[1,"X",1],[1,1,"Y"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+
+    // 複数のステップに渡る複雑な組み合わせのテストケース
+    it("returns a correctly formatted JSON string for a complex circuit across multiple steps", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new XGate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new SwapGate());
+      circuit.fetchStep(1).fetchDropzone(2).addChild(new SwapGate());
+      circuit.fetchStep(2).fetchDropzone(0).addChild(new Write0Gate());
+      circuit.fetchStep(3).fetchDropzone(1).addChild(new MeasurementGate());
+      circuit.fetchStep(4).fetchDropzone(2).addChild(new TDaggerGate());
+      const expectedJSON =
+        '{"cols":[["H","•","X"],[1,"Swap","Swap"],["|0>",1,1],[1,"Measure",1],[1,1,"T†"]]}';
+      expect(circuit.toJSON()).toBe(expectedJSON);
+    });
+  });
+
+  describe("fromJSON", () => {
+    it("should correctly load an empty circuit from a JSON string", () => {
+      const jsonString = '{"cols":[]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.steps.filter((step) => !step.isEmpty).length).toBe(0);
+      expect(newCircuit.toJSON()).toBe(jsonString); // Ensure round trip for empty
+    });
+
+    // toJSONで追加した各テストケースに対応するfromJSONテストを追加
+    it("should correctly load a circuit with a single H gate from JSON", () => {
+      const jsonString = '{"cols":[["H",1,1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single X gate from JSON", () => {
+      const jsonString = '{"cols":[[1,"X",1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        XGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Y gate from JSON", () => {
+      const jsonString = '{"cols":[[1,1,"Y"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        YGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Z gate from JSON", () => {
+      const jsonString = '{"cols":[["Z",1,1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        ZGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single S gate from JSON", () => {
+      const jsonString = '{"cols":[[1,"S",1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        SGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single S† gate from JSON", () => {
+      const jsonString = '{"cols":[[1,1,"S†"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        SDaggerGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single T gate from JSON", () => {
+      const jsonString = '{"cols":[["T",1,1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        TGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single T† gate from JSON", () => {
+      const jsonString = '{"cols":[[1,"T†",1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        TDaggerGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Rnot gate from JSON", () => {
+      const jsonString = '{"cols":[[1,1,"X^½"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        RnotGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Write0 gate from JSON", () => {
+      const jsonString = '{"cols":[["|0>",1,1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        Write0Gate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Write1 gate from JSON", () => {
+      const jsonString = '{"cols":[[1,"|1>",1]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        Write1Gate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit with a single Measurement gate from JSON", () => {
+      const jsonString = '{"cols":[[1,1,"Measure"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        MeasurementGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a CNOT gate from JSON", () => {
+      const jsonString = '{"cols":[["•",1,"X"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        XGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a Toffoli gate from JSON", () => {
+      const jsonString = '{"cols":[["•","•","X"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        XGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a Swap gate from JSON", () => {
+      const jsonString = '{"cols":[["Swap",1,"Swap"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        SwapGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        SwapGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load multiple single-qubit gates in the same step from JSON", () => {
+      const jsonString = '{"cols":[["H","T","Measure"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        TGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        MeasurementGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load multiple gates in different steps from JSON", () => {
+      const jsonString = '{"cols":[["H",1,1],[1,"X",1],[1,1,"Y"]]}';
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(newCircuit.fetchStep(1).fetchDropzone(1).operation).toBeInstanceOf(
+        XGate
+      );
+      expect(newCircuit.fetchStep(2).fetchDropzone(2).operation).toBeInstanceOf(
+        YGate
+      );
+      expect(newCircuit.toJSON()).toBe(jsonString);
+    });
+
+    it("should correctly load a circuit from a JSON string (round trip test)", () => {
+      // 様々なゲートを複数のステップに配置して回路をセットアップ
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new XGate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new SwapGate());
+      circuit.fetchStep(1).fetchDropzone(2).addChild(new SwapGate());
+      circuit.fetchStep(2).fetchDropzone(0).addChild(new Write0Gate());
+      circuit.fetchStep(3).fetchDropzone(1).addChild(new MeasurementGate());
+      circuit.fetchStep(4).fetchDropzone(2).addChild(new TDaggerGate());
+
+      // 回路をJSONにシリアライズ
+      const jsonString = circuit.toJSON();
+
+      // 新しい回路を作成し、JSON文字列を読み込み
+      // fromJSONが正しくステップを作成することを確認するため、ステップ数0で開始
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+
+      // 読み込まれた回路が元の回路と全く同じJSON文字列を生成することを確認
+      expect(newCircuit.toJSON()).toBe(jsonString);
+
+      // 読み込まれた回路が元の回路と同じ数の空でないステップを持つことを確認
+      const originalNonEmptySteps = circuit.steps.filter(
+        (step) => !step.isEmpty
+      ).length;
+      const loadedNonEmptySteps = newCircuit.steps.filter(
+        (step) => !step.isEmpty
+      ).length;
+      // ロード時に必要に応じてステップが追加されるため、これは元の非空ステップ数+fromJSONで追加されたステップ数になる可能性がある
+      // シンプルな比較ではなく、toJSONの結果が一致することを確認する方が堅牢
+      expect(newCircuit.toJSON()).toBe(jsonString);
+
+      // 読み込まれた回路内の個々のゲートについて、正しいタイプと位置にあるか確認
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        XGate
+      );
+      expect(newCircuit.fetchStep(1).fetchDropzone(1).operation).toBeInstanceOf(
+        SwapGate
+      );
+      expect(newCircuit.fetchStep(1).fetchDropzone(2).operation).toBeInstanceOf(
+        SwapGate
+      );
+      expect(newCircuit.fetchStep(2).fetchDropzone(0).operation).toBeInstanceOf(
+        Write0Gate
+      );
+      expect(newCircuit.fetchStep(3).fetchDropzone(1).operation).toBeInstanceOf(
+        MeasurementGate
+      );
+      expect(newCircuit.fetchStep(4).fetchDropzone(2).operation).toBeInstanceOf(
+        TDaggerGate
+      );
+    });
+
+    // より複雑な回路でのラウンドトリップテスト
+    it("should correctly load a complex circuit from a JSON string (complex round trip)", () => {
+      // 複数のステップにわたる様々なゲートの組み合わせで回路をセットアップ
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(0).fetchDropzone(1).addChild(new ControlGate());
+      circuit.fetchStep(0).fetchDropzone(2).addChild(new XGate()); // CNOT
+
+      circuit.fetchStep(1).fetchDropzone(0).addChild(new Write1Gate());
+      circuit.fetchStep(1).fetchDropzone(1).addChild(new MeasurementGate());
+
+      circuit.fetchStep(2).fetchDropzone(0).addChild(new ControlGate());
+      circuit.fetchStep(2).fetchDropzone(1).addChild(new ControlGate());
+      circuit.fetchStep(2).fetchDropzone(2).addChild(new XGate()); // Toffoli
+
+      circuit.fetchStep(3).fetchDropzone(0).addChild(new SwapGate());
+      circuit.fetchStep(3).fetchDropzone(2).addChild(new SwapGate()); // Swap
+
+      circuit.fetchStep(4).fetchDropzone(1).addChild(new TGate());
+
+      const jsonString = circuit.toJSON();
+      const newCircuit = new Circuit({ minWireCount: 3, stepCount: 0 });
+      newCircuit.fromJSON(jsonString);
+
+      expect(newCircuit.toJSON()).toBe(jsonString);
+
+      // ロードされた回路のゲートを確認
+      expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(1).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(0).fetchDropzone(2).operation).toBeInstanceOf(
+        XGate
+      );
+
+      expect(newCircuit.fetchStep(1).fetchDropzone(0).operation).toBeInstanceOf(
+        Write1Gate
+      );
+      expect(newCircuit.fetchStep(1).fetchDropzone(1).operation).toBeInstanceOf(
+        MeasurementGate
+      );
+
+      expect(newCircuit.fetchStep(2).fetchDropzone(0).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(2).fetchDropzone(1).operation).toBeInstanceOf(
+        ControlGate
+      );
+      expect(newCircuit.fetchStep(2).fetchDropzone(2).operation).toBeInstanceOf(
+        XGate
+      );
+
+      expect(newCircuit.fetchStep(3).fetchDropzone(0).operation).toBeInstanceOf(
+        SwapGate
+      );
+      expect(newCircuit.fetchStep(3).fetchDropzone(2).operation).toBeInstanceOf(
+        SwapGate
+      );
+
+      expect(newCircuit.fetchStep(4).fetchDropzone(1).operation).toBeInstanceOf(
+        TGate
+      );
     });
   });
 
