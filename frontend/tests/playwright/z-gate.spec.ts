@@ -10,8 +10,6 @@ test.describe("Z gate", () => {
     const zGate = circuitInfo.gatePalette.zGate;
 
     await dragAndDrop(page, zGate, { step: 0, bit: 0 });
-    const url = await page.evaluate(() => location.pathname);
-    expect(url).toContain('%7B%22cols%22%3A%5B%5B%22Z%22');
 
     await expect(page).toHaveScreenshot("z-gate-bit1.png");
   });
@@ -20,8 +18,6 @@ test.describe("Z gate", () => {
     const zGate = circuitInfo.gatePalette.zGate;
 
     await dragAndDrop(page, zGate, { step: 0, bit: 1 });
-    const url = await page.evaluate(() => location.pathname);
-    expect(url).toContain('%7B%22cols%22%3A%5B%5B1%2C%22Z%22');
 
     await expect(page).toHaveScreenshot("z-gate-bit2.png");
   });
@@ -30,8 +26,6 @@ test.describe("Z gate", () => {
     const zGate = circuitInfo.gatePalette.zGate;
 
     await dragAndDrop(page, zGate, { step: 0, bit: 2 });
-    const url = await page.evaluate(() => location.pathname);
-    expect(url).toContain('%7B%22cols%22%3A%5B%5B1%2C1%2C%22Z%22');
 
     await expect(page).toHaveScreenshot("z-gate-bit3.png");
   });

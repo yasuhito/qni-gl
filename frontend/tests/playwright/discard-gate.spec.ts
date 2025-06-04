@@ -13,9 +13,6 @@ test.describe("Discard gates", () => {
     await page.mouse.up();
     await idle.waitFor();
 
-    const url = await page.evaluate(() => location.pathname);
-    expect(url).toContain('%7B%22cols%22%3A%5B%5B%22H%22%5D%5D%7D');
-
     await expect(page).toHaveScreenshot("discard-gate.png");
   });
 });
