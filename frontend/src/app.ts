@@ -796,33 +796,23 @@ export class App {
    */
   private updateUrlWithCircuit(): void {
     const circuitJson = this.circuit.toJSON();
-    const encodedJson = encodeURIComponent(circuitJson);
-
-    // 相対パスでURLを更新する
-    const currentPath = location.pathname;
-    const lastSlashIndex = currentPath.lastIndexOf("/");
-    const basePath =
-      lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : "/";
-    const newPath = basePath + encodedJson;
-    history.replaceState("", "", newPath);
+    const newHash = `#circuit=${circuitJson}`;
+    history.replaceState("", "", location.pathname + newHash);
   }
 
   /**
    * URLのパスから量子回路の状態をデコードしロードする
    */
   private loadCircuitFromUrl(): void {
-    const currentPath = location.pathname;
-    const lastSlashIndex = currentPath.lastIndexOf("/");
-    const encodedCircuitJson =
-      lastSlashIndex >= 0 ? currentPath.substring(lastSlashIndex + 1) : "";
+    // URLハッシュに回路データがあるか確認 (#circuit=...)
+    const sourceString = location.hash.startsWith("#circuit=")
+      ? location.hash.substring("#circuit=".length)
+      : null;
+    if (!sourceString) return;
 
-    if (encodedCircuitJson) {
-      const circuitJson = decodeURIComponent(encodedCircuitJson);
-      try {
-        this.circuit.fromJSON(circuitJson);
-      } catch (error) {
-        console.error("Failed to load circuit from URL:", error);
-      }
-    }
+    // 回路データをデコードしてロード
+    const circuitJsonString = decodeURIComponent(sourceString);
+    const circuitData = JSON.parse(circuitJsonString);
+    this.circuit.fromJSON(JSON.stringify(circuitData));
   }
 }
