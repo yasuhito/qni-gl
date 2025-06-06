@@ -8,6 +8,7 @@ import { Operation } from "./operation";
 
 export class Dropzone extends Container {
   static readonly sizeInPx = spacingInPx(8);
+  static readonly GATE_INSET_OFFSET = Dropzone.sizeInPx / 4;
 
   inputWireType: WireType = WireType.Classical;
   outputWireType: WireType = WireType.Classical;
@@ -104,6 +105,8 @@ export class Dropzone extends Container {
     gate.insertable = false;
 
     this.addChild(gate);
+    // リロード時、ゲートを正しい配置にするためのオフセット
+    gate.position.set(Dropzone.GATE_INSET_OFFSET, Dropzone.GATE_INSET_OFFSET);
     if (this.operation === null) {
       throw new Error("Operation is null");
     }

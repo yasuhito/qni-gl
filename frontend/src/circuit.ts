@@ -125,6 +125,7 @@ export class Circuit extends Container {
     this.updateConnections();
 
     this.fetchStep(activeStepIndex).activate();
+
     this.markerManager.update(this.steps);
   }
 
@@ -148,12 +149,45 @@ export class Circuit extends Container {
     return this.steps.map((each) => each.serialize());
   }
 
+  /**
+   * Circuitインスタンスの状態をJSON文字列としてシリアライズする
+   * @returns 回路全体のJSON文字列
+   */
   toJSON() {
     const cols: string[] = [];
     for (const each of this.steps) {
-      cols.push(each.toJSON());
+      if (!each.isEmpty) {
+        cols.push(each.toJSON());
+      }
     }
     return `{"cols":[${cols.join(",")}]}`;
+  }
+
+  /**
+   * JSONデータからCircuitのインスタンスの状態を復元する
+   * @param jsonString 回路全体のJSONデータ文字列
+   */
+  fromJSON(jsonString: string): void {
+    const circuitData = JSON.parse(jsonString);
+
+    this.steps.forEach((step) => step.destroy());
+    this.stepList.removeChildren();
+
+    circuitData.cols.forEach((stepJson: any[]) => {
+      const circuitStep = CircuitStep.fromJSON(stepJson);
+      this.stepList.addChild(circuitStep);
+
+      circuitStep.on(OPERATION_EVENTS.SNAPPED, this.onGateSnapToDropzone, this);
+      circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
+      circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
+      circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+    });
+
+    if (this.steps.length > 0) {
+      this.fetchStep(0).activate();
+    }
+
+    this.update();
   }
 
   toString() {
@@ -222,6 +256,13 @@ export class Circuit extends Container {
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+
+    // 復元された各オペレーションにインタラクティブ性を設定する
+    circuitStep.dropzones.forEach((dropzone) => {
+      if (dropzone.operation) {
+        dropzone.operation.eventMode = "static";
+      }
+    });
   }
 
   private onGateSnapToDropzone() {

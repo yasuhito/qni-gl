@@ -116,6 +116,8 @@ export class App {
 
       this.setupFrames();
 
+      this.loadCircuitFromUrl();
+
       // 回路の最初のステップをアクティブにする
       // これによって、最初のステップの状態ベクトルが表示される
       this.circuit.fetchStep(0).activate();
@@ -206,6 +208,11 @@ export class App {
     this.circuitFrame.on(
       CIRCUIT_STEP_EVENTS.ACTIVATED,
       this.runSimulator,
+      this
+    );
+    this.circuitFrame.circuit.on(
+      OPERATION_EVENTS.SNAPPED,
+      this.handleCircuitChange,
       this
     );
   }
@@ -706,6 +713,8 @@ export class App {
 
     this.circuit.update();
 
+    this.updateUrlWithCircuit();
+
     this.updateStateVectorComponentQubitCount();
     this.stateVectorFrame.repositionAndResize(
       this.frameDivider.y + this.frameDivider.height,
@@ -775,5 +784,35 @@ export class App {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // 量子回路変更時に呼び出されるハンドラ
+  private handleCircuitChange() {
+    this.updateUrlWithCircuit();
+  }
+
+  /**
+   * 量子回路の状態をURLにエンコードする
+   */
+  private updateUrlWithCircuit(): void {
+    const circuitJson = this.circuit.toJSON();
+    const newHash = `#circuit=${circuitJson}`;
+    history.replaceState("", "", location.pathname + newHash);
+  }
+
+  /**
+   * URLのパスから量子回路の状態をデコードしロードする
+   */
+  private loadCircuitFromUrl(): void {
+    // URLハッシュに回路データがあるか確認 (#circuit=...)
+    const sourceString = location.hash.startsWith("#circuit=")
+      ? location.hash.substring("#circuit=".length)
+      : null;
+    if (!sourceString) return;
+
+    // 回路データをデコードしてロード
+    const circuitJsonString = decodeURIComponent(sourceString);
+    const circuitData = JSON.parse(circuitJsonString);
+    this.circuit.fromJSON(JSON.stringify(circuitData));
   }
 }
