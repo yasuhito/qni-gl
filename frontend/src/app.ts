@@ -50,6 +50,11 @@ export class App {
   circuitSteps: CircuitStep[] = [];
   nameMap = new Map();
 
+  private menuButton: HTMLElement | null = null;
+  private menuDropdown: HTMLElement | null = null;
+  private menuContainer: HTMLElement | null = null;
+  private activeClass = "bg-neutral-200"; // StimulusのactiveClassValueに対応
+
   public static get instance(): App {
     if (!this._instance) {
       this._instance = new App(this.elementId);
@@ -85,6 +90,22 @@ export class App {
       throw new Error("Could not find #app");
     }
     this.element = el;
+
+    // メニュー要素を取得
+    this.menuContainer = document.getElementById("menu-container");
+    this.menuButton = document.getElementById("menu-button");
+    this.menuDropdown = document.getElementById("menu-dropdown");
+
+    // メニューボタンにクリックイベントリスナーを追加
+    if (this.menuButton) {
+      this.menuButton.addEventListener(
+        "click",
+        this.toggleMenuDropdown.bind(this)
+      );
+    }
+
+    // ドキュメント全体にクリックイベントリスナーを追加（メニュー外をクリックしたときに閉じるため）
+    document.addEventListener("click", this.maybeHideMenuDropdown.bind(this));
 
     const serviceWorkerUrl =
       import.meta.env.MODE === "production"
@@ -133,6 +154,49 @@ export class App {
       // テスト用
       window.pixiApp = this;
     });
+  }
+
+  /**
+   * ドロップダウンメニューの表示・非表示を切り替える
+   */
+  private toggleMenuDropdown(): void {
+    if (!this.menuDropdown || !this.menuButton) return;
+
+    const isActive = this.menuDropdown.classList.toggle("hidden"); // hiddenクラスの有無をトグル
+
+    // 表示されたらボタンにアクティブクラスを追加、そうでなければ削除
+    if (!isActive) {
+      // 表示の場合
+      this.menuButton.classList.add(this.activeClass);
+      this.menuButton.setAttribute("aria-expanded", "true"); // ARIA属性を更新
+    } else {
+      // 非表示のの場合
+      this.menuButton.classList.remove(this.activeClass);
+      this.menuButton.setAttribute("aria-expanded", "false"); // ARIA属性を更新
+    }
+  }
+
+  /**
+   * メニューコンテナの外側をクリックした場合にドロップダウンメニューを閉じる
+   * @param event クリックイベント
+   */
+  private maybeHideMenuDropdown(event: MouseEvent): void {
+    const clickedEl = event.target as HTMLElement;
+
+    // クリックされた要素がメニューコンテナ内に含まれていないか、またはメニューコンテナ自体である場合
+    // かつ、ドロップダウンメニューが表示されている場合
+    if (
+      this.menuContainer &&
+      !this.menuContainer.contains(clickedEl) &&
+      this.menuDropdown &&
+      !this.menuDropdown.classList.contains("hidden")
+    ) {
+      this.menuDropdown.classList.add("hidden");
+      if (this.menuButton) {
+        this.menuButton.classList.remove(this.activeClass);
+        this.menuButton.setAttribute("aria-expanded", "false"); // ARIA属性を更新
+      }
+    }
   }
 
   private setupFrames() {
