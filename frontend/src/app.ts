@@ -25,6 +25,7 @@ import {
   OPERATION_EVENTS,
 } from "./events";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
+import { ShareModal } from "./share-modal";
 
 declare global {
   interface Window {
@@ -54,6 +55,8 @@ export class App {
   private menuDropdown: HTMLElement | null = null;
   private menuContainer: HTMLElement | null = null;
   private activeClass = "bg-neutral-200"; // StimulusのactiveClassValueに対応
+
+  private shareModal: ShareModal | null = null;
 
   public static get instance(): App {
     if (!this._instance) {
@@ -151,6 +154,21 @@ export class App {
         exportButton.addEventListener("click", this.exportCircuit.bind(this));
       }
 
+      // Shareボタンのイベントリスナーとモーダルの読み込み
+      const shareMenuItem = document.getElementById("menu-item-share");
+      if (shareMenuItem) {
+        this.loadShareModal().then(() => {
+          this.shareModal = new ShareModal(
+            "share-modal",
+            "close-share-modal-button"
+          );
+          shareMenuItem.addEventListener(
+            "click",
+            this.openShareModal.bind(this)
+          );
+        });
+      }
+
       // テスト用
       window.pixiApp = this;
     });
@@ -196,6 +214,29 @@ export class App {
         this.menuButton.classList.remove(this.activeClass);
         this.menuButton.setAttribute("aria-expanded", "false"); // ARIA属性を更新
       }
+    }
+  }
+
+  private openShareModal(): void {
+    this.shareModal?.open();
+  }
+
+  /**
+   * ShareモーダルのHTMLを動的に読み込む
+   */
+  private async loadShareModal(): Promise<void> {
+    try {
+      const response = await fetch("/share-modal.html");
+      if (!response.ok) {
+        throw new Error(`Failed to load share-modal.html: ${response.statusText}`);
+      }
+      const html = await response.text();
+      const container = document.getElementById("share-modal-container");
+      if (container) {
+        container.innerHTML = html;
+      }
+    } catch (error) {
+      console.error("Error loading share modal:", error);
     }
   }
 
