@@ -1,5 +1,12 @@
+import tippy from "tippy.js";
 export class ShareModal {
   private modalElement: HTMLElement;
+
+  private updateUrlDisplay(): void {
+    const urlDiv = document.getElementById("circuit-url");
+    if (!urlDiv) return;
+    urlDiv.textContent = `${location.origin}${location.pathname}${location.hash}`;
+  }
 
   constructor(modalId: string, closeButtonId: string) {
     const modal = document.getElementById(modalId);
@@ -26,8 +33,31 @@ export class ShareModal {
     if (titleInput) {
       titleInput.addEventListener("input", () => {
         document.title = titleInput.value || "Qni GL";
+        this.updateUrlDisplay();
       });
     }
+
+    const copyButton = document.getElementById("copy-button");
+    if (copyButton) {
+      // tippyインスタンスを作成
+      const tip = tippy(copyButton, {
+        content: "Copied to clipboard",
+        trigger: "manual",
+        placement: "bottom",
+        duration: [0, 250],
+      });
+
+      copyButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(
+          `${location.origin}${location.pathname}${location.hash}`
+        );
+        // 吹き出し表示
+        tip.show();
+        setTimeout(() => tip.hide(), 1000);
+      });
+    }
+
+    this.updateUrlDisplay();
   }
 
   open(): void {
@@ -38,6 +68,7 @@ export class ShareModal {
     if (titleInput) {
       titleInput.focus();
     }
+    this.updateUrlDisplay();
   }
 
   close(): void {
