@@ -8,6 +8,30 @@ export class ShareModal {
     urlDiv.textContent = `${location.origin}${location.pathname}${location.hash}`;
   }
 
+  private get shareOnXUrl(): string {
+    const hashtagsParam = "hashtags=qni";
+    const urlParam = `url=${encodeURIComponent(window.location.href)}`;
+    const params = [hashtagsParam, urlParam];
+
+    // location.hash から title を抽出
+    let title = "";
+    try {
+      if (location.hash.startsWith("#circuit=")) {
+        const json = JSON.parse(decodeURIComponent(location.hash.substring(9)));
+        if (json.title) title = json.title;
+      }
+    } catch (e) {
+      // 失敗しても何もしない
+    }
+
+    if (title) {
+      const textParam = `text=${encodeURIComponent(title)}`;
+      params.unshift(textParam);
+    }
+
+    return `https://x.com/intent/post?${params.join("&")}`;
+  }
+
   constructor(modalId: string, closeButtonId: string) {
     const modal = document.getElementById(modalId);
     if (!modal) {
@@ -59,6 +83,13 @@ export class ShareModal {
       });
     }
 
+    const shareButton = document.getElementById("share-button");
+    if (shareButton) {
+      shareButton.addEventListener("click", () => {
+        window.open(this.shareOnXUrl, "_blank");
+      });
+    }
+
     this.updateUrlDisplay();
   }
 
@@ -75,5 +106,9 @@ export class ShareModal {
 
   close(): void {
     this.modalElement.classList.add("hidden");
+  }
+
+  public share(): void {
+    window.open(this.shareOnXUrl, "_blank");
   }
 }
