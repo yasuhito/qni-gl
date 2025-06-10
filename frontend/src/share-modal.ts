@@ -33,6 +33,8 @@ export class ShareModal {
     if (titleInput) {
       titleInput.addEventListener("input", () => {
         document.title = titleInput.value || "Qni GL";
+        // URLも更新
+        window.pixiApp?.updateUrlWithCircuit();
         this.updateUrlDisplay();
       });
     }

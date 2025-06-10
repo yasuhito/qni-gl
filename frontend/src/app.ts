@@ -840,11 +840,21 @@ export class App {
   /**
    * 量子回路の状態をURLにエンコードする
    */
-  private updateUrlWithCircuit(): void {
-    const circuitJson = this.circuit.toJSON();
-    const newHash = `#circuit=${circuitJson}`;
-    history.replaceState("", "", location.pathname + newHash);
+  public updateUrlWithCircuit(): void {
+  // タイトル取得
+  const titleInput = document.getElementById(
+    "circuit-title-input"
+  ) as HTMLInputElement | null;
+  const title = titleInput?.value || "";
+
+  const circuitObj = JSON.parse(this.circuit.toJSON());
+  // titleを追加
+  if (title) {
+    circuitObj.title = title;
   }
+  const newHash = `#circuit=${JSON.stringify(circuitObj)}`;
+  history.replaceState("", "", location.pathname + newHash);
+}
 
   /**
    * URLのパスから量子回路の状態をデコードしロードする
@@ -859,6 +869,21 @@ export class App {
     // 回路データをデコードしてロード
     const circuitJsonString = decodeURIComponent(sourceString);
     const circuitData = JSON.parse(circuitJsonString);
-    this.circuit.fromJSON(JSON.stringify(circuitData));
+
+    // タイトルがあれば反映
+    if (circuitData.title) {
+      document.title = circuitData.title;
+      const titleInput = document.getElementById(
+        "circuit-title-input"
+      ) as HTMLInputElement | null;
+      if (titleInput) {
+        titleInput.value = circuitData.title;
+      }
+    } else {
+      document.title = "Qni GL";
+    }
+
+    // 回路データだけで復元
+    this.circuit.fromJSON(JSON.stringify({ cols: circuitData.cols }));
   }
 }
