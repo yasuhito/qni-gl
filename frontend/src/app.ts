@@ -151,6 +151,26 @@ export class App {
         });
       }
 
+      //Clear circuitボタンのイベントリスナーと処理
+      const clearButton = document.getElementById("menu-item-clear-circuit");
+      if (clearButton) {
+        clearButton.addEventListener("click", (e) => {
+          e.preventDefault(); // ページ遷移防止
+          
+          this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
+          this.circuit.fetchStep(0).activate();
+
+          const titleInput = document.getElementById("circuit-title-input") as HTMLInputElement | null;
+          if (titleInput) titleInput.value = "";
+          document.title = "Qni GL";
+
+          history.replaceState("", "", location.pathname);
+
+          this.updateStateVectorComponentQubitCount();
+          this.runSimulator();
+        });
+      }
+
       // テスト用
       window.pixiApp = this;
     });
