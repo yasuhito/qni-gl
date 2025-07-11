@@ -25,7 +25,7 @@
 
     <!-- Modal panel, show/hide based on modal state. -->
     <div
-      class="inline-block transform overflow-hidden rounded-lg bg-white p-6 px-4 pb-4 pt-14 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:max-w-md sm:p-6 sm:pt-14 sm:align-middle relative"
+      class="inline-block transform overflow-hidden rounded-lg bg-white p-6 px-4 pb-4 pt-14 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:pt-14 sm:align-middle relative"
     >
       <div
         class="absolute top-0 right-0 pt-2 pr-2 sm:block sm:pt-4 sm:pr-4"
@@ -55,17 +55,17 @@
         </button>
       </div>
 
-      <div class="absolute top-0 left-0 pt-4 pl-4 text-lg sm:pl-6">Share</div>
+      <div class="absolute top-0 left-0 pt-4 pl-4 text-lg sm:pl-6" id="modal-title">Share</div>
 
       <div>
         <div class="flex justify-between">
-          <label for="circuit-title" class="block text-sm font-medium text-gray-700">Title</label>
+          <label for="circuit-title-input" class="block text-sm font-medium text-gray-700">Title</label>
           <span class="text-gray-500 text-sm" id="circuit-title-optional">Optional</span>
         </div>
         <div class="mt-1">
           <input
             type="text"
-            name="circuit-title"
+            name="circuit-title-input"
             id="circuit-title-input"
             class="block w-full rounded-md shadow-sm border border-black focus:border-2 focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3"
             autocomplete="off"
