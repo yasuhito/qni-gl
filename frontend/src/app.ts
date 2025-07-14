@@ -168,6 +168,10 @@ export class App {
 
           this.updateStateVectorComponentQubitCount();
           this.runSimulator();
+
+          // ドロップダウンメニューを閉じる
+          const menuDropdown = document.getElementById("menu-dropdown");
+          if (menuDropdown) menuDropdown.classList.add("hidden");
         });
       }
 
