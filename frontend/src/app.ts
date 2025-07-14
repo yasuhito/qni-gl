@@ -181,6 +181,22 @@ export class App {
   }
 
   private openShareModal(): void {
+    const titleInput = document.getElementById(
+      "circuit-title-input"
+    ) as HTMLInputElement | null;
+    if (titleInput && location.hash.startsWith("#circuit=")) {
+      try {
+        const circuitData = JSON.parse(
+          location.hash.substring("#circuit=".length)
+        );
+        if (circuitData.title) {
+          titleInput.value = circuitData.title;
+          document.title = circuitData.title;
+        }
+      } catch {
+        // パース失敗時は何もしない
+      }
+    }
     this.shareModal?.open();
   }
 
