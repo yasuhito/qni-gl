@@ -64,22 +64,25 @@ export class ShareModal {
     }
 
     const copyButton = document.getElementById("copy-button");
+    const TOOLTIP_DURATION_MS = 1000
+    const TIPPY_HIDE_ANIMATION_MS = 250
+
     if (copyButton) {
       // tippyインスタンスを作成
       const tip = tippy(copyButton, {
         content: "Copied to clipboard",
         trigger: "manual",
         placement: "bottom",
-        duration: [0, 250],
+        duration: [0, TIPPY_HIDE_ANIMATION_MS],
       });
-
+      
       copyButton.addEventListener("click", () => {
         navigator.clipboard.writeText(
           `${location.origin}${location.pathname}${location.hash}`
         );
         // 吹き出し表示
         tip.show();
-        setTimeout(() => tip.hide(), 1000);
+        setTimeout(() => tip.hide(), TOOLTIP_DURATION_MS);
       });
     }
 
