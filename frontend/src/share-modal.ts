@@ -110,8 +110,4 @@ export class ShareModal {
   close(): void {
     this.modalElement.classList.add("hidden");
   }
-
-  public share(): void {
-    window.open(this.shareOnXUrl, "_blank");
-  }
 }
