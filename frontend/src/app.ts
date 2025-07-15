@@ -171,7 +171,15 @@ export class App {
 
           // ドロップダウンメニューを閉じる
           const menuDropdown = document.getElementById("menu-dropdown");
-          if (menuDropdown) menuDropdown.classList.add("hidden");
+          if (menuDropdown) {
+            menuDropdown.classList.add("hidden");
+
+            const menuButton = document.querySelector("[aria-controls='menu-dropdown']");
+            if (menuButton) {
+              menuButton.classList.remove("activeClass");
+              menuButton.setAttribute("aria-expanded", "false");
+            }
+          }
         });
       }
 
