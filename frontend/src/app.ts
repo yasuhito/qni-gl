@@ -139,15 +139,15 @@ export class App {
       // Shareボタンのイベントリスナーとモーダルの読み込み
       const shareMenuItem = document.getElementById("menu-item-share");
       if (shareMenuItem) {
-        this.loadShareModal().then(() => {
-          this.shareModal = new ShareModal(
-            "share-modal",
-            "close-share-modal-button"
-          );
-          shareMenuItem.addEventListener(
-            "click",
-            this.openShareModal.bind(this)
-          );
+        shareMenuItem.addEventListener("click", async () => {
+          if (!this.shareModal) {
+            await this.loadShareModal();
+            this.shareModal = new ShareModal(
+              "share-modal",
+              "close-share-modal-button"
+            );
+          }
+          this.openShareModal();
         });
       }
 
