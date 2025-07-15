@@ -14,7 +14,6 @@ test.describe("DropdownMenu", () => {
 
   test("should open share modal from dropdown", async ({ page }) => {
     await page.locator("#menu-button").click();
-
     await page.locator("#menu-item-share").click();
 
     await expect(page).toHaveScreenshot("dropdown-share-modal.png");
@@ -24,11 +23,9 @@ test.describe("DropdownMenu", () => {
     page,
   }) => {
     await page.locator("#menu-button").click();
-
     await page.locator("#menu-item-share").click();
 
     await page.locator("#circuit-title-input").fill("test");
-
     await page.locator("#circuit-title-input").blur();
 
     const hash = await page.evaluate(() => decodeURIComponent(location.hash));
@@ -45,11 +42,9 @@ test.describe("DropdownMenu", () => {
     circuitInfo,
   }) => {
     const hGate = circuitInfo.gatePalette.hGate;
-
     await dragAndDrop(page, hGate, { step: 0, bit: 0 });
 
     await page.locator("#menu-button").click();
-
     await page.locator("#menu-item-share").click();
 
     await page.waitForSelector("#circuit-url", { state: "visible" });
@@ -63,7 +58,6 @@ test.describe("DropdownMenu", () => {
 
   test("should open X share intent from share modal", async ({ page }) => {
     await page.locator("#menu-button").click();
-
     await page.locator("#menu-item-share").click();
 
     const shareUrl = await page.evaluate(() => {
@@ -83,6 +77,7 @@ test.describe("DropdownMenu", () => {
         : [hashtagsParam, urlParam];
       return `https://x.com/intent/post?${params.join("&")}`;
     });
+
     expect(shareUrl).toContain("https://x.com/intent/post?hashtags=qni&url=");
   });
 
@@ -97,6 +92,7 @@ test.describe("DropdownMenu", () => {
     await page.locator("#menu-button").click();
 
     const href = await page.locator("#menu-item-github").getAttribute("href");
+
     expect(href).toBe("https://github.com/yasuhito/qni-gl");
   });
 
@@ -105,11 +101,9 @@ test.describe("DropdownMenu", () => {
     circuitInfo,
   }) => {
     const hGate = circuitInfo.gatePalette.hGate;
-
     await dragAndDrop(page, hGate, { step: 0, bit: 0 });
 
     await page.locator("#menu-button").click();
-
     await page.locator("#menu-item-clear-circuit").click();
 
     await expect(page).toHaveScreenshot("dropdown-clear-circuit.png");
