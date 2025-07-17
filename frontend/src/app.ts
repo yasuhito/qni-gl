@@ -109,14 +109,7 @@ export class App {
 
       el.appendChild(this.app.canvas);
 
-      // stage: 画面に表示するオブジェクトたちの入れ物
-      this.app.stage.eventMode = "static";
-      this.app.stage.hitArea = this.app.screen;
-      this.app.stage.sortableChildren = true;
-      this.app.stage
-        .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
-        .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
-        .on("pointerdown", this.maybeDeactivateGate, this);
+      this.setupStage();
 
       this.setupFrames();
 
@@ -129,62 +122,90 @@ export class App {
       this.nameMap.set(this.app.stage, "stage");
 
       // エクスポートボタンのイベントリスナー
-      const exportButton = document.getElementById("exportButton");
-      if (exportButton) {
-        exportButton.addEventListener("click", this.exportCircuit.bind(this));
-      }
+      this.setupExportButton();
 
       new DropdownMenu();
 
-      // Shareボタンのイベントリスナーとモーダルの読み込み
-      const shareMenuItem = document.getElementById("menu-item-share");
-      if (shareMenuItem) {
-        shareMenuItem.addEventListener("click", async () => {
-          if (!this.shareModal) {
-            await this.loadShareModal();
-            this.shareModal = new ShareModal(
-              "share-modal",
-              "close-share-modal-button"
-            );
-          }
-          this.openShareModal();
-        });
-      }
+      this.setupShareMenu();
 
-      //Clear circuitボタンのイベントリスナーと処理
-      const clearButton = document.getElementById("menu-item-clear-circuit");
-      if (clearButton) {
-        clearButton.addEventListener("click", (e) => {
-          e.preventDefault(); // ページ遷移防止
-          
-          this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
-          this.circuit.fetchStep(0).activate();
-
-          const titleInput = document.getElementById("circuit-title-input") as HTMLInputElement | null;
-          if (titleInput) titleInput.value = "";
-          document.title = "Qni GL";
-
-          history.replaceState("", "", location.pathname);
-
-          this.updateStateVectorComponentQubitCount();
-          this.runSimulator();
-
-          // ドロップダウンメニューを閉じる
-          const menuDropdown = document.getElementById("menu-dropdown");
-          if (menuDropdown) {
-            menuDropdown.classList.add("hidden");
-
-            const menuButton = document.querySelector("[aria-controls='menu-dropdown']");
-            if (menuButton) {
-              menuButton.classList.remove("activeClass");
-              menuButton.setAttribute("aria-expanded", "false");
-            }
-          }
-        });
-      }
+      this.setupClearCircuitButton();
 
       // テスト用
       window.pixiApp = this;
+    });
+  }
+
+  private setupStage(): void {
+    // stage: 画面に表示するオブジェクトたちの入れ物
+    this.app.stage.eventMode = "static";
+    this.app.stage.hitArea = this.app.screen;
+    this.app.stage.sortableChildren = true;
+    this.app.stage
+      .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
+      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
+      .on("pointerdown", this.maybeDeactivateGate, this);
+  }
+
+  private setupExportButton(): void {
+    const exportButton = document.getElementById("exportButton");
+    if (!exportButton) {
+      throw new Error("Could not find #exportButton");
+    }
+    exportButton.addEventListener("click", this.exportCircuit.bind(this));
+  }
+
+  private setupShareMenu(): void {
+    const shareMenuItem = document.getElementById("menu-item-share");
+    if (!shareMenuItem) {
+      throw new Error("Could not find #menu-item-share");
+    }
+    shareMenuItem.addEventListener("click", async () => {
+      if (!this.shareModal) {
+        await this.loadShareModal();
+        this.shareModal = new ShareModal(
+          "share-modal",
+          "close-share-modal-button"
+        );
+      }
+      this.openShareModal();
+    });
+  }
+
+  private setupClearCircuitButton(): void {
+    const clearButton = document.getElementById("menu-item-clear-circuit");
+    if (!clearButton) {
+      throw new Error("Could not find #menu-item-clear-circuit");
+    }
+    clearButton.addEventListener("click", (e) => {
+      e.preventDefault(); // ページ遷移防止
+
+      this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
+      this.circuit.fetchStep(0).activate();
+
+      const titleInput = document.getElementById(
+        "circuit-title-input"
+      ) as HTMLInputElement | null;
+      if (titleInput) titleInput.value = "";
+      document.title = "Qni GL";
+
+      history.replaceState("", "", location.pathname);
+
+      this.updateStateVectorComponentQubitCount();
+      this.runSimulator();
+
+      // ドロップダウンメニューを閉じる
+      const menuDropdown = document.getElementById("menu-dropdown");
+      if (menuDropdown) {
+        menuDropdown.classList.add("hidden");
+
+        const menuButton = document.querySelector(
+          "[aria-controls='menu-dropdown']"
+        );
+        if (menuButton) {
+          menuButton.classList.remove("activeClass");
+          menuButton.setAttribute("aria-expanded", "false");
+        }
+      }
     });
   }
 
@@ -895,14 +916,14 @@ export class App {
   ) as HTMLInputElement | null;
   const title = titleInput?.value || "";
 
-  const circuitObj = JSON.parse(this.circuit.toJSON());
-  // titleを追加
-  if (title) {
-    circuitObj.title = title;
+    const circuitObj = JSON.parse(this.circuit.toJSON());
+    // titleを追加
+    if (title) {
+      circuitObj.title = title;
+    }
+    const newHash = `#circuit=${JSON.stringify(circuitObj)}`;
+    history.replaceState("", "", location.pathname + newHash);
   }
-  const newHash = `#circuit=${JSON.stringify(circuitObj)}`;
-  history.replaceState("", "", location.pathname + newHash);
-}
 
   /**
    * URLのパスから量子回路の状態をデコードしロードする
