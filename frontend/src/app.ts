@@ -3,6 +3,7 @@ import { CircuitFrame } from "./circuit-frame";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
 import { Complex } from "@qni/common";
+import { DropdownMenu } from "./dropdown-menu";
 import { Dropzone } from "./dropzone";
 import { FrameDivider } from "./frame-divider";
 import { OperationComponent } from "./operation-component";
@@ -25,6 +26,7 @@ import {
   OPERATION_EVENTS,
 } from "./events";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
+import { ShareModal } from "./share-modal";
 
 declare global {
   interface Window {
@@ -49,6 +51,8 @@ export class App {
   app: Application;
   circuitSteps: CircuitStep[] = [];
   nameMap = new Map();
+
+  private shareModal: ShareModal | null = null;
 
   public static get instance(): App {
     if (!this._instance) {
@@ -105,14 +109,7 @@ export class App {
 
       el.appendChild(this.app.canvas);
 
-      // stage: 画面に表示するオブジェクトたちの入れ物
-      this.app.stage.eventMode = "static";
-      this.app.stage.hitArea = this.app.screen;
-      this.app.stage.sortableChildren = true;
-      this.app.stage
-        .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
-        .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
-        .on("pointerdown", this.maybeDeactivateGate, this);
+      this.setupStage();
 
       this.setupFrames();
 
@@ -125,14 +122,132 @@ export class App {
       this.nameMap.set(this.app.stage, "stage");
 
       // エクスポートボタンのイベントリスナー
-      const exportButton = document.getElementById("exportButton");
-      if (exportButton) {
-        exportButton.addEventListener("click", this.exportCircuit.bind(this));
-      }
+      this.setupExportButton();
+
+      new DropdownMenu();
+
+      this.setupShareMenu();
+
+      this.setupClearCircuitButton();
 
       // テスト用
       window.pixiApp = this;
     });
+  }
+
+  private setupStage(): void {
+    // stage: 画面に表示するオブジェクトたちの入れ物
+    this.app.stage.eventMode = "static";
+    this.app.stage.hitArea = this.app.screen;
+    this.app.stage.sortableChildren = true;
+    this.app.stage
+      .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
+      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
+      .on("pointerdown", this.maybeDeactivateGate, this);
+  }
+
+  private setupExportButton(): void {
+    const exportButton = document.getElementById("exportButton");
+    if (!exportButton) {
+      throw new Error("Could not find #exportButton");
+    }
+    exportButton.addEventListener("click", this.exportCircuit.bind(this));
+  }
+
+  private setupShareMenu(): void {
+    const shareMenuItem = document.getElementById("menu-item-share");
+    if (!shareMenuItem) {
+      throw new Error("Could not find #menu-item-share");
+    }
+    shareMenuItem.addEventListener("click", async () => {
+      if (!this.shareModal) {
+        await this.loadShareModal();
+        this.shareModal = new ShareModal(
+          "share-modal",
+          "close-share-modal-button"
+        );
+      }
+      this.openShareModal();
+    });
+  }
+
+  private setupClearCircuitButton(): void {
+    const clearButton = document.getElementById("menu-item-clear-circuit");
+    if (!clearButton) {
+      throw new Error("Could not find #menu-item-clear-circuit");
+    }
+    clearButton.addEventListener("click", (e) => {
+      e.preventDefault(); // ページ遷移防止
+
+      this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
+      this.circuit.fetchStep(0).activate();
+
+      const titleInput = document.getElementById(
+        "circuit-title-input"
+      ) as HTMLInputElement | null;
+      if (titleInput) titleInput.value = "";
+      document.title = "Qni GL";
+
+      history.replaceState("", "", location.pathname);
+
+      this.updateStateVectorComponentQubitCount();
+      this.runSimulator();
+
+      // ドロップダウンメニューを閉じる
+      const menuDropdown = document.getElementById("menu-dropdown");
+      if (menuDropdown) {
+        menuDropdown.classList.add("hidden");
+
+        const menuButton = document.querySelector(
+          "[aria-controls='menu-dropdown']"
+        );
+        if (menuButton) {
+          menuButton.classList.remove("activeClass");
+          menuButton.setAttribute("aria-expanded", "false");
+        }
+      }
+    });
+  }
+
+  private openShareModal(): void {
+    const titleInput = document.getElementById(
+      "circuit-title-input"
+    ) as HTMLInputElement | null;
+    if (titleInput && location.hash.startsWith("#circuit=")) {
+      try {
+        const circuitData = JSON.parse(
+          location.hash.substring("#circuit=".length)
+        );
+        if (circuitData.title) {
+          titleInput.value = circuitData.title;
+          document.title = circuitData.title;
+        }
+      } catch {
+        // パース失敗時は何もしない
+      }
+    }
+    this.shareModal?.open();
+  }
+
+  /**
+   * ShareモーダルのHTMLを動的に読み込む
+   */
+  private async loadShareModal(): Promise<void> {
+    try {
+      const response = await fetch("/share-modal.html");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load share-modal.html: ${response.statusText}`
+        );
+      }
+      const html = await response.text();
+      const container = document.getElementById("share-modal-container");
+      if (container) {
+        container.innerHTML = html;
+      }
+    } catch (error) {
+      console.error("Error loading share modal:", error);
+    }
   }
 
   private setupFrames() {
@@ -794,9 +909,19 @@ export class App {
   /**
    * 量子回路の状態をURLにエンコードする
    */
-  private updateUrlWithCircuit(): void {
-    const circuitJson = this.circuit.toJSON();
-    const newHash = `#circuit=${circuitJson}`;
+  public updateUrlWithCircuit(): void {
+  // タイトル取得
+  const titleInput = document.getElementById(
+    "circuit-title-input"
+  ) as HTMLInputElement | null;
+  const title = titleInput?.value || "";
+
+    const circuitObj = JSON.parse(this.circuit.toJSON());
+    // titleを追加
+    if (title) {
+      circuitObj.title = title;
+    }
+    const newHash = `#circuit=${JSON.stringify(circuitObj)}`;
     history.replaceState("", "", location.pathname + newHash);
   }
 
@@ -813,6 +938,21 @@ export class App {
     // 回路データをデコードしてロード
     const circuitJsonString = decodeURIComponent(sourceString);
     const circuitData = JSON.parse(circuitJsonString);
-    this.circuit.fromJSON(JSON.stringify(circuitData));
+
+    // タイトルがあれば反映
+    if (circuitData.title) {
+      document.title = circuitData.title;
+      const titleInput = document.getElementById(
+        "circuit-title-input"
+      ) as HTMLInputElement | null;
+      if (titleInput) {
+        titleInput.value = circuitData.title;
+      }
+    } else {
+      document.title = "Qni GL";
+    }
+
+    // 回路データだけで復元
+    this.circuit.fromJSON(JSON.stringify({ cols: circuitData.cols }));
   }
 }
