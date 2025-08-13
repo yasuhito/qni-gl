@@ -28,6 +28,7 @@ import {
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { RunCircuitButton } from "./run-circuit-button";
+import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 
 declare global {
   interface Window {
@@ -129,12 +130,13 @@ export class App {
 
       this.nameMap.set(this.app.stage, "stage");
 
-      // エクスポートボタンのイベントリスナー
       this.setupExportButton();
 
       new DropdownMenu();
 
       this.setupShareMenu();
+
+      this.setupAlgorithms();
 
       this.setupClearCircuitButton();
 
@@ -178,6 +180,30 @@ export class App {
         );
       }
       this.openShareModal();
+    });
+  }
+
+  private setupAlgorithms(): void {
+    setupAlgorithms((algo: AlgorithmKey, hash: string, title: string) => {
+
+      logger.log(`Selected algorithm: ${algo}`);
+      
+      location.hash = hash;
+
+      this.loadCircuitFromUrl();
+
+      document.title = title;
+
+      const titleInput = document.getElementById(
+        "circuit-title-input"
+      ) as HTMLInputElement | null;
+      if (titleInput) {
+        titleInput.value = title;
+      }
+
+      this.updateStateVectorComponentQubitCount();
+
+      this.runSimulator();
     });
   }
 
