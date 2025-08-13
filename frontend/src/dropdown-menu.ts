@@ -3,11 +3,19 @@ export class DropdownMenu {
   private menuDropdown: HTMLElement | null;
   private menuContainer: HTMLElement | null;
   private activeClass = "bg-neutral-200";
+  private algorithmsButton: HTMLElement | null;
+  private algorithmDropdown: HTMLElement | null;
 
   constructor() {
     this.menuContainer = document.getElementById("menu-container");
     this.menuButton = document.getElementById("menu-button");
     this.menuDropdown = document.getElementById("menu-dropdown");
+    this.algorithmsButton = document.getElementById(
+      "quantum-algorithms"
+    );
+    this.algorithmDropdown = document.getElementById(
+      "quantum-algorithms-dropdown"
+    );
 
     if (this.menuButton) {
       this.menuButton.addEventListener(
@@ -16,6 +24,19 @@ export class DropdownMenu {
       );
     }
     document.addEventListener("click", this.maybeHideMenuDropdown.bind(this));
+
+    if (this.algorithmsButton && this.algorithmDropdown) {
+      this.algorithmsButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleAlgorithmDropdown();
+      });
+      // サブメニュー内のクリックで閉じる
+      this.algorithmDropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.hideAlgorithmDropdown();
+      });
+    }
   }
 
   private toggleMenuDropdown(): void {
@@ -27,6 +48,7 @@ export class DropdownMenu {
     } else {
       this.menuButton.classList.remove(this.activeClass);
       this.menuButton.setAttribute("aria-expanded", "false");
+      this.hideAlgorithmDropdown();
     }
   }
 
@@ -43,6 +65,36 @@ export class DropdownMenu {
         this.menuButton.classList.remove(this.activeClass);
         this.menuButton.setAttribute("aria-expanded", "false");
       }
+      this.hideAlgorithmDropdown();
+    }
+
+    if (
+      this.algorithmDropdown &&
+      !this.algorithmDropdown.classList.contains("hidden") &&
+      !this.algorithmDropdown.contains(clickedEl) &&
+      clickedEl !== this.algorithmsButton
+    ) {
+      this.hideAlgorithmDropdown();
+    }
+  }
+
+  private toggleAlgorithmDropdown(): void {
+    if (!this.algorithmDropdown || !this.algorithmsButton) return;
+    const isHidden = this.algorithmDropdown.classList.toggle("hidden");
+    if (!isHidden) {
+      this.algorithmDropdown.style.display = "";
+    } else {
+      this.hideAlgorithmDropdown();
+    }
+  }
+
+  private hideAlgorithmDropdown(): void {
+    if (this.algorithmDropdown) {
+      this.algorithmDropdown.classList.add("hidden");
+      // 位置リセット
+      this.algorithmDropdown.style.left = "";
+      this.algorithmDropdown.style.top = "";
+      this.algorithmDropdown.style.display = "none";
     }
   }
 }
