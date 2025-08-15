@@ -1,7 +1,7 @@
 export type AlgorithmKey = keyof typeof ALGORITHM_CIRCUIT_HASHES;
 
 const CHSH_QUBIT_COUNT = 2;
-const GHZ_QUBIT_COUNT = 16;
+const GHZ_QUBIT_COUNT = 9;
 const GROVER_QUBIT_COUNT = 3;
 
 export const ALGORITHM_CIRCUIT_HASHES = {
@@ -14,7 +14,7 @@ export const ALGORITHM_CIRCUIT_HASHES = {
         ["•", "X"],
         Array(CHSH_QUBIT_COUNT).fill("Measure"),
       ],
-      title: "CHSH(Bell state generation)",
+      title: "Bell state generation",
     }),
   ghz:
     "#circuit=" +
