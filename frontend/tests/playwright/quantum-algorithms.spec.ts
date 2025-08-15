@@ -28,7 +28,7 @@ test.describe("Quantum Algorithms Dropdown", () => {
     await expect(page).toHaveScreenshot("quantum-algorithms-chsh-selected.png");
   });
 
-  test("should select GH state  and update circuit", async ({ page }) => {
+  test("should select GHZ state  and update circuit", async ({ page }) => {
     await page.locator("#menu-button").click();
     await page.locator("#quantum-algorithms").click();
     await page.locator('button[data-algo="ghz"]').click();
@@ -36,7 +36,7 @@ test.describe("Quantum Algorithms Dropdown", () => {
     const urlHash = await page.evaluate(() =>
       decodeURIComponent(location.hash)
     );
-    expect(urlHash).toContain('"title":"GHZ state generation');
+    expect(urlHash).toContain('"title":"GHZ state generation"');
     expect(urlHash).toContain('"cols":[["|0>",');
 
     await expect(page).toHaveScreenshot("quantum-algorithms-ghz-selected.png");
