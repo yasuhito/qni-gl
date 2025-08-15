@@ -73,7 +73,16 @@ export function setupAlgorithms(
       if (!algo) return;
 
       const hash = ALGORITHM_CIRCUIT_HASHES[algo];
-      const circuitData = JSON.parse(decodeURIComponent(hash.replace(/^#circuit=/, "")));
+      let circuitData;
+      try {
+        circuitData = JSON.parse(
+          decodeURIComponent(hash.replace(/^#circuit=/, ""))
+        );
+      } catch (err) {
+        alert("Failed to load circuit data: The circuit hash is malformed.");
+        console.error("Error parsing circuit data:", err);
+        return;
+      }
 
       dropdown.classList.add("hidden");
       dropdown.style.left = "";
