@@ -36,7 +36,7 @@ test.describe("Quantum Algorithms Dropdown", () => {
     const urlHash = await page.evaluate(() =>
       decodeURIComponent(location.hash)
     );
-    expect(urlHash).toContain('"title":"GHZ state generation"');
+    expect(urlHash).toContain('"title":"GHZ state generation (9 qubits)"');
     expect(urlHash).toContain('"cols":[["|0>",');
 
     await expect(page).toHaveScreenshot("quantum-algorithms-ghz-selected.png");
