@@ -4,6 +4,7 @@ const CHSH_QUBIT_COUNT = 2;
 const GHZ_QUBIT_COUNT = 9;
 const GROVER_QUBIT_COUNT = 3;
 
+// Predefined quantum algorithm circuit hashes
 export const ALGORITHM_CIRCUIT_HASHES = {
   chsh:
     "#circuit=" +
@@ -68,7 +69,7 @@ export function setupAlgorithms(
       e.preventDefault();
       e.stopPropagation();
 
-      // 選択されたアルゴリズムのキーを取得
+      // Get selected algorithm key (used to identify which algorithm was chosen)
       const algo = btn.getAttribute("data-algo") as AlgorithmKey | null;
       if (!algo) return;
 
