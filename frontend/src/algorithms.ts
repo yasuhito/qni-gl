@@ -78,9 +78,8 @@ export function setupAlgorithms(
         circuitData = JSON.parse(
           decodeURIComponent(hash.replace(/^#circuit=/, ""))
         );
-      } catch (err) {
-        alert("Failed to load circuit data: The circuit hash is malformed.");
-        console.error("Error parsing circuit data:", err);
+      } catch (e) {
+        console.error("Failed to load circuit data: The circuit hash is malformed.", e);
         return;
       }
 
