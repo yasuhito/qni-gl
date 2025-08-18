@@ -31,7 +31,7 @@ export class DropdownMenu {
         e.stopPropagation();
         this.toggleAlgorithmDropdown();
       });
-      // サブメニュー内のクリックで閉じる
+      // Close submenu when clicking inside it
       this.algorithmDropdown.addEventListener("click", (e) => {
         e.stopPropagation();
         this.hideAlgorithmDropdown();
@@ -91,7 +91,7 @@ export class DropdownMenu {
   private hideAlgorithmDropdown(): void {
     if (this.algorithmDropdown) {
       this.algorithmDropdown.classList.add("hidden");
-      // 位置リセット
+      // Reset position
       this.algorithmDropdown.style.left = "";
       this.algorithmDropdown.style.top = "";
       this.algorithmDropdown.style.display = "none";
