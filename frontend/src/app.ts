@@ -27,6 +27,7 @@ import {
 } from "./events";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
+import { RunCircuitButton } from "./run-circuit-button";
 
 declare global {
   interface Window {
@@ -102,6 +103,13 @@ export class App {
       this.handleServiceWorkerMessage.bind(this)
     );
 
+    // TODO:Runボタン押下時の処理を追加
+    const runButton = new RunCircuitButton("#run-circuit-button", () => {
+      console.log("Run button clicked");
+      this.runSimulator();
+      console.log("Done");
+    });
+
     // view, stage などをまとめた application を作成
     this.app = new Application<Renderer<HTMLCanvasElement>>();
     this.initApp().then(() => {
@@ -129,6 +137,8 @@ export class App {
       this.setupShareMenu();
 
       this.setupClearCircuitButton();
+
+      this.circuit.on("executionFinished", () => runButton.finish());
 
       // テスト用
       window.pixiApp = this;
