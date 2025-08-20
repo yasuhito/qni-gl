@@ -58,29 +58,29 @@ export const ALGORITHM_CIRCUIT_HASHES = {
 } as const;
 
 export function setupAlgorithms(
-  onSelect: (algo: AlgorithmKey, hash: string, title: string) => void
+  onSelect: (algorithm: AlgorithmKey, hash: string, title: string) => void
 ) {
   const dropdown = document.getElementById("quantum-algorithms-dropdown");
   if (!dropdown) return;
 
   const buttons = dropdown.querySelectorAll<HTMLButtonElement>("button[data-algo]");
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+  buttons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
       // Get selected algorithm key (used to identify which algorithm was chosen)
-      const algo = btn.getAttribute("data-algo") as AlgorithmKey | null;
-      if (!algo) return;
+      const algorithm = button.getAttribute("data-algo") as AlgorithmKey | null;
+      if (!algorithm) return;
 
-      const hash = ALGORITHM_CIRCUIT_HASHES[algo];
+      const hash = ALGORITHM_CIRCUIT_HASHES[algorithm];
       let circuitData;
       try {
         circuitData = JSON.parse(
           decodeURIComponent(hash.replace(/^#circuit=/, ""))
         );
-      } catch (e) {
-        console.error("Failed to load circuit data: The circuit hash is malformed.", e);
+      } catch (error) {
+        console.error("Failed to load circuit data: The circuit hash is malformed.", error);
         return;
       }
 
@@ -93,7 +93,7 @@ export function setupAlgorithms(
         menuDropdown.classList.add("hidden");
       }
 
-      onSelect(algo, hash, circuitData.title);
+      onSelect(algorithm, hash, circuitData.title);
     });
   });
 }
