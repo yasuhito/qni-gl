@@ -65,11 +65,19 @@
         </div>
       </div>
       <button
-      id="exportButton"
-      class="absolute top-16 right-10 bg-sky-500 hover:bg-sky-600 active:bg-purple-500 border-2 border-sky-700 hover:border-purple-500 active:border-purple-700 text-white font-semibold h-8 px-1 rounded-sm shadow-2xl active:shadow-none"
+        id="exportButton"
+        class="absolute right-10 top-16 h-8 w-32 rounded-sm border-2 border-sky-700 bg-sky-500 px-1 text-center font-semibold text-white shadow-2xl hover:border-purple-500 hover:bg-sky-600 active:border-purple-700 active:bg-purple-500 active:shadow-none"
       >
-        Export to QASM
+        Export
       </button>
+      <button
+        id="importButton"
+        class="absolute right-48 top-16 h-8 w-32 rounded-sm border-2 border-sky-700 bg-sky-500 px-1 text-center font-semibold text-white shadow-2xl hover:border-purple-500 hover:bg-sky-600 active:border-purple-700 active:bg-purple-500 active:shadow-none"
+      >
+        Import
+      </button>
+      <!-- Import Modal will be loaded here by JavaScript -->
+      <div id="import-modal-container"></div>
       <!-- Share Modal will be loaded here by JavaScript -->
       <div id="share-modal-container"></div>
     </div>
