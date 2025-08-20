@@ -29,6 +29,7 @@ import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { RunCircuitButton } from "./run-circuit-button";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
+import { RunCircuitButton } from "./run-circuit-button";
 
 declare global {
   interface Window {
