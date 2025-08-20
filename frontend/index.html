@@ -39,6 +39,55 @@
                 Share...
               </button>
             </div>
+            <div class="py-1" role="none">
+              <button
+                class="text-neutral-700 w-full px-4 py-2 text-sm text-left flex items-center hover:bg-neutral-100"
+                role="menuitem"
+                tabindex="-1"
+                id="quantum-algorithms"
+                type="button"
+                aria-expanded="false"
+                aria-controls="quantum-algorithms"
+              >
+                <img
+                  src="/icons/list.svg"
+                  alt="Quantum Algorithms"
+                  class="w-5 h-5 flex-shrink-0 mr-2"
+                />
+                Quantum Algorithms
+                <img
+                  src="/icons/chevron-down.svg"
+                  class="ml-auto w-4 h-4"
+                  alt="Chevron Down"
+                />
+              </button>
+              <div
+                id="quantum-algorithms-dropdown"
+                class="flex-col gap-1 hidden"
+              >
+                <button
+                  type="button"
+                  class="text-neutral-700 w-full px-4 py-2 text-sm flex items-center hover:bg-neutral-100"
+                  data-algo="chsh"
+                >
+                  Bell state generation
+                </button>
+                <button
+                  type="button"
+                  class="text-neutral-700 w-full px-4 py-2 text-sm flex items-center hover:bg-neutral-100"
+                  data-algo="ghz"
+                >
+                  GHZ state generation
+                </button>
+                <button
+                  type="button"
+                  class="text-neutral-700 w-full px-4 py-2 text-sm flex items-center hover:bg-neutral-100"
+                  data-algo="grover"
+                >
+                  Grover's algorithm
+                </button>
+              </div>
+            </div>
             <div class="border-t border-neutral-200"></div>
             <div class="py-1" role="none">
               <a href="https://qniapp.github.io/qni/" class="text-neutral-700 block px-4 py-2 text-sm flex items-center hover:bg-neutral-100" role="menuitem" tabindex="-1" id="menu-item-tutorial" target="_blank" rel="noopener noreferrer">
