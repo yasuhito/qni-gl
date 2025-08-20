@@ -184,9 +184,9 @@ export class App {
   }
 
   private setupAlgorithms(): void {
-    setupAlgorithms((algo: AlgorithmKey, hash: string, title: string) => {
+    setupAlgorithms((algorithm: AlgorithmKey, hash: string, title: string) => {
 
-      logger.log(`Selected algorithm: ${algo}`);
+      logger.log(`Selected algorithm: ${algorithm}`);
       
       location.hash = hash;
 
