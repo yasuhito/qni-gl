@@ -28,6 +28,7 @@ import {
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
+import { ImportModal } from "./import-modal";
 
 declare global {
   interface Window {
@@ -54,6 +55,7 @@ export class App {
   nameMap = new Map();
 
   private shareModal: ShareModal | null = null;
+  private importModal: ImportModal | null = null;
 
   public static get instance(): App {
     if (!this._instance) {
@@ -124,6 +126,8 @@ export class App {
 
       this.setupExportButton();
 
+      this.setupImportButton();
+
       new DropdownMenu();
 
       this.setupShareMenu();
@@ -154,6 +158,41 @@ export class App {
       throw new Error("Could not find #exportButton");
     }
     exportButton.addEventListener("click", this.exportCircuit.bind(this));
+  }
+
+  private setupImportButton(): void {
+    const importButton = document.getElementById("importButton");
+    if (!importButton) throw new Error("Could not find #importButton");
+
+    importButton.addEventListener("click", async () => {
+      if (!this.importModal) {
+        await this.loadImportModal();
+        this.importModal = new ImportModal(
+          "import-modal",
+          "close-import-modal-button"
+        );
+      }
+      this.importModal.open();
+    });
+  }
+
+  private async loadImportModal(): Promise<void> {
+    try {
+      const response = await fetch("/import-modal.html");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load import-modal.html: ${response.statusText}`
+        );
+      }
+      
+      const html = await response.text();
+      const container = document.getElementById("import-modal-container");
+      if (container) {
+        container.innerHTML = html;
+      }
+    } catch (error) {
+      console.error("Error loading import modal:", error);
+    }
   }
 
   private setupShareMenu(): void {
