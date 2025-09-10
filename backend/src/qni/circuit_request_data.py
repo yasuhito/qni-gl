@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING
+from werkzeug.datastructures import ImmutableMultiDict
 
 if TYPE_CHECKING:
     from werkzeug.datastructures import ImmutableMultiDict
@@ -118,3 +119,16 @@ class CircuitRequestData:
     @staticmethod
     def _device_type(parameter: str) -> DeviceType:
         return DeviceType(parameter)
+    
+    @classmethod
+    def from_import(cls, circuit_id, steps, qubit_count, until_step_index, amplitude_indices, device):
+        form_data = {
+            "id": circuit_id,
+            "steps": json.dumps(steps),
+            "qubitCount": str(qubit_count),
+            "untilStepIndex": str(until_step_index),
+            "amplitudeIndices": ",".join(str(i) for i in amplitude_indices),
+            "device": str(device),
+        }
+        return cls(ImmutableMultiDict(form_data))
+    

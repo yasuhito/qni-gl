@@ -7,6 +7,30 @@ self.addEventListener("install", () => {
   console.log("ServiceWorker installed");
 });
 
+// fetch 共通化
+async function fetchBackend(params) {
+  const response = await fetch(BACKEND_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 502) {
+      console.error(
+        "502 Bad Gateway: The backend server is currently down. It is likely that the uWSGI server is down."
+      );
+    } else {
+      console.error(
+        `HTTP error ${response.status}: ${response.statusText}`
+      );
+    }
+    throw new Error("Failed to connect to Qni's backend endpoint.");
+  }
+
+  return await response.json();
+}
+
 // TODO: Qni の runSimulator にあたるハンドラを実行
 self.addEventListener("message", (event) => {
   const circuitJson = event.data.circuitJson;
@@ -15,6 +39,31 @@ self.addEventListener("message", (event) => {
   const amplitudeIndices = event.data.amplitudeIndices;
   const steps = event.data.steps;
   const requestType = event.data.requestType || "circuit";
+
+  if (requestType === "import") {
+    (async () => {
+      try {
+
+        const params = new URLSearchParams({
+          qasm: event.data.qasm,
+          requestType: "import",
+        });
+
+        const jsondata = await fetchBackend(params);
+        self.postMessage({
+          type: "import",
+          stepResults: jsondata.stepResults,
+          circuitCols: jsondata.circuitCols
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+      self.postMessage({ type: "finish" });
+    })();
+    return;
+  }
+
   const simulator = new Simulator("0".repeat(qubitCount));
   const vector = simulator.state.matrix.clone();
   const amplitudes = [];
@@ -38,29 +87,7 @@ self.addEventListener("message", (event) => {
         requestType: requestType,
       });
 
-      const response = await fetch(BACKEND_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
-      });
-
-      if (!response.ok) {
-        if (response.status === 502) {
-          console.error(
-            "502 Bad Gateway: The backend server is currently down. It is likely that the uWSGI server is down."
-          );
-        } else {
-          console.error(
-            `HTTP error ${response.status}: ${response.statusText}`
-          );
-        }
-
-        throw new Error("Failed to connect to Qni's backend endpoint.");
-      }
-
-      const jsondata = await response.json();
+      const jsondata = await fetchBackend(params);
 
       if (requestType === "circuit") {
         for (let i = 0; i < jsondata.length; i++) {

@@ -35,7 +35,12 @@ export class ImportModal {
       const qasm = this.textarea?.value?.trim();
       if (!qasm) return;
 
-      // TODO: qasmをServiceWorkerに送信
+      if (window.pixiApp?.worker) {
+        window.pixiApp.worker.postMessage({
+          requestType: "import",
+          qasm: qasm,
+        });
+      }
 
       this.close();
     });

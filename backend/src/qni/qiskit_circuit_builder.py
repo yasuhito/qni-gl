@@ -116,8 +116,8 @@ class QiskitCircuitBuilder:
         circuit = QuantumCircuit(qubit_count)
 
         for step in steps:
-            if len(step) == 0:
-                circuit.id(list(range(qubit_count)))
+            if not step or all(op["type"] in ("id", None, 1) for op in step):
+                continue 
 
             for operation in step:
                 self.apply_operation(circuit, operation)
@@ -324,6 +324,12 @@ class QiskitCircuitBuilder:
         gate: ControlledGate,
     ) -> None:
         operation = cast("ControllableOperation", operation)
-        u = gate.control(num_ctrl_qubits=len(operation["controls"]))
-        for target in operation["targets"]:
-            circuit.append(u, qargs=operation["controls"] + [target])
+        num_ctrl = len(operation["controls"])
+        
+        if num_ctrl == 0:
+            for target in operation["targets"]:
+                circuit.append(gate, qargs=[target])
+        else:
+            controlled_gate = gate.control(num_ctrl_qubits=num_ctrl)
+            for target in operation["targets"]:
+                circuit.append(controlled_gate, qargs=operation["controls"] + [target])

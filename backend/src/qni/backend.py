@@ -20,12 +20,14 @@ if TYPE_CHECKING:
         StepResult,
     )
 
-from qiskit.qasm3 import dumps  # type: ignore[import-untyped]
+from qiskit.qasm3 import dumps, loads  # type: ignore[import-untyped]
 
 from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
+from qni.qiskit_to_qni_converter import convert_qiskit_circuit_to_qni
+from qni.qiskit_to_qni_converter import cols_to_steps
 
 app = Flask(__name__)
 CORS(app)
@@ -52,6 +54,7 @@ def backend() -> tuple[Response, int]:
     request_handlers = {
         "circuit": handle_circuit_request,
         "export": handle_export_request,
+        "import": handle_import_request,
     }
 
     handler = request_handlers.get(request_type)
@@ -84,6 +87,55 @@ def handle_circuit_request() -> tuple[Response, int]:
     app.logger.info("step_results = %s", step_results)
     return jsonify(step_results), 200
 
+
+
+def handle_import_request() -> tuple[Response, int]:
+    """Handle QASM import requests.
+
+    Parses the QASM string from the request, converts it to Qni's internal representation,
+    runs the simulation, and returns both the simulation results and the circuit columns.
+
+    Returns
+    -------
+        tuple[Response, int]: A tuple containing:
+            - JSON response with simulation results and circuit columns
+            - HTTP status code (200 for success, 400 for errors)
+    """
+    qasm = request.form.get("qasm", "")
+    if not qasm:
+        return jsonify({"error": "QASM is required"}), 400
+
+    try:
+        qiskit_circuit = loads(qasm)
+        app.logger.info("import_circuit = %s", qiskit_circuit)
+        
+    except Exception as e:
+        return jsonify({"error": f"QASM parse error: {e}"}), 400
+
+    steps, circuit_cols, qubit_count = convert_qiskit_circuit_to_qni(qiskit_circuit)
+    steps = cols_to_steps(circuit_cols)
+
+    circuit_request_data = CircuitRequestData.from_import(
+        circuit_id="fromQASM",
+        steps=steps,
+        qubit_count=qubit_count,
+        until_step_index=(len(steps) - 1) if steps else 0,
+        amplitude_indices=[],
+        device="CPU",  # TODO: Allow device selection (CPU/GPU)
+    )
+    app.logger.info("circuit_request_data = %s", circuit_request_data)
+
+    qiskit_step_results = cached_qiskit_runner.run(circuit_request_data)
+    step_results = _convert_and_filter_qiskit_step_results(
+        qiskit_step_results,
+        circuit_request_data,
+    )
+    app.logger.info("step_results = %s", step_results)
+
+    return jsonify({
+        "stepResults": step_results,
+        "circuitCols": circuit_cols,
+    }), 200
 
 class EmptyStepsError(ValueError):
     """Exception raised when steps list is empty."""

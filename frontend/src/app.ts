@@ -438,6 +438,12 @@ export class App {
       return;
     }
 
+    if (event.data.type === "import") {
+      this.importCircuit(event.data.stepResults, event.data.circuitCols);
+      console.log("circuitCols(app.ts---442):", event.data.circuitCols);
+      return;
+    }
+
     const stepIndex = event.data.step;
     const step = this.circuit.fetchStep(stepIndex);
 
@@ -964,6 +970,35 @@ export class App {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  public importCircuit(stepResults: any, circuitCols?: any): void {
+    if (circuitCols) {
+      // colsをそのまま使う
+      const circuitData = { cols: circuitCols };
+      this.circuit.fromJSON(JSON.stringify(circuitData));
+      this.updateUrlWithCircuit();
+      this.updateStateVectorComponentQubitCount();
+    }
+
+    // stepResultsがあれば計算結果を即時反映
+    if (stepResults && typeof stepResults === "object") {
+      if (stepResults.measuredBits) {
+        for (const [bit, value] of Object.entries(stepResults.measuredBits)) {
+          if (value === "" || value === 0 || value === 1) {
+            const step = this.circuit.fetchStep(0);
+            const dropzone = step.fetchDropzone(Number(bit));
+            const measurementGate = dropzone.operation;
+            if (measurementGate instanceof MeasurementGate) {
+              measurementGate.value = value as "" | 0 | 1;
+            }
+          }
+        }
+      }
+      if (stepResults.amplitudes) {
+        this.updateStateVectorAmplitudes(stepResults.amplitudes);
+      }
+    }
   }
 
   // 量子回路変更時に呼び出されるハンドラ
