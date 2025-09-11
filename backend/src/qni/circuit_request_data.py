@@ -119,9 +119,31 @@ class CircuitRequestData:
     @staticmethod
     def _device_type(parameter: str) -> DeviceType:
         return DeviceType(parameter)
-    
+
     @classmethod
-    def from_import(cls, circuit_id, steps, qubit_count, until_step_index, amplitude_indices, device):
+    def from_import(
+        cls,
+        circuit_id: str,
+        steps: list[dict],
+        qubit_count: int,
+        until_step_index: int,
+        amplitude_indices: list[int],
+        device: DeviceType,
+    ) -> CircuitRequestData:
+        """Create CircuitRequestData from explicit parameters.
+
+        Args:
+            circuit_id (str): Circuit ID.
+            steps (list[dict]): List of steps.
+            qubit_count (int): Number of qubits.
+            until_step_index (int): Last step index.
+            amplitude_indices (list[int]): Amplitude indices.
+            device (DeviceType): Device type.
+
+        Returns:
+            CircuitRequestData: Instance with populated fields.
+
+        """
         form_data = {
             "id": circuit_id,
             "steps": json.dumps(steps),
@@ -131,4 +153,3 @@ class CircuitRequestData:
             "device": str(device),
         }
         return cls(ImmutableMultiDict(form_data))
-    

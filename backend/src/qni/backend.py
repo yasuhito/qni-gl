@@ -26,8 +26,7 @@ from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
-from qni.qiskit_to_qni_converter import convert_qiskit_circuit_to_qni
-from qni.qiskit_to_qni_converter import cols_to_steps
+from qni.qiskit_to_qni_converter import cols_to_steps, convert_qiskit_circuit_to_qni
 
 app = Flask(__name__)
 CORS(app)
@@ -88,18 +87,19 @@ def handle_circuit_request() -> tuple[Response, int]:
     return jsonify(step_results), 200
 
 
-
 def handle_import_request() -> tuple[Response, int]:
     """Handle QASM import requests.
 
-    Parses the QASM string from the request, converts it to Qni's internal representation,
-    runs the simulation, and returns both the simulation results and the circuit columns.
+    Parses the QASM string from the request, converts it to Qni's internal
+    representation, runs the simulation, and returns both the simulation results
+    and the circuit columns.
 
     Returns
     -------
         tuple[Response, int]: A tuple containing:
             - JSON response with simulation results and circuit columns
             - HTTP status code (200 for success, 400 for errors)
+
     """
     qasm = request.form.get("qasm", "")
     if not qasm:
@@ -108,8 +108,8 @@ def handle_import_request() -> tuple[Response, int]:
     try:
         qiskit_circuit = loads(qasm)
         app.logger.info("import_circuit = %s", qiskit_circuit)
-        
-    except Exception as e:
+
+    except ValueError as e:
         return jsonify({"error": f"QASM parse error: {e}"}), 400
 
     steps, circuit_cols, qubit_count = convert_qiskit_circuit_to_qni(qiskit_circuit)
@@ -121,7 +121,7 @@ def handle_import_request() -> tuple[Response, int]:
         qubit_count=qubit_count,
         until_step_index=(len(steps) - 1) if steps else 0,
         amplitude_indices=[],
-        device="CPU",  # TODO: Allow device selection (CPU/GPU)
+        device="CPU",
     )
     app.logger.info("circuit_request_data = %s", circuit_request_data)
 
@@ -136,6 +136,7 @@ def handle_import_request() -> tuple[Response, int]:
         "stepResults": step_results,
         "circuitCols": circuit_cols,
     }), 200
+
 
 class EmptyStepsError(ValueError):
     """Exception raised when steps list is empty."""

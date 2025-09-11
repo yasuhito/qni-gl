@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, TypedDict, cast
 
-from qiskit import (  # type: ignore[import-untyped]
+from qiskit import (
     ClassicalRegister,
     QuantumCircuit,  # type: ignore[import-untyped]
 )
@@ -116,8 +116,8 @@ class QiskitCircuitBuilder:
         circuit = QuantumCircuit(qubit_count)
 
         for step in steps:
-            if not step or all(op["type"] in ("id", None, 1) for op in step):
-                continue 
+            if not step or all(op["type"] in {"id", None, 1} for op in step):
+                continue
 
             for operation in step:
                 self.apply_operation(circuit, operation)
@@ -325,7 +325,7 @@ class QiskitCircuitBuilder:
     ) -> None:
         operation = cast("ControllableOperation", operation)
         num_ctrl = len(operation["controls"])
-        
+
         if num_ctrl == 0:
             for target in operation["targets"]:
                 circuit.append(gate, qargs=[target])
