@@ -7,10 +7,8 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING
-from werkzeug.datastructures import ImmutableMultiDict
 
-if TYPE_CHECKING:
-    from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import ImmutableMultiDict
 
 from qni.types import DeviceType
 
