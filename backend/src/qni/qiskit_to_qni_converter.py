@@ -2,7 +2,6 @@
 representation.
 """
 
-from typing import Any
 
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
