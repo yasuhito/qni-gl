@@ -2,7 +2,6 @@
 representation.
 """
 
-
 from qiskit import QuantumCircuit
 from qiskit.converters import circuit_to_dag
 
@@ -29,8 +28,15 @@ def _map_controlled_gate(op_type: str) -> str | None:
 
     """
     gate_map = {
-        "CX": "X", "CY": "Y", "CZ": "Z", "CH": "H", "CS": "S",
-        "CSDG": "S†", "CT": "T", "CTDG": "T†", "CSX": "X^½"
+        "CX": "X",
+        "CY": "Y",
+        "CZ": "Z",
+        "CH": "H",
+        "CS": "S",
+        "CSDG": "S†",
+        "CT": "T",
+        "CTDG": "T†",
+        "CSX": "X^½",
     }
     return gate_map.get(op_type)
 
@@ -90,9 +96,7 @@ def _build_column_for_layer(
         layer, qc, column, operations_in_step, processed_qubits, pending_reset
     )
 
-    _finalize_pending_resets(
-        column, operations_in_step, pending_reset
-    )
+    _finalize_pending_resets(column, operations_in_step, pending_reset)
 
     return column, operations_in_step
 
@@ -123,7 +127,7 @@ def _handle_multi_and_controlled_gates(
                 operations_in_step.append({
                     "type": "•",
                     "targets": [ctrl],
-                    "controls": []
+                    "controls": [],
                 })
 
             for tgt in targets:
@@ -132,7 +136,7 @@ def _handle_multi_and_controlled_gates(
                 operations_in_step.append({
                     "type": qni_gate,
                     "targets": [tgt],
-                    "controls": controls
+                    "controls": controls,
                 })
 
             continue
@@ -148,14 +152,16 @@ def _handle_multi_and_controlled_gates(
                 operations_in_step.append({
                     "type": "•",
                     "targets": [ctrl],
-                    "controls": []
+                    "controls": [],
                 })
 
             column[target] = "X"
             processed_qubits.add(target)
-            operations_in_step.append(
-                {"type": "X", "targets": [target], "controls": controls}
-            )
+            operations_in_step.append({
+                "type": "X",
+                "targets": [target],
+                "controls": controls,
+            })
 
             continue
 
@@ -178,10 +184,7 @@ def _handle_multi_and_controlled_gates(
             for q in qargs:
                 column[q] = "Swap"
                 processed_qubits.add(q)
-                operations_in_step.append({
-                    "type": "Swap",
-                    "targets": [q]
-                })
+                operations_in_step.append({"type": "Swap", "targets": [q]})
             continue
 
 
