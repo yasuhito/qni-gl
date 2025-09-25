@@ -84,8 +84,8 @@ def _build_column_for_layer(
         tuple[list[str | None], list[dict]]: (column, operations_in_step)
 
     """
-    column = [None for _ in range(num_qubits)]
-    operations_in_step = []
+    column: list[str | None] = [None for _ in range(num_qubits)]
+    operations_in_step: list[dict] = []
     processed_qubits: set[int] = set()
 
     _handle_multi_and_controlled_gates(

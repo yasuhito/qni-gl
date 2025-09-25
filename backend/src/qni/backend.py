@@ -26,7 +26,8 @@ from qni.cached_qiskit_runner import CachedQiskitRunner
 from qni.circuit_request_data import CircuitRequestData
 from qni.logging_config import setup_custom_logger
 from qni.qiskit_circuit_builder import QiskitCircuitBuilder
-from qni.qiskit_to_qni_converter import cols_to_steps, convert_qiskit_circuit_to_qni
+from qni.qiskit_to_qni_converter import convert_qiskit_circuit_to_qni
+from qni.types import DeviceType
 
 app = Flask(__name__)
 CORS(app)
@@ -112,16 +113,17 @@ def handle_import_request() -> tuple[Response, int]:
     except ValueError as e:
         return jsonify({"error": f"QASM parse error: {e}"}), 400
 
-    steps, circuit_cols, qubit_count = convert_qiskit_circuit_to_qni(qiskit_circuit)
-    steps = cols_to_steps(circuit_cols)
+    steps_converted, circuit_cols, qubit_count = convert_qiskit_circuit_to_qni(
+        qiskit_circuit
+    )
 
     circuit_request_data = CircuitRequestData.from_import(
         circuit_id="fromQASM",
-        steps=steps,
+        steps=steps_converted,
         qubit_count=qubit_count,
-        until_step_index=(len(steps) - 1) if steps else 0,
+        until_step_index=(len(steps_converted) - 1) if steps_converted else 0,
         amplitude_indices=[],
-        device="CPU",
+        device=DeviceType.CPU,
     )
     app.logger.info("circuit_request_data = %s", circuit_request_data)
 
@@ -246,7 +248,11 @@ def _filter_amplitudes(
     amplitude_indices: list[int],
 ) -> QiskitStepAmplitudes:
     return (
-        {each: qiskit_amplitudes[each] for each in amplitude_indices}
+        {
+            each: qiskit_amplitudes[each]
+            for each in amplitude_indices
+            if each in qiskit_amplitudes
+        }
         if amplitude_indices
         else qiskit_amplitudes
     )

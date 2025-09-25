@@ -121,7 +121,7 @@ class CircuitRequestData:
     def from_import(
         cls,
         circuit_id: str,
-        steps: list[dict],
+        steps: list[list[dict]],
         qubit_count: int,
         until_step_index: int,
         amplitude_indices: list[int],
