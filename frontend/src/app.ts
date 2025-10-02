@@ -440,7 +440,6 @@ export class App {
 
     if (event.data.type === "import") {
       this.importCircuit(event.data.stepResults, event.data.circuitCols);
-      console.log("circuitCols(app.ts---442):", event.data.circuitCols);
       return;
     }
 
