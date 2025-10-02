@@ -114,9 +114,10 @@ class QiskitCircuitBuilder:
 
         """
         circuit = QuantumCircuit(qubit_count)
+        IGNORED_OP_TYPES = {"id", None, 1} 
 
         for step in steps:
-            if not step or all(op["type"] in {"id", None, 1} for op in step):
+            if not step or all(op["type"] in IGNORED_OP_TYPES for op in step):
                 continue
 
             for operation in step:
