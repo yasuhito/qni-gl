@@ -58,15 +58,24 @@
 
       <div>
         <div class="mt-1 mb-4">
-          <textarea
-            id="qasm-input"
-            name="qasm-input"
-            rows="2" 
-            class="block w-full rounded-md shadow-sm border border-black focus:border-2 focus:border-purple-500 focus:ring-purple-500 sm:text-sm py-2 px-3 resize-y overflow-y-auto max-h-[320px]"
-            autocomplete="off"
-            placeholder="OpenQASM3.0 を入力..."
-            oninput="this.style.height='auto'; this.style.height=Math.min(this.scrollHeight, 320)+'px';"
-          ></textarea>
+          <div id="qasm-editor-container" class="relative min-h-[320px] max-h-[600px] overflow-x-auto">
+            <div class="flex h-full min-h-[320px] max-h-[600px] rounded-lg border border-gray-700 shadow-lg bg-gray-900 overflow-hidden">
+              <div
+                id="line-numbers"
+                class="bg-gray-800 px-3 py-2 text-right text-gray-400 select-none font-mono text-base overflow-y-hidden scrollbar-none"
+                style="min-width:2.5em; line-height:1.5; font-family:monospace; font-size:1rem;"
+              ></div>
+              <textarea
+                id="qasm-input"
+                name="qasm-input"
+                rows="12"
+                class="w-full bg-transparent text-white font-mono text-base outline-none resize-none border-none focus:ring-2 focus:ring-sky-500 py-2 px-3 h-full scrollbar-none whitespace-pre"
+                style="line-height:1.5; font-family:monospace; font-size:1rem; resize: none; overflow-y: auto;"
+                autocomplete="off"
+                placeholder="OpenQASM3.0 を入力..."
+              ></textarea>
+            </div>
+          </div>
         </div>
         <button
           id="modal-import-button"
