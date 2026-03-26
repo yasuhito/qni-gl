@@ -57,7 +57,7 @@ MIN_QUBIT_COUNT = 2
 # =========================
 # レイアウト設定
 # =========================
-STEP_WIDTH              = 80
+STEP_WIDTH              = 60
 QUBIT_HEIGHT            = 60
 GATE_SIZE               = 36
 CANVAS_MARGIN           = 20
@@ -70,6 +70,16 @@ GATE_FONT_FAMILY        = "Arial, sans-serif"
 # gate rect
 GATE_CORNER_RADIUS      = 6
 GATE_STROKE_WIDTH       = 2
+
+# control gate
+CONTROL_RADIUS          = 7
+
+# swap gate
+SWAP_SIZE               = 10
+SWAP_STROKE_WIDTH       = 3
+
+# pair wire
+PAIR_WIRE_STROKE_WIDTH  = 3
 
 # wire
 WIRE_STROKE_WIDTH       = 2
@@ -98,6 +108,17 @@ TEXT_COLOR    = "#FFFFFF"
 
 SELECT_FILL = NORMAL_FILL
 PASTE_FILL  = NORMAL_FILL
+
+# =========================
+# 対応ゲート
+# =========================
+SUPPORTED_SINGLE_GATES = [
+  "H", "X", "Y", "Z", "√X", "S", "S†", "T", "T†", "Φ", "RX", "RY", "RZ"
+]
+
+SUPPORTED_PAIR_GATES = [
+  "×", "•", "・"
+]
 
 # =========================
 # CLI解析
@@ -191,6 +212,27 @@ def identity_gate?(gate)
 end
 
 # --------------------------------------
+# normalize_gate(gate)
+# 役割:
+#   ゲート表記を正規化する
+#   入力ゆれをここで吸収して、以降の判定を単純にする
+# --------------------------------------
+def normalize_gate(gate)
+  return gate if gate.nil?
+  return gate if gate.is_a?(Numeric)
+
+  text = gate.to_s
+
+  return "√X" if text == "X^½"
+  return "•"  if text == "・"
+  return "RX" if text == "Rx"
+  return "RY" if text == "Ry"
+  return "RZ" if text == "Rz"
+
+  text
+end
+
+# --------------------------------------
 # drawable_gate?(gate)
 # 役割:
 #   描画対象のゲートかどうかを返す
@@ -203,13 +245,60 @@ def drawable_gate?(gate)
 end
 
 # --------------------------------------
+# supported_gate?(gate)
+# 役割:
+#   対応ゲートかどうかを返す
+#   normalize後の値で判定するので、入力ゆれも許容できる
+# --------------------------------------
+def supported_gate?(gate)
+  return true if gate.nil?
+  return true if identity_gate?(gate)
+
+  normalized_gate = normalize_gate(gate)
+
+  SUPPORTED_SINGLE_GATES.include?(normalized_gate) ||
+    SUPPORTED_PAIR_GATES.include?(normalized_gate)
+end
+
+# --------------------------------------
 # gate_label(gate)
 # 役割:
 #   ゲート表示文字を返す
+#   内部判定は X のまま使い、見た目だけ ＋ にする
 # --------------------------------------
 def gate_label(gate)
-  return "√X" if gate == "X^½"
-  gate.to_s
+  normalized_gate = normalize_gate(gate)
+  return "＋" if normalized_gate == "X"
+
+  normalized_gate.to_s
+end
+
+# --------------------------------------
+# control_gate?(gate)
+# 役割:
+#   コントロールゲートかどうかを返す
+# --------------------------------------
+def control_gate?(gate)
+  normalize_gate(gate) == "•"
+end
+
+# --------------------------------------
+# swap_gate?(gate)
+# 役割:
+#   SWAPゲートかどうかを返す
+# --------------------------------------
+def swap_gate?(gate)
+  normalize_gate(gate) == "×"
+end
+
+# --------------------------------------
+# circle_x_gate?(gate)
+# 役割:
+#   丸く描画するXゲートかどうかを返す
+#   表示文字は ＋ でも、内部的には X として扱う
+# --------------------------------------
+def circle_x_gate?(gate)
+  normalize_gate(gate) == "X"
 end
 
 json_text = extract_json_text(json_text)
@@ -218,6 +307,18 @@ data = JSON.parse(json_text)
 cols = data["cols"]
 
 raise ArgumentError, 'JSON must include "cols"' unless cols.is_a?(Array)
+
+# 入力時点で対応外ゲートを弾いておく。
+# ここで落としておくと、描画ループ側を複雑にしなくて済む。
+cols.each_with_index do |col, step_index|
+  next unless col.is_a?(Array)
+
+  col.each_with_index do |gate, qubit_index|
+    next if supported_gate?(gate)
+
+    raise ArgumentError, "Unsupported gate at step #{step_index}, qubit #{qubit_index}: #{gate.inspect}"
+  end
+end
 
 step_count_in_data  = cols.size
 qubit_count_in_data = cols.map { |col| col.is_a?(Array) ? col.size : 0 }.max || 0
@@ -243,6 +344,44 @@ qubit_count.times do |qubit_index|
   svg << %(<line x1="0" y1="#{wire_y}" x2="#{svg_width}" y2="#{wire_y}" stroke="#{WIRE_COLOR}" stroke-width="#{WIRE_STROKE_WIDTH}"/>)
 end
 
+# ---- ペアゲート接続線
+cols.each_with_index do |col, step_index|
+  next unless col.is_a?(Array)
+
+  normalized_col = col.map { |gate| normalize_gate(gate) }
+
+  control_indices = []
+  x_indices       = []
+  swap_indices    = []
+
+  normalized_col.each_with_index do |gate, qubit_index|
+    next unless drawable_gate?(gate)
+
+    control_indices << qubit_index if gate == "•"
+    x_indices << qubit_index if gate == "X"
+    swap_indices << qubit_index if gate == "×"
+  end
+
+  # 同じステップに • と X があれば、CNOT系として縦線を引く
+  if control_indices.any? && x_indices.any?
+    pair_indices = (control_indices + x_indices).sort
+    wire_x = CANVAS_MARGIN + step_index * STEP_WIDTH + STEP_WIDTH / 2
+    wire_y1 = CANVAS_MARGIN + pair_indices.first * QUBIT_HEIGHT + QUBIT_HEIGHT / 2
+    wire_y2 = CANVAS_MARGIN + pair_indices.last  * QUBIT_HEIGHT + QUBIT_HEIGHT / 2
+
+    svg << %(<line x1="#{wire_x}" y1="#{wire_y1}" x2="#{wire_x}" y2="#{wire_y2}" stroke="#{NORMAL_FILL}" stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"/>)
+  end
+
+  # SWAP は × が2つあるステップだけ縦線を引く
+  if swap_indices.size == 2
+    wire_x = CANVAS_MARGIN + step_index * STEP_WIDTH + STEP_WIDTH / 2
+    wire_y1 = CANVAS_MARGIN + swap_indices.first * QUBIT_HEIGHT + QUBIT_HEIGHT / 2
+    wire_y2 = CANVAS_MARGIN + swap_indices.last  * QUBIT_HEIGHT + QUBIT_HEIGHT / 2
+
+    svg << %(<line x1="#{wire_x}" y1="#{wire_y1}" x2="#{wire_x}" y2="#{wire_y2}" stroke="#{NORMAL_FILL}" stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"/>)
+  end
+end
+
 # ---- ゲート描画
 cols.each_with_index do |col, step_index|
   next unless col.is_a?(Array)
@@ -250,8 +389,12 @@ cols.each_with_index do |col, step_index|
   col.each_with_index do |gate, qubit_index|
     next unless drawable_gate?(gate)
 
+    gate = normalize_gate(gate)
+
     gate_x = CANVAS_MARGIN + step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2
     gate_y = CANVAS_MARGIN + qubit_index * QUBIT_HEIGHT + QUBIT_HEIGHT / 2 - GATE_SIZE / 2
+    gate_cx = gate_x + GATE_SIZE / 2
+    gate_cy = gate_y + GATE_SIZE / 2
 
     state =
       if [step_index, qubit_index] == select_position
@@ -278,15 +421,39 @@ cols.each_with_index do |col, step_index|
 
     dash_attr = border_dash ? %( stroke-dasharray="#{border_dash}") : ""
 
-    svg << %(<rect x="#{gate_x}" y="#{gate_y}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}"
-      fill="#{fill_color}" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}"#{dash_attr}/>)
+    # • / × / X は見た目が特殊なので分岐する
+    if control_gate?(gate)
+      svg << %(<circle cx="#{gate_cx}" cy="#{gate_cy}" r="#{CONTROL_RADIUS}"
+        fill="#{fill_color}"#{dash_attr}/>)
 
-    svg << %(<text x="#{gate_x + GATE_SIZE / 2}" y="#{gate_y + GATE_SIZE / 2 + GATE_TEXT_Y_OFFSET}"
-      font-size="#{GATE_FONT_SIZE}"
-      text-anchor="#{TEXT_ANCHOR}"
-      dominant-baseline="#{DOMINANT_BASELINE}"
-      font-family="#{GATE_FONT_FAMILY}"
-      fill="#{TEXT_COLOR}">#{gate_label(gate)}</text>)
+    elsif swap_gate?(gate)
+      svg << %(<line x1="#{gate_cx - SWAP_SIZE}" y1="#{gate_cy - SWAP_SIZE}" x2="#{gate_cx + SWAP_SIZE}" y2="#{gate_cy + SWAP_SIZE}"
+        stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"#{dash_attr}/>)
+      svg << %(<line x1="#{gate_cx - SWAP_SIZE}" y1="#{gate_cy + SWAP_SIZE}" x2="#{gate_cx + SWAP_SIZE}" y2="#{gate_cy - SWAP_SIZE}"
+        stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"#{dash_attr}/>)
+
+    elsif circle_x_gate?(gate)
+      svg << %(<circle cx="#{gate_cx}" cy="#{gate_cy}" r="#{GATE_SIZE / 2}"
+        fill="#{fill_color}" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}"#{dash_attr}/>)
+
+      svg << %(<text x="#{gate_cx}" y="#{gate_cy + GATE_TEXT_Y_OFFSET}"
+        font-size="#{GATE_FONT_SIZE}"
+        text-anchor="#{TEXT_ANCHOR}"
+        dominant-baseline="#{DOMINANT_BASELINE}"
+        font-family="#{GATE_FONT_FAMILY}"
+        fill="#{TEXT_COLOR}">#{gate_label(gate)}</text>)
+
+    else
+      svg << %(<rect x="#{gate_x}" y="#{gate_y}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}"
+        fill="#{fill_color}" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}"#{dash_attr}/>)
+
+      svg << %(<text x="#{gate_x + GATE_SIZE / 2}" y="#{gate_y + GATE_SIZE / 2 + GATE_TEXT_Y_OFFSET}"
+        font-size="#{GATE_FONT_SIZE}"
+        text-anchor="#{TEXT_ANCHOR}"
+        dominant-baseline="#{DOMINANT_BASELINE}"
+        font-family="#{GATE_FONT_FAMILY}"
+        fill="#{TEXT_COLOR}">#{gate_label(gate)}</text>)
+    end
   end
 end
 
@@ -311,9 +478,11 @@ def make_svg_name(cols, select_position = nil, paste_position = nil)
     col.each do |gate|
       next unless drawable_gate?(gate)
 
-      name = gate.to_s
+      name = normalize_gate(gate).to_s
       if name == "•"
-        name = col.include?("X") ? "CNOT" : "Dot"
+        name = col.map { |g| normalize_gate(g) }.include?("X") ? "CNOT" : "Dot"
+      elsif name == "×"
+        name = "SWAP"
       end
 
       names << name
