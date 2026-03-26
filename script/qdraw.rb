@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'json'
 require 'cgi'
+require 'fileutils'
 
 # ======================================
 # Quantum Circuit SVG Renderer (qdraw)
@@ -41,6 +42,7 @@ require 'cgi'
 #   ・量子ビット線はグレー(#E4E4E7)
 #   ・全ゲートは角丸矩形
 #   ・描画範囲は最低でも 5ステップ × 2量子ビット を確保する
+#   ・選択時、接続線のある複数量子ビットゲートは接続範囲全体を枠で囲う
 #
 # --- Iゲートの扱い ---
 #   ・1 は Iゲート扱い
@@ -301,6 +303,51 @@ def circle_x_gate?(gate)
   normalize_gate(gate) == "X"
 end
 
+# --------------------------------------
+# pair_selection_range(col, selected_qubit_index)
+# 役割:
+#   選択されたセルが接続線つきゲートの一部なら、
+#   その接続範囲全体の qubit index 範囲を返す
+# --------------------------------------
+def pair_selection_range(col, selected_qubit_index)
+  return nil unless col.is_a?(Array)
+
+  normalized_col = col.map { |gate| normalize_gate(gate) }
+
+  control_indices = []
+  x_indices       = []
+  swap_indices    = []
+
+  normalized_col.each_with_index do |gate, qubit_index|
+    next unless drawable_gate?(gate)
+
+    control_indices << qubit_index if gate == "•"
+    x_indices << qubit_index if gate == "X"
+    swap_indices << qubit_index if gate == "×"
+  end
+
+  # CNOT系:
+  # 同じステップに • と X があり、
+  # 選択位置がそのどちらかを含むなら接続全体を囲う
+  if control_indices.any? && x_indices.any?
+    pair_indices = (control_indices + x_indices).sort
+    if pair_indices.include?(selected_qubit_index)
+      return [pair_indices.first, pair_indices.last]
+    end
+  end
+
+  # SWAP系:
+  # × がちょうど2つあり、
+  # 選択位置がその片方なら接続全体を囲う
+  if swap_indices.size == 2
+    if swap_indices.include?(selected_qubit_index)
+      return [swap_indices.first, swap_indices.last]
+    end
+  end
+
+  nil
+end
+
 json_text = extract_json_text(json_text)
 
 data = JSON.parse(json_text)
@@ -396,11 +443,20 @@ cols.each_with_index do |col, step_index|
     gate_cx = gate_x + GATE_SIZE / 2
     gate_cy = gate_y + GATE_SIZE / 2
 
+    # 接続線つきゲートの選択中は、個別セルの枠色変更ではなく
+    # 上で描いた接続範囲全体の選択枠で見せる
+    pair_range_for_this_step =
+      if select_position && step_index == select_position[0]
+        pair_selection_range(col, select_position[1])
+      else
+        nil
+      end
+
     state =
-      if [step_index, qubit_index] == select_position
-        :selected
-      elsif [step_index, qubit_index] == paste_position
+      if [step_index, qubit_index] == paste_position
         :paste
+      elsif [step_index, qubit_index] == select_position && pair_range_for_this_step.nil?
+        :selected
       else
         :normal
       end
@@ -454,6 +510,28 @@ cols.each_with_index do |col, step_index|
         font-family="#{GATE_FONT_FAMILY}"
         fill="#{TEXT_COLOR}">#{gate_label(gate)}</text>)
     end
+  end
+end
+
+# ---- 接続範囲の選択枠
+# 単一セル選択ではなく、接続線でつながれた複数量子ビットゲート全体を囲う
+if select_position
+  selected_step_index, selected_qubit_index = select_position
+  selected_col = cols[selected_step_index]
+
+  pair_range = pair_selection_range(selected_col, selected_qubit_index)
+
+  if pair_range
+    min_qubit_index, max_qubit_index = pair_range
+
+    frame_x = CANVAS_MARGIN + selected_step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2
+    frame_y = CANVAS_MARGIN + min_qubit_index * QUBIT_HEIGHT + QUBIT_HEIGHT / 2 - GATE_SIZE / 2
+    frame_width = GATE_SIZE
+    frame_height =
+      ((max_qubit_index - min_qubit_index) * QUBIT_HEIGHT) + GATE_SIZE
+
+    svg << %(<rect x="#{frame_x}" y="#{frame_y}" width="#{frame_width}" height="#{frame_height}" rx="#{GATE_CORNER_RADIUS}"
+      fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
   end
 end
 
