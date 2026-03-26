@@ -32,6 +32,9 @@ require 'fileutils'
 #
 # --- 出力 ---
 #   SVGファイル（命名規則に基づく自動付与）
+#   生成先ディレクトリ:
+#   qni-gl\doc\image
+#   --output を指定した場合も、このディレクトリ配下に出力する
 #
 # --- 外観 ---
 #   ・通常ゲートは青枠(#0369A1)、塗りは水色(#0EA5E9)
@@ -97,6 +100,9 @@ BACKGROUND_FILL         = "white"
 # svg text align
 TEXT_ANCHOR             = "middle"
 DOMINANT_BASELINE       = "middle"
+
+# output dir
+OUTPUT_DIR = File.expand_path('../doc/image', File.realpath(__dir__))
 
 # =========================
 # 色設定
@@ -597,9 +603,12 @@ end
 # =========================
 # SVGファイル書き出し
 # =========================
-svg_name = out_svg || make_svg_name(cols, select_position, paste_position)
-svg_name = next_svg_name(svg_name)
+FileUtils.mkdir_p(OUTPUT_DIR)
 
-File.write(svg_name, svg.join("\n"))
+file_name = out_svg || make_svg_name(cols, select_position, paste_position)
+svg_path  = next_svg_name(File.join(OUTPUT_DIR, File.basename(file_name)))
 
-puts "generated: #{svg_name}"
+File.write(svg_path, svg.join("\n"))
+
+puts "OUTPUT_DIR: #{OUTPUT_DIR}"
+puts "generated: #{svg_path}"
