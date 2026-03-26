@@ -43,16 +43,19 @@ module QDraw
       # next_svg_name(base_name)
       # 役割:
       #   既存ファイルと重複しない名前を返す
+      # 注意:
+      #   重複時も元のディレクトリを維持する
       # --------------------------------------
       def next_svg_name(base_name)
         return base_name unless File.exist?(base_name)
 
+        dir  = File.dirname(base_name)
         ext  = File.extname(base_name)
         stem = File.basename(base_name, ext)
         num  = 1
 
         loop do
-          new_name = "#{stem}_#{num}#{ext}"
+          new_name = File.join(dir, "#{stem}_#{num}#{ext}")
           return new_name unless File.exist?(new_name)
           num += 1
         end

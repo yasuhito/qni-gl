@@ -1,0 +1,205 @@
+{
+  "cases": [
+    {
+      "name": "pattern-01-copy-single-h-source",
+      "description": "基本操作 / 単一ゲートコピー元 / Hゲートを選択",
+      "input": "{\"cols\":[[\"H\"]]}",
+      "select": [0, 0],
+      "output": "pattern-01-copy-single-h-source.svg"
+    },
+    {
+      "name": "pattern-02-copy-single-h-paste-right",
+      "description": "基本操作 / 単一ゲート右ペースト / Hの右にHが複製される",
+      "input": "{\"cols\":[[\"H\"],[\"H\"]]}",
+      "paste": [1, 0],
+      "output": "pattern-02-copy-single-h-paste-right.svg"
+    },
+    {
+      "name": "pattern-03-copy-single-h-push-x-before",
+      "description": "基本操作 / 既存ゲート押し出し前 / HをコピーしてXのある位置へ右ペーストする想定",
+      "input": "{\"cols\":[[\"H\"],[\"X\"]]}",
+      "select": [0, 0],
+      "output": "pattern-03-copy-single-h-push-x-before.svg"
+    },
+    {
+      "name": "pattern-04-copy-single-h-push-x-after",
+      "description": "基本操作 / 既存ゲート押し出し後 / Hが入り既存Xは右へ押し出される",
+      "input": "{\"cols\":[[\"H\"],[\"H\"],[\"X\"]]}",
+      "paste": [1, 0],
+      "output": "pattern-04-copy-single-h-push-x-after.svg"
+    },
+    {
+      "name": "pattern-05-copy-single-h-push-cnot-before",
+      "description": "基本操作 / 既存CNOT押し出し前 / HをコピーしてCNOT手前へ挿入する想定",
+      "input": "{\"cols\":[[\"H\",1],[\"•\",\"X\"]]}",
+      "select": [0, 0],
+      "output": "pattern-05-copy-single-h-push-cnot-before.svg"
+    },
+    {
+      "name": "pattern-06-copy-single-h-push-cnot-after",
+      "description": "基本操作 / 既存CNOT押し出し後 / CNOTは接続を保ったまま1ステップ右へ押し出される",
+      "input": "{\"cols\":[[\"H\",1],[\"H\",1],[\"•\",\"X\"]]}",
+      "paste": [1, 0],
+      "output": "pattern-06-copy-single-h-push-cnot-after.svg"
+    },
+    {
+      "name": "pattern-07-copy-single-h-cursor-moved",
+      "description": "基本操作 / コピー後にカーソル移動 / 空白位置にカーソルを置いた状態",
+      "input": "{\"cols\":[[\"H\"],[1],[\"H\"]]}",
+      "select": [1, 0],
+      "output": "pattern-07-copy-single-h-cursor-moved.svg"
+    },
+    {
+      "name": "pattern-08-copy-single-h-paste-from-blank-cursor",
+      "description": "基本操作 / 空白カーソルから右ペースト / カーソル右にHが複製される",
+      "input": "{\"cols\":[[\"H\"],[1],[\"H\"],[\"H\"]]}",
+      "paste": [3, 0],
+      "output": "pattern-08-copy-single-h-paste-from-blank-cursor.svg"
+    },
+    {
+      "name": "pattern-09-copy-single-h-repeat-paste",
+      "description": "基本操作 / 連続右ペースト / 右が最も古く、紫枠が最も新しい",
+      "input": "{\"cols\":[[\"H\"],[\"H\"],[\"H\"],[\"H\"]]}",
+      "paste": [3, 0],
+      "output": "pattern-09-copy-single-h-repeat-paste.svg"
+    },
+
+    {
+      "name": "pattern-10-copy-cnot-group-selected-by-control",
+      "description": "複数選択 / CNOTまとめ選択 / control側クリックで接続範囲全体選択",
+      "input": "{\"cols\":[[\"•\",\"X\"]]}",
+      "select": [0, 0],
+      "output": "pattern-10-copy-cnot-group-selected-by-control.svg"
+    },
+    {
+      "name": "pattern-11-copy-cnot-group-selected-by-target",
+      "description": "複数選択 / CNOTまとめ選択 / target側クリックでも接続範囲全体選択",
+      "input": "{\"cols\":[[\"•\",\"X\"]]}",
+      "select": [0, 1],
+      "output": "pattern-11-copy-cnot-group-selected-by-target.svg"
+    },
+    {
+      "name": "pattern-12-copy-cnot-skip-group-selected",
+      "description": "複数選択 / 1量子ビットまたがりCNOTまとめ選択",
+      "input": "{\"cols\":[[\"•\",1,\"X\"]]}",
+      "select": [0, 0],
+      "output": "pattern-12-copy-cnot-skip-group-selected.svg"
+    },
+    {
+      "name": "pattern-13-copy-x-paste-next-to-cnot-cursor",
+      "description": "複数選択 / CNOT近傍カーソルでXを右ペーストする実証",
+      "input": "{\"cols\":[[\"•\",\"X\"],[1,1],[\"X\",1]]}",
+      "paste": [2, 0],
+      "output": "pattern-13-copy-x-paste-next-to-cnot-cursor.svg"
+    },
+
+    {
+      "name": "pattern-14-shift-group-two-h-source",
+      "description": "複数選択 / Shift+クリック / 2つのHをグループ選択した想定",
+      "input": "{\"cols\":[[\"H\",1],[1,1],[\"H\",1]]}",
+      "select": [0, 0],
+      "output": "pattern-14-shift-group-two-h-source.svg"
+    },
+    {
+      "name": "pattern-15-shift-group-two-h-plus-cnot-source",
+      "description": "複数選択 / Shift+クリック / H2つとCNOTを含むグループ元",
+      "input": "{\"cols\":[[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"]]}",
+      "select": [0, 0],
+      "output": "pattern-15-shift-group-two-h-plus-cnot-source.svg"
+    },
+    {
+      "name": "pattern-16-shift-group-paste-2steps-right",
+      "description": "複数選択 / 複数ステップグループ右ペースト / 2ステップ幅のグループを保持して複製",
+      "input": "{\"cols\":[[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"],[1,1],[1,1],[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"]]}",
+      "paste": [6, 0],
+      "output": "pattern-16-shift-group-paste-2steps-right.svg"
+    },
+    {
+      "name": "pattern-17-shift-group-cursor-moved-before-paste",
+      "description": "複数選択 / グループコピー後カーソル移動 / 左上基準ゲートがカーソル右に来る前提",
+      "input": "{\"cols\":[[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"],[1,1],[1,1],[1,1],[1,1]]}",
+      "select": [6, 0],
+      "output": "pattern-17-shift-group-cursor-moved-before-paste.svg"
+    },
+    {
+      "name": "pattern-18-shift-group-paste-at-moved-cursor",
+      "description": "複数選択 / カーソル移動後ペースト / グループ左上Hがカーソル右に来る",
+      "input": "{\"cols\":[[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"],[1,1],[1,1],[1,1],[\"H\",1],[1,1],[\"H\",1],[\"•\",\"X\"]]}",
+      "paste": [7, 0],
+      "output": "pattern-18-shift-group-paste-at-moved-cursor.svg"
+    },
+
+    {
+      "name": "pattern-19-rect-group-source",
+      "description": "矩形選択 / ドラッグ選択後のグループ元",
+      "input": "{\"cols\":[[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,\"S\",1]]}",
+      "select": [0, 0],
+      "output": "pattern-19-rect-group-source.svg"
+    },
+    {
+      "name": "pattern-20-rect-group-paste-right",
+      "description": "矩形選択 / グループ右ペースト結果",
+      "input": "{\"cols\":[[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,\"S\",1],[1,1,1],[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,\"S\",1]]}",
+      "paste": [5, 0],
+      "output": "pattern-20-rect-group-paste-right.svg"
+    },
+
+    {
+      "name": "pattern-21-complex-group-source",
+      "description": "複雑な動作 / 離れた複数選択コピー元 / 空ステップもコピー範囲に含む",
+      "input": "{\"cols\":[[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1]]}",
+      "select": [0, 0],
+      "output": "pattern-21-complex-group-source.svg"
+    },
+    {
+      "name": "pattern-22-complex-group-paste-preserve-relative-position",
+      "description": "複雑な動作 / 位置関係保持して複製 / 6ステップ分をそのまま複製",
+      "input": "{\"cols\":[[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1],[1,1,1],[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1]]}",
+      "paste": [7, 0],
+      "output": "pattern-22-complex-group-paste-preserve-relative-position.svg"
+    },
+    {
+      "name": "pattern-23-complex-group-repeat-paste",
+      "description": "複雑な動作 / 連続複製 / 同じ相対位置のままさらに右へ複製",
+      "input": "{\"cols\":[[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1],[1,1,1],[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1],[1,1,1],[\"H\",1,1],[1,1,1],[\"•\",1,\"X\"],[1,1,1],[1,1,1],[\"T\",1,1]]}",
+      "paste": [14, 0],
+      "output": "pattern-23-complex-group-repeat-paste.svg"
+    },
+
+    {
+      "name": "pattern-24-input-raw-json-copy-pattern",
+      "description": "入力形式実証 / 生JSON / コピー＆ペースト実証用",
+      "input": "{\"cols\":[[\"H\",1],[\"•\",\"X\"],[\"×\",\"×\"]]}",
+      "select": [1, 0],
+      "output": "pattern-24-input-raw-json-copy-pattern.svg"
+    },
+    {
+      "name": "pattern-25-input-url-encoded-copy-pattern",
+      "description": "入力形式実証 / URLエンコードJSON / コピー＆ペースト実証用",
+      "input": "%7B%22cols%22%3A%5B%5B%22H%22%2C1%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%2C%5B%22%C3%97%22%2C%22%C3%97%22%5D%5D%7D",
+      "paste": [2, 0],
+      "output": "pattern-25-input-url-encoded-copy-pattern.svg"
+    },
+    {
+      "name": "pattern-26-input-fragment-url-copy-pattern",
+      "description": "入力形式実証 / #circuit= URL / コピー＆ペースト実証用",
+      "input": "http://localhost:5173/#circuit=%7B%22cols%22%3A%5B%5B%22H%22%2C1%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%2C%5B%22%C3%97%22%2C%22%C3%97%22%5D%5D%7D",
+      "select": [1, 1],
+      "output": "pattern-26-input-fragment-url-copy-pattern.svg"
+    },
+    {
+      "name": "pattern-27-input-circuit-param-copy-pattern",
+      "description": "入力形式実証 / circuit=... / コピー＆ペースト実証用",
+      "input": "circuit={\"cols\":[[\"H\",1],[\"•\",\"X\"],[\"×\",\"×\"]]}",
+      "paste": [1, 1],
+      "output": "pattern-27-input-circuit-param-copy-pattern.svg"
+    },
+    {
+      "name": "pattern-28-input-last-segment-copy-pattern",
+      "description": "入力形式実証 / URL末尾JSON / コピー＆ペースト実証用",
+      "input": "https://qniapp.net/%7B%22cols%22%3A%5B%5B%22H%22%2C1%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%2C%5B%22%C3%97%22%2C%22%C3%97%22%5D%5D%7D",
+      "select": [2, 0],
+      "output": "pattern-28-input-last-segment-copy-pattern.svg"
+    }
+  ]
+}
