@@ -24,6 +24,11 @@ module QDraw
     GATE_SIZE               = 36
     CANVAS_MARGIN           = 20
 
+    # step bar
+    STEP_BAR_WIDTH          = 6
+    STEP_BAR_OFFSET_X       = 10
+    STEP_BAR_PADDING_Y      = 28
+
     # gate text
     GATE_FONT_SIZE          = 24
     GATE_TEXT_Y_OFFSET      = 2

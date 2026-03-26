@@ -25,6 +25,11 @@ module QDraw
             paste_position = parse_position(args[arg_i + 1])
             arg_i += 2
 
+          when "--step-bar"
+            raise ArgumentError, "--step-bar requires step index like 1" if args[arg_i + 1].nil?
+            step_bar_index = Integer(args[arg_i + 1])
+            arg_i += 2
+
           when "--output"
             raise ArgumentError, "--output requires filename" if args[arg_i + 1].nil?
             out_svg = args[arg_i + 1]
@@ -41,6 +46,7 @@ module QDraw
         {
           select_position: select_position,
           paste_position:  paste_position,
+          step_bar_index:  step_bar_index,
           out_svg:         out_svg,
           json_text:       json_text
         }

@@ -74,7 +74,8 @@ circuit.validate!
 svg_text = QDraw::Renderer.new(
   circuit: circuit,
   select_position: options[:select_position],
-  paste_position: options[:paste_position]
+  paste_position: options[:paste_position],
+  step_bar_index: options[:step_bar_index]
 ).render
 
 # =========================

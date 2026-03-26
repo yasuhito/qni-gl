@@ -2,10 +2,11 @@ module QDraw
   class Renderer
     include QDraw::Constants
 
-    def initialize(circuit:, select_position: nil, paste_position: nil)
+    def initialize(circuit:, select_position: nil, paste_position: nil, step_bar_index: nil)
       @circuit = circuit
       @select_position = select_position
       @paste_position = paste_position
+      @step_bar_index = step_bar_index
     end
 
     # =========================
@@ -25,6 +26,9 @@ module QDraw
       # ---- ペアゲート接続線
       add_pair_wire_svgs(svg)
 
+      # ---- ステップ右側の縦棒
+      add_step_bar_svg(svg)
+
       # ---- ゲート描画
       add_gate_svgs(svg)
 
@@ -38,7 +42,7 @@ module QDraw
 
     private
 
-    attr_reader :circuit, :select_position, :paste_position
+    attr_reader :circuit, :select_position, :paste_position, :step_bar_index
 
     def svg_width
       CANVAS_MARGIN * 2 + circuit.step_count * STEP_WIDTH
@@ -84,6 +88,35 @@ module QDraw
           svg.add %(<line x1="#{wire_x}" y1="#{wire_y1}" x2="#{wire_x}" y2="#{wire_y2}" stroke="#{NORMAL_FILL}" stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"/>)
         end
       end
+    end
+
+    def add_step_bar_svg(svg)
+      return if step_bar_index.nil?
+      return if step_bar_index < 0
+    
+      # 全量子ビット範囲で描画
+      min_qubit_index = 0
+      max_qubit_index = circuit.qubit_count - 1
+    
+      gate_right_x = CANVAS_MARGIN + step_bar_index * STEP_WIDTH + STEP_WIDTH / 2 + GATE_SIZE / 2
+      bar_x = gate_right_x + STEP_BAR_OFFSET_X
+    
+      bar_y = qubit_center_y(min_qubit_index) - (GATE_SIZE / 2) - STEP_BAR_PADDING_Y
+    
+      bar_height =
+        ((max_qubit_index - min_qubit_index) * QUBIT_HEIGHT) +
+        GATE_SIZE +
+        (STEP_BAR_PADDING_Y * 2)
+    
+      svg.add %(
+        <rect
+          x="#{bar_x}"
+          y="#{bar_y}"
+          width="#{STEP_BAR_WIDTH}"
+          height="#{bar_height}"
+          fill="#{NORMAL_FILL}"
+        />
+      )
     end
 
     def add_gate_svgs(svg)
