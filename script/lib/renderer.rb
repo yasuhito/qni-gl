@@ -205,22 +205,27 @@ module QDraw
       return unless select_position
 
       selected_step_index, selected_qubit_index = select_position
-      selected_col = circuit.column(selected_step_index)
+      selected_col = circuit.column(selected_step_index) || []
 
       pair_range = QDraw::Selection.pair_selection_range(selected_col, selected_qubit_index)
 
-      return unless pair_range
+      if pair_range
+        min_qubit_index, max_qubit_index = pair_range
 
-      min_qubit_index, max_qubit_index = pair_range
+        frame_x = CANVAS_MARGIN + selected_step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2
+        frame_y = CANVAS_MARGIN + min_qubit_index * QUBIT_HEIGHT + QUBIT_HEIGHT / 2 - GATE_SIZE / 2
+        frame_width = GATE_SIZE
+        frame_height =
+          ((max_qubit_index - min_qubit_index) * QUBIT_HEIGHT) + GATE_SIZE
 
-      frame_x = CANVAS_MARGIN + selected_step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2
-      frame_y = CANVAS_MARGIN + min_qubit_index * QUBIT_HEIGHT + QUBIT_HEIGHT / 2 - GATE_SIZE / 2
-      frame_width = GATE_SIZE
-      frame_height =
-        ((max_qubit_index - min_qubit_index) * QUBIT_HEIGHT) + GATE_SIZE
+        svg.add %(<rect x="#{frame_x}" y="#{frame_y}" width="#{frame_width}" height="#{frame_height}" rx="#{GATE_CORNER_RADIUS}"
+          fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
+      else
+        rect = gate_rect(selected_step_index, selected_qubit_index)
 
-      svg.add %(<rect x="#{frame_x}" y="#{frame_y}" width="#{frame_width}" height="#{frame_height}" rx="#{GATE_CORNER_RADIUS}"
-        fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
+        svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}"
+          fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
+      end
     end
 
     def gate_rect(step_index, qubit_index)
