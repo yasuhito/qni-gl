@@ -98,12 +98,18 @@ cases.each_with_index do |test_case, index|
 
   if select
     cmd << "--select"
-    cmd << "#{select[0]},#{select[1]}"
+  
+    cmd << select.map { |p|
+      "#{p[0]},#{p[1]}"
+    }.join(";")
   end
 
   if paste
     cmd << "--paste"
-    cmd << "#{paste[0]},#{paste[1]}"
+    
+    cmd << paste.map { |p|
+      "#{p[0]},#{p[1]}"
+    }.join(";")
   end
 
   cmd << input

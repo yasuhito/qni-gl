@@ -2,10 +2,10 @@ module QDraw
   class Renderer
     include QDraw::Constants
 
-    def initialize(circuit:, select_position: nil, paste_position: nil, step_bar_index: nil)
+    def initialize(circuit:, select_positions: nil, paste_positions: nil, step_bar_index: nil)
       @circuit = circuit
-      @select_position = select_position
-      @paste_position = paste_position
+      @select_positions = select_positions
+      @paste_positions = paste_positions
       @step_bar_index = step_bar_index
     end
 
@@ -32,17 +32,13 @@ module QDraw
       # ---- ゲート描画
       add_gate_svgs(svg)
 
-      # ---- 接続範囲の選択枠
-      # 単一セル選択ではなく、接続線でつながれた複数量子ビットゲート全体を囲う
-      add_selection_frame_svg(svg)
-
       svg.add %(</svg>)
       svg.to_s
     end
 
     private
 
-    attr_reader :circuit, :select_position, :paste_position, :step_bar_index
+    attr_reader :circuit, :select_positions, :paste_positions, :step_bar_index
 
     def svg_width
       CANVAS_MARGIN * 2 + circuit.step_count * STEP_WIDTH
@@ -133,16 +129,16 @@ module QDraw
           # 接続線つきゲートの選択中は、個別セルの枠色変更ではなく
           # 上で描いた接続範囲全体の選択枠で見せる
           pair_range_for_this_step =
-            if select_position && step_index == select_position[0]
-              QDraw::Selection.pair_selection_range(col, select_position[1])
+            if select_positions && step_index == select_positions[0]
+              QDraw::Selection.pair_selection_range(col, select_positions[1])
             else
               nil
             end
 
           state =
-            if [step_index, qubit_index] == paste_position
+            if paste_positions&.include?([step_index, qubit_index])
               :paste
-            elsif [step_index, qubit_index] == select_position && pair_range_for_this_step.nil?
+            elsif select_positions&.include?([step_index, qubit_index]) && pair_range_for_this_step.nil?
               :selected
             else
               :normal
@@ -201,32 +197,6 @@ module QDraw
       end
     end
 
-    def add_selection_frame_svg(svg)
-      return unless select_position
-
-      selected_step_index, selected_qubit_index = select_position
-      selected_col = circuit.column(selected_step_index) || []
-
-      pair_range = QDraw::Selection.pair_selection_range(selected_col, selected_qubit_index)
-
-      if pair_range
-        min_qubit_index, max_qubit_index = pair_range
-
-        frame_x = CANVAS_MARGIN + selected_step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2
-        frame_y = CANVAS_MARGIN + min_qubit_index * QUBIT_HEIGHT + QUBIT_HEIGHT / 2 - GATE_SIZE / 2
-        frame_width = GATE_SIZE
-        frame_height =
-          ((max_qubit_index - min_qubit_index) * QUBIT_HEIGHT) + GATE_SIZE
-
-        svg.add %(<rect x="#{frame_x}" y="#{frame_y}" width="#{frame_width}" height="#{frame_height}" rx="#{GATE_CORNER_RADIUS}"
-          fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
-      else
-        rect = gate_rect(selected_step_index, selected_qubit_index)
-
-        svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}"
-          fill="none" stroke="#{SELECT_STROKE}" stroke-width="#{GATE_STROKE_WIDTH}"/>)
-      end
-    end
 
     def gate_rect(step_index, qubit_index)
       gate_x = CANVAS_MARGIN + step_index * STEP_WIDTH + STEP_WIDTH / 2 - GATE_SIZE / 2

@@ -73,8 +73,8 @@ circuit.validate!
 
 svg_text = QDraw::Renderer.new(
   circuit: circuit,
-  select_position: options[:select_position],
-  paste_position: options[:paste_position],
+  select_positions: options[:select_positions],
+  paste_positions: options[:paste_positions],
   step_bar_index: options[:step_bar_index]
 ).render
 
@@ -85,8 +85,8 @@ FileUtils.mkdir_p(QDraw::Constants::OUTPUT_DIR)
 
 file_name = options[:out_svg] || QDraw::FileNamer.make_svg_name(
   circuit.cols,
-  options[:select_position],
-  options[:paste_position]
+  options[:select_positions],
+  options[:paste_positions]
 )
 
 svg_path = QDraw::FileNamer.next_svg_name(

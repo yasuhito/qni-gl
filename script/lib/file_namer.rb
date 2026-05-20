@@ -6,12 +6,12 @@ module QDraw
       # =========================
 
       # --------------------------------------
-      # make_svg_name(cols, select_position=nil, paste_position=nil)
+      # make_svg_name(cols, select_positions=nil, paste_positions=nil)
       # 役割:
       #   回路内容と状態からSVGファイル名を作る
       #   Iゲート(1 / "1" / "I")は名前に含めない
       # --------------------------------------
-      def make_svg_name(cols, select_position = nil, paste_position = nil)
+      def make_svg_name(cols, select_positions = nil, paste_positions = nil)
         names = []
 
         cols.each do |col|
@@ -32,8 +32,8 @@ module QDraw
         end
 
         prefix = ""
-        prefix << "Select-" if select_position
-        prefix << "Paste-" if paste_position && paste_position != select_position
+        prefix << "Select-" if select_positions
+        prefix << "Paste-" if paste_positions && paste_positions != select_positions
 
         body = names.empty? ? "empty" : names.join("-")
         "#{prefix}#{body}.svg"

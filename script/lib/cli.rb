@@ -5,8 +5,8 @@ module QDraw
       # CLI解析
       # =========================
       def parse(argv)
-        select_position = nil
-        paste_position  = nil
+        select_positions = nil
+        paste_positions  = nil
         out_svg         = nil
         json_text       = nil
 
@@ -17,12 +17,12 @@ module QDraw
           case args[arg_i]
           when "--select"
             raise ArgumentError, "--select requires value like 1,0" if args[arg_i + 1].nil?
-            select_position = parse_position(args[arg_i + 1])
+            select_positions = parse_positions(args[arg_i + 1])
             arg_i += 2
 
           when "--paste"
             raise ArgumentError, "--paste requires value like 1,0" if args[arg_i + 1].nil?
-            paste_position = parse_position(args[arg_i + 1])
+            paste_positions = parse_positions(args[arg_i + 1])
             arg_i += 2
 
           when "--step-bar"
@@ -44,8 +44,8 @@ module QDraw
         raise ArgumentError, "JSON input is required" if json_text.nil?
 
         {
-          select_position: select_position,
-          paste_position:  paste_position,
+          select_positions: select_positions,
+          paste_positions:  paste_positions,
           step_bar_index:  step_bar_index,
           out_svg:         out_svg,
           json_text:       json_text
@@ -54,11 +54,15 @@ module QDraw
 
       private
 
-      def parse_position(text)
-        parts = text.to_s.split(",")
-        raise ArgumentError, "position must be like step,qubit" unless parts.size == 2
-
-        parts.map(&:to_i)
+      def parse_positions(text)
+        text.split(";").map do |pair|
+          parts = pair.split(",")
+      
+          raise ArgumentError,
+                "position must be like step,qubit" unless parts.size == 2
+      
+          parts.map(&:to_i)
+        end
       end
     end
   end
