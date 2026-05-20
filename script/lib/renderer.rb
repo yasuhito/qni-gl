@@ -162,14 +162,70 @@ module QDraw
 
           # • / × / X は見た目が特殊なので分岐する
           if QDraw::Gate.control?(gate)
-            svg.add %(<circle cx="#{rect[:cx]}" cy="#{rect[:cy]}" r="#{CONTROL_RADIUS}"
-              fill="#{fill_color}"#{dash_attr}/>)
+              # 外側の選択枠
+              svg.add %(
+                <rect
+                  x="#{rect[:x]}"
+                  y="#{rect[:y]}"
+                  width="#{GATE_SIZE}"
+                  height="#{GATE_SIZE}"
+                  rx="#{GATE_CORNER_RADIUS}"
+                  fill="none"
+                  stroke="#{border_color}"
+                  stroke-width="#{GATE_STROKE_WIDTH}"
+                  #{dash_attr}
+                />
+              )
+              # 中の control dot
+              svg.add %(
+                <circle
+                  cx="#{rect[:cx]}"
+                  cy="#{rect[:cy]}"
+                  r="#{CONTROL_RADIUS}"
+                  fill="#{fill_color}"
+                />
+              )
 
           elsif QDraw::Gate.swap?(gate)
-            svg.add %(<line x1="#{rect[:cx] - SWAP_SIZE}" y1="#{rect[:cy] - SWAP_SIZE}" x2="#{rect[:cx] + SWAP_SIZE}" y2="#{rect[:cy] + SWAP_SIZE}"
-              stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"#{dash_attr}/>)
-            svg.add %(<line x1="#{rect[:cx] - SWAP_SIZE}" y1="#{rect[:cy] + SWAP_SIZE}" x2="#{rect[:cx] + SWAP_SIZE}" y2="#{rect[:cy] - SWAP_SIZE}"
-              stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"#{dash_attr}/>)
+              # 外側枠
+              svg.add %(
+                <rect
+                  x="#{rect[:x]}"
+                  y="#{rect[:y]}"
+                  width="#{GATE_SIZE}"
+                  height="#{GATE_SIZE}"
+                  rx="#{GATE_CORNER_RADIUS}"
+                  fill="none"
+                  stroke="#{border_color}"
+                  stroke-width="#{GATE_STROKE_WIDTH}"
+                  #{dash_attr}
+                />
+              )
+                       
+              # swap cross
+              svg.add %(
+                <line
+                  x1="#{rect[:cx] - SWAP_SIZE}"
+                  y1="#{rect[:cy] - SWAP_SIZE}"
+                  x2="#{rect[:cx] + SWAP_SIZE}"
+                  y2="#{rect[:cy] + SWAP_SIZE}"
+                  stroke="#{fill_color}"
+                  stroke-width="#{SWAP_STROKE_WIDTH}"
+                  stroke-linecap="round"
+                />
+              )
+                       
+              svg.add %(
+                <line
+                  x1="#{rect[:cx] - SWAP_SIZE}"
+                  y1="#{rect[:cy] + SWAP_SIZE}"
+                  x2="#{rect[:cx] + SWAP_SIZE}"
+                  y2="#{rect[:cy] - SWAP_SIZE}"
+                  stroke="#{fill_color}"
+                  stroke-width="#{SWAP_STROKE_WIDTH}"
+                  stroke-linecap="round"
+                />
+              )
 
           elsif QDraw::Gate.circle_x?(gate)
             svg.add %(<circle cx="#{rect[:cx]}" cy="#{rect[:cy]}" r="#{GATE_SIZE / 2}"
