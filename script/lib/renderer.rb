@@ -226,15 +226,23 @@ module QDraw
           # control gate
           # =========================
           if QDraw::Gate.control?(gate)
-            svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
-
+          
+            # 選択・ペースト時だけ外枠表示
+            unless state == :normal
+              svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
+            end
+          
             svg.add %(<circle cx="#{rect[:cx]}" cy="#{rect[:cy]}" r="#{CONTROL_RADIUS}" fill="#{fill_color}"/>)
-
+          
           # =========================
           # swap gate
           # =========================
           elsif QDraw::Gate.swap?(gate)
-            svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
+          
+            # 選択・ペースト時だけ外枠表示
+            unless state == :normal
+              svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
+            end
 
             svg.add %(<line x1="#{rect[:cx] - SWAP_SIZE}" y1="#{rect[:cy] - SWAP_SIZE}" x2="#{rect[:cx] + SWAP_SIZE}" y2="#{rect[:cy] + SWAP_SIZE}" stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"/>)
 
