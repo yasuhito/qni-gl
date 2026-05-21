@@ -55,13 +55,31 @@ i = 0
 while i < args.length
   case args[i]
   when "--only"
-    only_name = args[i + 1]
+    value = args[i + 1]
+
+    if value.nil? || value.start_with?("--")
+      raise ArgumentError, "--only requires case name"
+    end
+
+    only_name = value
     i += 2
+
   when "--filter"
-    filter_text = args[i + 1]
+    value = args[i + 1]
+
+    if value.nil? || value.start_with?("--")
+      raise ArgumentError, "--filter requires text"
+    end
+
+    filter_text = value
     i += 2
+
   else
-    i += 1
+    if args[i].start_with?("--")
+      raise ArgumentError, "Unknown option: #{args[i]}"
+    end
+
+    raise ArgumentError, "Unknown argument: #{args[i]}"
   end
 end
 
