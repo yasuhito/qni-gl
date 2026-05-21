@@ -69,6 +69,14 @@ module QDraw
             arg_i += 2
 
           else
+            if current_arg.start_with?("--")
+              raise ArgumentError, "Unknown option: #{current_arg}"
+            end
+          
+            if json_text
+              raise ArgumentError, "Multiple JSON inputs are not allowed"
+            end
+          
             json_text = current_arg
             arg_i += 1
           end
