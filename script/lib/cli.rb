@@ -28,11 +28,11 @@ module QDraw
           current_arg = args[arg_i]
 
           case current_arg
-          when "--select"
+            when "--select"
             value = args[arg_i + 1]
 
             raise ArgumentError,
-                  "--select requires value like 1,0" if value.nil?
+                  "--select requires value like 1,0 or 1,0;1,1" if value.nil?
 
             select_positions = parse_positions(value)
 
@@ -42,7 +42,7 @@ module QDraw
             value = args[arg_i + 1]
 
             raise ArgumentError,
-                  "--paste requires value like 1,0" if value.nil?
+                  "--paste requires value like 1,0 or 1,0;1,1" if value.nil?
 
             paste_positions = parse_positions(value)
 
