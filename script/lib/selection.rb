@@ -33,43 +33,6 @@ module QDraw
       }
     end
 
-    # --------------------------------------
-    # pair_selection_range(col, selected_qubit_index)
-    # 役割:
-    #   選択されたセルが接続線つきゲートの一部なら、
-    #   その接続範囲全体の qubit index 範囲を返す
-    # --------------------------------------
-    def pair_selection_range(col, selected_qubit_index)
-      return nil unless col.is_a?(Array)
-
-      analysis = analyze_column(col)
-
-      control_indices = analysis[:controls]
-      x_indices       = analysis[:xs]
-      swap_indices    = analysis[:swaps]
-
-      # CNOT系:
-      # 同じステップに • と X があり、
-      # 選択位置がそのどちらかを含むなら接続全体を囲う
-      if control_indices.any? && x_indices.any?
-        pair_indices = (control_indices + x_indices).sort
-        if pair_indices.include?(selected_qubit_index)
-          return [pair_indices.first, pair_indices.last]
-        end
-      end
-
-      # SWAP系:
-      # × がちょうど2つあり、
-      # 選択位置がその片方なら接続全体を囲う
-      if swap_indices.size == 2
-        if swap_indices.include?(selected_qubit_index)
-          return [swap_indices.first, swap_indices.last]
-        end
-      end
-
-      nil
-    end
-
     def empty_analysis
       {
         controls: [],

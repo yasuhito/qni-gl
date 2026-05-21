@@ -176,17 +176,6 @@ module QDraw
           rect =
             gate_rect(step_index, qubit_index)
 
-          pair_range_for_this_step =
-            if select_positions &&
-               step_index == select_positions[0]
-              QDraw::Selection.pair_selection_range(
-                col,
-                select_positions[1]
-              )
-            else
-              nil
-            end
-
           state =
             if paste_positions&.include?(
               [step_index, qubit_index]
@@ -195,7 +184,7 @@ module QDraw
 
             elsif select_positions&.include?(
               [step_index, qubit_index]
-            ) && pair_range_for_this_step.nil?
+            )
               :selected
 
             else
