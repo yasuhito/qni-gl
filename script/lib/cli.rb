@@ -115,7 +115,12 @@ module QDraw
                   "position must be like step,qubit"
           end
 
-          parts.map(&:to_i)
+          begin
+            parts.map { |part| Integer(part, 10) }
+          rescue ArgumentError
+            raise ArgumentError,
+                  "position must be like step,qubit"
+          end
         end
       end
     end
