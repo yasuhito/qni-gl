@@ -13,6 +13,18 @@ module QDraw
       #   Select-CNOT.svg
       #   Paste-H-H.svg
       #
+      # 補足:
+      #   描画はセル単位だが、
+      #   ファイル名は step / column 単位でゲート名を判定する
+      #
+      # 例:
+      #   ["•", "X"]      => CNOT
+      #   ["•", "H"]      => CtrlH
+      #   ["•", "Z"]      => CtrlZ
+      #   ["•", "1"]      => CTRL
+      #   ["•", "•", "X"] => CCNOT
+      #   ["×", "×"]      => SWAP
+      #
       def make_svg_name(
         cols,
         select_positions = nil,
@@ -26,17 +38,15 @@ module QDraw
           normalized_col =
             col.map { |gate| QDraw::Gate.normalize(gate) }
 
-          normalized_col.each do |gate|
-            next unless QDraw::Gate.drawable?(gate)
+          gate_name =
+            convert_column_to_file_name(
+              normalized_col
+            )
 
-            gate_name =
-              convert_gate_name_for_file_name(
-                gate,
-                normalized_col
-              )
+          next if gate_name.nil?
+          next if gate_name.empty?
 
-            gate_names << gate_name
-          end
+          gate_names << gate_name
         end
 
         prefix = build_prefix(
@@ -103,12 +113,121 @@ module QDraw
       end
 
       # =========================
+      # column単位のファイル名変換
+      # =========================
+      #
+      # 同じ step にあるゲートの組み合わせから、
+      # ファイル名用のゲート名を決める
+      #
+      def convert_column_to_file_name(normalized_col)
+        controls = []
+        targets  = []
+        swaps    = []
+
+        normalized_col.each do |gate|
+          next unless QDraw::Gate.drawable?(gate)
+
+          if QDraw::Gate.control?(gate)
+            controls << gate
+          elsif QDraw::Gate.swap?(gate)
+            swaps << gate
+          else
+            targets << gate
+          end
+        end
+
+        return nil if controls.empty? &&
+                      targets.empty? &&
+                      swaps.empty?
+
+        return convert_swap_name(swaps) if swaps.any?
+
+        if controls.any?
+          return convert_controlled_gate_name(
+            controls.size,
+            targets
+          )
+        end
+
+        targets.map { |gate| convert_gate_name_for_file_name(gate) }.join("-")
+      end
+
+      # =========================
+      # 制御ゲート名変換
+      # =========================
+      #
+      # ["•", "X"]      => CNOT
+      # ["•", "H"]      => CtrlH
+      # ["•", "Z"]      => CtrlZ
+      # ["•", "1"]      => CTRL
+      # ["•", "•", "X"] => CCNOT
+      #
+      def convert_controlled_gate_name(control_count, targets)
+        if targets.empty?
+          return "CTRL" if control_count == 1
+
+          return "C#{control_count}CTRL"
+        end
+
+        if targets.size > 1
+          target_name =
+            targets.map { |gate| convert_gate_name_for_file_name(gate) }.join("-")
+
+          return "#{control_prefix(control_count)}#{target_name}"
+        end
+
+        target_gate = targets.first
+
+        case [control_count, target_gate]
+        when [1, "X"]
+          "CNOT"
+        when [2, "X"]
+          "CCNOT"
+        else
+          "#{control_prefix(control_count)}#{convert_gate_name_for_file_name(target_gate)}"
+        end
+      end
+
+      # =========================
+      # control数の接頭辞
+      # =========================
+      #
+      # 1 control  => Ctrl
+      # 2 controls => CCtrl
+      # 3 controls => C3Ctrl
+      #
+      def control_prefix(control_count)
+        return "Ctrl" if control_count == 1
+        return "CCtrl" if control_count == 2
+
+        "C#{control_count}Ctrl"
+      end
+
+      # =========================
+      # SWAPゲート名変換
+      # =========================
+      def convert_swap_name(swaps)
+        return "SWAP" if swaps.size == 2
+
+        "SWAP#{swaps.size}"
+      end
+
+      # =========================
       # ファイル名用ゲート名変換
       # =========================
-      def convert_gate_name_for_file_name(gate, normalized_col)
+      def convert_gate_name_for_file_name(gate)
         case gate
-        when "•"
-          normalized_col.include?("X") ? "CNOT" : "Dot"
+        when "√X"
+          "SqrtX"
+
+        when "S†"
+          "Sdag"
+
+        when "T†"
+          "Tdag"
+
+        when "Φ"
+          "Phi"
 
         when "×"
           "SWAP"
