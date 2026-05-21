@@ -20,24 +20,10 @@ module QDraw
     def render
       svg = SvgBuilder.new
 
-      svg.add %(
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="#{svg_width}"
-          height="#{svg_height}"
-        >
-      )
+      svg.add %(<svg xmlns="http://www.w3.org/2000/svg" width="#{svg_width}" height="#{svg_height}">)
 
       # ---- 背景
-      svg.add %(
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="#{BACKGROUND_FILL}"
-        />
-      )
+      svg.add %(<rect x="0" y="0" width="100%" height="100%" fill="#{BACKGROUND_FILL}"/>)
 
       # ---- ワイヤ
       add_wire_svgs(svg)
@@ -91,16 +77,7 @@ module QDraw
           qubit_index * QUBIT_HEIGHT +
           QUBIT_HEIGHT / 2
 
-        svg.add %(
-          <line
-            x1="0"
-            y1="#{wire_y}"
-            x2="#{svg_width}"
-            y2="#{wire_y}"
-            stroke="#{WIRE_COLOR}"
-            stroke-width="#{WIRE_STROKE_WIDTH}"
-          />
-        )
+        svg.add %(<line x1="0" y1="#{wire_y}" x2="#{svg_width}" y2="#{wire_y}" stroke="#{WIRE_COLOR}" stroke-width="#{WIRE_STROKE_WIDTH}"/>)
       end
     end
 
@@ -131,16 +108,7 @@ module QDraw
           wire_y2 =
             qubit_center_y(pair_indices.last)
 
-          svg.add %(
-            <line
-              x1="#{wire_x}"
-              y1="#{wire_y1}"
-              x2="#{wire_x}"
-              y2="#{wire_y2}"
-              stroke="#{NORMAL_FILL}"
-              stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"
-            />
-          )
+          svg.add %(<line x1="#{wire_x}" y1="#{wire_y1}" x2="#{wire_x}" y2="#{wire_y2}" stroke="#{NORMAL_FILL}" stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"/>)
         end
 
         # SWAP は × が2つある場合のみ
@@ -154,16 +122,7 @@ module QDraw
           wire_y2 =
             qubit_center_y(swap_indices.last)
 
-          svg.add %(
-            <line
-              x1="#{wire_x}"
-              y1="#{wire_y1}"
-              x2="#{wire_x}"
-              y2="#{wire_y2}"
-              stroke="#{NORMAL_FILL}"
-              stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"
-            />
-          )
+          svg.add %(<line x1="#{wire_x}" y1="#{wire_y1}" x2="#{wire_x}" y2="#{wire_y2}" stroke="#{NORMAL_FILL}" stroke-width="#{PAIR_WIRE_STROKE_WIDTH}"/>)
         end
       end
     end
@@ -198,15 +157,7 @@ module QDraw
         GATE_SIZE +
         (STEP_BAR_PADDING_Y * 2)
 
-      svg.add %(
-        <rect
-          x="#{bar_x}"
-          y="#{bar_y}"
-          width="#{STEP_BAR_WIDTH}"
-          height="#{bar_height}"
-          fill="#{NORMAL_FILL}"
-        />
-      )
+      svg.add %(<rect x="#{bar_x}" y="#{bar_y}" width="#{STEP_BAR_WIDTH}" height="#{bar_height}" fill="#{NORMAL_FILL}"/>)
     end
 
     # =========================
@@ -275,132 +226,35 @@ module QDraw
           # control gate
           # =========================
           if QDraw::Gate.control?(gate)
-            svg.add %(
-              <rect
-                x="#{rect[:x]}"
-                y="#{rect[:y]}"
-                width="#{GATE_SIZE}"
-                height="#{GATE_SIZE}"
-                rx="#{GATE_CORNER_RADIUS}"
-                fill="none"
-                stroke="#{border_color}"
-                stroke-width="#{GATE_STROKE_WIDTH}"
-                #{dash_attr}
-              />
-            )
+            svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
 
-            svg.add %(
-              <circle
-                cx="#{rect[:cx]}"
-                cy="#{rect[:cy]}"
-                r="#{CONTROL_RADIUS}"
-                fill="#{fill_color}"
-              />
-            )
+            svg.add %(<circle cx="#{rect[:cx]}" cy="#{rect[:cy]}" r="#{CONTROL_RADIUS}" fill="#{fill_color}"/>)
 
           # =========================
           # swap gate
           # =========================
           elsif QDraw::Gate.swap?(gate)
-            svg.add %(
-              <rect
-                x="#{rect[:x]}"
-                y="#{rect[:y]}"
-                width="#{GATE_SIZE}"
-                height="#{GATE_SIZE}"
-                rx="#{GATE_CORNER_RADIUS}"
-                fill="none"
-                stroke="#{border_color}"
-                stroke-width="#{GATE_STROKE_WIDTH}"
-                #{dash_attr}
-              />
-            )
+            svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
 
-            svg.add %(
-              <line
-                x1="#{rect[:cx] - SWAP_SIZE}"
-                y1="#{rect[:cy] - SWAP_SIZE}"
-                x2="#{rect[:cx] + SWAP_SIZE}"
-                y2="#{rect[:cy] + SWAP_SIZE}"
-                stroke="#{fill_color}"
-                stroke-width="#{SWAP_STROKE_WIDTH}"
-                stroke-linecap="round"
-              />
-            )
+            svg.add %(<line x1="#{rect[:cx] - SWAP_SIZE}" y1="#{rect[:cy] - SWAP_SIZE}" x2="#{rect[:cx] + SWAP_SIZE}" y2="#{rect[:cy] + SWAP_SIZE}" stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"/>)
 
-            svg.add %(
-              <line
-                x1="#{rect[:cx] - SWAP_SIZE}"
-                y1="#{rect[:cy] + SWAP_SIZE}"
-                x2="#{rect[:cx] + SWAP_SIZE}"
-                y2="#{rect[:cy] - SWAP_SIZE}"
-                stroke="#{fill_color}"
-                stroke-width="#{SWAP_STROKE_WIDTH}"
-                stroke-linecap="round"
-              />
-            )
+            svg.add %(<line x1="#{rect[:cx] - SWAP_SIZE}" y1="#{rect[:cy] + SWAP_SIZE}" x2="#{rect[:cx] + SWAP_SIZE}" y2="#{rect[:cy] - SWAP_SIZE}" stroke="#{fill_color}" stroke-width="#{SWAP_STROKE_WIDTH}" stroke-linecap="round"/>)
 
           # =========================
           # X gate
           # =========================
           elsif QDraw::Gate.circle_x?(gate)
-            svg.add %(
-              <circle
-                cx="#{rect[:cx]}"
-                cy="#{rect[:cy]}"
-                r="#{GATE_SIZE / 2}"
-                fill="#{fill_color}"
-                stroke="#{border_color}"
-                stroke-width="#{GATE_STROKE_WIDTH}"
-                #{dash_attr}
-              />
-            )
+            svg.add %(<circle cx="#{rect[:cx]}" cy="#{rect[:cy]}" r="#{GATE_SIZE / 2}" fill="#{fill_color}" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
 
-            svg.add %(
-              <text
-                x="#{rect[:cx]}"
-                y="#{rect[:cy] + GATE_TEXT_Y_OFFSET}"
-                font-size="#{GATE_FONT_SIZE}"
-                text-anchor="#{TEXT_ANCHOR}"
-                dominant-baseline="#{DOMINANT_BASELINE}"
-                font-family="#{GATE_FONT_FAMILY}"
-                fill="#{TEXT_COLOR}"
-              >
-                #{QDraw::Gate.label(gate)}
-              </text>
-            )
+            svg.add %(<text x="#{rect[:cx]}" y="#{rect[:cy] + GATE_TEXT_Y_OFFSET}" font-size="#{GATE_FONT_SIZE}" text-anchor="#{TEXT_ANCHOR}" dominant-baseline="#{DOMINANT_BASELINE}" font-family="#{GATE_FONT_FAMILY}" fill="#{TEXT_COLOR}">#{QDraw::Gate.label(gate)}</text>)
 
           # =========================
           # 通常ゲート
           # =========================
           else
-            svg.add %(
-              <rect
-                x="#{rect[:x]}"
-                y="#{rect[:y]}"
-                width="#{GATE_SIZE}"
-                height="#{GATE_SIZE}"
-                rx="#{GATE_CORNER_RADIUS}"
-                fill="#{fill_color}"
-                stroke="#{border_color}"
-                stroke-width="#{GATE_STROKE_WIDTH}"
-                #{dash_attr}
-              />
-            )
+            svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="#{fill_color}" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
 
-            svg.add %(
-              <text
-                x="#{rect[:x] + GATE_SIZE / 2}"
-                y="#{rect[:y] + GATE_SIZE / 2 + GATE_TEXT_Y_OFFSET}"
-                font-size="#{GATE_FONT_SIZE}"
-                text-anchor="#{TEXT_ANCHOR}"
-                dominant-baseline="#{DOMINANT_BASELINE}"
-                font-family="#{GATE_FONT_FAMILY}"
-                fill="#{TEXT_COLOR}"
-              >
-                #{QDraw::Gate.label(gate)}
-              </text>
-            )
+            svg.add %(<text x="#{rect[:x] + GATE_SIZE / 2}" y="#{rect[:y] + GATE_SIZE / 2 + GATE_TEXT_Y_OFFSET}" font-size="#{GATE_FONT_SIZE}" text-anchor="#{TEXT_ANCHOR}" dominant-baseline="#{DOMINANT_BASELINE}" font-family="#{GATE_FONT_FAMILY}" fill="#{TEXT_COLOR}">#{QDraw::Gate.label(gate)}</text>)
           end
         end
       end
