@@ -109,6 +109,9 @@ cases.each_with_index do |test_case, index|
   select      = test_case["select"]
   paste       = test_case["paste"]
 
+  select = [select] if select && !select[0].is_a?(Array)
+  paste  = [paste]  if paste  && !paste[0].is_a?(Array)
+
   raise ArgumentError, "case #{name}: input is required" if input.nil?
   raise ArgumentError, "case #{name}: output is required" if output.nil?
 
