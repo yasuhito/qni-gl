@@ -216,7 +216,8 @@ module QDraw
           # =========================
           if QDraw::Gate.control?(gate)
           
-            # 選択・ペースト時だけ外枠表示
+            # control gate は通常時は小さい丸だけを描画する。
+            # 選択・ペースト時は、通常ゲートと同じサイズの角丸枠を外側に表示する。
             unless state == :normal
               svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
             end
@@ -228,7 +229,8 @@ module QDraw
           # =========================
           elsif QDraw::Gate.swap?(gate)
           
-            # 選択・ペースト時だけ外枠表示
+            # SWAP gate は通常時は × だけを描画する。
+            # 選択・ペースト時は、通常ゲートと同じサイズの角丸枠を外側に表示する。
             unless state == :normal
               svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
             end
