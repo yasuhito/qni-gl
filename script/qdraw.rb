@@ -42,7 +42,7 @@ require_relative "lib/renderer"
 # --- 出力 ---
 #   SVGファイル（命名規則に基づく自動付与）
 #   生成先ディレクトリ:
-#   qni-gl\doc\image
+#   qni-gl/doc/image
 #   --output を指定した場合も、このディレクトリ配下に出力する
 #   同名ファイルが存在する場合は、末尾に _1, _2 ... を付けて保存する
 #
