@@ -132,7 +132,11 @@ module QDraw
     # =========================
     def add_step_bar_svg(svg)
       return if step_bar_index.nil?
-      return if step_bar_index < 0
+
+      if step_bar_index < 0 || step_bar_index >= circuit.step_count
+        raise ArgumentError,
+              "step_bar_index must be within 0...#{circuit.step_count}, got #{step_bar_index}"
+      end
 
       min_qubit_index = 0
       max_qubit_index = circuit.qubit_count - 1
