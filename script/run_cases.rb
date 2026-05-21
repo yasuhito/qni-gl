@@ -98,16 +98,30 @@ cases.each_with_index do |test_case, index|
 
   if select
     cmd << "--select"
-  
-    cmd << select.map { |p|
+
+    select_positions =
+      if select[0].is_a?(Array)
+        select
+      else
+        [select]
+      end
+
+    cmd << select_positions.map { |p|
       "#{p[0]},#{p[1]}"
     }.join(";")
   end
 
   if paste
     cmd << "--paste"
-    
-    cmd << paste.map { |p|
+
+    paste_positions =
+      if paste[0].is_a?(Array)
+        paste
+      else
+        [paste]
+      end
+
+    cmd << paste_positions.map { |p|
       "#{p[0]},#{p[1]}"
     }.join(";")
   end
