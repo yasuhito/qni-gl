@@ -172,8 +172,6 @@ module QDraw
         next unless col.is_a?(Array)
 
         col.each_with_index do |gate, qubit_index|
-          next unless QDraw::Gate.drawable?(gate)
-
           gate =
             QDraw::Gate.normalize(gate)
 
@@ -214,6 +212,20 @@ module QDraw
             border_dash ?
               %(stroke-dasharray="#{border_dash}") :
               ""
+
+          # =========================
+          # 空白セル
+          # =========================
+          # 
+          # 空白をselect / paste で指定された場合は枠だけ描画する。
+          #
+          unless QDraw::Gate.drawable?(gate)
+            unless state == :normal
+              svg.add %(<rect x="#{rect[:x]}" y="#{rect[:y]}" width="#{GATE_SIZE}" height="#{GATE_SIZE}" rx="#{GATE_CORNER_RADIUS}" fill="none" stroke="#{border_color}" stroke-width="#{GATE_STROKE_WIDTH}" #{dash_attr}/>)
+            end
+
+            next
+          end
 
           # =========================
           # control gate
