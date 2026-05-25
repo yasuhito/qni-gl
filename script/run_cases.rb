@@ -41,6 +41,34 @@ require "open3"
 #   qni-gl/doc/image 配下へSVGを生成する。
 #
 # ======================================
+
+def normalize_positions(value, case_name, key)
+  return nil if value.nil?
+  return nil if value == []
+
+  unless value.is_a?(Array)
+    raise ArgumentError, "case #{case_name}: #{key} must be an Array"
+  end
+
+  positions =
+    if value.all? { |item| item.is_a?(Integer) }
+      [value]
+    else
+      value
+    end
+
+  positions.each do |position|
+    unless position.is_a?(Array) &&
+           position.size == 2 &&
+           position.all? { |item| item.is_a?(Integer) }
+      raise ArgumentError,
+            "case #{case_name}: #{key} must be [[step, qubit], ...]"
+    end
+  end
+
+  positions
+end
+
 cases_file = ARGV[0]
 
 # --------------------------------------
@@ -96,7 +124,8 @@ success_count = 0
 failure_count = 0
 
 cases.each_with_index do |test_case, index|
-  name        = test_case["name"] || "case_#{index + 1}"
+  name = test_case["name"] || "case_#{index + 1}"
+
   # --- only filter ---
   next if only_name && name != only_name
 
@@ -106,11 +135,8 @@ cases.each_with_index do |test_case, index|
   description = test_case["description"]
   input       = test_case["input"]
   output      = test_case["output"]
-  select      = test_case["select"]
-  paste       = test_case["paste"]
-
-  select = [select] if select && !select[0].is_a?(Array)
-  paste  = [paste]  if paste  && !paste[0].is_a?(Array)
+  select      = normalize_positions(test_case["select"], name, "select")
+  paste       = normalize_positions(test_case["paste"],  name, "paste")
 
   raise ArgumentError, "case #{name}: input is required" if input.nil?
   raise ArgumentError, "case #{name}: output is required" if output.nil?
@@ -119,31 +145,17 @@ cases.each_with_index do |test_case, index|
 
   if select
     cmd << "--select"
-
-    select_positions =
-      if select[0].is_a?(Array)
-        select
-      else
-        [select]
-      end
-
-    cmd << select_positions.map { |p|
-      "#{p[0]},#{p[1]}"
+    
+    cmd << select.map { |position|
+      "#{position[0]},#{position[1]}"
     }.join(";")
   end
 
   if paste
     cmd << "--paste"
 
-    paste_positions =
-      if paste[0].is_a?(Array)
-        paste
-      else
-        [paste]
-      end
-
-    cmd << paste_positions.map { |p|
-      "#{p[0]},#{p[1]}"
+    cmd << paste.map { |position|
+      "#{position[0]},#{position[1]}"
     }.join(";")
   end
 
