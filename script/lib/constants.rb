@@ -64,8 +64,7 @@ module QDraw
     DOMINANT_BASELINE       = "middle"
 
     # output dir
-    OUTPUT_DIR = File.expand_path("../../doc/image", File.realpath(__dir__))
-
+    OUTPUT_DIR = File.expand_path("../../../doc/image", File.realpath(__dir__))
     # =========================
     # 色設定
     # =========================
