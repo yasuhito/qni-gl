@@ -39,6 +39,7 @@ module QDraw
 
       return "√X" if text == "X^½"
       return "•"  if text == "・"
+      return "×" if text == "Swap" || text == "SWAP"
       return "RX" if text == "Rx"
       return "RY" if text == "Ry"
       return "RZ" if text == "Rz"
