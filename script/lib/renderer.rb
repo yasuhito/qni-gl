@@ -91,13 +91,13 @@ module QDraw
         analysis = QDraw::Selection.analyze_column(col)
 
         control_indices = analysis[:controls]
-        x_indices       = analysis[:xs]
+        target_indices  = analysis[:targets]
         swap_indices    = analysis[:swaps]
 
-        # 同じstepに • と X がある場合
-        if control_indices.any? && x_indices.any?
+        # 同じstepに control と target がある場合
+        if control_indices.any? && target_indices.any?
           pair_indices =
-            (control_indices + x_indices).sort
+            (control_indices + target_indices).sort
 
           wire_x =
             step_center_x(step_index)
