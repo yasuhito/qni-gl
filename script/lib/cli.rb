@@ -28,55 +28,55 @@ module QDraw
           current_arg = args[arg_i]
 
           case current_arg
-            when "--select"
-            value = args[arg_i + 1]
-
-            raise ArgumentError,
-                  "--select requires value like 1,0 or 1,0;1,1" if value.nil?
+          when "--select"
+            value = option_value!(
+              args,
+              arg_i,
+              "--select requires value like 1,0 or 1,0;1,1"
+            )
 
             select_positions = parse_positions(value)
-
             arg_i += 2
 
           when "--paste"
-            value = args[arg_i + 1]
-
-            raise ArgumentError,
-                  "--paste requires value like 1,0 or 1,0;1,1" if value.nil?
+            value = option_value!(
+              args,
+              arg_i,
+              "--paste requires value like 1,0 or 1,0;1,1"
+            )
 
             paste_positions = parse_positions(value)
-
             arg_i += 2
 
           when "--step-bar"
-            value = args[arg_i + 1]
-
-            raise ArgumentError,
-                  "--step-bar requires step index" if value.nil?
+            value = option_value!(
+              args,
+              arg_i,
+              "--step-bar requires step index"
+            )
 
             step_bar_index = Integer(value)
-
             arg_i += 2
 
           when "--output"
-            value = args[arg_i + 1]
-
-            raise ArgumentError,
-                  "--output requires filename" if value.nil?
+            value = option_value!(
+              args,
+              arg_i,
+              "--output requires filename"
+            )
 
             out_svg = value
-
             arg_i += 2
 
           else
             if current_arg.start_with?("--")
               raise ArgumentError, "Unknown option: #{current_arg}"
             end
-          
+
             if json_text
               raise ArgumentError, "Multiple JSON inputs are not allowed"
             end
-          
+
             json_text = current_arg
             arg_i += 1
           end
@@ -94,6 +94,19 @@ module QDraw
       end
 
       private
+
+      # =========================
+      # オプション値取得
+      # =========================
+      def option_value!(args, arg_i, error_message)
+        value = args[arg_i + 1]
+
+        if value.nil? || value.start_with?("--")
+          raise ArgumentError, error_message
+        end
+
+        value
+      end
 
       # =========================
       # 座標文字列解析
