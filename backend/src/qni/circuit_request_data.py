@@ -6,10 +6,8 @@ Provides type-safe access to HTTP form data for quantum circuit execution.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from werkzeug.datastructures import ImmutableMultiDict
+from werkzeug.datastructures import ImmutableMultiDict
 
 from qni.types import DeviceType
 
@@ -118,3 +116,37 @@ class CircuitRequestData:
     @staticmethod
     def _device_type(parameter: str) -> DeviceType:
         return DeviceType(parameter)
+
+    @classmethod
+    def from_import(
+        cls,
+        circuit_id: str,
+        steps: list[list[dict]],
+        qubit_count: int,
+        until_step_index: int,
+        amplitude_indices: list[int],
+        device: DeviceType,
+    ) -> CircuitRequestData:
+        """Create CircuitRequestData from explicit parameters.
+
+        Args:
+            circuit_id (str): Circuit ID.
+            steps (list[dict]): List of steps.
+            qubit_count (int): Number of qubits.
+            until_step_index (int): Last step index.
+            amplitude_indices (list[int]): Amplitude indices.
+            device (DeviceType): Device type.
+
+        Returns:
+            CircuitRequestData: Instance with populated fields.
+
+        """
+        form_data = {
+            "id": circuit_id,
+            "steps": json.dumps(steps),
+            "qubitCount": str(qubit_count),
+            "untilStepIndex": str(until_step_index),
+            "amplitudeIndices": ",".join(str(i) for i in amplitude_indices),
+            "device": str(device),
+        }
+        return cls(ImmutableMultiDict(form_data))

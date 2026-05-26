@@ -28,6 +28,7 @@ import {
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
+import { ImportModal } from "./import-modal";
 
 declare global {
   interface Window {
@@ -54,6 +55,7 @@ export class App {
   nameMap = new Map();
 
   private shareModal: ShareModal | null = null;
+  private importModal: ImportModal | null = null;
 
   public static get instance(): App {
     if (!this._instance) {
@@ -124,6 +126,8 @@ export class App {
 
       this.setupExportButton();
 
+      this.setupImportButton();
+
       new DropdownMenu();
 
       this.setupShareMenu();
@@ -154,6 +158,41 @@ export class App {
       throw new Error("Could not find #exportButton");
     }
     exportButton.addEventListener("click", this.exportCircuit.bind(this));
+  }
+
+  private setupImportButton(): void {
+    const importButton = document.getElementById("importButton");
+    if (!importButton) throw new Error("Could not find #importButton");
+
+    importButton.addEventListener("click", async () => {
+      if (!this.importModal) {
+        await this.loadImportModal();
+        this.importModal = new ImportModal(
+          "import-modal",
+          "close-import-modal-button"
+        );
+      }
+      this.importModal.open();
+    });
+  }
+
+  private async loadImportModal(): Promise<void> {
+    try {
+      const response = await fetch("/import-modal.html");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load import-modal.html: ${response.statusText}`
+        );
+      }
+      
+      const html = await response.text();
+      const container = document.getElementById("import-modal-container");
+      if (container) {
+        container.innerHTML = html;
+      }
+    } catch (error) {
+      console.error("Error loading import modal:", error);
+    }
   }
 
   private setupShareMenu(): void {
@@ -396,6 +435,11 @@ export class App {
 
   protected handleServiceWorkerMessage(event: MessageEvent): void {
     if (!this.stateVector) {
+      return;
+    }
+
+    if (event.data.type === "import") {
+      this.importCircuit(event.data.stepResults, event.data.circuitCols);
       return;
     }
 
@@ -925,6 +969,35 @@ export class App {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  public importCircuit(stepResults: any, circuitCols?: any): void {
+    if (circuitCols) {
+      // colsをそのまま使う
+      const circuitData = { cols: circuitCols };
+      this.circuit.fromJSON(JSON.stringify(circuitData));
+      this.updateUrlWithCircuit();
+      this.updateStateVectorComponentQubitCount();
+    }
+
+    // stepResultsがあれば計算結果を即時反映
+    if (stepResults && typeof stepResults === "object") {
+      if (stepResults.measuredBits) {
+        for (const [bit, value] of Object.entries(stepResults.measuredBits)) {
+          if (value === "" || value === 0 || value === 1) {
+            const step = this.circuit.fetchStep(0);
+            const dropzone = step.fetchDropzone(Number(bit));
+            const measurementGate = dropzone.operation;
+            if (measurementGate instanceof MeasurementGate) {
+              measurementGate.value = value as "" | 0 | 1;
+            }
+          }
+        }
+      }
+      if (stepResults.amplitudes) {
+        this.updateStateVectorAmplitudes(stepResults.amplitudes);
+      }
+    }
   }
 
   // 量子回路変更時に呼び出されるハンドラ

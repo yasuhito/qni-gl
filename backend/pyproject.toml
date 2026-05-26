@@ -23,7 +23,8 @@ dependencies = [
   "qiskit-aer>=0.15.0", # If you want to use GPU, change to "qiskit-aer-gpu>=0.15.0"
   "flask-cors>=5.0.0",
   "gunicorn>=23.0.0",
-  "numpy>=1.26.0"
+  "numpy>=1.26.0",
+  "qiskit_qasm3_import"
 ]
 
 [project.urls]
@@ -55,8 +56,11 @@ lint.select = ["ALL"]
 lint.ignore = [
   "CPY001",
   "D203",
+  "D205",
   "D213",
   "COM812",
+  "PLR0913",
+  "PLR0917",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -79,6 +83,7 @@ lint.ignore = [
 
 [tool.mypy]
 files = ["src", "tests"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--cov=src --cov-report=xml"
