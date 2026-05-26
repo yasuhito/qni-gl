@@ -168,12 +168,16 @@ module QDraw
     # ゲート描画
     # =========================
     def add_gate_svgs(svg)
-      circuit.each_column do |col, step_index|
-        next unless col.is_a?(Array)
-
-        col.each_with_index do |gate, qubit_index|
+      circuit.step_count.times do |step_index|
+        col = circuit.column(step_index)
+    
+        circuit.qubit_count.times do |qubit_index|
           gate =
-            QDraw::Gate.normalize(gate)
+            if col.is_a?(Array)
+              QDraw::Gate.normalize(col[qubit_index])
+            else
+              nil
+            end
 
           rect =
             gate_rect(step_index, qubit_index)
@@ -217,7 +221,7 @@ module QDraw
           # 空白セル
           # =========================
           # 
-          # 空白をselect / paste で指定された場合は枠だけ描画する。
+          # 描画範囲内の空白セルを select / paste で指定した場合は枠だけ描画する。
           #
           unless QDraw::Gate.drawable?(gate)
             unless state == :normal
