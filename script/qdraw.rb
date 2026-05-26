@@ -20,10 +20,10 @@ require_relative "lib/renderer"
 # ゲートごとに配置・選択状態・貼り付け状態を強調表示します。
 #
 # --- 使い方(コマンド例) ---
-#   ruby qdraw.rb '{"cols":[["H",1],["•","X"]]}' --output circuit.svg
-#   ruby qdraw.rb '%7B"cols"%3A%5B%5B"H"%5D%5D%7D' --output encoded.svg
-#   ruby qdraw.rb 'http://localhost:5173/#circuit={"cols":[["H","H"],["H","H"],["H",1]]}' --output from_url.svg
-#   ruby qdraw.rb --select 0,0 --paste 1,1 'https://qniapp.net/%7B%22cols%22%3A%5B%5B%22H%22%2C%22H%22%5D%2C%5B%22H%22%2C%22H%22%5D%5D%7D' --output out.svg
+#   ruby script/qdraw.rb '{"cols":[["H",1],["•","X"]]}' --output circuit.svg
+#   ruby script/qdraw.rb '%7B"cols"%3A%5B%5B"H"%5D%5D%7D' --output encoded.svg
+#   ruby script/qdraw.rb 'http://localhost:5173/#circuit={"cols":[["H","H"],["H","H"],["H",1]]}' --output from_url.svg
+#   ruby script/qdraw.rb --select 0,0 --paste 1,1 'https://qniapp.net/%7B%22cols%22%3A%5B%5B%22H%22%2C%22H%22%5D%2C%5B%22H%22%2C%22H%22%5D%5D%7D' --output out.svg
 #
 # --- 入力仕様 ---
 #   cols: 回路ステップごとのゲート配列
