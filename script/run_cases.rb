@@ -122,6 +122,7 @@ qdraw_path = File.expand_path("qdraw.rb", __dir__)
 
 success_count = 0
 failure_count = 0
+matched_count = 0
 
 cases.each_with_index do |test_case, index|
   name = test_case["name"] || "case_#{index + 1}"
@@ -131,6 +132,8 @@ cases.each_with_index do |test_case, index|
 
   # --- text filter ---
   next if filter_text && !name.include?(filter_text)
+
+  matched_count += 1
 
   description = test_case["description"]
   input       = test_case["input"]
@@ -180,6 +183,11 @@ cases.each_with_index do |test_case, index|
     puts stdout unless stdout.empty?
     puts stderr unless stderr.empty?
   end
+end
+
+if only_name && matched_count == 0
+  warn "ERROR: --only target not found: #{only_name}"
+  exit(1)
 end
 
 puts "=================================================="
