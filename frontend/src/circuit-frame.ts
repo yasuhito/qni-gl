@@ -103,9 +103,15 @@ export class CircuitFrame extends Container {
 
   private grabPaletteOperation(
     operation: InstanceType<OperationClass>,
-    pointerPosition: Point
+    pointerPosition: Point,
+    additiveSelection = false
   ): void {
     this.addChild(operation);
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
@@ -126,8 +132,14 @@ export class CircuitFrame extends Container {
 
   private grabCircuitOperation(
     operation: InstanceType<OperationClass>,
-    pointerPosition: Point
+    pointerPosition: Point,
+    additiveSelection = false
   ): void {
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 

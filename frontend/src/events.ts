@@ -10,6 +10,10 @@ export const OPERATION_EVENTS = {
   MOUSE_LEFT: "operation.mouse-left",
 } as const;
 
+export const DROPZONE_EVENTS = {
+  SELECTED: "dropzone.selected",
+} as const;
+
 export const FRAME_DIVIDER_EVENTS = {
   DRAG_STARTED: "frame-divider.drag-started",
 } as const;

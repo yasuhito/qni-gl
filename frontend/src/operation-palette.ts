@@ -107,7 +107,12 @@ export class OperationPalette extends Container {
   private setupOperationSourceEvents(operationSource: OperationSource) {
     operationSource.on(
       OPERATION_EVENTS.GRABBED,
-      (operation, globalPosition) => {
+      (operation, globalPosition, additiveSelection = false) => {
+        if (additiveSelection) {
+          this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition, true);
+          return;
+        }
+
         this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
       }
     );

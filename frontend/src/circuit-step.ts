@@ -1,4 +1,8 @@
-import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
+import {
+  CIRCUIT_STEP_EVENTS,
+  DROPZONE_EVENTS,
+  OPERATION_EVENTS,
+} from "./events";
 import { DropzoneList } from "./dropzone-list";
 import { CircuitStepState } from "./circuit-step-state";
 import { Container } from "pixi.js";
@@ -182,9 +186,27 @@ export class CircuitStep extends Container {
     const dropzone = this.dropzoneList.append();
 
     dropzone.on(OPERATION_EVENTS.SNAPPED, this.onDropzoneSnap, this);
-    dropzone.on(OPERATION_EVENTS.GRABBED, (operation, globalPosition) => {
-      this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
-    });
+    dropzone.on(
+      OPERATION_EVENTS.GRABBED,
+      (operation, globalPosition, additiveSelection = false) => {
+        if (additiveSelection) {
+          this.emit(
+            OPERATION_EVENTS.GRABBED,
+            operation,
+            globalPosition,
+            true,
+          );
+          return;
+        }
+
+        this.emit(
+          OPERATION_EVENTS.GRABBED,
+          operation,
+          globalPosition,
+        );
+      },
+    );
+    dropzone.on(DROPZONE_EVENTS.SELECTED, this.onDropzoneSelected, this);
 
     return dropzone;
   }
@@ -279,7 +301,7 @@ export class CircuitStep extends Container {
    * @param stepJson ステップのJSONデータ
    * @returns 復元されたCircuitStepのインスタンス
    */
-  static fromJSON(stepJson: any[]): CircuitStep {
+  static fromJSON(stepJson: unknown[]): CircuitStep {
     if (!Array.isArray(stepJson)) {
       console.error("Invalid step data format:", stepJson);
       return new CircuitStep(1);
@@ -305,11 +327,6 @@ export class CircuitStep extends Container {
       }
       return null;
     });
-
-    // Swapゲートのペアリング
-    const swapIdx = ops
-      .map((op, i) => (op instanceof SwapGate ? i : -1))
-      .filter((i) => i !== -1);
 
     // コントロールゲートとXゲートの関係
     const controlIdx = ops
@@ -341,7 +358,7 @@ export class CircuitStep extends Container {
    * @param label ゲートのラベル文字列
    * @returns 生成されたOperationComponentインスタンス、または対応するラベルがない場合はnull
    */
-  private static createOperationFromLabel(
+  static createOperationFromLabel(
     label: string
   ): OperationComponent | null {
     switch (label) {
@@ -470,7 +487,7 @@ export class CircuitStep extends Container {
 
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
     const controllableBits = controllableDropzones.map((dz) =>
-      this.qubitNumberOf(dz)
+      this.qubitNumberOf(dz),
     );
     const activeOperationBits = activeControlBits.concat(controllableBits);
 
@@ -518,6 +535,15 @@ export class CircuitStep extends Container {
 
   private onDropzoneSnap(dropzone: Dropzone) {
     this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
+  }
+
+  private onDropzoneSelected(dropzone: Dropzone, additiveSelection = false) {
+    if (additiveSelection) {
+      this.emit(DROPZONE_EVENTS.SELECTED, this, dropzone, true);
+      return;
+    }
+
+    this.emit(DROPZONE_EVENTS.SELECTED, this, dropzone);
   }
 
   private maybeSetHoverState() {
