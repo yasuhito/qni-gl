@@ -46,6 +46,7 @@ export class CircuitStep extends Container {
   private state!: CircuitStepState;
   private pastedEmphasisDelayTimer: ReturnType<typeof setTimeout> | null = null;
   private pastedEmphasisAnimationFrame: number | null = null;
+  private hoverEnabled = true;
 
   /**
    *  Returns the number of wires (qubits) in this circuit step.
@@ -305,6 +306,17 @@ export class CircuitStep extends Container {
    */
   deactivate() {
     this.state.setIdle();
+  }
+
+  clearHoverState(): void {
+    if (this.state.isHover()) {
+      this.state.setIdle();
+    }
+  }
+
+  setHoverEnabled(enabled: boolean): void {
+    this.hoverEnabled = enabled;
+    this.clearHoverState();
   }
 
   /**
@@ -610,6 +622,10 @@ export class CircuitStep extends Container {
   }
 
   private maybeSetHoverState() {
+    if (!this.hoverEnabled) {
+      return;
+    }
+
     if (this.state.isIdle()) {
       this.state.setHover();
     }

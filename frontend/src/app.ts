@@ -1106,6 +1106,7 @@ export class App {
   private startRectangleSelection(): void {
     // ドラッグ開始前から選択されていたゲートは、矩形の外でも保持する。
     this.rectangleSelectionBase = new Set(this.selectedGates);
+    this.circuit.setStepMarkerUpdatesEnabled(false);
   }
 
   private updateRectangleSelection(gates: OperationComponent[]): void {
@@ -1118,6 +1119,7 @@ export class App {
 
   private finishRectangleSelection(): void {
     this.rectangleSelectionBase = null;
+    this.circuit.setStepMarkerUpdatesEnabled(true);
   }
 
   /**

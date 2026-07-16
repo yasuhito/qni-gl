@@ -88,6 +88,58 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => activeStepIndex(page)).toBe(1);
   });
 
+  test("does not start rectangle selection while resizing the state vector frame", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    const divider = await page.evaluate(() => {
+      const app = window.pixiApp as
+        | {
+            frameDivider: {
+              getBounds(): { x: number; y: number; width: number };
+            };
+          }
+        | undefined;
+      const bounds = app?.frameDivider.getBounds();
+      if (bounds === undefined) {
+        throw new Error("Frame divider is not initialized");
+      }
+
+      return {
+        x: bounds.x + bounds.width / 2,
+        y: bounds.y + 1,
+      };
+    });
+
+    await page.mouse.move(divider.x, divider.y);
+    await page.mouse.down();
+    await page.mouse.move(divider.x, divider.y + 40, { steps: 5 });
+
+    await expect.poll(() => rectangleSelectionIsActive(page)).toBe(false);
+
+    await page.mouse.up();
+  });
+
+  test("does not update step marker candidates during rectangle selection", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await page.mouse.move(
+      circuitInfo.steps[3][0].x,
+      circuitInfo.steps[3][0].y
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      circuitInfo.steps[1][1].x,
+      circuitInfo.steps[1][1].y,
+      { steps: 5 }
+    );
+
+    await expect.poll(() => hoveredStepIndexes(page)).toEqual([]);
+
+    await page.mouse.up();
+  });
+
   test("keeps selected gates when an empty cell becomes the paste anchor", async ({
     page,
     circuitInfo,
@@ -390,5 +442,25 @@ async function occupiedCells(page: import("@playwright/test").Page) {
           : [{ stepIndex, qubitIndex, operationType: operation.operationType }];
       })
     );
+  });
+}
+
+async function rectangleSelectionIsActive(
+  page: import("@playwright/test").Page
+) {
+  return page.evaluate(() => {
+    const app = window.pixiApp as
+      | { rectangleSelectionBase: Set<unknown> | null }
+      | undefined;
+
+    return app?.rectangleSelectionBase != null;
+  });
+}
+
+async function hoveredStepIndexes(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const steps = window.pixiApp?.circuitFrame?.circuit.steps ?? [];
+
+    return steps.flatMap((step, index) => (step.isHovered ? [index] : []));
   });
 }

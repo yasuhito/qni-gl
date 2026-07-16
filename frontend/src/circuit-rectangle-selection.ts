@@ -12,6 +12,7 @@ import { Dropzone } from "./dropzone";
 import { CIRCUIT_FRAME_EVENTS, DROPZONE_EVENTS } from "./events";
 import { OperationComponent } from "./operation-component";
 import { OperationPalette } from "./operation-palette";
+import { FrameDivider } from "./frame-divider";
 
 type RectangleBounds = Pick<Rectangle, "left" | "right" | "top" | "bottom">;
 
@@ -51,6 +52,7 @@ export class CircuitRectangleSelection {
 
     // 既存のゲート操作とパレットからのドラッグを優先する。
     if (
+      event.target instanceof FrameDivider ||
       this.findAncestor(event.target, OperationComponent) !== null ||
       this.findAncestor(event.target, OperationPalette) !== null ||
       this.operationPalette

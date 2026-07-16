@@ -58,6 +58,7 @@ export class Circuit extends Container {
   private minStepCount = 5;
   private stepList: List;
   private markerManager: CircuitStepMarkerManager;
+  private stepMarkerUpdatesEnabled = true;
 
   /**
    * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
@@ -194,6 +195,15 @@ export class Circuit extends Container {
       }
     });
 
+    this.markerManager.update(this.steps);
+  }
+
+  setStepMarkerUpdatesEnabled(enabled: boolean): void {
+    this.stepMarkerUpdatesEnabled = enabled;
+
+    this.steps.forEach((step) => {
+      step.setHoverEnabled(enabled);
+    });
     this.markerManager.update(this.steps);
   }
 
@@ -587,6 +597,10 @@ export class Circuit extends Container {
   }
 
   private updateStepMarker() {
+    if (!this.stepMarkerUpdatesEnabled) {
+      return;
+    }
+
     this.markerManager.update(this.steps);
   }
 
