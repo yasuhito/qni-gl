@@ -58,7 +58,7 @@ export class App {
   private activeCell: CircuitCellPosition | null = null;
   private clipboard: CircuitClipboard | null = null;
   private selectedGates = new Set<OperationComponent>();
-  private pastedGates = new Set<OperationComponent>();
+  private pastedSteps = new Set<CircuitStep>();
   private activeDropzone: Dropzone | null = null;
   private pasteUndoStack: string[] = [];
   private pasteRedoStack: string[] = [];
@@ -216,6 +216,7 @@ export class App {
     clearButton.addEventListener("click", (e) => {
       e.preventDefault(); // ページ遷移防止
 
+      this.clearPastedSteps();
       this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
       this.circuit.fetchStep(0).activate();
 
@@ -402,7 +403,6 @@ export class App {
     this.activeGate = null;
     this.grabbedGate = null;
     this.selectedGates.delete(gate);
-    this.pastedGates.delete(gate);
     if (gate.parent === this.circuitFrame) {
       this.circuitFrame.removeChild(gate);
     }
@@ -1049,7 +1049,7 @@ export class App {
 
     this.activeCell = position;
     this.clearActiveDropzone();
-    this.clearPastedGates();
+    this.clearPastedSteps();
 
     if (!additive) {
       this.clearSelectedGates();
@@ -1083,7 +1083,7 @@ export class App {
     }
 
     this.activeCell = { stepIndex, qubitIndex };
-    this.clearPastedGates();
+    this.clearPastedSteps();
 
     if (!additiveSelection && dropzone.operation === null) {
       this.clearSelectedGates();
@@ -1108,15 +1108,22 @@ export class App {
 
     this.pasteUndoStack.push(this.circuit.toJSON());
     this.pasteRedoStack = [];
-    this.clearPastedGates();
+    this.clearPastedSteps();
 
     const pastedOperations = this.circuit.pasteClipboardAt(
       this.activeCell,
       this.clipboard
     );
-    this.pastedGates = new Set(pastedOperations);
+    this.pastedSteps = new Set(
+      pastedOperations.flatMap((operation) => {
+        const position = this.circuit.findOperationPosition(operation);
+        return position === null
+          ? []
+          : [this.circuit.fetchStep(position.stepIndex)];
+      }),
+    );
     this.applySelectedGateStyles();
-    this.applyPastedGateStyles();
+    this.applyPastedStepStyles();
 
     this.circuit.update();
     this.updateUrlWithCircuit();
@@ -1149,7 +1156,7 @@ export class App {
    */
   private restoreCircuitFromPasteHistory(circuitJson: string): void {
     this.clearSelectedGates();
-    this.clearPastedGates();
+    this.clearPastedSteps();
     this.clearActiveDropzone();
     this.circuit.fromJSON(circuitJson);
     this.activeCell = null;
@@ -1168,21 +1175,21 @@ export class App {
     this.activeDropzone = null;
   }
 
-  private clearPastedGates(): void {
-    for (const gate of this.pastedGates) {
-      gate.clearEmphasis();
-    }
-    this.pastedGates.clear();
+  private clearPastedSteps(): void {
+    this.pastedSteps.forEach((step) => {
+      step.clearPastedEmphasis();
+    });
+    this.pastedSteps.clear();
   }
 
   private applySelectedGateStyles(): void {
     this.syncGateSelectionStyles();
   }
 
-  private applyPastedGateStyles(): void {
-    for (const gate of this.pastedGates) {
-      gate.applyPastedEmphasis();
-    }
+  private applyPastedStepStyles(): void {
+    this.pastedSteps.forEach((step) => {
+      step.applyPastedEmphasis();
+    });
   }
 
   /**
@@ -1244,6 +1251,8 @@ export class App {
    * URLのパスから量子回路の状態をデコードしロードする
    */
   private loadCircuitFromUrl(): void {
+    this.clearPastedSteps();
+
     // URLハッシュに回路データがあるか確認 (#circuit=...)
     const sourceString = location.hash.startsWith("#circuit=")
       ? location.hash.substring("#circuit=".length)

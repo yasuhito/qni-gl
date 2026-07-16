@@ -56,7 +56,8 @@ export class OperationComponent extends IconableMixin(Container) {
   debug = false;
 
   protected _shape!: Graphics;
-  private emphasisOverlay: Graphics | null = null;
+  protected pastedEmphasisCoversBackground = true;
+  private emphasisOverlay: Container | null = null;
 
   protected stateMachine = createMachine(
     {
@@ -249,14 +250,18 @@ export class OperationComponent extends IconableMixin(Container) {
     this.applyActiveStyle();
   }
 
-  /**
-   * 直近のペーストで追加されたゲートを、紫の点線枠で強調する。
-   */
-  applyPastedEmphasis(): void {
-    this.clearEmphasis();
-    this.emphasisOverlay = new Graphics();
-    this.drawDashedRect(this.emphasisOverlay, 0x6b15a8);
-    this.addChild(this.emphasisOverlay);
+  setPastedEmphasisAlpha(alpha: number): void {
+    if (alpha <= 0) {
+      this.clearEmphasis();
+      return;
+    }
+
+    if (this.emphasisOverlay === null) {
+      this.emphasisOverlay = this.createPastedEmphasisOverlay();
+      this.addChild(this.emphasisOverlay);
+    }
+
+    this.emphasisOverlay.alpha = alpha;
   }
 
   /**
@@ -321,75 +326,24 @@ export class OperationComponent extends IconableMixin(Container) {
 
   applyActiveStyle() {}
 
-  private drawDashedRect(graphics: Graphics, color: number): void {
-    const dash = 4;
-    const gap = 3;
-    const max = this.sizeInPx;
-    const borderWidth = 2;
-    const offset = borderWidth / 2;
-    const min = offset;
-    const edgeMax = max - offset;
-    const radius = this.emphasisCornerRadius;
+  private createPastedEmphasisOverlay(): Container {
+    if (!this.pastedEmphasisCoversBackground) {
+      const whiteSprite = this.createWhiteSprite(this.sprite.texture);
+      whiteSprite.width = this.sizeInPx;
+      whiteSprite.height = this.sizeInPx;
 
-    if (radius >= max / 2) {
-      this.drawDashedEllipse(
-        graphics,
-        max / 2,
-        max / 2,
-        edgeMax / 2,
-        dash,
-        gap,
-        color,
-        borderWidth,
-      );
-      return;
+      return whiteSprite;
     }
 
-    graphics.clear();
-    this.drawDashedLine(
-      graphics,
-      min,
-      min,
-      edgeMax,
-      min,
-      dash,
-      gap,
-      color,
-      borderWidth,
-    );
-    this.drawDashedLine(
-      graphics,
-      edgeMax,
-      min,
-      edgeMax,
-      edgeMax,
-      dash,
-      gap,
-      color,
-      borderWidth,
-    );
-    this.drawDashedLine(
-      graphics,
-      edgeMax,
-      edgeMax,
-      min,
-      edgeMax,
-      dash,
-      gap,
-      color,
-      borderWidth,
-    );
-    this.drawDashedLine(
-      graphics,
-      min,
-      edgeMax,
-      min,
-      min,
-      dash,
-      gap,
-      color,
-      borderWidth,
-    );
+    return new Graphics()
+      .roundRect(
+        0,
+        0,
+        this.sizeInPx,
+        this.sizeInPx,
+        this.emphasisCornerRadius,
+      )
+      .fill(0xffffff);
   }
 
   private get emphasisCornerRadius(): number {
@@ -400,54 +354,6 @@ export class OperationComponent extends IconableMixin(Container) {
     return (
       constructor.SHAPE_CONFIG?.cornerRadius ?? OperationComponent.cornerRadius
     );
-  }
-
-  private drawDashedEllipse(
-    graphics: Graphics,
-    centerX: number,
-    centerY: number,
-    radius: number,
-    dash: number,
-    gap: number,
-    color: number,
-    borderWidth: number,
-  ): void {
-    const circumference = Math.PI * 2 * radius;
-    graphics.clear();
-
-    for (let distance = 0; distance < circumference; distance += dash + gap) {
-      const startAngle = distance / radius;
-      const endAngle = Math.min(distance + dash, circumference) / radius;
-      graphics
-        .arc(centerX, centerY, radius, startAngle, endAngle)
-        .stroke({ color, width: borderWidth });
-    }
-  }
-
-  private drawDashedLine(
-    graphics: Graphics,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    dash: number,
-    gap: number,
-    color: number,
-    borderWidth: number,
-  ): void {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const length = Math.hypot(dx, dy);
-    const unitX = dx / length;
-    const unitY = dy / length;
-
-    for (let distance = 0; distance < length; distance += dash + gap) {
-      const segmentEnd = Math.min(distance + dash, length);
-      graphics
-        .moveTo(x1 + unitX * distance, y1 + unitY * distance)
-        .lineTo(x1 + unitX * segmentEnd, y1 + unitY * segmentEnd)
-        .stroke({ color, width: borderWidth });
-    }
   }
 
   private onPointerOver() {

@@ -35,11 +35,17 @@ import { SwapGate } from "./swap-gate";
  * special operations like swap gates and controlled operations.
  */
 export class CircuitStep extends Container {
+  private static readonly PASTED_EMPHASIS_DELAY = 50;
+  private static readonly PASTED_EMPHASIS_DURATION = 500;
+  private static readonly PASTED_EMPHASIS_ALPHA = 0.35;
+
   /** The padding space around the dropzones within the circuit step. */
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
   private dropzoneList!: DropzoneList;
   private state!: CircuitStepState;
+  private pastedEmphasisDelayTimer: ReturnType<typeof setTimeout> | null = null;
+  private pastedEmphasisAnimationFrame: number | null = null;
 
   /**
    *  Returns the number of wires (qubits) in this circuit step.
@@ -125,6 +131,63 @@ export class CircuitStep extends Container {
     this.initializeDropzoneList();
     this.createDropzones(wireCount);
     this.setupEventListeners();
+  }
+
+  applyPastedEmphasis(): void {
+    this.clearPastedEmphasis();
+    this.pastedEmphasisDelayTimer = setTimeout(
+      () => this.startPastedEmphasisFade(),
+      CircuitStep.PASTED_EMPHASIS_DELAY,
+    );
+  }
+
+  clearPastedEmphasis(): void {
+    if (this.pastedEmphasisDelayTimer !== null) {
+      clearTimeout(this.pastedEmphasisDelayTimer);
+      this.pastedEmphasisDelayTimer = null;
+    }
+    if (this.pastedEmphasisAnimationFrame !== null) {
+      cancelAnimationFrame(this.pastedEmphasisAnimationFrame);
+      this.pastedEmphasisAnimationFrame = null;
+    }
+
+    this.setPastedEmphasisAlpha(0);
+  }
+
+  private startPastedEmphasisFade(): void {
+    const fadeStartedAt = performance.now();
+    this.setPastedEmphasisAlpha(CircuitStep.PASTED_EMPHASIS_ALPHA);
+    this.pastedEmphasisAnimationFrame = requestAnimationFrame((now) =>
+      this.fadePastedEmphasis(now, fadeStartedAt),
+    );
+  }
+
+  private fadePastedEmphasis(now: number, fadeStartedAt: number): void {
+    const progress = Math.max(
+      0,
+      Math.min(
+        (now - fadeStartedAt) / CircuitStep.PASTED_EMPHASIS_DURATION,
+        1,
+      ),
+    );
+    this.setPastedEmphasisAlpha(
+      CircuitStep.PASTED_EMPHASIS_ALPHA * (1 - progress),
+    );
+
+    if (progress < 1) {
+      this.pastedEmphasisAnimationFrame = requestAnimationFrame((nextNow) =>
+        this.fadePastedEmphasis(nextNow, fadeStartedAt),
+      );
+      return;
+    }
+
+    this.clearPastedEmphasis();
+  }
+
+  private setPastedEmphasisAlpha(alpha: number): void {
+    this.dropzones.forEach((dropzone) => {
+      dropzone.setPastedEmphasisAlpha(alpha);
+    });
   }
 
   private initializeState(): void {

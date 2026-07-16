@@ -204,6 +204,11 @@ export class Dropzone extends Container {
     this.selectionOverlay = null;
   }
 
+  setPastedEmphasisAlpha(alpha: number): void {
+    this.renderer.setPastedEmphasisAlpha(alpha);
+    this.operation?.setPastedEmphasisAlpha(alpha);
+  }
+
   redrawWires() {
     this.renderer.updateWires({
       inputWireType: this.inputWireType,
