@@ -208,7 +208,6 @@ describe("Circuit", () => {
 
   describe("copy and paste", () => {
     it("preserves relative positions and empty steps in clipboard data", () => {
-
       const hGate = new HGate();
       const tGate = new TGate();
       circuit.fetchStep(0).fetchDropzone(1).addChild(hGate);
@@ -227,7 +226,6 @@ describe("Circuit", () => {
     });
 
     it("inserts pasted gates and pushes existing steps to the right", () => {
-
       const hGate = new HGate();
       const xGate = new XGate();
       circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
@@ -244,6 +242,53 @@ describe("Circuit", () => {
         HGate
       );
       expect(circuit.fetchStep(2).fetchDropzone(0).operation).toBe(xGate);
+    });
+
+    it("keeps empty steps inside the pasted clipboard range", () => {
+      const hGate = new HGate();
+      const tGate = new TGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(2).fetchDropzone(0).addChild(tGate);
+
+      const clipboard = circuit.createClipboardFromOperations([hGate, tGate]);
+      if (clipboard === null) {
+        throw new Error("Expected clipboard data for the selected gates");
+      }
+
+      circuit.pasteClipboardAt({ stepIndex: 2, qubitIndex: 0 }, clipboard);
+      circuit.updateAfterPaste();
+
+      expect(circuit.fetchStep(3).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(circuit.fetchStep(4).isEmpty).toBe(true);
+      expect(circuit.fetchStep(5).fetchDropzone(0).operation).toBeInstanceOf(
+        TGate
+      );
+    });
+
+    it("preserves pasted empty steps when restoring history", () => {
+      const hGate = new HGate();
+      const tGate = new TGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(2).fetchDropzone(0).addChild(tGate);
+
+      const clipboard = circuit.createClipboardFromOperations([hGate, tGate]);
+      if (clipboard === null) {
+        throw new Error("Expected clipboard data for the selected gates");
+      }
+
+      circuit.pasteClipboardAt({ stepIndex: 2, qubitIndex: 0 }, clipboard);
+      circuit.updateAfterPaste();
+      const historyJson = circuit.toJSON(true);
+
+      const restoredCircuit = new Circuit({ minWireCount: 2, stepCount: 0 });
+      restoredCircuit.fromJSON(historyJson, true);
+
+      expect(restoredCircuit.fetchStep(4).isEmpty).toBe(true);
+      expect(
+        restoredCircuit.fetchStep(5).fetchDropzone(0).operation
+      ).toBeInstanceOf(TGate);
     });
 
     it("preserves a CNOT structure when pasting", () => {
@@ -271,6 +316,33 @@ describe("Circuit", () => {
       expect(pastedStep.fetchDropzone(1).controlConnectTop).toBe(true);
       expect(pastedStep.fetchDropzone(1).controlConnectBottom).toBe(true);
       expect(pastedStep.fetchDropzone(2).controlConnectTop).toBe(true);
+    });
+
+    it("finds a controlled structure from either connected gate", () => {
+      const controlGate = new ControlGate();
+      const xGate = new XGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(controlGate);
+      circuit.fetchStep(0).fetchDropzone(2).addChild(xGate);
+      circuit.fetchStep(0).updateOperationAttributes();
+
+      expect(circuit.connectedOperationsFor(controlGate)).toEqual([
+        controlGate,
+        xGate,
+      ]);
+      expect(circuit.connectedOperationsFor(xGate)).toEqual([
+        controlGate,
+        xGate,
+      ]);
+    });
+
+    it("does not group unrelated gates in the same step", () => {
+      const hGate = new HGate();
+      const tGate = new TGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(0).fetchDropzone(1).addChild(tGate);
+
+      expect(circuit.connectedOperationsFor(hGate)).toEqual([hGate]);
+      expect(circuit.connectedOperationsFor(tGate)).toEqual([tGate]);
     });
   });
 

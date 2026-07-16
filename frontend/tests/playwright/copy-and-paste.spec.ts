@@ -88,6 +88,168 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => activeStepIndex(page)).toBe(1);
   });
 
+  test("keeps selected gates when an empty cell becomes the paste anchor", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await page.mouse.click(
+      circuitInfo.steps[2][1].x,
+      circuitInfo.steps[2][1].y
+    );
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual(["HGate"]);
+    await expect.poll(() => activeCell(page)).toEqual({
+      stepIndex: 2,
+      qubitIndex: 1,
+    });
+  });
+
+  test("selects a controlled structure with one click and one gate with a double click", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.controlGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 0,
+      bit: 1,
+    });
+
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await expect
+      .poll(() => selectedGateTypes(page))
+      .toEqual(["ControlGate", "XGate"]);
+
+    await page.mouse.dblclick(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await expect
+      .poll(() => selectedGateTypes(page))
+      .toEqual(["ControlGate"]);
+  });
+
+  test("keeps the clipboard when copying without selected gates", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+    await page.evaluate(() => {
+      const app = window.pixiApp as
+        | { selectedGates: Set<unknown> }
+        | undefined;
+
+      app?.selectedGates.clear();
+    });
+
+    await page.keyboard.press("Control+c");
+    await page.mouse.click(
+      circuitInfo.steps[2][0].x,
+      circuitInfo.steps[2][0].y
+    );
+    await page.keyboard.press("Control+v");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
+    ]);
+  });
+
+  test("uses the same paste anchor for consecutive pastes", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+
+    await page.keyboard.press("Control+v");
+    await page.keyboard.press("Control+v");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 2, qubitIndex: 0, operationType: "HGate" },
+    ]);
+  });
+
+  test("preserves empty steps through paste, undo, and redo", async ({ page }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+
+    await page.evaluate(() => {
+      const app = window.pixiApp as
+        | {
+            circuitFrame: NonNullable<typeof window.pixiApp>["circuitFrame"];
+            selectedGates: Set<unknown>;
+          }
+        | undefined;
+      const circuit = app?.circuitFrame?.circuit;
+      if (app === undefined || circuit === undefined) {
+        throw new Error("App is not initialized");
+      }
+
+      circuit.fromJSON('{"cols":[["H",1],[1,1],["T",1]]}', true);
+
+      const hGate = circuit.fetchStep(0).fetchDropzone(0).operation;
+      const tGate = circuit.fetchStep(2).fetchDropzone(0).operation;
+      if (hGate === null || tGate === null) {
+        throw new Error("Test gates are not initialized");
+      }
+
+      app.selectedGates = new Set([hGate, tGate]);
+    });
+    await page.keyboard.press("Control+c");
+
+    await page.keyboard.press("Control+v");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 2, qubitIndex: 0, operationType: "TGate" },
+      { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 5, qubitIndex: 0, operationType: "TGate" },
+    ]);
+
+    await page.keyboard.press("Control+z");
+    await page.keyboard.press("Control+Shift+z");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 2, qubitIndex: 0, operationType: "TGate" },
+      { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 5, qubitIndex: 0, operationType: "TGate" },
+    ]);
+  });
+
   test("updates temporary selections as gates enter and leave the rectangle", async ({
     page,
   }) => {
@@ -159,6 +321,18 @@ async function activeStepIndex(page: import("@playwright/test").Page) {
   });
 }
 
+async function activeCell(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const app = window.pixiApp as
+      | {
+          activeCell: { stepIndex: number; qubitIndex: number } | null;
+        }
+      | undefined;
+
+    return app?.activeCell ?? null;
+  });
+}
+
 async function selectedGateTypes(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
     const app = window.pixiApp as
@@ -171,5 +345,21 @@ async function selectedGateTypes(page: import("@playwright/test").Page) {
     }
 
     return Array.from(app.selectedGates, (gate) => gate.operationType).sort();
+  });
+}
+
+async function occupiedCells(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const steps = window.pixiApp?.circuitFrame?.circuit.steps ?? [];
+
+    return steps.flatMap((step, stepIndex) =>
+      step.dropzones.flatMap((dropzone, qubitIndex) => {
+        const operation = dropzone.operation;
+
+        return operation === null
+          ? []
+          : [{ stepIndex, qubitIndex, operationType: operation.operationType }];
+      })
+    );
   });
 }
