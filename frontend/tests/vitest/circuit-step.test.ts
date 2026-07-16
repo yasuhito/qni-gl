@@ -14,7 +14,7 @@ import { Write1Gate } from "../../src/write1-gate";
 import { XGate } from "../../src/x-gate";
 import { YGate } from "../../src/y-gate";
 import { ZGate } from "../../src/z-gate";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 describe("CircuitStep", () => {
   let circuitStep: CircuitStep;
@@ -208,6 +208,61 @@ describe("CircuitStep", () => {
       circuitStep.deactivate();
 
       expect(circuitStep.isActive).toBe(false);
+    });
+  });
+
+  describe("pasted emphasis", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    });
+
+    it("starts after 50 ms and fades out over 500 ms", () => {
+      const setAlphaSpies = circuitStep.dropzones.map((dropzone) =>
+        vi.spyOn(dropzone, "setPastedEmphasisAlpha")
+      );
+      let animationFrame: FrameRequestCallback | undefined;
+      vi.stubGlobal(
+        "requestAnimationFrame",
+        vi.fn((callback: FrameRequestCallback) => {
+          animationFrame = callback;
+          return 1;
+        })
+      );
+      circuitStep.applyPastedEmphasis();
+      setAlphaSpies.forEach((spy) => spy.mockClear());
+
+      vi.advanceTimersByTime(50);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenLastCalledWith(0.35);
+      });
+
+      animationFrame?.(performance.now() + 500);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenLastCalledWith(0);
+      });
+    });
+
+    it("cancels a pending emphasis when it is cleared", () => {
+      const setAlphaSpies = circuitStep.dropzones.map((dropzone) =>
+        vi.spyOn(dropzone, "setPastedEmphasisAlpha")
+      );
+      circuitStep.applyPastedEmphasis();
+      setAlphaSpies.forEach((spy) => spy.mockClear());
+
+      circuitStep.clearPastedEmphasis();
+      vi.advanceTimersByTime(50);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenCalledOnce();
+        expect(spy).toHaveBeenCalledWith(0);
+      });
     });
   });
 
