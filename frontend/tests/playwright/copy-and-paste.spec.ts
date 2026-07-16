@@ -113,6 +113,35 @@ test.describe("Copy and paste", () => {
     });
   });
 
+  test("clears gate selection on a background click without clearing the clipboard", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+
+    await page.mouse.click(
+      circuitInfo.steps[2][0].x,
+      circuitInfo.steps[0][0].y - circuitInfo.gatePalette.hGate.size * 2
+    );
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([]);
+
+    await page.keyboard.press("Control+v");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+    ]);
+  });
+
   test("selects a controlled structure with one click and one gate with a double click", async ({
     page,
     circuitInfo,

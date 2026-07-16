@@ -164,8 +164,7 @@ export class App {
     this.app.stage.sortableChildren = true;
     this.app.stage
       .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
-      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
-      .on("pointerdown", this.maybeDeactivateGate, this);
+      .on("pointerupoutside", this.releaseGate, this); // 描画オブジェクトの外側でクリック、タッチを離した
   }
 
   private setupExportButton(): void {
@@ -367,6 +366,11 @@ export class App {
     this.circuitFrame.on(OPERATION_EVENTS.MOUSE_LEFT, this.resetCursor, this);
     this.circuitFrame.on(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
     this.app.stage
+      .on(
+        CIRCUIT_FRAME_EVENTS.BACKGROUND_CLICKED,
+        this.clearSelectionFromBackground,
+        this,
+      )
       .on(
         CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED,
         this.startRectangleSelection,
@@ -959,12 +963,10 @@ export class App {
     this.stateVector.qubitCount = this.circuit.highestOccupiedQubitNumber;
   }
 
-  private maybeDeactivateGate(event: FederatedPointerEvent) {
-    if (event.target === this.app.stage) {
-      this.activeGate?.deactivate();
-      this.clearSelectedGates();
-      this.clearActiveDropzone();
-    }
+  private clearSelectionFromBackground(): void {
+    this.activeGate?.deactivate();
+    this.clearSelectedGates();
+    this.clearActiveDropzone();
   }
 
   protected runSimulator() {

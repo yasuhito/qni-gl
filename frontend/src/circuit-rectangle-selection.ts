@@ -145,6 +145,8 @@ export class CircuitRectangleSelection {
         this.startDropzone,
         additiveSelection,
       );
+    } else if (this.startStep === null) {
+      this.stage.emit(CIRCUIT_FRAME_EVENTS.BACKGROUND_CLICKED);
     }
 
     this.stage.emit(CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_FINISHED);

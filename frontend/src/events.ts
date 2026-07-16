@@ -19,6 +19,7 @@ export const FRAME_DIVIDER_EVENTS = {
 } as const;
 
 export const CIRCUIT_FRAME_EVENTS = {
+  BACKGROUND_CLICKED: "circuit-frame.background-clicked",
   RECTANGLE_SELECTION_STARTED: "circuit-frame.rectangle-selection-started",
   RECTANGLE_SELECTION_UPDATED: "circuit-frame.rectangle-selection-updated",
   RECTANGLE_SELECTION_FINISHED: "circuit-frame.rectangle-selection-finished",
