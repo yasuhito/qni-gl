@@ -22,6 +22,7 @@ import {
 } from "pixi.js";
 import {
   CIRCUIT_STEP_EVENTS,
+  CIRCUIT_FRAME_EVENTS,
   DROPZONE_EVENTS,
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
@@ -29,6 +30,7 @@ import {
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
+import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 
 declare global {
   interface Window {
@@ -63,6 +65,7 @@ export class App {
   private pasteUndoStack: string[] = [];
   private pasteRedoStack: string[] = [];
   private shouldSyncSelectionStylesAfterRelease = false;
+  private rectangleSelectionBase: Set<OperationComponent> | null = null;
 
   public static get instance(): App {
     if (!this._instance) {
@@ -122,6 +125,12 @@ export class App {
       this.setupStage();
 
       this.setupFrames();
+
+      new CircuitRectangleSelection(
+        this.app.stage,
+        this.circuit,
+        this.gatePalette,
+      );
 
       this.loadCircuitFromUrl();
 
@@ -357,6 +366,22 @@ export class App {
     this.circuitFrame.on(OPERATION_EVENTS.GRABBED, this.grabGate, this);
     this.circuitFrame.on(OPERATION_EVENTS.MOUSE_LEFT, this.resetCursor, this);
     this.circuitFrame.on(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
+    this.app.stage
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED,
+        this.startRectangleSelection,
+        this,
+      )
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_UPDATED,
+        this.updateRectangleSelection,
+        this,
+      )
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_FINISHED,
+        this.finishRectangleSelection,
+        this,
+      );
 
     this.circuitFrame.on(
       CIRCUIT_STEP_EVENTS.ACTIVATED,
@@ -1066,6 +1091,23 @@ export class App {
 
     this.selectedGates.add(gate);
     this.applySelectedGateStyles();
+  }
+
+  private startRectangleSelection(): void {
+    // ドラッグ開始前から選択されていたゲートは、矩形の外でも保持する。
+    this.rectangleSelectionBase = new Set(this.selectedGates);
+  }
+
+  private updateRectangleSelection(gates: OperationComponent[]): void {
+    const selectionBase = this.rectangleSelectionBase ?? this.selectedGates;
+
+    this.selectedGates = new Set([...Array.from(selectionBase), ...gates]);
+
+    this.applySelectedGateStyles();
+  }
+
+  private finishRectangleSelection(): void {
+    this.rectangleSelectionBase = null;
   }
 
   /**
