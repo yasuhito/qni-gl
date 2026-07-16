@@ -1074,14 +1074,19 @@ export class App {
 
     this.activeCell = position;
     this.clearActiveDropzone();
-    this.clearPastedSteps();
+
+    const selectedOperations = gate.consumeIndividualSelectionRequest()
+      ? [gate]
+      : this.circuit.connectedOperationsFor(gate);
 
     if (!additive) {
       this.clearSelectedGates();
     } else if (this.selectedGates.has(gate)) {
-      // Shift選択中に同じゲートを押した場合は、コピー対象から外す。
-      this.selectedGates.delete(gate);
-      gate.deactivate();
+      selectedOperations.forEach((operation) => {
+        this.selectedGates.delete(operation);
+        operation.deactivate();
+      });
+
       this.shouldSyncSelectionStylesAfterRelease = true;
       if (this.activeGate === gate) {
         this.activeGate = null;
@@ -1089,7 +1094,10 @@ export class App {
       return;
     }
 
-    this.selectedGates.add(gate);
+    selectedOperations.forEach((operation) => {
+      this.selectedGates.add(operation);
+    });
+
     this.applySelectedGateStyles();
   }
 
@@ -1125,10 +1133,8 @@ export class App {
     }
 
     this.activeCell = { stepIndex, qubitIndex };
-    this.clearPastedSteps();
 
     if (!additiveSelection && dropzone.operation === null) {
-      this.clearSelectedGates();
       this.clearActiveDropzone();
       this.activeDropzone = dropzone;
       this.activeDropzone.applySelectionEmphasis();
@@ -1136,11 +1142,17 @@ export class App {
   }
 
   private copySelectedGates(): void {
-    const selectedGates = [...this.selectedGates];
-    this.clipboard = this.circuit.createClipboardFromOperations(selectedGates);
-    this.activeCell =
-      this.circuit.findClipboardAnchorForOperations(selectedGates) ??
-      this.activeCell;
+    const selectedGates = Array.from(this.selectedGates);
+    const clipboard = this.circuit.createClipboardFromOperations(selectedGates);
+    const activeCell =
+      this.circuit.findClipboardAnchorForOperations(selectedGates);
+
+    if (clipboard === null || activeCell === null) {
+      return;
+    }
+
+    this.clipboard = clipboard;
+    this.activeCell = activeCell;
   }
 
   private pasteClipboard(): void {
@@ -1148,9 +1160,8 @@ export class App {
       return;
     }
 
-    this.pasteUndoStack.push(this.circuit.toJSON());
+    this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.pasteRedoStack = [];
-    this.clearPastedSteps();
 
     const pastedOperations = this.circuit.pasteClipboardAt(
       this.activeCell,
@@ -1167,7 +1178,7 @@ export class App {
     this.applySelectedGateStyles();
     this.applyPastedStepStyles();
 
-    this.circuit.update();
+    this.circuit.updateAfterPaste();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1179,7 +1190,7 @@ export class App {
       return;
     }
 
-    this.pasteRedoStack.push(this.circuit.toJSON());
+    this.pasteRedoStack.push(this.circuit.toJSON(true));
     this.restoreCircuitFromPasteHistory(previousCircuitJson);
   }
 
@@ -1189,7 +1200,7 @@ export class App {
       return;
     }
 
-    this.pasteUndoStack.push(this.circuit.toJSON());
+    this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.restoreCircuitFromPasteHistory(nextCircuitJson);
   }
 
@@ -1200,7 +1211,7 @@ export class App {
     this.clearSelectedGates();
     this.clearPastedSteps();
     this.clearActiveDropzone();
-    this.circuit.fromJSON(circuitJson);
+    this.circuit.fromJSON(circuitJson, true);
     this.activeCell = null;
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();

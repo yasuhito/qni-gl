@@ -20,7 +20,7 @@ export declare class Iconable {
     sprite: Sprite;
     whiteSprite: Sprite;
   }>;
-  protected createWhiteSprite(texture: Texture): Sprite;
+  createWhiteSprite(texture: Texture): Sprite;
 }
 
 const WHITE_FILTER_MATRIX = [
@@ -74,7 +74,7 @@ export function IconableMixin<TBase extends Constructor<Container>>(
       return new Sprite(texture);
     }
 
-    protected createWhiteSprite(texture: Texture): Sprite {
+    createWhiteSprite(texture: Texture): Sprite {
       const sprite = new Sprite(texture);
       const whiteFilter = new ColorMatrixFilter();
 

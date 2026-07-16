@@ -10,6 +10,10 @@ import {
 } from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 import { OperationComponent } from "./operation-component";
+import { ControlGate } from "./control-gate";
+import { SwapGate } from "./swap-gate";
+import { Controllable, isControllable } from "./controllable-mixin";
+import { Operation } from "./operation";
 
 type CircuitJson = {
   cols: unknown[][];
@@ -159,6 +163,24 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
+  /**
+   * ペーストしたゲートの相対位置を保ったまま、回路表示を更新する。
+   */
+  updateAfterPaste(): void {
+    const activeStep =
+      this.activeStepIndex === null
+        ? null
+        : this.fetchStep(this.activeStepIndex);
+
+    this.appendMinimumSteps();
+    this.removeUnusedUpperWires();
+    this.redrawDropzoneInputAndOutputWires();
+    this.updateConnections();
+
+    activeStep?.activate();
+    this.markerManager.update(this.steps);
+  }
+
   maybeAppendWire() {
     const firstStepWireCount = this.fetchStep(0).wireCount;
 
@@ -259,6 +281,94 @@ export class Circuit extends Container {
   }
 
   /**
+   * Qniが保持する接続情報から、指定ゲートと同じ構造に属するゲートを返す。
+   */
+  connectedOperationsFor(
+    operation: OperationComponent,
+  ): OperationComponent[] {
+    const position = this.findOperationPosition(operation);
+    if (position === null) {
+      return [];
+    }
+
+    const step = this.fetchStep(position.stepIndex);
+    const operations = step.dropzones.flatMap((dropzone) =>
+      dropzone.operation === null ? [] : [dropzone.operation],
+    );
+
+    if (operation instanceof SwapGate) {
+      const swapOperations = operations.filter(
+        (candidate) => candidate instanceof SwapGate,
+      );
+
+      return swapOperations.length === 2 ? swapOperations : [operation];
+    }
+
+    if (isControllable(operation) && operation.controls.length > 0) {
+      return operations.filter((candidate) => {
+        if (candidate instanceof ControlGate) {
+          const candidatePosition = this.findOperationPosition(candidate);
+
+          return (
+            candidatePosition !== null &&
+            operation.controls.includes(candidatePosition.qubitIndex)
+          );
+        }
+
+        return (
+          isControllable(candidate) &&
+          candidate.controls.some((control) =>
+            operation.controls.includes(control),
+          )
+        );
+      });
+    }
+
+    if (operation instanceof ControlGate) {
+      const controllableOperations = operations.filter(
+        (candidate): candidate is Operation & Controllable =>
+          isControllable(candidate),
+      );
+      const targetsControlledByOperation = controllableOperations.filter(
+        (candidate) =>
+          candidate.controls.includes(position.qubitIndex),
+      );
+
+      if (targetsControlledByOperation.length > 0) {
+        const connectedControlBits = new Set(
+          targetsControlledByOperation.flatMap((target) => target.controls),
+        );
+
+        return operations.filter((candidate) => {
+          if (candidate instanceof ControlGate) {
+            const candidatePosition = this.findOperationPosition(candidate);
+
+            return (
+              candidatePosition !== null &&
+              connectedControlBits.has(candidatePosition.qubitIndex)
+            );
+          }
+
+          return (
+            isControllable(candidate) &&
+            candidate.controls.some((control) =>
+              connectedControlBits.has(control),
+            )
+          );
+        });
+      }
+
+      const controlOperations = operations.filter(
+        (candidate) => candidate instanceof ControlGate,
+      );
+
+      return controlOperations.length > 1 ? controlOperations : [operation];
+    }
+
+    return [operation];
+  }
+
+  /**
    * activeCell の右隣にクリップボード内容をステップ挿入し、追加したゲートを返す。
    */
   pasteClipboardAt(
@@ -307,10 +417,10 @@ export class Circuit extends Container {
    * Circuitインスタンスの状態をJSON文字列としてシリアライズする
    * @returns 回路全体のJSON文字列
    */
-  toJSON() {
+  toJSON(preserveEmptySteps = false) {
     const cols: string[] = [];
     for (const each of this.steps) {
-      if (!each.isEmpty) {
+      if (preserveEmptySteps || !each.isEmpty) {
         cols.push(each.toJSON());
       }
     }
@@ -321,7 +431,7 @@ export class Circuit extends Container {
    * JSONデータからCircuitのインスタンスの状態を復元する
    * @param jsonString 回路全体のJSONデータ文字列
    */
-  fromJSON(jsonString: string): void {
+  fromJSON(jsonString: string, preserveEmptySteps = false): void {
     const circuitData = JSON.parse(jsonString) as CircuitJson;
 
     this.steps.forEach((step) => step.destroy());
@@ -342,7 +452,11 @@ export class Circuit extends Container {
       this.fetchStep(0).activate();
     }
 
-    this.update();
+    if (preserveEmptySteps) {
+      this.updateAfterPaste();
+    } else {
+      this.update();
+    }
   }
 
   toString() {
