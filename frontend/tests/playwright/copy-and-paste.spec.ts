@@ -165,6 +165,41 @@ test.describe("Copy and paste", () => {
     });
   });
 
+  test("removes an empty step after it stops being the paste anchor", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const circuit = window.pixiApp?.circuitFrame?.circuit;
+      if (circuit === undefined) {
+        throw new Error("Circuit is not initialized");
+      }
+
+      circuit.fromJSON('{"cols":[["H",1],[1,1],["X",1]]}', true);
+    });
+
+    await page.mouse.click(
+      circuitInfo.steps[1][1].x,
+      circuitInfo.steps[1][1].y
+    );
+
+    await expect.poll(() => activeCell(page)).toEqual({
+      stepIndex: 1,
+      qubitIndex: 1,
+    });
+
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "XGate" },
+    ]);
+  });
+
   test("clears gate selection on a background click without clearing the clipboard", async ({
     page,
     circuitInfo,

@@ -182,6 +182,25 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
+  /**
+   * ペースト基準から外れた空ステップだけを回路から取り除く。
+   */
+  removeEmptyStep(step: CircuitStep): void {
+    const stepIndex = this.steps.indexOf(step);
+    if (stepIndex === -1 || !step.isEmpty) {
+      return;
+    }
+
+    step.destroy();
+    this.stepList.arrangeChildren();
+    this.appendMinimumSteps();
+    this.redrawDropzoneInputAndOutputWires();
+    this.updateConnections();
+
+    this.fetchStep(Math.min(stepIndex, this.steps.length - 1)).activate();
+    this.markerManager.update(this.steps);
+  }
+
   maybeAppendWire() {
     const firstStepWireCount = this.fetchStep(0).wireCount;
 

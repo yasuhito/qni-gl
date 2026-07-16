@@ -1068,13 +1068,14 @@ export class App {
     gate: OperationComponent,
     additive: boolean
   ): void {
+    this.releaseEmptyPasteAnchor();
+
     const position = this.circuit.findOperationPosition(gate);
     if (position === null) {
       return;
     }
 
     this.activeCell = position;
-    this.clearActiveDropzone();
 
     const selectedOperations = gate.consumeIndividualSelectionRequest()
       ? [gate]
@@ -1129,6 +1130,8 @@ export class App {
     dropzone: Dropzone,
     additiveSelection = false
   ): void {
+    this.releaseEmptyPasteAnchor(dropzone);
+
     const stepIndex = this.circuit.steps.indexOf(circuitStep);
     const qubitIndex = circuitStep.dropzones.indexOf(dropzone);
     if (stepIndex === -1 || qubitIndex === -1) {
@@ -1145,6 +1148,8 @@ export class App {
   }
 
   private copySelectedGates(): void {
+    this.releaseEmptyPasteAnchor();
+
     const selectedGates = Array.from(this.selectedGates);
     const clipboard = this.circuit.createClipboardFromOperations(selectedGates);
     const activeCell =
@@ -1229,6 +1234,23 @@ export class App {
   private clearActiveDropzone(): void {
     this.activeDropzone?.clearSelectionEmphasis();
     this.activeDropzone = null;
+  }
+
+  /**
+   * 選択対象から外れた空のペースト基準ステップを詰める。
+   */
+  private releaseEmptyPasteAnchor(nextDropzone: Dropzone | null = null): void {
+    const activeDropzone = this.activeDropzone;
+    if (activeDropzone === null || activeDropzone.parent === nextDropzone?.parent) {
+      return;
+    }
+
+    const activeStep = activeDropzone.parent;
+
+    this.clearActiveDropzone();
+    if (activeStep instanceof CircuitStep) {
+      this.circuit.removeEmptyStep(activeStep);
+    }
   }
 
   private clearPastedSteps(): void {
