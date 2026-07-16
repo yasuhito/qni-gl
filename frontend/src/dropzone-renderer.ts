@@ -104,10 +104,10 @@ export class DropzoneRenderer {
    */
   updateWires({ inputWireType, outputWireType }: WireUpdateInfo): void {
     this.wire.clear();
+    this.pastedWire.clear();
 
     this.updateInputWire(inputWireType);
     this.updateOutputWire(outputWireType);
-    this.redrawPastedWire();
   }
 
   /**
@@ -134,15 +134,21 @@ export class DropzoneRenderer {
   }
 
   private updateInputWire(wireType: WireType): void {
-    this.drawWire({ wireType, startX: 0, endX: this.inputWireEndX() });
+    const wire = { wireType, startX: 0, endX: this.inputWireEndX() };
+
+    this.drawWire(wire);
+    this.drawPastedWire(wire);
   }
 
   private updateOutputWire(wireType: WireType): void {
-    this.drawWire({
+    const wire = {
       wireType,
       startX: this.outputWireStartX(),
       endX: this.totalSize,
-    });
+    };
+
+    this.drawWire(wire);
+    this.drawPastedWire(wire);
   }
 
   private inputWireEndX(): number {
@@ -185,9 +191,8 @@ export class DropzoneRenderer {
       .fill(color);
   }
 
-  private redrawPastedWire(): void {
-    this.pastedWire.clear();
-    this.drawWireSegment(this.pastedWire, 0, this.totalSize, 0xffffff);
+  private drawPastedWire({ startX, endX }: WireSegment): void {
+    this.drawWireSegment(this.pastedWire, startX, endX, 0xffffff);
   }
 
   private drawWire({ wireType, startX, endX }: WireSegment): void {
