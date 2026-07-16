@@ -966,7 +966,6 @@ export class App {
   private clearSelectionFromBackground(): void {
     this.activeGate?.deactivate();
     this.clearSelectedGates();
-    this.clearActiveDropzone();
   }
 
   protected runSimulator() {

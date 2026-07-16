@@ -180,17 +180,27 @@ test.describe("Copy and paste", () => {
     await page.keyboard.press("Control+c");
 
     await page.mouse.click(
+      circuitInfo.steps[2][1].x,
+      circuitInfo.steps[2][1].y
+    );
+
+    await page.mouse.click(
       circuitInfo.steps[2][0].x,
       circuitInfo.steps[0][0].y - circuitInfo.gatePalette.hGate.size * 2
     );
 
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
+    await expect.poll(() => activeCell(page)).toEqual({
+      stepIndex: 2,
+      qubitIndex: 1,
+    });
+    await expect.poll(() => hasActiveDropzone(page)).toBe(true);
 
     await page.keyboard.press("Control+v");
 
     await expect.poll(() => occupiedCells(page)).toEqual([
       { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
-      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 3, qubitIndex: 1, operationType: "HGate" },
     ]);
   });
 
@@ -411,6 +421,16 @@ async function activeCell(page: import("@playwright/test").Page) {
       | undefined;
 
     return app?.activeCell ?? null;
+  });
+}
+
+async function hasActiveDropzone(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const app = window.pixiApp as
+      | { activeDropzone: unknown | null }
+      | undefined;
+
+    return app?.activeDropzone != null;
   });
 }
 
