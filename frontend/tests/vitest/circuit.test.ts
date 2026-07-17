@@ -709,17 +709,6 @@ describe("Circuit", () => {
       // 読み込まれた回路が元の回路と全く同じJSON文字列を生成することを確認
       expect(newCircuit.toJSON()).toBe(jsonString);
 
-      // 読み込まれた回路が元の回路と同じ数の空でないステップを持つことを確認
-      const originalNonEmptySteps = circuit.steps.filter(
-        (step) => !step.isEmpty
-      ).length;
-      const loadedNonEmptySteps = newCircuit.steps.filter(
-        (step) => !step.isEmpty
-      ).length;
-      // ロード時に必要に応じてステップが追加されるため、これは元の非空ステップ数+fromJSONで追加されたステップ数になる可能性がある
-      // シンプルな比較ではなく、toJSONの結果が一致することを確認する方が堅牢
-      expect(newCircuit.toJSON()).toBe(jsonString);
-
       // 読み込まれた回路内の個々のゲートについて、正しいタイプと位置にあるか確認
       expect(newCircuit.fetchStep(0).fetchDropzone(0).operation).toBeInstanceOf(
         HGate

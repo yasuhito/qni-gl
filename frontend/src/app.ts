@@ -1100,7 +1100,7 @@ export class App {
       this.selectedGates.add(operation);
     });
 
-    this.applySelectedGateStyles();
+    this.syncGateSelectionStyles();
   }
 
   private startRectangleSelection(): void {
@@ -1114,7 +1114,7 @@ export class App {
 
     this.selectedGates = new Set([...Array.from(selectionBase), ...gates]);
 
-    this.applySelectedGateStyles();
+    this.syncGateSelectionStyles();
   }
 
   private finishRectangleSelection(): void {
@@ -1175,6 +1175,8 @@ export class App {
       this.activeCell,
       this.clipboard
     );
+
+    this.clearPastedSteps();
     this.pastedSteps = new Set(
       pastedOperations.flatMap((operation) => {
         const position = this.circuit.findOperationPosition(operation);
@@ -1183,7 +1185,7 @@ export class App {
           : [this.circuit.fetchStep(position.stepIndex)];
       }),
     );
-    this.applySelectedGateStyles();
+    this.syncGateSelectionStyles();
     this.applyPastedStepStyles();
 
     this.circuit.updateAfterPaste();
@@ -1238,10 +1240,15 @@ export class App {
 
   /**
    * 選択対象から外れた空のペースト基準ステップを詰める。
+   * 同じステップ内で基準セルを移す場合は、そのステップを残す。
    */
   private releaseEmptyPasteAnchor(nextDropzone: Dropzone | null = null): void {
     const activeDropzone = this.activeDropzone;
-    if (activeDropzone === null || activeDropzone.parent === nextDropzone?.parent) {
+
+    if (
+      activeDropzone === null ||
+      activeDropzone.parent === nextDropzone?.parent
+    ) {
       return;
     }
 
@@ -1258,10 +1265,6 @@ export class App {
       step.clearPastedEmphasis();
     });
     this.pastedSteps.clear();
-  }
-
-  private applySelectedGateStyles(): void {
-    this.syncGateSelectionStyles();
   }
 
   private applyPastedStepStyles(): void {
@@ -1294,27 +1297,15 @@ export class App {
     );
   }
 
-  private updateAfterCircuitEdit(): void {
-    this.circuit.update();
-    this.updateUrlWithCircuit();
-    this.updateStateVectorComponentQubitCount();
-    this.stateVectorFrame.repositionAndResize(
-      this.frameDivider.y + this.frameDivider.height,
-      this.app.screen.width,
-      this.app.screen.height - this.frameDivider.y
-    );
-    this.runSimulator();
-  }
-
   /**
    * 量子回路の状態をURLにエンコードする
    */
   public updateUrlWithCircuit(): void {
-  // タイトル取得
-  const titleInput = document.getElementById(
-    "circuit-title-input"
-  ) as HTMLInputElement | null;
-  const title = titleInput?.value || "";
+    // タイトル取得
+    const titleInput = document.getElementById(
+      "circuit-title-input"
+    ) as HTMLInputElement | null;
+    const title = titleInput?.value || "";
 
     const circuitObj = JSON.parse(this.circuit.toJSON());
     // titleを追加
