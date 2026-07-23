@@ -76,12 +76,23 @@ test.describe("Copy and paste", () => {
       .toBe('{"cols":[["H",1],[1,"X"],["H",1],[1,"X"]]}');
   });
 
-  test("keeps empty-cell clicks working without starting a rectangle", async ({
+  test("separates empty paste anchor clicks from step marker clicks", async ({
     page,
     circuitInfo,
   }) => {
     await page.mouse.click(
       circuitInfo.steps[1][0].x,
+      circuitInfo.steps[1][0].y
+    );
+
+    await expect.poll(() => activeStepIndex(page)).toBe(0);
+    await expect.poll(() => activeCell(page)).toEqual({
+      stepIndex: 1,
+      qubitIndex: 0,
+    });
+
+    await page.mouse.click(
+      circuitInfo.steps[1][0].x + circuitInfo.steps[1][0].size / 2 - 2,
       circuitInfo.steps[1][0].y
     );
 
@@ -229,7 +240,6 @@ test.describe("Copy and paste", () => {
       stepIndex: 2,
       qubitIndex: 1,
     });
-    await expect.poll(() => hasActiveDropzone(page)).toBe(true);
 
     await page.keyboard.press("Control+v");
 
@@ -456,16 +466,6 @@ async function activeCell(page: import("@playwright/test").Page) {
       | undefined;
 
     return app?.activeCell ?? null;
-  });
-}
-
-async function hasActiveDropzone(page: import("@playwright/test").Page) {
-  return page.evaluate(() => {
-    const app = window.pixiApp as
-      | { activeDropzone: unknown | null }
-      | undefined;
-
-    return app?.activeDropzone != null;
   });
 }
 

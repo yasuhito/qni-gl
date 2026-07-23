@@ -16,7 +16,9 @@ import { logger, rectIntersect } from "./util";
 import {
   Application,
   Assets,
+  Container,
   FederatedPointerEvent,
+  Graphics,
   Point,
   Renderer,
 } from "pixi.js";
@@ -31,6 +33,7 @@ import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
+import { Spacing } from "./spacing";
 
 declare global {
   interface Window {
@@ -41,6 +44,8 @@ declare global {
 export class App {
   static elementId = "app";
   private static _instance: App;
+  private static readonly CARET_BLINK_INTERVAL = 500;
+  private static readonly PASTE_CARET_POSITION_RATIO = 0.65;
 
   declare worker: Worker;
 
@@ -62,6 +67,8 @@ export class App {
   private selectedGates = new Set<OperationComponent>();
   private pastedSteps = new Set<CircuitStep>();
   private activeDropzone: Dropzone | null = null;
+  private pasteCaretOverlay!: Container;
+  private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
   private pasteUndoStack: string[] = [];
   private pasteRedoStack: string[] = [];
   private shouldSyncSelectionStylesAfterRelease = false;
@@ -319,10 +326,17 @@ export class App {
       initialY: this.circuitFrame.height,
     });
     this.app.stage.addChild(this.frameDivider);
+    this.setupPastePlacementOverlay();
 
     this.setupFrameDividerEventHandlers();
     this.setupCircuitFrameEventHandlers();
     this.setupStateVectorEventHandlers();
+  }
+
+  private setupPastePlacementOverlay(): void {
+    this.pasteCaretOverlay = new Container();
+    this.pasteCaretOverlay.eventMode = "none";
+    this.circuit.addChild(this.pasteCaretOverlay);
   }
 
   private setupFrameDividerEventHandlers() {
@@ -938,7 +952,7 @@ export class App {
       this.shouldSyncSelectionStylesAfterRelease = false;
     }
     if (this.grabbedGate.dropzone !== null) {
-      this.clearActiveDropzone();
+      this.syncPasteAnchorWithGrabbedGate();
     }
     this.grabbedGate = null;
 
@@ -1076,6 +1090,7 @@ export class App {
     }
 
     this.activeCell = position;
+    this.updatePastePlacementPreview();
 
     const selectedOperations = gate.consumeIndividualSelectionRequest()
       ? [gate]
@@ -1141,9 +1156,8 @@ export class App {
     this.activeCell = { stepIndex, qubitIndex };
 
     if (!additiveSelection && dropzone.operation === null) {
-      this.clearActiveDropzone();
       this.activeDropzone = dropzone;
-      this.activeDropzone.applySelectionEmphasis();
+      this.updatePastePlacementPreview();
     }
   }
 
@@ -1161,6 +1175,8 @@ export class App {
 
     this.clipboard = clipboard;
     this.activeCell = activeCell;
+    this.activeDropzone = null;
+    this.updatePastePlacementPreview();
   }
 
   private pasteClipboard(): void {
@@ -1170,13 +1186,13 @@ export class App {
 
     this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.pasteRedoStack = [];
+    this.clearPastePlacementOverlay();
 
     const pastedOperations = this.circuit.pasteClipboardAt(
       this.activeCell,
       this.clipboard
     );
 
-    this.clearPastedSteps();
     this.pastedSteps = new Set(
       pastedOperations.flatMap((operation) => {
         const position = this.circuit.findOperationPosition(operation);
@@ -1189,6 +1205,7 @@ export class App {
     this.applyPastedStepStyles();
 
     this.circuit.updateAfterPaste();
+    this.updatePastePlacementPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1220,9 +1237,9 @@ export class App {
   private restoreCircuitFromPasteHistory(circuitJson: string): void {
     this.clearSelectedGates();
     this.clearPastedSteps();
-    this.clearActiveDropzone();
+    this.clearPastePlacementOverlay();
     this.circuit.fromJSON(circuitJson, true);
-    this.activeCell = null;
+    this.updatePastePlacementPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1233,9 +1250,136 @@ export class App {
     this.syncGateSelectionStyles();
   }
 
-  private clearActiveDropzone(): void {
-    this.activeDropzone?.clearSelectionEmphasis();
-    this.activeDropzone = null;
+  /**
+   * Ctrl+V で挿入される位置を、キャレットとして表示する。
+   */
+  private updatePastePlacementPreview(): void {
+    this.clearPastePlacementOverlay();
+
+    if (this.activeCell === null) {
+      return;
+    }
+
+    this.applyPasteAnchorAt(this.activeCell);
+  }
+
+  private clearPastePlacementOverlay(): void {
+    if (this.pasteAnchorBlinkTimer !== null) {
+      clearInterval(this.pasteAnchorBlinkTimer);
+      this.pasteAnchorBlinkTimer = null;
+    }
+
+    this.pasteCaretOverlay.removeChildren().forEach((child) => {
+      child.destroy();
+    });
+  }
+
+  private syncPasteAnchorWithGrabbedGate(): void {
+    if (this.grabbedGate === null) {
+      return;
+    }
+
+    const position = this.circuit.findOperationPosition(this.grabbedGate);
+    if (position === null) {
+      return;
+    }
+
+    this.activeCell = position;
+    this.updatePastePlacementPreview();
+  }
+
+  /**
+   * ペースト基準セルの右側に、挿入位置を示すキャレットを描く。
+   */
+  private applyPasteAnchorAt(position: CircuitCellPosition): void {
+    const anchorDropzone = this.dropzoneAt(position);
+    const insertStartCell = this.insertStartCellFor(position);
+
+    if (anchorDropzone === null) {
+      return;
+    }
+
+    const caret = this.createPasteAnchorCaret(this.pasteCaretHeight());
+    caret.position.copyFrom(this.pasteCellTopLeft(insertStartCell, position));
+
+    this.pasteCaretOverlay.addChild(caret);
+    this.pasteAnchorBlinkTimer = setInterval(() => {
+      caret.visible = !caret.visible;
+    }, App.CARET_BLINK_INTERVAL);
+  }
+
+  private dropzoneAt(position: CircuitCellPosition): Dropzone | null {
+    const step = this.circuit.steps[position.stepIndex];
+    if (step === undefined) {
+      return null;
+    }
+
+    return step.dropzones[position.qubitIndex] ?? null;
+  }
+
+  private insertStartCellFor(position: CircuitCellPosition): CircuitCellPosition {
+    return {
+      stepIndex: position.stepIndex + 1,
+      qubitIndex: position.qubitIndex,
+    };
+  }
+
+  private pasteCaretHeight(): number {
+    const clipboardHeight = this.clipboard?.height ?? 1;
+
+    return (
+      Dropzone.sizeInPx +
+      (clipboardHeight - 1) * this.referenceDropzoneTotalSize()
+    );
+  }
+
+  private createPasteAnchorCaret(height: number): Graphics {
+    const width = Spacing.borderWidth.gate.base;
+    const x = Dropzone.GATE_INSET_OFFSET * App.PASTE_CARET_POSITION_RATIO;
+
+    const caret = new Graphics()
+      .roundRect(
+        x - width / 2,
+        Dropzone.GATE_INSET_OFFSET,
+        width,
+        height,
+        width / 2
+      )
+      .fill(Colors["border-component-strong"]);
+    caret.eventMode = "none";
+
+    return caret;
+  }
+
+  private referenceDropzoneTotalSize(): number {
+    return this.circuit.steps[0]?.dropzones[0]?.totalSize ?? Dropzone.sizeInPx;
+  }
+
+  private pasteCellTopLeft(
+    position: CircuitCellPosition,
+    anchor: CircuitCellPosition
+  ): Point {
+    const existingDropzone = this.dropzoneAt(position);
+    if (existingDropzone !== null) {
+      return this.pasteCaretOverlay.toLocal(
+        existingDropzone.getGlobalPosition()
+      );
+    }
+
+    const anchorDropzone = this.dropzoneAt(anchor);
+    if (anchorDropzone === null) {
+      return new Point(0, 0);
+    }
+
+    const anchorPosition = anchorDropzone.getGlobalPosition();
+    return this.pasteCaretOverlay.toLocal(
+      new Point(
+        anchorPosition.x +
+          (position.stepIndex - anchor.stepIndex) * anchorDropzone.totalSize,
+        anchorPosition.y +
+          (position.qubitIndex - anchor.qubitIndex) * anchorDropzone.totalSize
+      )
+    );
   }
 
   /**
@@ -1254,7 +1398,7 @@ export class App {
 
     const activeStep = activeDropzone.parent;
 
-    this.clearActiveDropzone();
+    this.activeDropzone = null;
     if (activeStep instanceof CircuitStep) {
       this.circuit.removeEmptyStep(activeStep);
     }

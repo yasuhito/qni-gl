@@ -1,11 +1,10 @@
-import { Container, FederatedPointerEvent, Graphics, Point } from "pixi.js";
+import { Container, FederatedPointerEvent, Point, Rectangle } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
 import { WireType } from "./types";
 import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
 import { spacingInPx } from "./util";
 import { Operation } from "./operation";
-import { Spacing } from "./spacing";
 
 export class Dropzone extends Container {
   static readonly sizeInPx = spacingInPx(8);
@@ -22,7 +21,6 @@ export class Dropzone extends Container {
   private _controlConnectBottom = false;
 
   private renderer: DropzoneRenderer;
-  private selectionOverlay: Graphics | null = null;
 
   constructor() {
     super();
@@ -31,6 +29,12 @@ export class Dropzone extends Container {
     this.redrawWires();
     this.redrawConnections();
     this.eventMode = "static";
+    this.hitArea = new Rectangle(
+      Dropzone.GATE_INSET_OFFSET,
+      Dropzone.GATE_INSET_OFFSET,
+      this.gateSize,
+      this.gateSize
+    );
     this.on("pointerdown", this.emitSelectedEvent, this);
   }
 
@@ -170,38 +174,6 @@ export class Dropzone extends Container {
     }
 
     this.emit(DROPZONE_EVENTS.SELECTED, this);
-  }
-
-  /**
-   * 空セルがペースト基準として選択されていることを示す枠を表示する。
-   */
-  applySelectionEmphasis(): void {
-    this.clearSelectionEmphasis();
-    const borderWidth = Spacing.borderWidth.gate.base;
-    const borderOffset = borderWidth / 2;
-    this.selectionOverlay = new Graphics()
-      .roundRect(
-        Dropzone.GATE_INSET_OFFSET + borderOffset,
-        Dropzone.GATE_INSET_OFFSET + borderOffset,
-        this.gateSize - borderWidth,
-        this.gateSize - borderWidth,
-        OperationComponent.cornerRadius,
-      )
-      .stroke({ color: 0x5eead4, width: borderWidth });
-    this.addChild(this.selectionOverlay);
-  }
-
-  /**
-   * 空セルの選択枠を消す。
-   */
-  clearSelectionEmphasis(): void {
-    if (this.selectionOverlay === null) {
-      return;
-    }
-
-    this.removeChild(this.selectionOverlay);
-    this.selectionOverlay.destroy();
-    this.selectionOverlay = null;
   }
 
   setPastedEmphasisAlpha(alpha: number): void {

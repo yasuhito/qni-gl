@@ -35,7 +35,7 @@ interface CircuitInfo {
     write1Gate: { x: number; y: number; size: number };
     measurementGate: { x: number; y: number; size: number };
   };
-  steps: { x: number; y: number }[][];
+  steps: { x: number; y: number; size: number }[][];
 }
 
 export async function getCircuitInfo(page: Page): Promise<CircuitInfo> {
@@ -197,7 +197,10 @@ export async function activateStep(page: Page, stepIndex: number) {
   const circuitInfo = await getCircuitInfo(page);
   const dropzone = circuitInfo.steps[stepIndex][0];
 
-  await page.mouse.move(dropzone.x, dropzone.y);
+  await page.mouse.move(
+    dropzone.x + dropzone.size - 1,
+    dropzone.y
+  );
   await page.mouse.down();
   await page.mouse.up();
 

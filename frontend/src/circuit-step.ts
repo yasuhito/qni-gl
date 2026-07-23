@@ -131,7 +131,7 @@ export class CircuitStep extends Container {
     this.initializeState();
     this.initializeDropzoneList();
     this.createDropzones(wireCount);
-    this.setupEventListeners();
+    this.setupHoverEventListeners();
   }
 
   applyPastedEmphasis(): void {
@@ -208,10 +208,9 @@ export class CircuitStep extends Container {
     }
   }
 
-  private setupEventListeners(): void {
-    this.on("pointerover", this.maybeSetHoverState, this)
-      .on("pointerout", this.maybeSetIdleState, this)
-      .on("pointerdown", this.activate, this);
+  private setupHoverEventListeners(): void {
+    this.on("pointerover", this.hoverStepMarker, this)
+      .on("pointerout", this.clearHoverState, this);
     this.eventMode = "static";
   }
 
@@ -312,6 +311,17 @@ export class CircuitStep extends Container {
     if (this.state.isHover()) {
       this.state.setIdle();
     }
+  }
+
+  hoverStepMarker(): void {
+    if (!this.hoverEnabled) {
+      return;
+    }
+
+    if (this.state.isIdle()) {
+      this.state.setHover();
+    }
+    this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
   setHoverEnabled(enabled: boolean): void {
@@ -621,20 +631,4 @@ export class CircuitStep extends Container {
     this.emit(DROPZONE_EVENTS.SELECTED, this, dropzone);
   }
 
-  private maybeSetHoverState() {
-    if (!this.hoverEnabled) {
-      return;
-    }
-
-    if (this.state.isIdle()) {
-      this.state.setHover();
-    }
-    this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
-  }
-
-  private maybeSetIdleState() {
-    if (this.state.isHover()) {
-      this.state.setIdle();
-    }
-  }
 }

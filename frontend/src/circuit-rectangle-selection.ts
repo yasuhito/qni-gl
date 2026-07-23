@@ -13,6 +13,7 @@ import { CIRCUIT_FRAME_EVENTS, DROPZONE_EVENTS } from "./events";
 import { OperationComponent } from "./operation-component";
 import { OperationPalette } from "./operation-palette";
 import { FrameDivider } from "./frame-divider";
+import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 
 type RectangleBounds = Pick<Rectangle, "left" | "right" | "top" | "bottom">;
 
@@ -54,6 +55,7 @@ export class CircuitRectangleSelection {
     if (
       event.target instanceof FrameDivider ||
       this.findAncestor(event.target, OperationComponent) !== null ||
+      this.findAncestor(event.target, CircuitStepMarkerManager) !== null ||
       this.findAncestor(event.target, OperationPalette) !== null ||
       this.operationPalette
         .getBounds()
@@ -67,15 +69,14 @@ export class CircuitRectangleSelection {
       return;
     }
 
-    const step = this.findAncestor(event.target, CircuitStep);
-    if (step !== null) {
-      // 矩形選択中にステップバーを移動させない。
+    if (dropzone !== null) {
+      // ペースト基準選択をステップマーカーの位置確定と混ぜない。
       event.stopPropagation();
     }
 
     this.start = event.global.clone();
     this.startDropzone = dropzone;
-    this.startStep = step;
+    this.startStep = this.findAncestor(event.target, CircuitStep);
     this.isDragging = false;
 
     this.stage.emit(CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED);
@@ -138,9 +139,6 @@ export class CircuitRectangleSelection {
   }
 
   private finishEmptyCellClick(additiveSelection: boolean): void {
-    // ドラッグでなければ、従来の空セルクリックとして処理する。
-    this.startStep?.activate();
-
     if (this.startDropzone !== null) {
       this.startDropzone.emit(
         DROPZONE_EVENTS.SELECTED,
