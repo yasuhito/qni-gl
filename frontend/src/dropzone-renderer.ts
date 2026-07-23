@@ -161,19 +161,24 @@ export class DropzoneRenderer {
 
   private initConnections(): void {
     const halfSize = this.totalSize * 0.5;
+
     this.drawConnection(this.topConnection, { startY: 0, endY: halfSize });
     this.drawConnection(this.bottomConnection, {
       startY: halfSize,
       endY: this.totalSize,
     });
-    this.drawConnection(this.pastedTopConnection, {
-      startY: 0,
-      endY: halfSize,
-    }, 0xffffff);
-    this.drawConnection(this.pastedBottomConnection, {
-      startY: halfSize,
-      endY: this.totalSize,
-    }, 0xffffff);
+
+    this.drawConnection(
+      this.pastedTopConnection,
+      { startY: 0, endY: halfSize },
+      0xffffff
+    );
+    this.drawConnection(
+      this.pastedBottomConnection,
+      { startY: halfSize, endY: this.totalSize },
+      0xffffff
+    );
+
     this.setPastedEmphasisAlpha(0);
   }
 
