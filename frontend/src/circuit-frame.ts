@@ -2,7 +2,14 @@ import { Circuit } from "./circuit";
 import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
-import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
+import {
+  Container,
+  FederatedWheelEvent,
+  Graphics,
+  Point,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { OperationClass } from "./operation";
 import { OperationPalette } from "./operation-palette";
 
@@ -155,26 +162,77 @@ export class CircuitFrame extends Container {
     this.maskSprite.y = 0;
   }
 
-  private handleScroll(event: WheelEvent): void {
-    if (this.circuit.y + this.circuit.height + 128 <= this.maskSprite.height) {
+  private handleScroll(event: FederatedWheelEvent): void {
+    this.scrollVertically(this.verticalScrollDelta(event));
+    this.scrollHorizontally(this.horizontalScrollDelta(event));
+  }
+
+  private verticalScrollDelta(event: FederatedWheelEvent): number {
+    if (event.shiftKey && event.deltaX === 0) {
+      return 0;
+    }
+
+    return event.deltaY;
+  }
+
+  private horizontalScrollDelta(event: FederatedWheelEvent): number {
+    if (event.deltaX !== 0) {
+      return event.deltaX;
+    }
+
+    return event.shiftKey ? event.deltaY : 0;
+  }
+
+  private scrollVertically(deltaY: number): void {
+    if (this.maxScrollY() <= 0) {
       return;
     }
 
-    const deltaY = event.deltaY;
     this.scrollContainer.y -= deltaY;
+    this.scrollContainer.y = this.limitScrollPosition(
+      this.scrollContainer.y,
+      this.maxScrollY()
+    );
+  }
 
-    // スクロール範囲の制限
-    if (this.scrollContainer.y > 0) {
-      this.scrollContainer.y = 0;
+  private scrollHorizontally(deltaX: number): void {
+    if (this.maxScrollX() <= 0) {
+      return;
     }
 
-    const maxScrollY =
+    this.scrollContainer.x -= deltaX;
+    this.scrollContainer.x = this.limitScrollPosition(
+      this.scrollContainer.x,
+      this.maxScrollX()
+    );
+  }
+
+  private maxScrollY(): number {
+    return Math.max(
+      0,
       this.circuit.height +
-      this.operationPalette.height +
-      256 -
-      this.maskSprite.height;
-    if (this.scrollContainer.y < -maxScrollY) {
-      this.scrollContainer.y = -maxScrollY;
+        this.operationPalette.height +
+        256 -
+        this.maskSprite.height
+    );
+  }
+
+  private maxScrollX(): number {
+    return Math.max(
+      0,
+      this.circuit.x + this.circuit.width + 128 - this.maskSprite.width
+    );
+  }
+
+  private limitScrollPosition(position: number, maxScroll: number): number {
+    if (position > 0) {
+      return 0;
     }
+
+    if (position < -maxScroll) {
+      return -maxScroll;
+    }
+
+    return position;
   }
 }
