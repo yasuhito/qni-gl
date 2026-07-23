@@ -76,6 +76,102 @@ test.describe("Copy and paste", () => {
       .toBe('{"cols":[["H",1],[1,"X"],["H",1],[1,"X"]]}');
   });
 
+  test("deletes the selected gate with Delete", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await page.keyboard.press("Delete");
+
+    await expect
+      .poll(() => circuitJson(page))
+      .toBe('{"cols":[["X",1]]}');
+  });
+
+  test("deletes rectangle-selected gates with Backspace", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 1,
+    });
+
+    await page.mouse.move(
+      circuitInfo.steps[0][1].x,
+      circuitInfo.steps[0][1].y
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      circuitInfo.steps[1][0].x,
+      circuitInfo.steps[1][0].y,
+      { steps: 5 }
+    );
+    await page.mouse.up();
+
+    await page.keyboard.press("Backspace");
+
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[]}');
+  });
+
+  test("keeps selected gates when Delete is typed in an input", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.evaluate(() => {
+      const input = document.createElement("input");
+      input.value = "text";
+      document.body.appendChild(input);
+      input.focus();
+    });
+
+    await page.keyboard.press("Delete");
+
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1]]}');
+  });
+
+  test("keeps selected gates with modifier Delete shortcuts", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await page.keyboard.press("Control+Backspace");
+
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1]]}');
+  });
+
   test("separates empty paste anchor clicks from step marker clicks", async ({
     page,
     circuitInfo,

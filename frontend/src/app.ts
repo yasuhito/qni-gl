@@ -73,6 +73,9 @@ export class App {
   private pasteRedoStack: string[] = [];
   private shouldSyncSelectionStylesAfterRelease = false;
   private rectangleSelectionBase: Set<OperationComponent> | null = null;
+  private readonly keyboardShortcutHandler = (event: KeyboardEvent) => {
+    this.handleKeyboardShortcut(event);
+  };
 
   public static get instance(): App {
     if (!this._instance) {
@@ -157,7 +160,7 @@ export class App {
 
       this.setupClearCircuitButton();
 
-      this.setupClipboardKeybindings();
+      this.setupKeyboardShortcuts();
 
       // テスト用
       window.pixiApp = this;
@@ -1035,32 +1038,60 @@ export class App {
     this.updateUrlWithCircuit();
   }
 
-  private setupClipboardKeybindings(): void {
-    window.addEventListener("keydown", (event) => {
-      if (this.isEditableEventTarget(event.target)) {
-        return;
-      }
+  private setupKeyboardShortcuts(): void {
+    window.addEventListener("keydown", this.keyboardShortcutHandler);
+  }
 
-      const usesModifier = event.ctrlKey || event.metaKey;
-      if (!usesModifier) {
-        return;
-      }
+  private handleKeyboardShortcut(event: KeyboardEvent): void {
+    if (this.isEditableEventTarget(event.target)) {
+      return;
+    }
 
-      const key = event.key.toLowerCase();
-      if (key === "c") {
-        event.preventDefault();
-        this.copySelectedGates();
-      } else if (key === "v") {
-        event.preventDefault();
-        this.pasteClipboard();
-      } else if (key === "z" && event.shiftKey) {
-        event.preventDefault();
-        this.redoLastPaste();
-      } else if (key === "z") {
-        event.preventDefault();
-        this.undoLastPaste();
-      }
-    });
+    this.handleDeleteShortcut(event);
+    this.handleClipboardShortcut(event);
+  }
+
+  private handleDeleteShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+    if (event.key !== "Backspace" && event.key !== "Delete") {
+      return;
+    }
+
+    this.preventDefaultIfHandled(event, this.deleteSelectedGates());
+  }
+
+  private handleClipboardShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (!event.ctrlKey && !event.metaKey) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (key === "c") {
+      this.preventDefaultIfHandled(event, this.copySelectedGates());
+    } else if (key === "v") {
+      this.preventDefaultIfHandled(event, this.pasteClipboard());
+    } else if (key === "z" && event.shiftKey) {
+      this.preventDefaultIfHandled(event, this.redoLastPaste());
+    } else if (key === "z") {
+      this.preventDefaultIfHandled(event, this.undoLastPaste());
+    }
+  }
+
+  private preventDefaultIfHandled(
+    event: KeyboardEvent,
+    handled: boolean
+  ): void {
+    if (handled) {
+      event.preventDefault();
+    }
   }
 
   private isEditableEventTarget(target: EventTarget | null): boolean {
@@ -1161,27 +1192,28 @@ export class App {
     }
   }
 
-  private copySelectedGates(): void {
-    this.releaseEmptyPasteAnchor();
-
+  private copySelectedGates(): boolean {
     const selectedGates = Array.from(this.selectedGates);
     const clipboard = this.circuit.createClipboardFromOperations(selectedGates);
     const activeCell =
       this.circuit.findClipboardAnchorForOperations(selectedGates);
 
     if (clipboard === null || activeCell === null) {
-      return;
+      return false;
     }
 
+    this.releaseEmptyPasteAnchor();
     this.clipboard = clipboard;
     this.activeCell = activeCell;
     this.activeDropzone = null;
     this.updatePastePlacementPreview();
+
+    return true;
   }
 
-  private pasteClipboard(): void {
+  private pasteClipboard(): boolean {
     if (this.clipboard === null || this.activeCell === null) {
-      return;
+      return false;
     }
 
     this.pasteUndoStack.push(this.circuit.toJSON(true));
@@ -1209,26 +1241,32 @@ export class App {
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
+
+    return true;
   }
 
-  private undoLastPaste(): void {
+  private undoLastPaste(): boolean {
     const previousCircuitJson = this.pasteUndoStack.pop();
     if (previousCircuitJson === undefined) {
-      return;
+      return false;
     }
 
     this.pasteRedoStack.push(this.circuit.toJSON(true));
     this.restoreCircuitFromPasteHistory(previousCircuitJson);
+
+    return true;
   }
 
-  private redoLastPaste(): void {
+  private redoLastPaste(): boolean {
     const nextCircuitJson = this.pasteRedoStack.pop();
     if (nextCircuitJson === undefined) {
-      return;
+      return false;
     }
 
     this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.restoreCircuitFromPasteHistory(nextCircuitJson);
+
+    return true;
   }
 
   /**
@@ -1248,6 +1286,35 @@ export class App {
   private clearSelectedGates(): void {
     this.selectedGates.clear();
     this.syncGateSelectionStyles();
+  }
+
+  private deleteSelectedGates(): boolean {
+    if (this.selectedGates.size === 0) {
+      return false;
+    }
+
+    for (const gate of this.selectedGates) {
+      const position = this.circuit.findOperationPosition(gate);
+      if (position === null) {
+        continue;
+      }
+
+      this.circuit
+        .fetchStep(position.stepIndex)
+        .fetchDropzone(position.qubitIndex)
+        .detach(gate);
+      gate.destroy();
+    }
+
+    this.activeGate = null;
+    this.grabbedGate = null;
+    this.clearSelectedGates();
+    this.circuit.update();
+    this.updateUrlWithCircuit();
+    this.updateStateVectorComponentQubitCount();
+    this.runSimulator();
+
+    return true;
   }
 
   /**
