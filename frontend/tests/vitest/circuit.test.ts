@@ -267,6 +267,28 @@ describe("Circuit", () => {
       );
     });
 
+    it("removes empty steps outside the pasted clipboard range", () => {
+      const hGate = new HGate();
+      const tGate = new TGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
+      circuit.fetchStep(3).fetchDropzone(0).addChild(tGate);
+
+      const clipboard = circuit.createClipboardFromOperations([hGate]);
+      if (clipboard === null) {
+        throw new Error("Expected clipboard data for the selected gate");
+      }
+
+      circuit.pasteClipboardAt({ stepIndex: 1, qubitIndex: 0 }, clipboard);
+      const pastedStep = circuit.fetchStep(2);
+      circuit.updateAfterPaste(new Set([pastedStep]));
+
+      expect(circuit.fetchStep(0).fetchDropzone(0).operation).toBe(hGate);
+      expect(circuit.fetchStep(1).fetchDropzone(0).operation).toBeInstanceOf(
+        HGate
+      );
+      expect(circuit.fetchStep(2).fetchDropzone(0).operation).toBe(tGate);
+    });
+
     it("preserves pasted empty steps when restoring history", () => {
       const hGate = new HGate();
       const tGate = new TGate();

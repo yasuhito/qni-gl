@@ -504,35 +504,13 @@ export class CircuitStep extends Container {
 
     this.updateSwapConnections();
 
-    if (controlDropzones.length === 1 && controllableDropzones.length === 0) {
+    if (controlDropzones.length === 0 || controllableDropzones.length === 0) {
+      this.clearControlConnections();
       return;
     }
 
     // コントロール線の接続を更新
-    if (controlDropzones.length > 0) {
-      if (controllableDropzones.length === 0) {
-        this.updateControlControlConnections();
-      } else {
-        this.updateControlledUConnections();
-      }
-    }
-
-    this.applyConnectionUpdates();
-  }
-
-  /**
-   * コントロールゲート同士の上下接続を更新
-   */
-  private updateControlControlConnections(): void {
-    const controlDropzones =
-      this.dropzoneList.filterByOperationType(ControlGate);
-    const controlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
-    for (const dz of controlDropzones) {
-      dz.connectTop = controlBits.some((bit) => this.qubitNumberOf(dz) > bit);
-      dz.connectBottom = controlBits.some(
-        (bit) => this.qubitNumberOf(dz) < bit
-      );
-    }
+    this.updateControlledUConnections();
   }
 
   private qubitNumberOf(dropzone: Dropzone): number {
@@ -570,6 +548,11 @@ export class CircuitStep extends Container {
       this.dropzoneList.filterByOperationType(ControlGate);
     const allControlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
 
+    for (const each of controllableDropzones) {
+      need(isControllable(each.operation), "operation is not Controllable");
+      each.operation.controls = allControlBits;
+    }
+
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
     const controllableBits = controllableDropzones.map((dz) =>
       this.qubitNumberOf(dz),
@@ -587,17 +570,20 @@ export class CircuitStep extends Container {
         dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
         dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
       }
-
-      // Set controls for XGates
-      for (const each of controllableDropzones) {
-        need(isControllable(each.operation), "operation is not Controllable");
-        each.operation.controls = allControlBits;
-      }
     } else {
       for (const dropzone of this.dropzones) {
         dropzone.controlConnectTop = false;
         dropzone.controlConnectBottom = false;
       }
+    }
+
+    this.applyConnectionUpdates();
+  }
+
+  private clearControlConnections(): void {
+    for (const dropzone of this.dropzones) {
+      dropzone.controlConnectTop = false;
+      dropzone.controlConnectBottom = false;
     }
 
     this.applyConnectionUpdates();

@@ -1216,6 +1216,8 @@ export class App {
       return false;
     }
 
+    const insertStartStep = this.activeCell.stepIndex + 1;
+
     this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.pasteRedoStack = [];
     this.clearPastePlacementOverlay();
@@ -1233,10 +1235,17 @@ export class App {
           : [this.circuit.fetchStep(position.stepIndex)];
       }),
     );
+    const pastedStepRange = new Set(
+      this.circuit.steps.slice(
+        insertStartStep,
+        insertStartStep + this.clipboard.width
+      )
+    );
     this.syncGateSelectionStyles();
-    this.applyPastedStepStyles();
 
-    this.circuit.updateAfterPaste();
+    this.circuit.updateAfterPaste(pastedStepRange);
+    this.clearReleasedEmptyPasteAnchor();
+    this.applyPastedStepStyles();
     this.updatePastePlacementPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
@@ -1339,6 +1348,12 @@ export class App {
     this.pasteCaretOverlay.removeChildren().forEach((child) => {
       child.destroy();
     });
+  }
+
+  private clearReleasedEmptyPasteAnchor(): void {
+    if (this.activeDropzone?.destroyed) {
+      this.activeDropzone = null;
+    }
   }
 
   private syncPasteAnchorWithGrabbedGate(): void {

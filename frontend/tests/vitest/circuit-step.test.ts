@@ -289,6 +289,47 @@ describe("CircuitStep", () => {
       expect(xGateDropzone.controlConnectBottom).toBe(false);
     });
 
+    it("clears control connections when the controlled gate is removed", () => {
+      const controlGate1 = new ControlGate();
+      const controlGate2 = new ControlGate();
+      const xGate = new XGate();
+
+      circuitStep.fetchDropzone(0).addChild(controlGate1);
+      circuitStep.fetchDropzone(1).addChild(controlGate2);
+      circuitStep.fetchDropzone(2).addChild(xGate);
+      circuitStep.updateConnections();
+
+      circuitStep.fetchDropzone(2).removeChild(xGate);
+      circuitStep.updateConnections();
+
+      for (const dropzone of circuitStep.dropzones) {
+        expect(dropzone.controlConnectTop).toBe(false);
+        expect(dropzone.controlConnectBottom).toBe(false);
+        expect(dropzone.connectTop).toBe(false);
+        expect(dropzone.connectBottom).toBe(false);
+      }
+    });
+
+    it("clears controllable gate controls when the control gate is removed", () => {
+      const controlGate = new ControlGate();
+      const xGate = new XGate();
+
+      circuitStep.fetchDropzone(0).addChild(controlGate);
+      circuitStep.fetchDropzone(2).addChild(xGate);
+      circuitStep.updateConnections();
+
+      circuitStep.fetchDropzone(0).removeChild(controlGate);
+      circuitStep.updateConnections();
+
+      expect(xGate.controls).toEqual([]);
+      for (const dropzone of circuitStep.dropzones) {
+        expect(dropzone.controlConnectTop).toBe(false);
+        expect(dropzone.controlConnectBottom).toBe(false);
+        expect(dropzone.connectTop).toBe(false);
+        expect(dropzone.connectBottom).toBe(false);
+      }
+    });
+
     it("should update the connections between two swap gates in the circuit step", () => {
       const swapGate1 = new SwapGate();
       const swapGate2 = new SwapGate();

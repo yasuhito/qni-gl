@@ -167,18 +167,22 @@ export class Circuit extends Container {
   /**
    * ペーストしたゲートの相対位置を保ったまま、回路表示を更新する。
    */
-  updateAfterPaste(): void {
-    const activeStep =
-      this.activeStepIndex === null
-        ? null
-        : this.fetchStep(this.activeStepIndex);
+  updateAfterPaste(
+    preservedEmptySteps = new Set<CircuitStep>(this.steps)
+  ): void {
+    const activeStepIndex = this.activeStepIndex;
 
+    this.removeEmptyStepsExcept(preservedEmptySteps);
     this.appendMinimumSteps();
     this.removeUnusedUpperWires();
     this.redrawDropzoneInputAndOutputWires();
     this.updateConnections();
 
-    activeStep?.activate();
+    if (activeStepIndex !== null) {
+      this.fetchStep(
+        Math.min(activeStepIndex, this.steps.length - 1)
+      ).activate();
+    }
     this.markerManager.update(this.steps);
   }
 
@@ -694,6 +698,15 @@ export class Circuit extends Container {
   private removeEmptySteps(): void {
     for (const each of this.emptySteps) {
       each.destroy();
+    }
+    this.stepList.arrangeChildren();
+  }
+
+  private removeEmptyStepsExcept(preservedSteps: Set<CircuitStep>): void {
+    for (const each of this.emptySteps) {
+      if (!preservedSteps.has(each)) {
+        each.destroy();
+      }
     }
     this.stepList.arrangeChildren();
   }

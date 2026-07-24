@@ -341,7 +341,7 @@ test.describe("Copy and paste", () => {
 
     await expect.poll(() => occupiedCells(page)).toEqual([
       { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
-      { stepIndex: 3, qubitIndex: 1, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 1, operationType: "HGate" },
     ]);
   });
 
@@ -407,7 +407,7 @@ test.describe("Copy and paste", () => {
 
     await expect.poll(() => occupiedCells(page)).toEqual([
       { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
-      { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
     ]);
   });
 
@@ -484,33 +484,33 @@ test.describe("Copy and paste", () => {
 
   test("updates temporary selections as gates enter and leave the rectangle", async ({
     page,
+    circuitInfo,
   }) => {
-    await page.evaluate(() => {
-      window.pixiApp?.circuitFrame?.circuit.fromJSON(
-        '{"cols":[["H",1],[1,"X"]]}'
-      );
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
     });
-    await page.waitForFunction(() => {
-      const steps = window.pixiApp?.circuitFrame?.circuit.steps ?? [];
-
-      return steps.every((step) =>
-        step.dropzones.every((dropzone) => {
-          const operation = dropzone.operation;
-
-          return operation === null || operation.sprite?.width > 0;
-        })
-      );
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 1,
     });
+    const updatedCircuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      updatedCircuitInfo.steps[2][0].x,
+      updatedCircuitInfo.steps[0][0].y -
+        updatedCircuitInfo.gatePalette.hGate.size * 2
+    );
+    await expect.poll(() => selectedGateTypes(page)).toEqual([]);
 
-    const circuitInfo = await getCircuitInfo(page);
-
+    const xGateCell = updatedCircuitInfo.steps[1][1];
+    const selectionMargin = xGateCell.size;
     const start = {
-      x: circuitInfo.steps[3][0].x,
-      y: circuitInfo.steps[3][0].y,
+      x: xGateCell.x + selectionMargin,
+      y: xGateCell.y + selectionMargin,
     };
     const end = {
-      x: circuitInfo.steps[1][1].x,
-      y: circuitInfo.steps[1][1].y,
+      x: xGateCell.x - selectionMargin,
+      y: xGateCell.y - selectionMargin,
     };
 
     await page.mouse.move(start.x, start.y);
@@ -519,7 +519,7 @@ test.describe("Copy and paste", () => {
 
     await expect
       .poll(() => selectedGateTypes(page))
-      .toEqual(["XGate"]);
+      .toEqual(["HGate", "XGate"]);
 
     await page.mouse.move(start.x, start.y, { steps: 5 });
 
