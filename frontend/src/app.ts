@@ -34,6 +34,7 @@ import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { Spacing } from "./spacing";
+import { PasteInsertionAnimation } from "./paste-insertion-animation";
 
 declare global {
   interface Window {
@@ -46,6 +47,8 @@ export class App {
   private static _instance: App;
   private static readonly CARET_BLINK_INTERVAL = 500;
   private static readonly PASTE_CARET_POSITION_RATIO = 0.65;
+  private static readonly PASTE_PUSH_ANIMATION_DURATION = 120;
+  private static readonly PASTE_INSERT_REVEAL_DELAY = 30;
 
   declare worker: Worker;
 
@@ -71,6 +74,12 @@ export class App {
   private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
   private pasteUndoStack: string[] = [];
   private pasteRedoStack: string[] = [];
+  private pasteInsertionAnimation = new PasteInsertionAnimation({
+    pushDuration: App.PASTE_PUSH_ANIMATION_DURATION,
+    revealDelay: App.PASTE_INSERT_REVEAL_DELAY,
+    maxPushDistance: Dropzone.sizeInPx * 0.75,
+    onReveal: () => this.applyPastedStepStyles(),
+  });
   private shouldSyncSelectionStylesAfterRelease = false;
   private rectangleSelectionBase: Set<OperationComponent> | null = null;
   private readonly keyboardShortcutHandler = (event: KeyboardEvent) => {
@@ -1217,9 +1226,11 @@ export class App {
     }
 
     const insertStartStep = this.activeCell.stepIndex + 1;
+    const pushedSteps = this.circuit.steps.slice(insertStartStep);
 
     this.pasteUndoStack.push(this.circuit.toJSON(true));
     this.pasteRedoStack = [];
+    this.pasteInsertionAnimation.cancel();
     this.clearPastePlacementOverlay();
 
     const pastedOperations = this.circuit.pasteClipboardAt(
@@ -1245,7 +1256,12 @@ export class App {
 
     this.circuit.updateAfterPaste(pastedStepRange);
     this.clearReleasedEmptyPasteAnchor();
-    this.applyPastedStepStyles();
+    this.pasteInsertionAnimation.start({
+      pushedSteps,
+      pastedSteps: pastedStepRange,
+      clipboardWidth: this.clipboard.width,
+      referenceStepSize: this.referenceDropzoneTotalSize(),
+    });
     this.updatePastePlacementPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
@@ -1284,6 +1300,7 @@ export class App {
   private restoreCircuitFromPasteHistory(circuitJson: string): void {
     this.clearSelectedGates();
     this.clearPastedSteps();
+    this.pasteInsertionAnimation.cancel();
     this.clearPastePlacementOverlay();
     this.circuit.fromJSON(circuitJson, true);
     this.updatePastePlacementPreview();

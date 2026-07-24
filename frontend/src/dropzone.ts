@@ -181,6 +181,20 @@ export class Dropzone extends Container {
     this.operation?.setPastedEmphasisAlpha(alpha);
   }
 
+  setInsertionAnimationOffset(offsetX: number): void {
+    this.renderer.setConnectionOffsetX(offsetX);
+    if (this.operation !== null) {
+      this.operation.x = Dropzone.GATE_INSET_OFFSET + offsetX;
+    }
+  }
+
+  setInsertionAnimationAlpha(alpha: number): void {
+    this.renderer.setVisibleConnectionAlpha(alpha);
+    if (this.operation !== null) {
+      this.operation.visible = alpha > 0;
+    }
+  }
+
   redrawWires() {
     this.renderer.updateWires({
       inputWireType: this.inputWireType,

@@ -112,13 +112,24 @@ export class DropzoneRenderer {
   updateConnections({ connectTop, connectBottom }: ConnectionUpdateInfo): void {
     this.connectTop = connectTop;
     this.connectBottom = connectBottom;
-    this.topConnection.alpha = connectTop ? NO_OPACITY : FULL_OPACITY;
-    this.bottomConnection.alpha = connectBottom ? NO_OPACITY : FULL_OPACITY;
+    this.resetConnectionAlpha();
     this.updatePastedConnectionAlpha(0);
   }
 
   setPastedEmphasisAlpha(alpha: number): void {
     this.updatePastedConnectionAlpha(alpha);
+  }
+
+  setConnectionOffsetX(offsetX: number): void {
+    this.topConnection.x = offsetX;
+    this.bottomConnection.x = offsetX;
+    this.pastedTopConnection.x = offsetX;
+    this.pastedBottomConnection.x = offsetX;
+  }
+
+  setVisibleConnectionAlpha(alpha: number): void {
+    this.topConnection.alpha = this.connectTop ? alpha : 0;
+    this.bottomConnection.alpha = this.connectBottom ? alpha : 0;
   }
 
   private initBody(): void {
@@ -176,6 +187,11 @@ export class DropzoneRenderer {
   private updatePastedConnectionAlpha(alpha: number): void {
     this.pastedTopConnection.alpha = this.connectTop ? alpha : 0;
     this.pastedBottomConnection.alpha = this.connectBottom ? alpha : 0;
+  }
+
+  private resetConnectionAlpha(): void {
+    this.topConnection.alpha = this.connectTop ? NO_OPACITY : FULL_OPACITY;
+    this.bottomConnection.alpha = this.connectBottom ? NO_OPACITY : FULL_OPACITY;
   }
 
   private drawConnection(
