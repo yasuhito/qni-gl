@@ -324,6 +324,10 @@ export class CircuitStep extends Container {
     this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
   }
 
+  private maybeSetHoverState(): void {
+    this.hoverStepMarker();
+  }
+
   setHoverEnabled(enabled: boolean): void {
     this.hoverEnabled = enabled;
     this.clearHoverState();
@@ -334,8 +338,7 @@ export class CircuitStep extends Container {
    * This method handles the visual connections for swap operations and controlled operations.
    */
   updateConnections(): void {
-    this.updateSwapConnections();
-    this.updateControlledUConnections();
+    this.updateOperationAttributes();
   }
 
   /**
