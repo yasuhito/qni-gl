@@ -35,6 +35,7 @@ import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { Spacing } from "./spacing";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
+import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
 
 declare global {
   interface Window {
@@ -71,6 +72,7 @@ export class App {
   private pastedSteps = new Set<CircuitStep>();
   private activeDropzone: Dropzone | null = null;
   private pasteCaretOverlay!: Container;
+  private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
   private pasteUndoStack: string[] = [];
   private pasteRedoStack: string[] = [];
@@ -349,6 +351,9 @@ export class App {
     this.pasteCaretOverlay = new Container();
     this.pasteCaretOverlay.eventMode = "none";
     this.circuit.addChild(this.pasteCaretOverlay);
+
+    this.selectionBoundsOverlay = new SelectionBoundsOverlay();
+    this.circuit.addChild(this.selectionBoundsOverlay);
   }
 
   private setupFrameDividerEventHandlers() {
@@ -1148,6 +1153,7 @@ export class App {
       if (this.activeGate === gate) {
         this.activeGate = null;
       }
+      this.updateSelectionBoundsOverlay();
       return;
     }
 
@@ -1527,6 +1533,15 @@ export class App {
         gate.deactivate();
       }
     }
+
+    this.updateSelectionBoundsOverlay();
+  }
+
+  /**
+   * 複数選択時だけ、選択中ゲート群の外側に点線のまとまり枠を描く。
+   */
+  private updateSelectionBoundsOverlay(): void {
+    this.selectionBoundsOverlay.sync(this.selectedGates);
   }
 
   /**
