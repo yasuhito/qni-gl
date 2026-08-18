@@ -79,7 +79,10 @@ export class CircuitRectangleSelection {
     this.startStep = this.findAncestor(event.target, CircuitStep);
     this.isDragging = false;
 
-    this.stage.emit(CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED);
+    this.stage.emit(
+      CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED,
+      event.shiftKey,
+    );
   }
 
   private updateSelection(event: FederatedPointerEvent): void {

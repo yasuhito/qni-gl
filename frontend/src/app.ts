@@ -74,8 +74,9 @@ export class App {
   private pasteCaretOverlay!: Container;
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
-  private pasteUndoStack: string[] = [];
-  private pasteRedoStack: string[] = [];
+  private editUndoStack: string[] = [];
+  private editRedoStack: string[] = [];
+  private dragUndoSnapshot: string | null = null;
   private pasteInsertionAnimation = new PasteInsertionAnimation({
     pushDuration: App.PASTE_PUSH_ANIMATION_DURATION,
     revealDelay: App.PASTE_INSERT_REVEAL_DELAY,
@@ -473,6 +474,7 @@ export class App {
 
     // 回路外へ捨てたゲートで空になったステップを、通常の回路編集と同じ後処理で詰める。
     this.circuit.update();
+    this.pushDragUndoSnapshotIfCircuitChanged();
     if (this.circuit.activeStepIndex === null) {
       this.circuit.fetchStep(0).activate();
     }
@@ -571,6 +573,7 @@ export class App {
     pointerPosition: Point,
     additiveSelection = false
   ) {
+    this.dragUndoSnapshot = this.circuit.toJSON(true);
     this.shouldSyncSelectionStylesAfterRelease = false;
     const previousActiveGate = this.activeGate;
     if (
@@ -974,6 +977,7 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.update();
+    this.pushDragUndoSnapshotIfCircuitChanged();
 
     this.updateUrlWithCircuit();
 
@@ -1061,8 +1065,20 @@ export class App {
       return;
     }
 
+    this.handleEscapeShortcut(event);
     this.handleDeleteShortcut(event);
     this.handleClipboardShortcut(event);
+  }
+
+  private handleEscapeShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    this.preventDefaultIfHandled(event, this.clearSelectionAndPasteAnchor());
   }
 
   private handleDeleteShortcut(event: KeyboardEvent): void {
@@ -1093,9 +1109,9 @@ export class App {
     } else if (key === "v") {
       this.preventDefaultIfHandled(event, this.pasteClipboard());
     } else if (key === "z" && event.shiftKey) {
-      this.preventDefaultIfHandled(event, this.redoLastPaste());
+      this.preventDefaultIfHandled(event, this.redoLastEdit());
     } else if (key === "z") {
-      this.preventDefaultIfHandled(event, this.undoLastPaste());
+      this.preventDefaultIfHandled(event, this.undoLastEdit());
     }
   }
 
@@ -1164,9 +1180,11 @@ export class App {
     this.syncGateSelectionStyles();
   }
 
-  private startRectangleSelection(): void {
-    // ドラッグ開始前から選択されていたゲートは、矩形の外でも保持する。
-    this.rectangleSelectionBase = new Set(this.selectedGates);
+  private startRectangleSelection(additive: boolean): void {
+    // Shift + ドラッグだけ、ドラッグ開始前の選択を保持する。
+    this.rectangleSelectionBase = additive
+      ? new Set(this.selectedGates)
+      : new Set();
     this.circuit.setStepMarkerUpdatesEnabled(false);
   }
 
@@ -1233,9 +1251,8 @@ export class App {
 
     const insertStartStep = this.activeCell.stepIndex + 1;
     const pushedSteps = this.circuit.steps.slice(insertStartStep);
+    const undoSnapshot = this.circuit.toJSON(true);
 
-    this.pasteUndoStack.push(this.circuit.toJSON(true));
-    this.pasteRedoStack = [];
     this.pasteInsertionAnimation.cancel();
     this.clearPastePlacementOverlay();
 
@@ -1258,6 +1275,7 @@ export class App {
         insertStartStep + this.clipboard.width
       )
     );
+    this.recordUndoSnapshot(undoSnapshot);
     this.syncGateSelectionStyles();
 
     this.circuit.updateAfterPaste(pastedStepRange);
@@ -1276,26 +1294,26 @@ export class App {
     return true;
   }
 
-  private undoLastPaste(): boolean {
-    const previousCircuitJson = this.pasteUndoStack.pop();
+  private undoLastEdit(): boolean {
+    const previousCircuitJson = this.editUndoStack.pop();
     if (previousCircuitJson === undefined) {
       return false;
     }
 
-    this.pasteRedoStack.push(this.circuit.toJSON(true));
-    this.restoreCircuitFromPasteHistory(previousCircuitJson);
+    this.editRedoStack.push(this.circuit.toJSON(true));
+    this.restoreCircuitFromEditHistory(previousCircuitJson);
 
     return true;
   }
 
-  private redoLastPaste(): boolean {
-    const nextCircuitJson = this.pasteRedoStack.pop();
+  private redoLastEdit(): boolean {
+    const nextCircuitJson = this.editRedoStack.pop();
     if (nextCircuitJson === undefined) {
       return false;
     }
 
-    this.pasteUndoStack.push(this.circuit.toJSON(true));
-    this.restoreCircuitFromPasteHistory(nextCircuitJson);
+    this.editUndoStack.push(this.circuit.toJSON(true));
+    this.restoreCircuitFromEditHistory(nextCircuitJson);
 
     return true;
   }
@@ -1303,7 +1321,7 @@ export class App {
   /**
    * Undo/Redo履歴から回路を復元し、古い選択表示を残さないようにする。
    */
-  private restoreCircuitFromPasteHistory(circuitJson: string): void {
+  private restoreCircuitFromEditHistory(circuitJson: string): void {
     this.clearSelectedGates();
     this.clearPastedSteps();
     this.pasteInsertionAnimation.cancel();
@@ -1315,15 +1333,57 @@ export class App {
     this.runSimulator();
   }
 
+  /**
+   * 回路を変更する操作の直前状態を保存し、Redo履歴を破棄する。
+   */
+  private recordUndoSnapshot(snapshot = this.circuit.toJSON(true)): void {
+    this.editUndoStack.push(snapshot);
+    this.editRedoStack = [];
+  }
+
+  private pushDragUndoSnapshotIfCircuitChanged(): void {
+    const snapshot = this.dragUndoSnapshot;
+    this.dragUndoSnapshot = null;
+
+    if (snapshot === null || snapshot === this.circuit.toJSON(true)) {
+      return;
+    }
+
+    this.recordUndoSnapshot(snapshot);
+  }
+
   private clearSelectedGates(): void {
     this.selectedGates.clear();
     this.syncGateSelectionStyles();
+  }
+
+  /**
+   * Escapeで通常編集へ戻れるよう、選択表示とペースト基準をまとめて解除する。
+   */
+  private clearSelectionAndPasteAnchor(): boolean {
+    if (
+      this.selectedGates.size === 0 &&
+      this.activeCell === null &&
+      this.activeDropzone === null
+    ) {
+      return false;
+    }
+
+    this.activeGate = null;
+    this.activeCell = null;
+    this.activeDropzone = null;
+    this.clearSelectedGates();
+    this.clearPastePlacementOverlay();
+
+    return true;
   }
 
   private deleteSelectedGates(): boolean {
     if (this.selectedGates.size === 0) {
       return false;
     }
+
+    this.recordUndoSnapshot();
 
     for (const gate of this.selectedGates) {
       const position = this.circuit.findOperationPosition(gate);

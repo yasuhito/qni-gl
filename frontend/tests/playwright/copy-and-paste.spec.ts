@@ -43,6 +43,64 @@ test.describe("Copy and paste", () => {
     }
   );
 
+  test("undoes a drag placement without reverting the previous paste", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+    await page.keyboard.press("Control+v");
+
+    const updatedCircuitInfo = await getCircuitInfo(page);
+    await dragAndDrop(page, updatedCircuitInfo.gatePalette.yGate, {
+      step: 2,
+      bit: 1,
+    });
+
+    await page.keyboard.press("Control+z");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+    ]);
+  });
+
+  test("undoes a deletion without reverting the previous paste", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+    await page.keyboard.press("Control+v");
+
+    const updatedCircuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      updatedCircuitInfo.steps[1][0].x,
+      updatedCircuitInfo.steps[1][0].y
+    );
+    await page.keyboard.press("Delete");
+    await page.keyboard.press("Control+z");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+    ]);
+  });
+
   test("selects multiple gates by dragging a rectangle", async ({
     page,
     circuitInfo,
@@ -74,6 +132,82 @@ test.describe("Copy and paste", () => {
     await expect
       .poll(() => circuitJson(page))
       .toBe('{"cols":[["H",1],[1,"X"],["H",1],[1,"X"]]}');
+  });
+
+  test("replaces the previous selection with a plain rectangle selection", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.tGate, {
+      step: 2,
+      bit: 1,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await page.mouse.move(
+      circuitInfo.steps[1][1].x,
+      circuitInfo.steps[1][1].y
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      circuitInfo.steps[2][0].x,
+      circuitInfo.steps[2][0].y,
+      { steps: 5 }
+    );
+    await page.mouse.up();
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "TGate",
+      "XGate",
+    ]);
+  });
+
+  test("keeps the previous selection with a Shift rectangle selection", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 1,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+
+    await page.keyboard.down("Shift");
+    await page.mouse.move(
+      circuitInfo.steps[1][1].x + circuitInfo.steps[1][1].size,
+      circuitInfo.steps[1][1].y + circuitInfo.steps[1][1].size
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      circuitInfo.steps[1][1].x - circuitInfo.steps[1][1].size,
+      circuitInfo.steps[1][1].y - circuitInfo.steps[1][1].size,
+      { steps: 5 }
+    );
+    await page.mouse.up();
+    await page.keyboard.up("Shift");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "HGate",
+      "XGate",
+    ]);
   });
 
   test("deletes the selected gate with Delete", async ({
@@ -170,6 +304,26 @@ test.describe("Copy and paste", () => {
     await page.keyboard.press("Control+Backspace");
 
     await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1]]}');
+  });
+
+  test("clears the selection and paste anchor with Escape", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y
+    );
+    await page.keyboard.press("Control+c");
+
+    await page.keyboard.press("Escape");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([]);
+    await expect.poll(() => activeCell(page)).toBeNull();
   });
 
   test("separates empty paste anchor clicks from step marker clicks", async ({
