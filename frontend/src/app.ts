@@ -164,6 +164,7 @@ export class App {
       this.setupExportButton();
 
       new DropdownMenu();
+      this.setupShortcutHelp();
 
       this.setupShareMenu();
 
@@ -354,6 +355,27 @@ export class App {
 
     this.selectionBoundsOverlay = new SelectionBoundsOverlay();
     this.circuit.addChild(this.selectionBoundsOverlay);
+  }
+
+  private setupShortcutHelp(): void {
+    const openButton = document.getElementById("menu-item-shortcuts");
+    const closeButton = document.getElementById("shortcut-help-close");
+    const dialog = document.getElementById("shortcut-help-dialog");
+    if (
+      openButton === null ||
+      closeButton === null ||
+      !(dialog instanceof HTMLDialogElement)
+    ) {
+      throw new Error("Could not initialize keyboard shortcut help");
+    }
+
+    openButton.addEventListener("click", () => dialog.showModal());
+    closeButton.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
   }
 
   private setupFrameDividerEventHandlers() {
@@ -1105,12 +1127,18 @@ export class App {
     const key = event.key.toLowerCase();
     if (key === "c") {
       this.preventDefaultIfHandled(event, this.copySelectedGates());
+    } else if (key === "x") {
+      this.preventDefaultIfHandled(event, this.cutSelectedGates());
     } else if (key === "v") {
       this.preventDefaultIfHandled(event, this.pasteClipboard());
+    } else if (key === "a") {
+      this.preventDefaultIfHandled(event, this.selectAllGates());
     } else if (key === "z" && event.shiftKey) {
       this.preventDefaultIfHandled(event, this.redoLastEdit());
     } else if (key === "z") {
       this.preventDefaultIfHandled(event, this.undoLastEdit());
+    } else if (key === "y") {
+      this.preventDefaultIfHandled(event, this.redoLastEdit());
     }
   }
 
@@ -1240,6 +1268,27 @@ export class App {
     this.activeDropzone = null;
     this.updatePastePlacementPreview();
     this.flashCopiedSelection();
+
+    return true;
+  }
+
+  private cutSelectedGates(): boolean {
+    if (!this.copySelectedGates()) {
+      return false;
+    }
+
+    return this.deleteSelectedGates();
+  }
+
+  private selectAllGates(): boolean {
+    const operations = this.circuitOperations();
+    if (operations.length === 0) {
+      return false;
+    }
+
+    this.selectedGates = new Set(operations);
+    this.activeGate = null;
+    this.syncGateSelectionStyles();
 
     return true;
   }
