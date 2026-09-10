@@ -17,6 +17,8 @@ export function WriteGateMixin<TBase extends Constructor<OperationComponent>>(
   const GateStyleBase = GateStyleMixin(Base);
 
   return class WriteGateMixinClass extends GateStyleBase {
+    protected pastedEmphasisCoversBackground = false;
+
     static SHAPE_CONFIG: GateShapeConfig = {
       cornerRadius: Spacing.cornerRadius.gate,
       strokeAlignment: 1,

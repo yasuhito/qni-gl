@@ -17,6 +17,8 @@ export function OutlinedGateMixin<
   const GateStyleBase = GateStyleMixin(Base);
 
   return class OutlinedGateMixinClass extends GateStyleBase {
+    protected pastedEmphasisCoversBackground = false;
+
     static SHAPE_CONFIG: GateShapeConfig = {
       cornerRadius: Spacing.cornerRadius.gate,
       strokeAlignment: 1,

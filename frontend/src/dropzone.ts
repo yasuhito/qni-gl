@@ -1,8 +1,8 @@
-import { Container, Point } from "pixi.js";
+import { Container, FederatedPointerEvent, Point, Rectangle } from "pixi.js";
 import { DropzoneRenderer } from "./dropzone-renderer";
 import { OperationComponent } from "./operation-component";
 import { WireType } from "./types";
-import { OPERATION_EVENTS } from "./events";
+import { DROPZONE_EVENTS, OPERATION_EVENTS } from "./events";
 import { spacingInPx } from "./util";
 import { Operation } from "./operation";
 
@@ -28,6 +28,14 @@ export class Dropzone extends Container {
     this.renderer = new DropzoneRenderer(this);
     this.redrawWires();
     this.redrawConnections();
+    this.eventMode = "static";
+    this.hitArea = new Rectangle(
+      Dropzone.GATE_INSET_OFFSET,
+      Dropzone.GATE_INSET_OFFSET,
+      this.gateSize,
+      this.gateSize
+    );
+    this.on("pointerdown", this.emitSelectedEvent, this);
   }
 
   get totalSize(): number {
@@ -132,8 +140,59 @@ export class Dropzone extends Container {
     this.redrawWires();
   }
 
-  private emitGrabGateEvent(gate: OperationComponent, globalPosition: Point) {
+  /**
+   * 指定された配置済みゲートをセルから外し、ドラッグ通知も解除する。
+   */
+  detach(operation: OperationComponent): void {
+    operation.off(OPERATION_EVENTS.GRABBED, this.emitGrabGateEvent, this);
+    if (operation.parent === this) {
+      this.removeChild(operation);
+    }
+    this.redrawWires();
+  }
+
+  private emitGrabGateEvent(
+    gate: OperationComponent,
+    globalPosition: Point,
+    additiveSelection = false,
+  ) {
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition);
+  }
+
+  /**
+   * ゲートがないセルもペースト基準として選べるよう、セル選択を通知する。
+   */
+  private emitSelectedEvent(event: FederatedPointerEvent) {
+    if (event.shiftKey) {
+      this.emit(DROPZONE_EVENTS.SELECTED, this, true);
+      return;
+    }
+
+    this.emit(DROPZONE_EVENTS.SELECTED, this);
+  }
+
+  setPastedEmphasisAlpha(alpha: number): void {
+    this.renderer.setPastedEmphasisAlpha(alpha);
+    this.operation?.setPastedEmphasisAlpha(alpha);
+  }
+
+  setInsertionAnimationOffset(offsetX: number): void {
+    this.renderer.setConnectionOffsetX(offsetX);
+    if (this.operation !== null) {
+      this.operation.x = Dropzone.GATE_INSET_OFFSET + offsetX;
+    }
+  }
+
+  setInsertionAnimationAlpha(alpha: number): void {
+    this.renderer.setVisibleConnectionAlpha(alpha);
+    if (this.operation !== null) {
+      this.operation.visible = alpha > 0;
+    }
   }
 
   redrawWires() {

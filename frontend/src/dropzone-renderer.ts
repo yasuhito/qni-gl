@@ -45,6 +45,10 @@ export class DropzoneRenderer {
   private wire!: Graphics;
   private topConnection!: Graphics;
   private bottomConnection!: Graphics;
+  private pastedTopConnection!: Graphics;
+  private pastedBottomConnection!: Graphics;
+  private connectTop = false;
+  private connectBottom = false;
 
   private get totalSize(): number {
     return this.dropzone.totalSize;
@@ -77,6 +81,8 @@ export class DropzoneRenderer {
     this.wire = new Graphics();
     this.topConnection = new Graphics();
     this.bottomConnection = new Graphics();
+    this.pastedTopConnection = new Graphics();
+    this.pastedBottomConnection = new Graphics();
   }
 
   private addChildrenToDropzone(): void {
@@ -84,7 +90,9 @@ export class DropzoneRenderer {
       this.body,
       this.wire,
       this.topConnection,
-      this.bottomConnection
+      this.bottomConnection,
+      this.pastedTopConnection,
+      this.pastedBottomConnection
     );
   }
 
@@ -102,8 +110,26 @@ export class DropzoneRenderer {
    * Updates the visibility of top and bottom connections.
    */
   updateConnections({ connectTop, connectBottom }: ConnectionUpdateInfo): void {
-    this.topConnection.alpha = connectTop ? NO_OPACITY : FULL_OPACITY;
-    this.bottomConnection.alpha = connectBottom ? NO_OPACITY : FULL_OPACITY;
+    this.connectTop = connectTop;
+    this.connectBottom = connectBottom;
+    this.resetConnectionAlpha();
+    this.updatePastedConnectionAlpha(0);
+  }
+
+  setPastedEmphasisAlpha(alpha: number): void {
+    this.updatePastedConnectionAlpha(alpha);
+  }
+
+  setConnectionOffsetX(offsetX: number): void {
+    this.topConnection.x = offsetX;
+    this.bottomConnection.x = offsetX;
+    this.pastedTopConnection.x = offsetX;
+    this.pastedBottomConnection.x = offsetX;
+  }
+
+  setVisibleConnectionAlpha(alpha: number): void {
+    this.topConnection.alpha = this.connectTop ? alpha : 0;
+    this.bottomConnection.alpha = this.connectBottom ? alpha : 0;
   }
 
   private initBody(): void {
@@ -114,15 +140,19 @@ export class DropzoneRenderer {
   }
 
   private updateInputWire(wireType: WireType): void {
-    this.drawWire({ wireType, startX: 0, endX: this.inputWireEndX() });
+    const wire = { wireType, startX: 0, endX: this.inputWireEndX() };
+
+    this.drawWire(wire);
   }
 
   private updateOutputWire(wireType: WireType): void {
-    this.drawWire({
+    const wire = {
       wireType,
       startX: this.outputWireStartX(),
       endX: this.totalSize,
-    });
+    };
+
+    this.drawWire(wire);
   }
 
   private inputWireEndX(): number {
@@ -135,16 +165,39 @@ export class DropzoneRenderer {
 
   private initConnections(): void {
     const halfSize = this.totalSize * 0.5;
+
     this.drawConnection(this.topConnection, { startY: 0, endY: halfSize });
     this.drawConnection(this.bottomConnection, {
       startY: halfSize,
       endY: this.totalSize,
     });
+    this.drawConnection(
+      this.pastedTopConnection,
+      { startY: 0, endY: halfSize },
+      0xffffff
+    );
+    this.drawConnection(
+      this.pastedBottomConnection,
+      { startY: halfSize, endY: this.totalSize },
+      0xffffff
+    );
+    this.updatePastedConnectionAlpha(0);
+  }
+
+  private updatePastedConnectionAlpha(alpha: number): void {
+    this.pastedTopConnection.alpha = this.connectTop ? alpha : 0;
+    this.pastedBottomConnection.alpha = this.connectBottom ? alpha : 0;
+  }
+
+  private resetConnectionAlpha(): void {
+    this.topConnection.alpha = this.connectTop ? NO_OPACITY : FULL_OPACITY;
+    this.bottomConnection.alpha = this.connectBottom ? NO_OPACITY : FULL_OPACITY;
   }
 
   private drawConnection(
     graphics: Graphics,
-    { startY, endY }: ConnectionPosition
+    { startY, endY }: ConnectionPosition,
+    color: string | number = Colors["bg-brand"]
   ): void {
     const width = DropzoneRenderer.CONNECTION_WIDTH;
     const x = this.totalSize * 0.5 - width / 2;
@@ -152,18 +205,27 @@ export class DropzoneRenderer {
     graphics
       .clear()
       .rect(x, startY, width, endY - startY)
-      .fill(Colors["bg-brand"]);
+      .fill(color);
   }
 
   private drawWire({ wireType, startX, endX }: WireSegment): void {
-    this.wire
+    this.drawWireSegment(this.wire, startX, endX, this.wireColor(wireType));
+  }
+
+  private drawWireSegment(
+    graphics: Graphics,
+    startX: number,
+    endX: number,
+    color: string | number
+  ): void {
+    graphics
       .rect(
         startX,
         this.totalSize * 0.5 - DropzoneRenderer.WIRE_WIDTH / 2,
         endX - startX,
         DropzoneRenderer.WIRE_WIDTH
       )
-      .fill(this.wireColor(wireType));
+      .fill(color);
   }
 
   private wireColor(wireType: WireType): WireColor {

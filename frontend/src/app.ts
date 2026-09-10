@@ -1,4 +1,4 @@
-import { Circuit } from "./circuit";
+import { Circuit, CircuitCellPosition, CircuitClipboard } from "./circuit";
 import { CircuitFrame } from "./circuit-frame";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
@@ -16,18 +16,26 @@ import { logger, rectIntersect } from "./util";
 import {
   Application,
   Assets,
+  Container,
   FederatedPointerEvent,
+  Graphics,
   Point,
   Renderer,
 } from "pixi.js";
 import {
   CIRCUIT_STEP_EVENTS,
+  CIRCUIT_FRAME_EVENTS,
+  DROPZONE_EVENTS,
   FRAME_DIVIDER_EVENTS,
   OPERATION_EVENTS,
 } from "./events";
 import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
+import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
+import { Spacing } from "./spacing";
+import { PasteInsertionAnimation } from "./paste-insertion-animation";
+import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
 
 declare global {
   interface Window {
@@ -38,6 +46,10 @@ declare global {
 export class App {
   static elementId = "app";
   private static _instance: App;
+  private static readonly CARET_BLINK_INTERVAL = 500;
+  private static readonly PASTE_CARET_POSITION_RATIO = 0.65;
+  private static readonly PASTE_PUSH_ANIMATION_DURATION = 120;
+  private static readonly PASTE_INSERT_REVEAL_DELAY = 30;
 
   declare worker: Worker;
 
@@ -54,6 +66,28 @@ export class App {
   nameMap = new Map();
 
   private shareModal: ShareModal | null = null;
+  private activeCell: CircuitCellPosition | null = null;
+  private clipboard: CircuitClipboard | null = null;
+  private selectedGates = new Set<OperationComponent>();
+  private pastedSteps = new Set<CircuitStep>();
+  private activeDropzone: Dropzone | null = null;
+  private pasteCaretOverlay!: Container;
+  private selectionBoundsOverlay!: SelectionBoundsOverlay;
+  private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
+  private editUndoStack: string[] = [];
+  private editRedoStack: string[] = [];
+  private dragUndoSnapshot: string | null = null;
+  private pasteInsertionAnimation = new PasteInsertionAnimation({
+    pushDuration: App.PASTE_PUSH_ANIMATION_DURATION,
+    revealDelay: App.PASTE_INSERT_REVEAL_DELAY,
+    maxPushDistance: Dropzone.sizeInPx * 0.75,
+    onReveal: () => this.applyPastedStepStyles(),
+  });
+  private shouldSyncSelectionStylesAfterRelease = false;
+  private rectangleSelectionBase: Set<OperationComponent> | null = null;
+  private readonly keyboardShortcutHandler = (event: KeyboardEvent) => {
+    this.handleKeyboardShortcut(event);
+  };
 
   public static get instance(): App {
     if (!this._instance) {
@@ -114,6 +148,12 @@ export class App {
 
       this.setupFrames();
 
+      new CircuitRectangleSelection(
+        this.app.stage,
+        this.circuit,
+        this.gatePalette,
+      );
+
       this.loadCircuitFromUrl();
 
       // 回路の最初のステップをアクティブにする
@@ -132,6 +172,8 @@ export class App {
 
       this.setupClearCircuitButton();
 
+      this.setupKeyboardShortcuts();
+
       // テスト用
       window.pixiApp = this;
     });
@@ -144,8 +186,7 @@ export class App {
     this.app.stage.sortableChildren = true;
     this.app.stage
       .on("pointerup", this.releaseGate, this) // マウスでクリックを離した、タッチパネルでタッチを離した
-      .on("pointerupoutside", this.releaseGate, this) // 描画オブジェクトの外側でクリック、タッチを離した
-      .on("pointerdown", this.maybeDeactivateGate, this);
+      .on("pointerupoutside", this.releaseGate, this); // 描画オブジェクトの外側でクリック、タッチを離した
   }
 
   private setupExportButton(): void {
@@ -205,6 +246,7 @@ export class App {
     clearButton.addEventListener("click", (e) => {
       e.preventDefault(); // ページ遷移防止
 
+      this.clearPastedSteps();
       this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
       this.circuit.fetchStep(0).activate();
 
@@ -299,10 +341,20 @@ export class App {
       initialY: this.circuitFrame.height,
     });
     this.app.stage.addChild(this.frameDivider);
+    this.setupPastePlacementOverlay();
 
     this.setupFrameDividerEventHandlers();
     this.setupCircuitFrameEventHandlers();
     this.setupStateVectorEventHandlers();
+  }
+
+  private setupPastePlacementOverlay(): void {
+    this.pasteCaretOverlay = new Container();
+    this.pasteCaretOverlay.eventMode = "none";
+    this.circuit.addChild(this.pasteCaretOverlay);
+
+    this.selectionBoundsOverlay = new SelectionBoundsOverlay();
+    this.circuit.addChild(this.selectionBoundsOverlay);
   }
 
   private setupFrameDividerEventHandlers() {
@@ -345,6 +397,27 @@ export class App {
     this.circuitFrame.on(OPERATION_EVENTS.GRABBED, this.grabGate, this);
     this.circuitFrame.on(OPERATION_EVENTS.MOUSE_LEFT, this.resetCursor, this);
     this.circuitFrame.on(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
+    this.app.stage
+      .on(
+        CIRCUIT_FRAME_EVENTS.BACKGROUND_CLICKED,
+        this.clearSelectionFromBackground,
+        this,
+      )
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_STARTED,
+        this.startRectangleSelection,
+        this,
+      )
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_UPDATED,
+        this.updateRectangleSelection,
+        this,
+      )
+      .on(
+        CIRCUIT_FRAME_EVENTS.RECTANGLE_SELECTION_FINISHED,
+        this.finishRectangleSelection,
+        this,
+      );
 
     this.circuitFrame.on(
       CIRCUIT_STEP_EVENTS.ACTIVATED,
@@ -354,6 +427,11 @@ export class App {
     this.circuitFrame.circuit.on(
       OPERATION_EVENTS.SNAPPED,
       this.handleCircuitChange,
+      this
+    );
+    this.circuitFrame.circuit.on(
+      DROPZONE_EVENTS.SELECTED,
+      this.selectDropzoneAsActiveCell,
       this
     );
   }
@@ -385,12 +463,28 @@ export class App {
   private gateDiscarded(gate: OperationComponent) {
     this.activeGate = null;
     this.grabbedGate = null;
-    this.circuitFrame!.removeChild(gate);
-    this.circuit.update();
+    this.selectedGates.delete(gate);
+    if (gate.parent === this.circuitFrame) {
+      this.circuitFrame.removeChild(gate);
+    }
+
     if (this.circuit.activeStepIndex === null) {
       this.circuit.fetchStep(0).activate();
     }
+
+    // 回路外へ捨てたゲートで空になったステップを、通常の回路編集と同じ後処理で詰める。
+    this.circuit.update();
+    this.pushDragUndoSnapshotIfCircuitChanged();
+    if (this.circuit.activeStepIndex === null) {
+      this.circuit.fetchStep(0).activate();
+    }
+    this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
+    this.stateVectorFrame.repositionAndResize(
+      this.frameDivider.y + this.frameDivider.height,
+      this.app.screen.width,
+      this.app.screen.height - this.frameDivider.y
+    );
     this.runSimulator();
   }
 
@@ -474,9 +568,20 @@ export class App {
     );
   }
 
-  private grabGate(gate: OperationComponent, pointerPosition: Point) {
-    if (this.activeGate !== null && this.activeGate !== gate) {
-      this.activeGate.deactivate();
+  private grabGate(
+    gate: OperationComponent,
+    pointerPosition: Point,
+    additiveSelection = false
+  ) {
+    this.dragUndoSnapshot = this.circuit.toJSON(true);
+    this.shouldSyncSelectionStylesAfterRelease = false;
+    const previousActiveGate = this.activeGate;
+    if (
+      previousActiveGate !== null &&
+      previousActiveGate !== gate &&
+      !additiveSelection
+    ) {
+      previousActiveGate.deactivate();
     }
 
     // the reason for this is because of multitouch
@@ -484,13 +589,9 @@ export class App {
     this.activeGate = gate;
     this.grabbedGate = gate;
     gate.insertable = false;
+    this.selectGateForClipboard(gate, additiveSelection);
 
-    this.grabbedGate.on(OPERATION_EVENTS.DISCARDED, (gate) => {
-      this.activeGate = null;
-      this.grabbedGate = null;
-      this.circuitFrame!.removeChild(gate);
-      // this.pixiApp.stage.removeChild(gate);
-    });
+    this.grabbedGate.once(OPERATION_EVENTS.DISCARDED, this.gateDiscarded, this);
 
     // this.dropzones についてループを回す
     // その中で、dropzone が snappable かどうかを判定する
@@ -500,6 +601,8 @@ export class App {
 
     this.updateStateVectorComponentQubitCount();
 
+    const dragSize = this.dragHitSizeFor(gate);
+
     for (const circuitStep of this.circuit.steps) {
       for (const each of circuitStep.dropzones) {
         if (
@@ -507,8 +610,8 @@ export class App {
             gate,
             pointerPosition.x,
             pointerPosition.y,
-            gate.width,
-            gate.height,
+            dragSize.width,
+            dragSize.height,
             each
           )
         ) {
@@ -677,6 +780,19 @@ export class App {
   }
 
   /**
+   * ドラッグ中の当たり判定は、描画boundsではなくゲート本来のサイズで安定させる。
+   */
+  private dragHitSizeFor(gate: OperationComponent): {
+    width: number;
+    height: number;
+  } {
+    return {
+      width: gate.sizeInPx,
+      height: gate.sizeInPx
+    };
+  }
+
+  /**
    * pointerPosition is the global position of the mouse/touch
    *
    * @param gate ゲート
@@ -687,6 +803,7 @@ export class App {
     let insertablePosition: Point | null = null;
     let insertStepPosition = 0;
     let insertedOperationQubitIndex = 0;
+    const dragSize = this.dragHitSizeFor(gate);
 
     for (let index = 0; index < this.circuit.steps.length; index++) {
       const circuitStep = this.circuit.steps[index];
@@ -701,22 +818,22 @@ export class App {
           gate,
           pointerPosition.x,
           pointerPosition.y,
-          gate.width,
-          gate.height,
+          dragSize.width,
+          dragSize.height,
           dropzone
         );
         const isGateInsertableLeft = this.isGateHoveringAtLeftInsertPosition(
           pointerPosition.x,
           pointerPosition.y,
-          gate.width,
-          gate.height,
+          dragSize.width,
+          dragSize.height,
           dropzone
         );
         const isGateInsertableRight = this.isGateHoveringAtRightInsertPosition(
           pointerPosition.x,
           pointerPosition.y,
-          gate.width,
-          gate.height,
+          dragSize.width,
+          dragSize.height,
           dropzone
         );
 
@@ -850,9 +967,17 @@ export class App {
     this.resetCursor();
     this.app.stage.off("pointermove", this.maybeMoveGate);
     this.grabbedGate.mouseUp();
+    if (this.shouldSyncSelectionStylesAfterRelease) {
+      this.syncGateSelectionStyles();
+      this.shouldSyncSelectionStylesAfterRelease = false;
+    }
+    if (this.grabbedGate.dropzone !== null) {
+      this.syncPasteAnchorWithGrabbedGate();
+    }
     this.grabbedGate = null;
 
     this.circuit.update();
+    this.pushDragUndoSnapshotIfCircuitChanged();
 
     this.updateUrlWithCircuit();
 
@@ -873,10 +998,9 @@ export class App {
     this.stateVector.qubitCount = this.circuit.highestOccupiedQubitNumber;
   }
 
-  private maybeDeactivateGate(event: FederatedPointerEvent) {
-    if (event.target === this.app.stage) {
-      this.activeGate?.deactivate();
-    }
+  private clearSelectionFromBackground(): void {
+    this.activeGate?.deactivate();
+    this.clearSelectedGates();
   }
 
   protected runSimulator() {
@@ -932,15 +1056,574 @@ export class App {
     this.updateUrlWithCircuit();
   }
 
+  private setupKeyboardShortcuts(): void {
+    window.addEventListener("keydown", this.keyboardShortcutHandler);
+  }
+
+  private handleKeyboardShortcut(event: KeyboardEvent): void {
+    if (this.isEditableEventTarget(event.target)) {
+      return;
+    }
+
+    this.handleEscapeShortcut(event);
+    this.handleDeleteShortcut(event);
+    this.handleClipboardShortcut(event);
+  }
+
+  private handleEscapeShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    this.preventDefaultIfHandled(event, this.clearSelectionAndPasteAnchor());
+  }
+
+  private handleDeleteShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+    if (event.key !== "Backspace" && event.key !== "Delete") {
+      return;
+    }
+
+    this.preventDefaultIfHandled(event, this.deleteSelectedGates());
+  }
+
+  private handleClipboardShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (!event.ctrlKey && !event.metaKey) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (key === "c") {
+      this.preventDefaultIfHandled(event, this.copySelectedGates());
+    } else if (key === "v") {
+      this.preventDefaultIfHandled(event, this.pasteClipboard());
+    } else if (key === "z" && event.shiftKey) {
+      this.preventDefaultIfHandled(event, this.redoLastEdit());
+    } else if (key === "z") {
+      this.preventDefaultIfHandled(event, this.undoLastEdit());
+    }
+  }
+
+  private preventDefaultIfHandled(
+    event: KeyboardEvent,
+    handled: boolean
+  ): void {
+    if (handled) {
+      event.preventDefault();
+    }
+  }
+
+  private isEditableEventTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    return (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target.isContentEditable
+    );
+  }
+
+  /**
+   * クリックされたゲートをコピー対象として記録し、ペースト基準セルも更新する。
+   */
+  private selectGateForClipboard(
+    gate: OperationComponent,
+    additive: boolean
+  ): void {
+    this.releaseEmptyPasteAnchor();
+
+    const position = this.circuit.findOperationPosition(gate);
+    if (position === null) {
+      return;
+    }
+
+    this.activeCell = position;
+    this.updatePastePlacementPreview();
+
+    const selectedOperations = gate.consumeIndividualSelectionRequest()
+      ? [gate]
+      : this.circuit.connectedOperationsFor(gate);
+
+    if (!additive) {
+      this.clearSelectedGates();
+    } else if (this.selectedGates.has(gate)) {
+      selectedOperations.forEach((operation) => {
+        this.selectedGates.delete(operation);
+        operation.deactivate();
+      });
+
+      this.shouldSyncSelectionStylesAfterRelease = true;
+      if (this.activeGate === gate) {
+        this.activeGate = null;
+      }
+      this.updateSelectionBoundsOverlay();
+      return;
+    }
+
+    selectedOperations.forEach((operation) => {
+      this.selectedGates.add(operation);
+    });
+
+    this.syncGateSelectionStyles();
+  }
+
+  private startRectangleSelection(additive: boolean): void {
+    // Shift + ドラッグだけ、ドラッグ開始前の選択を保持する。
+    this.rectangleSelectionBase = additive
+      ? new Set(this.selectedGates)
+      : new Set();
+    this.circuit.setStepMarkerUpdatesEnabled(false);
+  }
+
+  private updateRectangleSelection(gates: OperationComponent[]): void {
+    const selectionBase = this.rectangleSelectionBase ?? this.selectedGates;
+
+    this.selectedGates = new Set([...Array.from(selectionBase), ...gates]);
+
+    this.syncGateSelectionStyles();
+  }
+
+  private finishRectangleSelection(): void {
+    this.rectangleSelectionBase = null;
+    this.circuit.setStepMarkerUpdatesEnabled(true);
+  }
+
+  /**
+   * 空セルを含むドロップゾーンを、Ctrl+V のペースト基準セルにする。
+   */
+  private selectDropzoneAsActiveCell(
+    circuitStep: CircuitStep,
+    dropzone: Dropzone,
+    additiveSelection = false
+  ): void {
+    this.releaseEmptyPasteAnchor(dropzone);
+
+    const stepIndex = this.circuit.steps.indexOf(circuitStep);
+    const qubitIndex = circuitStep.dropzones.indexOf(dropzone);
+    if (stepIndex === -1 || qubitIndex === -1) {
+      return;
+    }
+
+    this.activeCell = { stepIndex, qubitIndex };
+
+    if (!additiveSelection && dropzone.operation === null) {
+      this.activeDropzone = dropzone;
+      this.updatePastePlacementPreview();
+    }
+  }
+
+  private copySelectedGates(): boolean {
+    const selectedGates = Array.from(this.selectedGates);
+    const clipboard = this.circuit.createClipboardFromOperations(selectedGates);
+    const activeCell =
+      this.circuit.findClipboardAnchorForOperations(selectedGates);
+
+    if (clipboard === null || activeCell === null) {
+      return false;
+    }
+
+    this.releaseEmptyPasteAnchor();
+    this.clipboard = clipboard;
+    this.activeCell = activeCell;
+    this.activeDropzone = null;
+    this.updatePastePlacementPreview();
+
+    return true;
+  }
+
+  private pasteClipboard(): boolean {
+    if (this.clipboard === null || this.activeCell === null) {
+      return false;
+    }
+
+    const insertStartStep = this.activeCell.stepIndex + 1;
+    const pushedSteps = this.circuit.steps.slice(insertStartStep);
+    const undoSnapshot = this.circuit.toJSON(true);
+
+    this.pasteInsertionAnimation.cancel();
+    this.clearPastePlacementOverlay();
+
+    const pastedOperations = this.circuit.pasteClipboardAt(
+      this.activeCell,
+      this.clipboard
+    );
+
+    this.pastedSteps = new Set(
+      pastedOperations.flatMap((operation) => {
+        const position = this.circuit.findOperationPosition(operation);
+        return position === null
+          ? []
+          : [this.circuit.fetchStep(position.stepIndex)];
+      }),
+    );
+    const pastedStepRange = new Set(
+      this.circuit.steps.slice(
+        insertStartStep,
+        insertStartStep + this.clipboard.width
+      )
+    );
+    this.recordUndoSnapshot(undoSnapshot);
+    this.syncGateSelectionStyles();
+
+    this.circuit.updateAfterPaste(pastedStepRange);
+    this.clearReleasedEmptyPasteAnchor();
+    this.pasteInsertionAnimation.start({
+      pushedSteps,
+      pastedSteps: pastedStepRange,
+      clipboardWidth: this.clipboard.width,
+      referenceStepSize: this.referenceDropzoneTotalSize(),
+    });
+    this.updatePastePlacementPreview();
+    this.updateUrlWithCircuit();
+    this.updateStateVectorComponentQubitCount();
+    this.runSimulator();
+
+    return true;
+  }
+
+  private undoLastEdit(): boolean {
+    const previousCircuitJson = this.editUndoStack.pop();
+    if (previousCircuitJson === undefined) {
+      return false;
+    }
+
+    this.editRedoStack.push(this.circuit.toJSON(true));
+    this.restoreCircuitFromEditHistory(previousCircuitJson);
+
+    return true;
+  }
+
+  private redoLastEdit(): boolean {
+    const nextCircuitJson = this.editRedoStack.pop();
+    if (nextCircuitJson === undefined) {
+      return false;
+    }
+
+    this.editUndoStack.push(this.circuit.toJSON(true));
+    this.restoreCircuitFromEditHistory(nextCircuitJson);
+
+    return true;
+  }
+
+  /**
+   * Undo/Redo履歴から回路を復元し、古い選択表示を残さないようにする。
+   */
+  private restoreCircuitFromEditHistory(circuitJson: string): void {
+    this.clearSelectedGates();
+    this.clearPastedSteps();
+    this.pasteInsertionAnimation.cancel();
+    this.clearPastePlacementOverlay();
+    this.circuit.fromJSON(circuitJson, true);
+    this.updatePastePlacementPreview();
+    this.updateUrlWithCircuit();
+    this.updateStateVectorComponentQubitCount();
+    this.runSimulator();
+  }
+
+  /**
+   * 回路を変更する操作の直前状態を保存し、Redo履歴を破棄する。
+   */
+  private recordUndoSnapshot(snapshot = this.circuit.toJSON(true)): void {
+    this.editUndoStack.push(snapshot);
+    this.editRedoStack = [];
+  }
+
+  private pushDragUndoSnapshotIfCircuitChanged(): void {
+    const snapshot = this.dragUndoSnapshot;
+    this.dragUndoSnapshot = null;
+
+    if (snapshot === null || snapshot === this.circuit.toJSON(true)) {
+      return;
+    }
+
+    this.recordUndoSnapshot(snapshot);
+  }
+
+  private clearSelectedGates(): void {
+    this.selectedGates.clear();
+    this.syncGateSelectionStyles();
+  }
+
+  /**
+   * Escapeで通常編集へ戻れるよう、選択表示とペースト基準をまとめて解除する。
+   */
+  private clearSelectionAndPasteAnchor(): boolean {
+    if (
+      this.selectedGates.size === 0 &&
+      this.activeCell === null &&
+      this.activeDropzone === null
+    ) {
+      return false;
+    }
+
+    this.activeGate = null;
+    this.activeCell = null;
+    this.activeDropzone = null;
+    this.clearSelectedGates();
+    this.clearPastePlacementOverlay();
+
+    return true;
+  }
+
+  private deleteSelectedGates(): boolean {
+    if (this.selectedGates.size === 0) {
+      return false;
+    }
+
+    this.recordUndoSnapshot();
+
+    for (const gate of this.selectedGates) {
+      const position = this.circuit.findOperationPosition(gate);
+      if (position === null) {
+        continue;
+      }
+
+      this.circuit
+        .fetchStep(position.stepIndex)
+        .fetchDropzone(position.qubitIndex)
+        .detach(gate);
+      gate.destroy();
+    }
+
+    this.activeGate = null;
+    this.grabbedGate = null;
+    this.clearSelectedGates();
+    this.circuit.update();
+    this.updateUrlWithCircuit();
+    this.updateStateVectorComponentQubitCount();
+    this.runSimulator();
+
+    return true;
+  }
+
+  /**
+   * Ctrl+V で挿入される位置を、キャレットとして表示する。
+   */
+  private updatePastePlacementPreview(): void {
+    this.clearPastePlacementOverlay();
+
+    if (this.activeCell === null) {
+      return;
+    }
+
+    this.applyPasteAnchorAt(this.activeCell);
+  }
+
+  private clearPastePlacementOverlay(): void {
+    if (this.pasteAnchorBlinkTimer !== null) {
+      clearInterval(this.pasteAnchorBlinkTimer);
+      this.pasteAnchorBlinkTimer = null;
+    }
+
+    this.pasteCaretOverlay.removeChildren().forEach((child) => {
+      child.destroy();
+    });
+  }
+
+  private clearReleasedEmptyPasteAnchor(): void {
+    if (this.activeDropzone?.destroyed) {
+      this.activeDropzone = null;
+    }
+  }
+
+  private syncPasteAnchorWithGrabbedGate(): void {
+    if (this.grabbedGate === null) {
+      return;
+    }
+
+    const position = this.circuit.findOperationPosition(this.grabbedGate);
+    if (position === null) {
+      return;
+    }
+
+    this.activeCell = position;
+    this.updatePastePlacementPreview();
+  }
+
+  /**
+   * ペースト基準セルの右側に、挿入位置を示すキャレットを描く。
+   */
+  private applyPasteAnchorAt(position: CircuitCellPosition): void {
+    const anchorDropzone = this.dropzoneAt(position);
+    const insertStartCell = this.insertStartCellFor(position);
+
+    if (anchorDropzone === null) {
+      return;
+    }
+
+    const caret = this.createPasteAnchorCaret(this.pasteCaretHeight());
+    caret.position.copyFrom(this.pasteCellTopLeft(insertStartCell, position));
+
+    this.pasteCaretOverlay.addChild(caret);
+    this.pasteAnchorBlinkTimer = setInterval(() => {
+      caret.visible = !caret.visible;
+    }, App.CARET_BLINK_INTERVAL);
+  }
+
+  private dropzoneAt(position: CircuitCellPosition): Dropzone | null {
+    const step = this.circuit.steps[position.stepIndex];
+    if (step === undefined) {
+      return null;
+    }
+
+    return step.dropzones[position.qubitIndex] ?? null;
+  }
+
+  private insertStartCellFor(position: CircuitCellPosition): CircuitCellPosition {
+    return {
+      stepIndex: position.stepIndex + 1,
+      qubitIndex: position.qubitIndex,
+    };
+  }
+
+  private pasteCaretHeight(): number {
+    const clipboardHeight = this.clipboard?.height ?? 1;
+
+    return (
+      Dropzone.sizeInPx +
+      (clipboardHeight - 1) * this.referenceDropzoneTotalSize()
+    );
+  }
+
+  private createPasteAnchorCaret(height: number): Graphics {
+    const width = Spacing.borderWidth.gate.base;
+    const x = Dropzone.GATE_INSET_OFFSET * App.PASTE_CARET_POSITION_RATIO;
+
+    const caret = new Graphics()
+      .roundRect(
+        x - width / 2,
+        Dropzone.GATE_INSET_OFFSET,
+        width,
+        height,
+        width / 2
+      )
+      .fill(Colors["border-component-strong"]);
+    caret.eventMode = "none";
+
+    return caret;
+  }
+
+  private referenceDropzoneTotalSize(): number {
+    return this.circuit.steps[0]?.dropzones[0]?.totalSize ?? Dropzone.sizeInPx;
+  }
+
+  private pasteCellTopLeft(
+    position: CircuitCellPosition,
+    anchor: CircuitCellPosition
+  ): Point {
+    const existingDropzone = this.dropzoneAt(position);
+    if (existingDropzone !== null) {
+      return this.pasteCaretOverlay.toLocal(
+        existingDropzone.getGlobalPosition()
+      );
+    }
+
+    const anchorDropzone = this.dropzoneAt(anchor);
+    if (anchorDropzone === null) {
+      return new Point(0, 0);
+    }
+
+    const anchorPosition = anchorDropzone.getGlobalPosition();
+    return this.pasteCaretOverlay.toLocal(
+      new Point(
+        anchorPosition.x +
+          (position.stepIndex - anchor.stepIndex) * anchorDropzone.totalSize,
+        anchorPosition.y +
+          (position.qubitIndex - anchor.qubitIndex) * anchorDropzone.totalSize
+      )
+    );
+  }
+
+  /**
+   * 選択対象から外れた空のペースト基準ステップを詰める。
+   * 同じステップ内で基準セルを移す場合は、そのステップを残す。
+   */
+  private releaseEmptyPasteAnchor(nextDropzone: Dropzone | null = null): void {
+    const activeDropzone = this.activeDropzone;
+
+    if (
+      activeDropzone === null ||
+      activeDropzone.parent === nextDropzone?.parent
+    ) {
+      return;
+    }
+
+    const activeStep = activeDropzone.parent;
+
+    this.activeDropzone = null;
+    if (activeStep instanceof CircuitStep) {
+      this.circuit.removeEmptyStep(activeStep);
+    }
+  }
+
+  private clearPastedSteps(): void {
+    this.pastedSteps.forEach((step) => {
+      step.clearPastedEmphasis();
+    });
+    this.pastedSteps.clear();
+  }
+
+  private applyPastedStepStyles(): void {
+    this.pastedSteps.forEach((step) => {
+      step.applyPastedEmphasis();
+    });
+  }
+
+  /**
+   * 選択枠の見た目を selectedGates の実データから作り直し、古い枠の残留を防ぐ。
+   */
+  private syncGateSelectionStyles(): void {
+    for (const gate of this.circuitOperations()) {
+      if (this.selectedGates.has(gate)) {
+        gate.applySelectionEmphasis();
+      } else {
+        gate.deactivate();
+      }
+    }
+
+    this.updateSelectionBoundsOverlay();
+  }
+
+  /**
+   * 複数選択時だけ、選択中ゲート群の外側に点線のまとまり枠を描く。
+   */
+  private updateSelectionBoundsOverlay(): void {
+    this.selectionBoundsOverlay.sync(this.selectedGates);
+  }
+
+  /**
+   * 現在の回路上に実際に配置されているゲートだけを返す。
+   */
+  private circuitOperations(): OperationComponent[] {
+    return this.circuit.steps.flatMap((step) =>
+      step.dropzones.flatMap((dropzone) =>
+        dropzone.operation === null ? [] : [dropzone.operation]
+      )
+    );
+  }
+
   /**
    * 量子回路の状態をURLにエンコードする
    */
   public updateUrlWithCircuit(): void {
-  // タイトル取得
-  const titleInput = document.getElementById(
-    "circuit-title-input"
-  ) as HTMLInputElement | null;
-  const title = titleInput?.value || "";
+    // タイトル取得
+    const titleInput = document.getElementById(
+      "circuit-title-input"
+    ) as HTMLInputElement | null;
+    const title = titleInput?.value || "";
 
     const circuitObj = JSON.parse(this.circuit.toJSON());
     // titleを追加
@@ -955,6 +1638,8 @@ export class App {
    * URLのパスから量子回路の状態をデコードしロードする
    */
   private loadCircuitFromUrl(): void {
+    this.clearPastedSteps();
+
     // URLハッシュに回路データがあるか確認 (#circuit=...)
     const sourceString = location.hash.startsWith("#circuit=")
       ? location.hash.substring("#circuit=".length)
