@@ -245,6 +245,8 @@ export class App {
     clearButton.addEventListener("click", (e) => {
       e.preventDefault(); // ページ遷移防止
 
+      this.clearSelectionAndPasteAnchor();
+      this.clearCopyFeedback();
       this.clearPastedSteps();
       this.circuit.fromJSON(JSON.stringify({ cols: [[]] }));
       this.circuit.fetchStep(0).activate();
@@ -471,6 +473,7 @@ export class App {
 
     // 回路外へ捨てたゲートで空になったステップを、通常の回路編集と同じ後処理で詰める。
     this.circuit.update();
+    this.syncGateSelectionStyles();
     this.pushDragUndoSnapshotIfCircuitChanged();
     if (this.circuit.activeStepIndex === null) {
       this.circuit.fetchStep(0).activate();
@@ -1537,7 +1540,17 @@ export class App {
    * 選択枠の見た目を selectedGates の実データから作り直し、古い枠の残留を防ぐ。
    */
   private syncGateSelectionStyles(): void {
-    for (const gate of this.circuitOperations()) {
+    const circuitOperations = this.circuitOperations();
+    const existingOperations = new Set(circuitOperations);
+
+    // 選択状態は回路上の実体を正とし、削除・再構築済みのゲート参照を残さない。
+    this.selectedGates = new Set(
+      Array.from(this.selectedGates).filter((gate) =>
+        existingOperations.has(gate),
+      ),
+    );
+
+    for (const gate of circuitOperations) {
       if (this.selectedGates.has(gate)) {
         gate.applySelectionEmphasis();
       } else {

@@ -326,6 +326,43 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => activeCell(page)).toBeNull();
   });
 
+  test("clears stale selection state when the circuit is cleared", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 1,
+    });
+
+    await page.keyboard.down("Shift");
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.mouse.click(
+      circuitInfo.steps[1][1].x,
+      circuitInfo.steps[1][1].y,
+    );
+    await page.keyboard.up("Shift");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "HGate",
+      "XGate",
+    ]);
+
+    await page.locator("#menu-button").click();
+    await page.locator("#menu-item-clear-circuit").click();
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([]);
+    await expect.poll(() => activeCell(page)).toBeNull();
+    await expect.poll(() => occupiedCells(page)).toEqual([]);
+  });
+
   test("separates empty paste anchor clicks from step marker clicks", async ({
     page,
     circuitInfo,
