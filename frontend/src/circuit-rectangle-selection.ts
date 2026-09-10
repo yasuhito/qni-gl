@@ -22,7 +22,7 @@ type RectangleBounds = Pick<Rectangle, "left" | "right" | "top" | "bottom">;
  */
 export class CircuitRectangleSelection {
   private static readonly DRAG_THRESHOLD = 4;
-  private static readonly FILL_ALPHA = 0.35;
+  private static readonly FILL_ALPHA = 0.12;
   private static readonly BORDER_WIDTH = 1;
 
   private readonly rectangle = new Graphics();
@@ -173,11 +173,11 @@ export class CircuitRectangleSelection {
       .clear()
       .rect(topLeft.x, topLeft.y, bounds.width, bounds.height)
       .fill({
-        color: Colors["border-component"],
+        color: Colors["bg-active"],
         alpha: CircuitRectangleSelection.FILL_ALPHA,
       })
       .stroke({
-        color: Colors["border-component"],
+        color: Colors["border-pressed"],
         width: CircuitRectangleSelection.BORDER_WIDTH,
       });
   }
