@@ -16,9 +16,7 @@ import { logger, rectIntersect } from "./util";
 import {
   Application,
   Assets,
-  Container,
   FederatedPointerEvent,
-  Graphics,
   Point,
   Renderer,
 } from "pixi.js";
@@ -33,8 +31,8 @@ import { STATE_VECTOR_EVENTS } from "./state-vector-events";
 import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
-import { Spacing } from "./spacing";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
+import { PastePlacementPreview } from "./paste-placement-preview";
 import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
 
 declare global {
@@ -46,8 +44,8 @@ declare global {
 export class App {
   static elementId = "app";
   private static _instance: App;
-  private static readonly CARET_BLINK_INTERVAL = 500;
-  private static readonly PASTE_CARET_POSITION_RATIO = 0.65;
+  private static readonly COPY_FEEDBACK_ALPHA = 0.5;
+  private static readonly COPY_FEEDBACK_DURATION = 260;
   private static readonly PASTE_PUSH_ANIMATION_DURATION = 120;
   private static readonly PASTE_INSERT_REVEAL_DELAY = 30;
 
@@ -71,9 +69,10 @@ export class App {
   private selectedGates = new Set<OperationComponent>();
   private pastedSteps = new Set<CircuitStep>();
   private activeDropzone: Dropzone | null = null;
-  private pasteCaretOverlay!: Container;
+  private pastePlacementPreview!: PastePlacementPreview;
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
-  private pasteAnchorBlinkTimer: ReturnType<typeof setInterval> | null = null;
+  private copyFeedbackAnimationFrame: number | null = null;
+  private copyFeedbackGates = new Set<OperationComponent>();
   private editUndoStack: string[] = [];
   private editRedoStack: string[] = [];
   private dragUndoSnapshot: string | null = null;
@@ -349,9 +348,7 @@ export class App {
   }
 
   private setupPastePlacementOverlay(): void {
-    this.pasteCaretOverlay = new Container();
-    this.pasteCaretOverlay.eventMode = "none";
-    this.circuit.addChild(this.pasteCaretOverlay);
+    this.pastePlacementPreview = new PastePlacementPreview(this.circuit);
 
     this.selectionBoundsOverlay = new SelectionBoundsOverlay();
     this.circuit.addChild(this.selectionBoundsOverlay);
@@ -999,8 +996,7 @@ export class App {
   }
 
   private clearSelectionFromBackground(): void {
-    this.activeGate?.deactivate();
-    this.clearSelectedGates();
+    this.clearSelectionAndPasteAnchor();
   }
 
   protected runSimulator() {
@@ -1240,6 +1236,7 @@ export class App {
     this.activeCell = activeCell;
     this.activeDropzone = null;
     this.updatePastePlacementPreview();
+    this.flashCopiedSelection();
 
     return true;
   }
@@ -1413,24 +1410,59 @@ export class App {
    * Ctrl+V で挿入される位置を、キャレットとして表示する。
    */
   private updatePastePlacementPreview(): void {
-    this.clearPastePlacementOverlay();
-
-    if (this.activeCell === null) {
-      return;
-    }
-
-    this.applyPasteAnchorAt(this.activeCell);
+    this.pastePlacementPreview.sync(this.activeCell, this.clipboard);
   }
 
   private clearPastePlacementOverlay(): void {
-    if (this.pasteAnchorBlinkTimer !== null) {
-      clearInterval(this.pasteAnchorBlinkTimer);
-      this.pasteAnchorBlinkTimer = null;
+    this.pastePlacementPreview.clear();
+  }
+
+  private flashCopiedSelection(): void {
+    this.clearCopyFeedback();
+
+    this.copyFeedbackGates = new Set(this.selectedGates);
+    this.copyFeedbackGates.forEach((gate) => {
+      gate.setPastedEmphasisAlpha(App.COPY_FEEDBACK_ALPHA);
+    });
+
+    const startedAt = performance.now();
+    const animate = (now: number) => {
+      const progress = Math.min(
+        (now - startedAt) / App.COPY_FEEDBACK_DURATION,
+        1,
+      );
+      const alpha = App.COPY_FEEDBACK_ALPHA * Math.pow(1 - progress, 2);
+
+      this.copyFeedbackGates.forEach((gate) => {
+        if (!gate.destroyed) {
+          gate.setPastedEmphasisAlpha(alpha);
+        }
+      });
+
+      if (progress < 1) {
+        this.copyFeedbackAnimationFrame = requestAnimationFrame(animate);
+        return;
+      }
+
+      this.copyFeedbackAnimationFrame = null;
+      this.clearCopyFeedback();
+    };
+
+    this.copyFeedbackAnimationFrame = requestAnimationFrame(animate);
+  }
+
+  private clearCopyFeedback(): void {
+    if (this.copyFeedbackAnimationFrame !== null) {
+      cancelAnimationFrame(this.copyFeedbackAnimationFrame);
+      this.copyFeedbackAnimationFrame = null;
     }
 
-    this.pasteCaretOverlay.removeChildren().forEach((child) => {
-      child.destroy();
+    this.copyFeedbackGates.forEach((gate) => {
+      if (!gate.destroyed) {
+        gate.clearEmphasis();
+      }
     });
+    this.copyFeedbackGates.clear();
   }
 
   private clearReleasedEmptyPasteAnchor(): void {
@@ -1453,26 +1485,6 @@ export class App {
     this.updatePastePlacementPreview();
   }
 
-  /**
-   * ペースト基準セルの右側に、挿入位置を示すキャレットを描く。
-   */
-  private applyPasteAnchorAt(position: CircuitCellPosition): void {
-    const anchorDropzone = this.dropzoneAt(position);
-    const insertStartCell = this.insertStartCellFor(position);
-
-    if (anchorDropzone === null) {
-      return;
-    }
-
-    const caret = this.createPasteAnchorCaret(this.pasteCaretHeight());
-    caret.position.copyFrom(this.pasteCellTopLeft(insertStartCell, position));
-
-    this.pasteCaretOverlay.addChild(caret);
-    this.pasteAnchorBlinkTimer = setInterval(() => {
-      caret.visible = !caret.visible;
-    }, App.CARET_BLINK_INTERVAL);
-  }
-
   private dropzoneAt(position: CircuitCellPosition): Dropzone | null {
     const step = this.circuit.steps[position.stepIndex];
     if (step === undefined) {
@@ -1482,69 +1494,8 @@ export class App {
     return step.dropzones[position.qubitIndex] ?? null;
   }
 
-  private insertStartCellFor(position: CircuitCellPosition): CircuitCellPosition {
-    return {
-      stepIndex: position.stepIndex + 1,
-      qubitIndex: position.qubitIndex,
-    };
-  }
-
-  private pasteCaretHeight(): number {
-    const clipboardHeight = this.clipboard?.height ?? 1;
-
-    return (
-      Dropzone.sizeInPx +
-      (clipboardHeight - 1) * this.referenceDropzoneTotalSize()
-    );
-  }
-
-  private createPasteAnchorCaret(height: number): Graphics {
-    const width = Spacing.borderWidth.gate.base;
-    const x = Dropzone.GATE_INSET_OFFSET * App.PASTE_CARET_POSITION_RATIO;
-
-    const caret = new Graphics()
-      .roundRect(
-        x - width / 2,
-        Dropzone.GATE_INSET_OFFSET,
-        width,
-        height,
-        width / 2
-      )
-      .fill(Colors["border-component-strong"]);
-    caret.eventMode = "none";
-
-    return caret;
-  }
-
   private referenceDropzoneTotalSize(): number {
     return this.circuit.steps[0]?.dropzones[0]?.totalSize ?? Dropzone.sizeInPx;
-  }
-
-  private pasteCellTopLeft(
-    position: CircuitCellPosition,
-    anchor: CircuitCellPosition
-  ): Point {
-    const existingDropzone = this.dropzoneAt(position);
-    if (existingDropzone !== null) {
-      return this.pasteCaretOverlay.toLocal(
-        existingDropzone.getGlobalPosition()
-      );
-    }
-
-    const anchorDropzone = this.dropzoneAt(anchor);
-    if (anchorDropzone === null) {
-      return new Point(0, 0);
-    }
-
-    const anchorPosition = anchorDropzone.getGlobalPosition();
-    return this.pasteCaretOverlay.toLocal(
-      new Point(
-        anchorPosition.x +
-          (position.stepIndex - anchor.stepIndex) * anchorDropzone.totalSize,
-        anchorPosition.y +
-          (position.qubitIndex - anchor.qubitIndex) * anchorDropzone.totalSize
-      )
-    );
   }
 
   /**

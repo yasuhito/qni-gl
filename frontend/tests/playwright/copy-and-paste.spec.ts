@@ -461,7 +461,7 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
-  test("clears gate selection on a background click without clearing the clipboard", async ({
+  test("clears the selection and paste anchor on a background click", async ({
     page,
     circuitInfo,
   }) => {
@@ -486,10 +486,12 @@ test.describe("Copy and paste", () => {
     );
 
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
-    await expect.poll(() => activeCell(page)).toEqual({
-      stepIndex: 2,
-      qubitIndex: 1,
-    });
+    await expect.poll(() => activeCell(page)).toBeNull();
+
+    await page.mouse.click(
+      circuitInfo.steps[2][1].x,
+      circuitInfo.steps[2][1].y
+    );
 
     await page.keyboard.press("Control+v");
 
