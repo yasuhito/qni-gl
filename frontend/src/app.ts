@@ -82,7 +82,6 @@ export class App {
     maxPushDistance: Dropzone.sizeInPx * 0.75,
     onReveal: () => this.applyPastedStepStyles(),
   });
-  private shouldSyncSelectionStylesAfterRelease = false;
   private rectangleSelectionBase: Set<OperationComponent> | null = null;
   private readonly keyboardShortcutHandler = (event: KeyboardEvent) => {
     this.handleKeyboardShortcut(event);
@@ -494,7 +493,10 @@ export class App {
     }
 
     // 回路外へ捨てたゲートで空になったステップを、通常の回路編集と同じ後処理で詰める。
+    const stepsBeforeUpdate = [...this.circuit.steps];
+    this.pasteInsertionAnimation.cancel();
     this.circuit.update();
+    this.animateStepCompaction(stepsBeforeUpdate);
     this.syncGateSelectionStyles();
     this.updatePastePlacementPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
@@ -597,7 +599,6 @@ export class App {
     additiveSelection = false
   ) {
     this.dragUndoSnapshot = this.circuit.toJSON(true);
-    this.shouldSyncSelectionStylesAfterRelease = false;
     const previousActiveGate = this.activeGate;
     if (
       previousActiveGate !== null &&
@@ -990,16 +991,16 @@ export class App {
     this.resetCursor();
     this.app.stage.off("pointermove", this.maybeMoveGate);
     this.grabbedGate.mouseUp();
-    if (this.shouldSyncSelectionStylesAfterRelease) {
-      this.syncGateSelectionStyles();
-      this.shouldSyncSelectionStylesAfterRelease = false;
-    }
     if (this.grabbedGate.dropzone !== null) {
       this.syncPasteAnchorWithGrabbedGate();
     }
     this.grabbedGate = null;
 
+    const stepsBeforeUpdate = [...this.circuit.steps];
+    this.pasteInsertionAnimation.cancel();
     this.circuit.update();
+    this.animateStepCompaction(stepsBeforeUpdate);
+    this.syncGateSelectionStyles();
     this.updatePastePlacementPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
 
@@ -1194,11 +1195,10 @@ export class App {
         operation.deactivate();
       });
 
-      this.shouldSyncSelectionStylesAfterRelease = true;
       if (this.activeGate === gate) {
         this.activeGate = null;
       }
-      this.updateSelectionBoundsOverlay();
+      this.syncGateSelectionStyles();
       return;
     }
 
@@ -1301,7 +1301,8 @@ export class App {
     }
 
     const insertStartStep = this.activeCell.stepIndex + 1;
-    const pushedSteps = this.circuit.steps.slice(insertStartStep);
+    const stepsBeforePaste = [...this.circuit.steps];
+    const activeStepIndexBeforePaste = this.activeCell.stepIndex;
     const undoSnapshot = this.circuit.toJSON(true);
 
     this.pasteInsertionAnimation.cancel();
@@ -1330,11 +1331,14 @@ export class App {
     this.syncGateSelectionStyles();
 
     this.circuit.updateAfterPaste(pastedStepRange);
+    this.trackPasteAnchorAfterStepCompaction(
+      stepsBeforePaste,
+      activeStepIndexBeforePaste,
+    );
     this.clearReleasedEmptyPasteAnchor();
     this.pasteInsertionAnimation.start({
-      pushedSteps,
+      movedSteps: this.stepMovementsFrom(stepsBeforePaste),
       pastedSteps: pastedStepRange,
-      clipboardWidth: this.clipboard.width,
       referenceStepSize: this.referenceDropzoneTotalSize(),
     });
     this.updatePastePlacementPreview();
@@ -1435,6 +1439,9 @@ export class App {
     }
 
     this.recordUndoSnapshot();
+    const stepsBeforeDelete = [...this.circuit.steps];
+    const activeStepIndexBeforeDelete = this.activeCell?.stepIndex ?? null;
+    this.pasteInsertionAnimation.cancel();
 
     for (const gate of this.selectedGates) {
       const position = this.circuit.findOperationPosition(gate);
@@ -1453,11 +1460,62 @@ export class App {
     this.grabbedGate = null;
     this.clearSelectedGates();
     this.circuit.update();
+    this.trackPasteAnchorAfterStepCompaction(
+      stepsBeforeDelete,
+      activeStepIndexBeforeDelete,
+    );
+    if (this.activeCell !== null) {
+      const activeDropzone =
+        this.circuit.steps[this.activeCell.stepIndex]?.dropzones[
+          this.activeCell.qubitIndex
+        ] ?? null;
+      this.activeDropzone =
+        activeDropzone?.operation === null ? activeDropzone : null;
+    }
+    this.animateStepCompaction(stepsBeforeDelete);
+    this.updatePastePlacementPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
 
     return true;
+  }
+
+  private trackPasteAnchorAfterStepCompaction(
+    previousSteps: CircuitStep[],
+    previousActiveStepIndex: number | null,
+  ): void {
+    if (this.activeCell === null || previousActiveStepIndex === null) {
+      return;
+    }
+
+    const remainingSteps = new Set(this.circuit.steps);
+    const removedStepsThroughAnchor = previousSteps
+      .slice(0, previousActiveStepIndex + 1)
+      .filter((step) => !remainingSteps.has(step)).length;
+    this.activeCell = {
+      ...this.activeCell,
+      stepIndex: Math.min(
+        Math.max(previousActiveStepIndex - removedStepsThroughAnchor, 0),
+        this.circuit.steps.length - 1,
+      ),
+    };
+  }
+
+  private animateStepCompaction(previousSteps: CircuitStep[]): void {
+    this.pasteInsertionAnimation.startCompaction({
+      movedSteps: this.stepMovementsFrom(previousSteps),
+      referenceStepSize: this.referenceDropzoneTotalSize(),
+    });
+  }
+
+  private stepMovementsFrom(previousSteps: CircuitStep[]) {
+    return this.circuit.steps.flatMap((step, newIndex) => {
+      const previousIndex = previousSteps.indexOf(step);
+      return previousIndex !== -1 && previousIndex !== newIndex
+        ? [{ step, startStepOffset: previousIndex - newIndex }]
+        : [];
+    });
   }
 
   /**
@@ -1563,20 +1621,28 @@ export class App {
    */
   private releaseEmptyPasteAnchor(nextDropzone: Dropzone | null = null): void {
     const activeDropzone = this.activeDropzone;
+    const activeStep =
+      activeDropzone === null
+        ? null
+        : this.circuitStepContaining(activeDropzone);
+    const nextStep =
+      nextDropzone === null ? null : this.circuitStepContaining(nextDropzone);
 
-    if (
-      activeDropzone === null ||
-      activeDropzone.parent === nextDropzone?.parent
-    ) {
+    if (activeDropzone === null || activeStep === nextStep) {
       return;
     }
 
-    const activeStep = activeDropzone.parent;
-
     this.activeDropzone = null;
-    if (activeStep instanceof CircuitStep) {
+    if (activeStep !== null) {
       this.circuit.removeEmptyStep(activeStep);
     }
+  }
+
+  private circuitStepContaining(dropzone: Dropzone): CircuitStep | null {
+    return (
+      this.circuit.steps.find((step) => step.dropzones.includes(dropzone)) ??
+      null
+    );
   }
 
   private clearPastedSteps(): void {
@@ -1613,13 +1679,9 @@ export class App {
         gate.deactivate();
       }
     }
-
     this.updateSelectionBoundsOverlay();
   }
 
-  /**
-   * 複数選択時だけ、選択中ゲート群の外側に点線のまとまり枠を描く。
-   */
   private updateSelectionBoundsOverlay(): void {
     this.selectionBoundsOverlay.sync(this.selectedGates);
   }

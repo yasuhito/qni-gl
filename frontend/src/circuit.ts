@@ -257,7 +257,8 @@ export class Circuit extends Container {
   }
 
   /**
-   * 選択中ゲートから、相対位置を保持したクリップボードデータを作る。
+   * 選択中ゲートからクリップボードデータを作る。
+   * 選択ゲートがない横方向のステップは詰め、量子ビット方向の位置は保持する。
    */
   createClipboardFromOperations(
     operations: OperationComponent[],
@@ -268,11 +269,16 @@ export class Circuit extends Container {
       return null;
     }
 
-    const minStep = Math.min(
-      ...positionedOperations.map((entry) => entry.position.stepIndex),
-    );
-    const maxStep = Math.max(
-      ...positionedOperations.map((entry) => entry.position.stepIndex),
+    const selectedStepIndexes = Array.from(
+      new Set(
+        positionedOperations.map((entry) => entry.position.stepIndex),
+      ),
+    ).sort((a, b) => a - b);
+    const relativeStepByStepIndex = new Map(
+      selectedStepIndexes.map((stepIndex, relativeStep) => [
+        stepIndex,
+        relativeStep,
+      ]),
     );
     const minQubit = Math.min(
       ...positionedOperations.map((entry) => entry.position.qubitIndex),
@@ -284,10 +290,11 @@ export class Circuit extends Container {
     return {
       operations: positionedOperations.map(({ operation, position }) => ({
         label: this.operationJsonLabel(operation),
-        relativeStep: position.stepIndex - minStep,
+        relativeStep:
+          relativeStepByStepIndex.get(position.stepIndex) ?? 0,
         relativeQubit: position.qubitIndex - minQubit,
       })),
-      width: maxStep - minStep + 1,
+      width: selectedStepIndexes.length,
       height: maxQubit - minQubit + 1,
     };
   }

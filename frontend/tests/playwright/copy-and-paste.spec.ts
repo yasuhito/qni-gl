@@ -306,6 +306,222 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1]]}');
   });
 
+  test("selects all gates, cuts them, and redoes the cut with Ctrl+Y", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 1,
+    });
+
+    await page.keyboard.press("Control+a");
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "HGate",
+      "XGate",
+    ]);
+
+    await page.keyboard.press("Control+x");
+    await expect.poll(() => occupiedCells(page)).toEqual([]);
+
+    await page.keyboard.press("Control+z");
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 1, operationType: "XGate" },
+    ]);
+
+    await page.keyboard.press("Control+y");
+    await expect.poll(() => occupiedCells(page)).toEqual([]);
+  });
+
+  test("keeps a gapped CNOT available for paste after Ctrl+X", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.waitForSelector('#app[data-state="idle"]');
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON('{"cols":[["•",1,"X"]]}', true);
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.keyboard.press("Control+x");
+    await expect.poll(() => occupiedCells(page)).toEqual([]);
+
+    await page.keyboard.press("Control+v");
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "ControlGate" },
+      { stepIndex: 0, qubitIndex: 2, operationType: "XGate" },
+    ]);
+  });
+
+  test("compacts cut steps and pastes noncontiguous selections without gaps", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.waitForSelector('#app[data-state="idle"]');
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["H",1],["X",1],["Z",1]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.keyboard.down("Shift");
+    await page.mouse.click(
+      circuitInfo.steps[2][0].x,
+      circuitInfo.steps[2][0].y,
+    );
+    await page.keyboard.up("Shift");
+
+    await page.keyboard.press("Control+x");
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "XGate" },
+    ]);
+
+    await page.keyboard.press("Control+v");
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "XGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 2, qubitIndex: 0, operationType: "ZGate" },
+    ]);
+  });
+
+  test("shows keyboard shortcuts from the menu", async ({ page }) => {
+    await page.locator("#menu-button").click();
+    await page.locator("#menu-item-shortcuts").click();
+
+    const help = page.locator("#shortcut-help-dialog");
+    await expect(help).toBeVisible();
+    await expect(help).toContainText("Ctrl/Cmd+A");
+    await expect(help).toContainText("Ctrl/Cmd+X");
+    await expect(help).toContainText("Ctrl/Cmd+C");
+    await expect(help).toContainText("Ctrl/Cmd+V");
+    await expect(help).toContainText("Ctrl/Cmd+Z");
+    await expect(help).toContainText("Ctrl/Cmd+Y");
+    await expect(help).toContainText("Escape");
+
+    await page.getByLabel("Close keyboard shortcuts").click();
+    await expect(help).not.toBeVisible();
+  });
+
+  test("adds interactive wires required by the paste placement", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.waitForSelector('#app[data-state="idle"]');
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["•",1,"X"],[1,1,1]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.keyboard.press("Control+c");
+    await page.mouse.click(
+      circuitInfo.steps[1][2].x,
+      circuitInfo.steps[1][2].y,
+    );
+
+    const preview = await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        circuit: {
+          steps: Array<{ height: number }>;
+          markerManager: {
+            children: Array<{ getBounds(): { height: number } }>;
+          };
+        };
+        pastePlacementPreview: {
+          container: {
+            children: Array<{
+              getBounds(): { x: number; y: number; width: number; height: number };
+            }>;
+          };
+        };
+      };
+
+      const circuit = app.circuit;
+
+      return {
+        placementChildCount:
+          app.pastePlacementPreview.container.children.length,
+        stepHeight: circuit.steps[0].height,
+        markerHeight: circuit.markerManager.children[0].getBounds().height,
+      };
+    });
+
+    const previewCircuitInfo = await getCircuitInfo(page);
+    expect(preview.placementChildCount).toBe(2);
+    expect(preview.markerHeight).toBeGreaterThanOrEqual(preview.stepHeight);
+    expect(preview.markerHeight - preview.stepHeight).toBeLessThanOrEqual(4);
+    previewCircuitInfo.steps.forEach((step) => expect(step).toHaveLength(5));
+
+    await dragAndDrop(page, previewCircuitInfo.gatePalette.hGate, {
+      step: 1,
+      bit: 3,
+    });
+    await expect.poll(() => occupiedCells(page)).toContainEqual({
+      stepIndex: 1,
+      qubitIndex: 3,
+      operationType: "HGate",
+    });
+  });
+
+  test("removes the unused third wire after closing a CNOT gap", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.controlGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 0,
+      bit: 2,
+    });
+
+    const expandedCircuitInfo = await getCircuitInfo(page);
+    expect(expandedCircuitInfo.steps[0]).toHaveLength(3);
+
+    await dragAndDrop(page, expandedCircuitInfo.steps[0][2], {
+      step: 0,
+      bit: 1,
+    });
+
+    const compactCircuitInfo = await getCircuitInfo(page);
+    expect(compactCircuitInfo.steps[0]).toHaveLength(2);
+    const selectionBottom = await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        selectionBoundsOverlay: { getBounds(): { bottom: number } };
+      };
+      return app.selectionBoundsOverlay.getBounds().bottom;
+    });
+    expect(selectionBottom).toBeLessThan(
+      expandedCircuitInfo.steps[0][2].y,
+    );
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "ControlGate" },
+      { stepIndex: 0, qubitIndex: 1, operationType: "XGate" },
+    ]);
+  });
+
   test("clears the selection and paste anchor with Escape", async ({
     page,
     circuitInfo,
@@ -628,7 +844,7 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
-  test("preserves empty steps through paste, undo, and redo", async ({ page }) => {
+  test("keeps compact pasted steps through undo and redo", async ({ page }) => {
     await page.waitForFunction(() => window.pixiApp !== undefined);
 
     await page.evaluate(() => {
@@ -643,7 +859,10 @@ test.describe("Copy and paste", () => {
         throw new Error("App is not initialized");
       }
 
-      circuit.fromJSON('{"cols":[["H",1],[1,1],["T",1]]}', true);
+      circuit.fromJSON(
+        '{"cols":[["H",1],["X",1],["T",1]]}',
+        true,
+      );
 
       const hGate = circuit.fetchStep(0).fetchDropzone(0).operation;
       const tGate = circuit.fetchStep(2).fetchDropzone(0).operation;
@@ -659,9 +878,10 @@ test.describe("Copy and paste", () => {
 
     await expect.poll(() => occupiedCells(page)).toEqual([
       { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "XGate" },
       { stepIndex: 2, qubitIndex: 0, operationType: "TGate" },
       { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
-      { stepIndex: 5, qubitIndex: 0, operationType: "TGate" },
+      { stepIndex: 4, qubitIndex: 0, operationType: "TGate" },
     ]);
 
     await page.keyboard.press("Control+z");
@@ -669,9 +889,10 @@ test.describe("Copy and paste", () => {
 
     await expect.poll(() => occupiedCells(page)).toEqual([
       { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 1, qubitIndex: 0, operationType: "XGate" },
       { stepIndex: 2, qubitIndex: 0, operationType: "TGate" },
       { stepIndex: 3, qubitIndex: 0, operationType: "HGate" },
-      { stepIndex: 5, qubitIndex: 0, operationType: "TGate" },
+      { stepIndex: 4, qubitIndex: 0, operationType: "TGate" },
     ]);
   });
 

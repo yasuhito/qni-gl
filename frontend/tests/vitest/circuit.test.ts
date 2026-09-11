@@ -207,7 +207,7 @@ describe("Circuit", () => {
   });
 
   describe("copy and paste", () => {
-    it("preserves relative positions and empty steps in clipboard data", () => {
+    it("compacts unselected steps in clipboard data", () => {
       const hGate = new HGate();
       const tGate = new TGate();
       circuit.fetchStep(0).fetchDropzone(1).addChild(hGate);
@@ -218,9 +218,9 @@ describe("Circuit", () => {
       expect(clipboard).toEqual({
         operations: [
           { label: "H", relativeStep: 0, relativeQubit: 0 },
-          { label: "T", relativeStep: 2, relativeQubit: 1 },
+          { label: "T", relativeStep: 1, relativeQubit: 1 },
         ],
-        width: 3,
+        width: 2,
         height: 2,
       });
     });
@@ -244,7 +244,7 @@ describe("Circuit", () => {
       expect(circuit.fetchStep(2).fetchDropzone(0).operation).toBe(xGate);
     });
 
-    it("keeps empty steps inside the pasted clipboard range", () => {
+    it("pastes selected steps without gaps", () => {
       const hGate = new HGate();
       const tGate = new TGate();
       circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
@@ -261,8 +261,7 @@ describe("Circuit", () => {
       expect(circuit.fetchStep(3).fetchDropzone(0).operation).toBeInstanceOf(
         HGate
       );
-      expect(circuit.fetchStep(4).isEmpty).toBe(true);
-      expect(circuit.fetchStep(5).fetchDropzone(0).operation).toBeInstanceOf(
+      expect(circuit.fetchStep(4).fetchDropzone(0).operation).toBeInstanceOf(
         TGate
       );
     });
@@ -289,7 +288,7 @@ describe("Circuit", () => {
       expect(circuit.fetchStep(2).fetchDropzone(0).operation).toBe(tGate);
     });
 
-    it("preserves pasted empty steps when restoring history", () => {
+    it("restores compact pasted steps from history", () => {
       const hGate = new HGate();
       const tGate = new TGate();
       circuit.fetchStep(0).fetchDropzone(0).addChild(hGate);
@@ -307,9 +306,8 @@ describe("Circuit", () => {
       const restoredCircuit = new Circuit({ minWireCount: 2, stepCount: 0 });
       restoredCircuit.fromJSON(historyJson, true);
 
-      expect(restoredCircuit.fetchStep(4).isEmpty).toBe(true);
       expect(
-        restoredCircuit.fetchStep(5).fetchDropzone(0).operation
+        restoredCircuit.fetchStep(4).fetchDropzone(0).operation
       ).toBeInstanceOf(TGate);
     });
 

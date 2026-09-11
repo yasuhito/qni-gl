@@ -14,9 +14,18 @@ type PasteInsertionAnimationOptions = {
 };
 
 type PasteInsertionAnimationStartOptions = {
-  pushedSteps: CircuitStep[];
+  movedSteps: StepMovementTarget[];
   pastedSteps: Set<CircuitStep>;
-  clipboardWidth: number;
+  referenceStepSize: number;
+};
+
+type StepMovementTarget = {
+  step: CircuitStep;
+  startStepOffset: number;
+};
+
+type StepCompactionAnimationStartOptions = {
+  movedSteps: StepMovementTarget[];
   referenceStepSize: number;
 };
 
@@ -32,17 +41,17 @@ export class PasteInsertionAnimation {
   constructor(private readonly options: PasteInsertionAnimationOptions) {}
 
   start({
-    pushedSteps,
+    movedSteps,
     pastedSteps,
-    clipboardWidth,
     referenceStepSize,
   }: PasteInsertionAnimationStartOptions): void {
     this.cancel();
     this.hidePastedDropzones(pastedSteps);
 
-    const pushedDropzones = this.pushedDropzonesIn(pushedSteps);
-    const pushDistance = this.pushDistance(clipboardWidth, referenceStepSize);
-    const targets = this.targetsFor(pushedDropzones, pushDistance);
+    const targets = this.targetsForStepMovements(
+      movedSteps,
+      referenceStepSize,
+    );
 
     if (targets.length === 0) {
       this.reveal();
@@ -50,7 +59,27 @@ export class PasteInsertionAnimation {
     }
 
     this.moveTargetsToStart(targets);
-    this.animatePush(targets);
+    this.animateMovement(targets, () => this.scheduleReveal());
+  }
+
+  /** 空ステップ削除で左へ詰まるゲートを、削除前の位置から滑らせる。 */
+  startCompaction({
+    movedSteps,
+    referenceStepSize,
+  }: StepCompactionAnimationStartOptions): void {
+    this.cancel();
+
+    const targets = this.targetsForStepMovements(
+      movedSteps,
+      referenceStepSize,
+    );
+
+    if (targets.length === 0) {
+      return;
+    }
+
+    this.moveTargetsToStart(targets);
+    this.animateMovement(targets);
   }
 
   cancel(): void {
@@ -67,16 +96,21 @@ export class PasteInsertionAnimation {
     this.revealHiddenDropzones();
   }
 
-  private targetsFor(
-    pushedDropzones: Dropzone[],
-    pushDistance: number
+  private targetsForStepMovements(
+    movedSteps: StepMovementTarget[],
+    referenceStepSize: number,
   ): PastePushAnimationTarget[] {
-    return pushedDropzones
-      .filter((dropzone) => !dropzone.destroyed)
-      .map((dropzone) => ({
+    return movedSteps.flatMap(({ step, startStepOffset }) => {
+      const startOffsetX = this.movementDistance(
+        startStepOffset,
+        referenceStepSize,
+      );
+
+      return this.pushedDropzonesIn([step]).map((dropzone) => ({
         dropzone,
-        startOffsetX: -pushDistance,
+        startOffsetX,
       }));
+    });
   }
 
   private moveTargetsToStart(targets: PastePushAnimationTarget[]): void {
@@ -85,7 +119,10 @@ export class PasteInsertionAnimation {
     });
   }
 
-  private animatePush(targets: PastePushAnimationTarget[]): void {
+  private animateMovement(
+    targets: PastePushAnimationTarget[],
+    onComplete: () => void = () => undefined,
+  ): void {
     const startedAt = performance.now();
 
     const animate = (now: number) => {
@@ -104,14 +141,18 @@ export class PasteInsertionAnimation {
 
       this.pushAnimationFrame = null;
       this.pushAnimationTargets = [];
-      this.revealTimer = setTimeout(() => {
-        this.revealTimer = null;
-        this.reveal();
-      }, this.options.revealDelay);
+      onComplete();
     };
 
     this.pushAnimationTargets = targets;
     this.pushAnimationFrame = requestAnimationFrame(animate);
+  }
+
+  private scheduleReveal(): void {
+    this.revealTimer = setTimeout(() => {
+      this.revealTimer = null;
+      this.reveal();
+    }, this.options.revealDelay);
   }
 
   private moveTargets(
@@ -138,13 +179,16 @@ export class PasteInsertionAnimation {
     );
   }
 
-  private pushDistance(
-    clipboardWidth: number,
+  private movementDistance(
+    startStepOffset: number,
     referenceStepSize: number
   ): number {
-    return Math.min(
-      clipboardWidth * referenceStepSize,
-      this.options.maxPushDistance
+    return (
+      Math.sign(startStepOffset) *
+      Math.min(
+        Math.abs(startStepOffset) * referenceStepSize,
+        this.options.maxPushDistance,
+      )
     );
   }
 
