@@ -124,7 +124,7 @@ export class PastePlacementPreview {
 
     return (
       Dropzone.sizeInPx +
-      (clipboardHeight - 1) * this.referenceDropzoneTotalSize()
+      (clipboardHeight - 1) * this.referenceQubitPitch()
     );
   }
 
@@ -148,7 +148,7 @@ export class PastePlacementPreview {
         anchorPosition.x +
           (position.stepIndex - anchor.stepIndex) * anchorDropzone.totalSize,
         anchorPosition.y +
-          (position.qubitIndex - anchor.qubitIndex) * anchorDropzone.totalSize
+          (position.qubitIndex - anchor.qubitIndex) * this.referenceQubitPitch()
       )
     );
   }
@@ -164,5 +164,17 @@ export class PastePlacementPreview {
 
   private referenceDropzoneTotalSize(): number {
     return this.circuit.steps[0]?.dropzones[0]?.totalSize ?? Dropzone.sizeInPx;
+  }
+
+  private referenceQubitPitch(): number {
+    const referenceDropzones = this.circuit.steps[0]?.dropzones;
+    if (referenceDropzones !== undefined && referenceDropzones.length >= 2) {
+      return (
+        referenceDropzones[1].getGlobalPosition().y -
+        referenceDropzones[0].getGlobalPosition().y
+      );
+    }
+
+    return this.referenceDropzoneTotalSize();
   }
 }

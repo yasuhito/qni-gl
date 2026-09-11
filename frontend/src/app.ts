@@ -496,6 +496,7 @@ export class App {
     // 回路外へ捨てたゲートで空になったステップを、通常の回路編集と同じ後処理で詰める。
     this.circuit.update();
     this.syncGateSelectionStyles();
+    this.updatePastePlacementPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
     if (this.circuit.activeStepIndex === null) {
       this.circuit.fetchStep(0).activate();
@@ -999,6 +1000,7 @@ export class App {
     this.grabbedGate = null;
 
     this.circuit.update();
+    this.updatePastePlacementPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
 
     this.updateUrlWithCircuit();
@@ -1462,6 +1464,11 @@ export class App {
    * Ctrl+V で挿入される位置を、キャレットとして表示する。
    */
   private updatePastePlacementPreview(): void {
+    if (this.activeCell !== null && this.clipboard !== null) {
+      this.circuit.ensureWireCount(
+        this.activeCell.qubitIndex + this.clipboard.height,
+      );
+    }
     this.pastePlacementPreview.sync(this.activeCell, this.clipboard);
   }
 

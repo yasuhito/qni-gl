@@ -572,7 +572,7 @@ export class Circuit extends Container {
   /**
    * ペースト先に必要な量子ビット数まで、全ステップへドロップゾーンを追加する。
    */
-  private ensureWireCount(requiredWireCount: number): void {
+  ensureWireCount(requiredWireCount: number): void {
     while (this.wireCount < requiredWireCount) {
       const beforeWireCount = this.wireCount;
       this.maybeAppendWire();
