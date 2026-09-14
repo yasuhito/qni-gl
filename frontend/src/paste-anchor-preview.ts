@@ -5,11 +5,11 @@ import { Spacing } from "./spacing";
 import { Container, Graphics, Point } from "pixi.js";
 
 /**
- * Ctrl+V の挿入位置を、キャレットと薄い範囲表示で示す。
+ * Ctrl+V の挿入アンカーを、ペースト位置マーカーと薄い範囲表示で示す。
  */
-export class PastePlacementPreview {
-  private static readonly CARET_BLINK_INTERVAL = 500;
-  private static readonly CARET_POSITION_RATIO = 0.65;
+export class PasteAnchorPreview {
+  private static readonly MARKER_BLINK_INTERVAL = 500;
+  private static readonly MARKER_POSITION_RATIO = 0.65;
   private static readonly PREVIEW_ALPHA = 0.12;
 
   private readonly container = new Container();
@@ -21,16 +21,16 @@ export class PastePlacementPreview {
   }
 
   sync(
-    activeCell: CircuitCellPosition | null,
+    pasteAnchorCell: CircuitCellPosition | null,
     clipboard: CircuitClipboard | null
   ): void {
     this.clear();
 
-    if (activeCell === null) {
+    if (pasteAnchorCell === null) {
       return;
     }
 
-    this.draw(activeCell, clipboard);
+    this.draw(pasteAnchorCell, clipboard);
   }
 
   clear(): void {
@@ -45,11 +45,11 @@ export class PastePlacementPreview {
   }
 
   private draw(
-    activeCell: CircuitCellPosition,
+    pasteAnchorCell: CircuitCellPosition,
     clipboard: CircuitClipboard | null
   ): void {
-    const insertStartCell = this.insertStartCellFor(activeCell);
-    const topLeft = this.cellTopLeft(insertStartCell, activeCell);
+    const insertStartCell = this.insertStartCellFor(pasteAnchorCell);
+    const topLeft = this.cellTopLeft(insertStartCell, pasteAnchorCell);
 
     if (clipboard !== null) {
       const preview = this.createInsertionPreview(clipboard);
@@ -57,13 +57,13 @@ export class PastePlacementPreview {
       this.container.addChild(preview);
     }
 
-    const caret = this.createCaret(this.previewHeight(clipboard));
-    caret.position.copyFrom(topLeft);
-    this.container.addChild(caret);
+    const marker = this.createMarker(this.previewHeight(clipboard));
+    marker.position.copyFrom(topLeft);
+    this.container.addChild(marker);
 
     this.blinkTimer = setInterval(() => {
-      caret.visible = !caret.visible;
-    }, PastePlacementPreview.CARET_BLINK_INTERVAL);
+      marker.visible = !marker.visible;
+    }, PasteAnchorPreview.MARKER_BLINK_INTERVAL);
   }
 
   private createInsertionPreview(clipboard: CircuitClipboard): Graphics {
@@ -77,19 +77,19 @@ export class PastePlacementPreview {
       )
       .fill({
         color: Colors["border-component"],
-        alpha: PastePlacementPreview.PREVIEW_ALPHA,
+        alpha: PasteAnchorPreview.PREVIEW_ALPHA,
       });
     preview.eventMode = "none";
 
     return preview;
   }
 
-  private createCaret(height: number): Graphics {
+  private createMarker(height: number): Graphics {
     const width = Spacing.borderWidth.gate.base;
     const x =
-      Dropzone.GATE_INSET_OFFSET * PastePlacementPreview.CARET_POSITION_RATIO;
+      Dropzone.GATE_INSET_OFFSET * PasteAnchorPreview.MARKER_POSITION_RATIO;
 
-    const caret = new Graphics()
+    const marker = new Graphics()
       .roundRect(
         x - width / 2,
         Dropzone.GATE_INSET_OFFSET,
@@ -98,9 +98,9 @@ export class PastePlacementPreview {
         width / 2
       )
       .fill(Colors["border-active"]);
-    caret.eventMode = "none";
+    marker.eventMode = "none";
 
-    return caret;
+    return marker;
   }
 
   private insertStartCellFor(

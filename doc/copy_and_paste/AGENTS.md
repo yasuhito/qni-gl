@@ -39,7 +39,7 @@
 - 選択枠は基準表示であり、ペースト後も自動解除してはならない。
 - `clipboard` は Ctrl+C 実行時のみ更新する。
 - 新たなゲート選択や空セル選択で、既存の `clipboard` を変更してはならない。
-- 連続ペースト時も `activeCell` は自動更新しない。
+- 連続ペースト時も `pasteAnchorCell` は自動更新しない。
 - Redo は初期実装対象とし、Ctrl+Shift+Z で Undo したペースト操作を復元する。
 - 未決定事項などの発見により、実装で迷ったら質問を生成する。
 
@@ -58,8 +58,8 @@
 - 制御ゲート構造の判定を、SVG上の見た目やゲート名だけで行ってはならない。
 - 制御ゲートの接続対象を、AIが量子回路理論だけから推測してはならない。
 - 通常ゲートが同じステップに並んでいるだけで、まとめて選択してはならない。
-- Ctrl+V 後に `selectedGates` または `activeCell` を自動解除してはならない。
-- Ctrl+V 後に `activeCell` をペースト先へ自動更新してはならない。
+- Ctrl+V 後に `selectedGates` または `pasteAnchorCell` を自動解除してはならない。
+- Ctrl+V 後に `pasteAnchorCell` をペースト先へ自動更新してはならない。
 - ペーストされたゲートを `selectedGates` に自動追加してはならない。
 - 新たなゲート選択または空セル選択により、既存の `clipboard` を変更してはならない。
 - `selectedGates` が空の Ctrl+C で、既存の `clipboard` を消去してはならない。
@@ -77,8 +77,8 @@
 - 制御ゲート構造のまとめて選択
 - 制御ゲートまたはターゲットゲートのダブルクリックによる単独選択
 - Shift押し続け + クリックによる複数選択
-- 空セル選択による `activeCell` 更新
-- ペースト基準を挿入キャレットで表示
+- 空セル選択による `pasteAnchorCell` 更新
+- 挿入アンカーをペースト位置マーカーで表示
 - Ctrl+C によるコピー
 - Ctrl+V による右方向ペースト
 - ペースト時のステップ押し出し
@@ -123,13 +123,13 @@
 別実装へ移植する場合は、以下の順で実装する。
 
 1. 回路データから、ゲート実体・ステップ・量子ビット・接続情報を取得する方法を確認する。
-2. `selectedGates`、`activeCell`、`clipboard`、`pastedGates`、`pastedSteps` を状態として分離する。
-3. クリック、Shift + クリック、矩形選択、空セルクリックで選択状態と `activeCell` を更新する。
+2. `selectedGates`、`pasteAnchorCell`、`clipboard`、`pastedGates`、`pastedSteps` を状態として分離する。
+3. クリック、Shift + クリック、矩形選択、空セルクリックで選択状態と `pasteAnchorCell` を更新する。
 4. Ctrl+C で、選択ゲートの相対ステップ・相対量子ビット・接続情報を保存する。
-5. Ctrl+V で、`activeCell.step + 1` へ右方向ステップ挿入する。
+5. Ctrl+V で、`pasteAnchorCell.step + 1` へ右方向ステップ挿入する。
 6. 挿入前の回路状態を、Ctrl+Z / Ctrl+Shift+Z 用に保存する。
 7. ペースト後に、接続線・量子状態・URL・表示を既存の更新経路で再計算する。
-8. 挿入キャレット、押し出しアニメーション、白いフェード強調表示を表示レイヤとして追加する。
+8. ペースト位置マーカー、押し出しアニメーション、白いフェード強調表示を表示レイヤとして追加する。
 9. Delete / Backspace で選択ゲートを削除し、接続線と空ステップを既存の整理機能で更新する。
 10. `SPEC.md` のテスト観点を満たすテストを追加する。
 
@@ -177,7 +177,7 @@ digレビューで確認すべき主な観点は以下とする。
 
 - 初期実装対象と後続実装対象が明確に分かれているか
 - `SVG_DESIGN_RULES.md` にアルゴリズム仕様が混入していないか
-- `activeCell`、`selectedGates`、`clipboard`、`pastedGates` の状態遷移が明確か
+- `pasteAnchorCell`、`selectedGates`、`clipboard`、`pastedGates` の状態遷移が明確か
 - 連続ペースト時の基準セル更新が明確か
 - Ctrl+C、Ctrl+V、Ctrl+Z、Ctrl+Shift+Z の無操作ケースが定義されているか
 - 制御ゲート構造、SWAP、CCNOTの扱いが初期実装対象か後続実装対象か明確か

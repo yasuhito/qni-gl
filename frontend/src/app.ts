@@ -32,7 +32,7 @@ import { ShareModal } from "./share-modal";
 import { setupAlgorithms, AlgorithmKey } from "./algorithms";
 import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
-import { PastePlacementPreview } from "./paste-placement-preview";
+import { PasteAnchorPreview } from "./paste-anchor-preview";
 import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
 
 declare global {
@@ -64,12 +64,12 @@ export class App {
   nameMap = new Map();
 
   private shareModal: ShareModal | null = null;
-  private activeCell: CircuitCellPosition | null = null;
+  private pasteAnchorCell: CircuitCellPosition | null = null;
   private clipboard: CircuitClipboard | null = null;
   private selectedGates = new Set<OperationComponent>();
   private pastedSteps = new Set<CircuitStep>();
-  private activeDropzone: Dropzone | null = null;
-  private pastePlacementPreview!: PastePlacementPreview;
+  private pasteAnchorDropzone: Dropzone | null = null;
+  private pasteAnchorPreview!: PasteAnchorPreview;
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private copyFeedbackAnimationFrame: number | null = null;
   private copyFeedbackGates = new Set<OperationComponent>();
@@ -342,15 +342,15 @@ export class App {
       initialY: this.circuitFrame.height,
     });
     this.app.stage.addChild(this.frameDivider);
-    this.setupPastePlacementOverlay();
+    this.setupPasteAnchorOverlay();
 
     this.setupFrameDividerEventHandlers();
     this.setupCircuitFrameEventHandlers();
     this.setupStateVectorEventHandlers();
   }
 
-  private setupPastePlacementOverlay(): void {
-    this.pastePlacementPreview = new PastePlacementPreview(this.circuit);
+  private setupPasteAnchorOverlay(): void {
+    this.pasteAnchorPreview = new PasteAnchorPreview(this.circuit);
 
     this.selectionBoundsOverlay = new SelectionBoundsOverlay();
     this.circuit.addChild(this.selectionBoundsOverlay);
@@ -451,7 +451,7 @@ export class App {
     );
     this.circuitFrame.circuit.on(
       DROPZONE_EVENTS.SELECTED,
-      this.selectDropzoneAsActiveCell,
+      this.selectDropzoneAsPasteAnchor,
       this
     );
   }
@@ -498,7 +498,7 @@ export class App {
     this.circuit.update();
     this.animateStepCompaction(stepsBeforeUpdate);
     this.syncGateSelectionStyles();
-    this.updatePastePlacementPreview();
+    this.updatePasteAnchorPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
     if (this.circuit.activeStepIndex === null) {
       this.circuit.fetchStep(0).activate();
@@ -1001,7 +1001,7 @@ export class App {
     this.circuit.update();
     this.animateStepCompaction(stepsBeforeUpdate);
     this.syncGateSelectionStyles();
-    this.updatePastePlacementPreview();
+    this.updatePasteAnchorPreview();
     this.pushDragUndoSnapshotIfCircuitChanged();
 
     this.updateUrlWithCircuit();
@@ -1167,7 +1167,7 @@ export class App {
   }
 
   /**
-   * クリックされたゲートをコピー対象として記録し、ペースト基準セルも更新する。
+   * クリックされたゲートをコピー対象として記録し、挿入アンカーセルも更新する。
    */
   private selectGateForClipboard(
     gate: OperationComponent,
@@ -1180,8 +1180,8 @@ export class App {
       return;
     }
 
-    this.activeCell = position;
-    this.updatePastePlacementPreview();
+    this.pasteAnchorCell = position;
+    this.updatePasteAnchorPreview();
 
     const selectedOperations = gate.consumeIndividualSelectionRequest()
       ? [gate]
@@ -1231,9 +1231,9 @@ export class App {
   }
 
   /**
-   * 空セルを含むドロップゾーンを、Ctrl+V のペースト基準セルにする。
+   * 空セルを含むドロップゾーンを、Ctrl+V の挿入アンカーセルにする。
    */
-  private selectDropzoneAsActiveCell(
+  private selectDropzoneAsPasteAnchor(
     circuitStep: CircuitStep,
     dropzone: Dropzone,
     additiveSelection = false
@@ -1246,29 +1246,29 @@ export class App {
       return;
     }
 
-    this.activeCell = { stepIndex, qubitIndex };
+    this.pasteAnchorCell = { stepIndex, qubitIndex };
 
     if (!additiveSelection && dropzone.operation === null) {
-      this.activeDropzone = dropzone;
-      this.updatePastePlacementPreview();
+      this.pasteAnchorDropzone = dropzone;
+      this.updatePasteAnchorPreview();
     }
   }
 
   private copySelectedGates(): boolean {
     const selectedGates = Array.from(this.selectedGates);
     const clipboard = this.circuit.createClipboardFromOperations(selectedGates);
-    const activeCell =
-      this.circuit.findClipboardAnchorForOperations(selectedGates);
+    const pasteAnchorCell =
+      this.circuit.findPasteAnchorForOperations(selectedGates);
 
-    if (clipboard === null || activeCell === null) {
+    if (clipboard === null || pasteAnchorCell === null) {
       return false;
     }
 
     this.releaseEmptyPasteAnchor();
     this.clipboard = clipboard;
-    this.activeCell = activeCell;
-    this.activeDropzone = null;
-    this.updatePastePlacementPreview();
+    this.pasteAnchorCell = pasteAnchorCell;
+    this.pasteAnchorDropzone = null;
+    this.updatePasteAnchorPreview();
     this.flashCopiedSelection();
 
     return true;
@@ -1296,20 +1296,20 @@ export class App {
   }
 
   private pasteClipboard(): boolean {
-    if (this.clipboard === null || this.activeCell === null) {
+    if (this.clipboard === null || this.pasteAnchorCell === null) {
       return false;
     }
 
-    const insertStartStep = this.activeCell.stepIndex + 1;
+    const insertStartStep = this.pasteAnchorCell.stepIndex + 1;
     const stepsBeforePaste = [...this.circuit.steps];
-    const activeStepIndexBeforePaste = this.activeCell.stepIndex;
+    const pasteAnchorStepIndexBeforePaste = this.pasteAnchorCell.stepIndex;
     const undoSnapshot = this.circuit.toJSON(true);
 
     this.pasteInsertionAnimation.cancel();
-    this.clearPastePlacementOverlay();
+    this.clearPasteAnchorOverlay();
 
     const pastedOperations = this.circuit.pasteClipboardAt(
-      this.activeCell,
+      this.pasteAnchorCell,
       this.clipboard
     );
 
@@ -1333,7 +1333,7 @@ export class App {
     this.circuit.updateAfterPaste(pastedStepRange);
     this.trackPasteAnchorAfterStepCompaction(
       stepsBeforePaste,
-      activeStepIndexBeforePaste,
+      pasteAnchorStepIndexBeforePaste,
     );
     this.clearReleasedEmptyPasteAnchor();
     this.pasteInsertionAnimation.start({
@@ -1341,7 +1341,7 @@ export class App {
       pastedSteps: pastedStepRange,
       referenceStepSize: this.referenceDropzoneTotalSize(),
     });
-    this.updatePastePlacementPreview();
+    this.updatePasteAnchorPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1380,9 +1380,9 @@ export class App {
     this.clearSelectedGates();
     this.clearPastedSteps();
     this.pasteInsertionAnimation.cancel();
-    this.clearPastePlacementOverlay();
+    this.clearPasteAnchorOverlay();
     this.circuit.fromJSON(circuitJson, true);
-    this.updatePastePlacementPreview();
+    this.updatePasteAnchorPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1413,22 +1413,22 @@ export class App {
   }
 
   /**
-   * Escapeで通常編集へ戻れるよう、選択表示とペースト基準をまとめて解除する。
+   * Escapeで通常編集へ戻れるよう、選択表示と挿入アンカーをまとめて解除する。
    */
   private clearSelectionAndPasteAnchor(): boolean {
     if (
       this.selectedGates.size === 0 &&
-      this.activeCell === null &&
-      this.activeDropzone === null
+      this.pasteAnchorCell === null &&
+      this.pasteAnchorDropzone === null
     ) {
       return false;
     }
 
     this.activeGate = null;
-    this.activeCell = null;
-    this.activeDropzone = null;
+    this.pasteAnchorCell = null;
+    this.pasteAnchorDropzone = null;
     this.clearSelectedGates();
-    this.clearPastePlacementOverlay();
+    this.clearPasteAnchorOverlay();
 
     return true;
   }
@@ -1440,7 +1440,8 @@ export class App {
 
     this.recordUndoSnapshot();
     const stepsBeforeDelete = [...this.circuit.steps];
-    const activeStepIndexBeforeDelete = this.activeCell?.stepIndex ?? null;
+    const pasteAnchorStepIndexBeforeDelete =
+      this.pasteAnchorCell?.stepIndex ?? null;
     this.pasteInsertionAnimation.cancel();
 
     for (const gate of this.selectedGates) {
@@ -1462,18 +1463,18 @@ export class App {
     this.circuit.update();
     this.trackPasteAnchorAfterStepCompaction(
       stepsBeforeDelete,
-      activeStepIndexBeforeDelete,
+      pasteAnchorStepIndexBeforeDelete,
     );
-    if (this.activeCell !== null) {
-      const activeDropzone =
-        this.circuit.steps[this.activeCell.stepIndex]?.dropzones[
-          this.activeCell.qubitIndex
+    if (this.pasteAnchorCell !== null) {
+      const pasteAnchorDropzone =
+        this.circuit.steps[this.pasteAnchorCell.stepIndex]?.dropzones[
+          this.pasteAnchorCell.qubitIndex
         ] ?? null;
-      this.activeDropzone =
-        activeDropzone?.operation === null ? activeDropzone : null;
+      this.pasteAnchorDropzone =
+        pasteAnchorDropzone?.operation === null ? pasteAnchorDropzone : null;
     }
     this.animateStepCompaction(stepsBeforeDelete);
-    this.updatePastePlacementPreview();
+    this.updatePasteAnchorPreview();
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1483,20 +1484,20 @@ export class App {
 
   private trackPasteAnchorAfterStepCompaction(
     previousSteps: CircuitStep[],
-    previousActiveStepIndex: number | null,
+    previousPasteAnchorStepIndex: number | null,
   ): void {
-    if (this.activeCell === null || previousActiveStepIndex === null) {
+    if (this.pasteAnchorCell === null || previousPasteAnchorStepIndex === null) {
       return;
     }
 
     const remainingSteps = new Set(this.circuit.steps);
     const removedStepsThroughAnchor = previousSteps
-      .slice(0, previousActiveStepIndex + 1)
+      .slice(0, previousPasteAnchorStepIndex + 1)
       .filter((step) => !remainingSteps.has(step)).length;
-    this.activeCell = {
-      ...this.activeCell,
+    this.pasteAnchorCell = {
+      ...this.pasteAnchorCell,
       stepIndex: Math.min(
-        Math.max(previousActiveStepIndex - removedStepsThroughAnchor, 0),
+        Math.max(previousPasteAnchorStepIndex - removedStepsThroughAnchor, 0),
         this.circuit.steps.length - 1,
       ),
     };
@@ -1519,19 +1520,19 @@ export class App {
   }
 
   /**
-   * Ctrl+V で挿入される位置を、キャレットとして表示する。
+   * Ctrl+V で挿入される位置を、ペースト位置マーカーとして表示する。
    */
-  private updatePastePlacementPreview(): void {
-    if (this.activeCell !== null && this.clipboard !== null) {
+  private updatePasteAnchorPreview(): void {
+    if (this.pasteAnchorCell !== null && this.clipboard !== null) {
       this.circuit.ensureWireCount(
-        this.activeCell.qubitIndex + this.clipboard.height,
+        this.pasteAnchorCell.qubitIndex + this.clipboard.height,
       );
     }
-    this.pastePlacementPreview.sync(this.activeCell, this.clipboard);
+    this.pasteAnchorPreview.sync(this.pasteAnchorCell, this.clipboard);
   }
 
-  private clearPastePlacementOverlay(): void {
-    this.pastePlacementPreview.clear();
+  private clearPasteAnchorOverlay(): void {
+    this.pasteAnchorPreview.clear();
   }
 
   private flashCopiedSelection(): void {
@@ -1583,8 +1584,8 @@ export class App {
   }
 
   private clearReleasedEmptyPasteAnchor(): void {
-    if (this.activeDropzone?.destroyed) {
-      this.activeDropzone = null;
+    if (this.pasteAnchorDropzone?.destroyed) {
+      this.pasteAnchorDropzone = null;
     }
   }
 
@@ -1598,8 +1599,8 @@ export class App {
       return;
     }
 
-    this.activeCell = position;
-    this.updatePastePlacementPreview();
+    this.pasteAnchorCell = position;
+    this.updatePasteAnchorPreview();
   }
 
   private dropzoneAt(position: CircuitCellPosition): Dropzone | null {
@@ -1616,25 +1617,25 @@ export class App {
   }
 
   /**
-   * 選択対象から外れた空のペースト基準ステップを詰める。
+   * 選択対象から外れた空の挿入アンカーステップを詰める。
    * 同じステップ内で基準セルを移す場合は、そのステップを残す。
    */
   private releaseEmptyPasteAnchor(nextDropzone: Dropzone | null = null): void {
-    const activeDropzone = this.activeDropzone;
-    const activeStep =
-      activeDropzone === null
+    const pasteAnchorDropzone = this.pasteAnchorDropzone;
+    const pasteAnchorStep =
+      pasteAnchorDropzone === null
         ? null
-        : this.circuitStepContaining(activeDropzone);
+        : this.circuitStepContaining(pasteAnchorDropzone);
     const nextStep =
       nextDropzone === null ? null : this.circuitStepContaining(nextDropzone);
 
-    if (activeDropzone === null || activeStep === nextStep) {
+    if (pasteAnchorDropzone === null || pasteAnchorStep === nextStep) {
       return;
     }
 
-    this.activeDropzone = null;
-    if (activeStep !== null) {
-      this.circuit.removeEmptyStep(activeStep);
+    this.pasteAnchorDropzone = null;
+    if (pasteAnchorStep !== null) {
+      this.circuit.removeEmptyStep(pasteAnchorStep);
     }
   }
 

@@ -405,19 +405,28 @@ test.describe("Copy and paste", () => {
 
     const help = page.locator("#shortcut-help-dialog");
     await expect(help).toBeVisible();
-    await expect(help).toContainText("Ctrl/Cmd+A");
-    await expect(help).toContainText("Ctrl/Cmd+X");
-    await expect(help).toContainText("Ctrl/Cmd+C");
-    await expect(help).toContainText("Ctrl/Cmd+V");
-    await expect(help).toContainText("Ctrl/Cmd+Z");
-    await expect(help).toContainText("Ctrl/Cmd+Y");
-    await expect(help).toContainText("Escape");
+    await expect(help.getByRole("row", { name: "Select all Ctrl+A ⌘A" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Cut Ctrl+X ⌘X" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Copy Ctrl+C ⌘C" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Paste Ctrl+V ⌘V" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Undo Ctrl+Z ⌘Z" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Redo Ctrl+Y ⌘Y" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Ctrl+Shift+Z ⇧⌘Z" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Delete Delete ⌫" })).toBeVisible();
+    await expect(help.getByRole("row", { name: "Clear selection Esc Esc" })).toBeVisible();
+
+    const separatorXPositions = await help
+      .locator("[data-shortcut-separator]")
+      .evaluateAll((separators) =>
+        separators.map((separator) => separator.getBoundingClientRect().x),
+      );
+    expect(new Set(separatorXPositions).size).toBe(1);
 
     await page.getByLabel("Close keyboard shortcuts").click();
     await expect(help).not.toBeVisible();
   });
 
-  test("adds interactive wires required by the paste placement", async ({
+  test("adds interactive wires required by the paste anchor", async ({
     page,
   }) => {
     await page.waitForFunction(() => window.pixiApp !== undefined);
@@ -448,7 +457,7 @@ test.describe("Copy and paste", () => {
             children: Array<{ getBounds(): { height: number } }>;
           };
         };
-        pastePlacementPreview: {
+        pasteAnchorPreview: {
           container: {
             children: Array<{
               getBounds(): { x: number; y: number; width: number; height: number };
@@ -461,7 +470,7 @@ test.describe("Copy and paste", () => {
 
       return {
         placementChildCount:
-          app.pastePlacementPreview.container.children.length,
+          app.pasteAnchorPreview.container.children.length,
         stepHeight: circuit.steps[0].height,
         markerHeight: circuit.markerManager.children[0].getBounds().height,
       };
@@ -539,7 +548,7 @@ test.describe("Copy and paste", () => {
     await page.keyboard.press("Escape");
 
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
-    await expect.poll(() => activeCell(page)).toBeNull();
+    await expect.poll(() => pasteAnchorCell(page)).toBeNull();
   });
 
   test("clears stale selection state when the circuit is cleared", async ({
@@ -575,7 +584,7 @@ test.describe("Copy and paste", () => {
     await page.locator("#menu-item-clear-circuit").click();
 
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
-    await expect.poll(() => activeCell(page)).toBeNull();
+    await expect.poll(() => pasteAnchorCell(page)).toBeNull();
     await expect.poll(() => occupiedCells(page)).toEqual([]);
   });
 
@@ -589,7 +598,7 @@ test.describe("Copy and paste", () => {
     );
 
     await expect.poll(() => activeStepIndex(page)).toBe(0);
-    await expect.poll(() => activeCell(page)).toEqual({
+    await expect.poll(() => pasteAnchorCell(page)).toEqual({
       stepIndex: 1,
       qubitIndex: 0,
     });
@@ -673,7 +682,7 @@ test.describe("Copy and paste", () => {
     );
 
     await expect.poll(() => selectedGateTypes(page)).toEqual(["HGate"]);
-    await expect.poll(() => activeCell(page)).toEqual({
+    await expect.poll(() => pasteAnchorCell(page)).toEqual({
       stepIndex: 2,
       qubitIndex: 1,
     });
@@ -698,7 +707,7 @@ test.describe("Copy and paste", () => {
       circuitInfo.steps[1][1].y
     );
 
-    await expect.poll(() => activeCell(page)).toEqual({
+    await expect.poll(() => pasteAnchorCell(page)).toEqual({
       stepIndex: 1,
       qubitIndex: 1,
     });
@@ -739,7 +748,7 @@ test.describe("Copy and paste", () => {
     );
 
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
-    await expect.poll(() => activeCell(page)).toBeNull();
+    await expect.poll(() => pasteAnchorCell(page)).toBeNull();
 
     await page.mouse.click(
       circuitInfo.steps[2][1].x,
@@ -967,15 +976,15 @@ async function activeStepIndex(page: import("@playwright/test").Page) {
   });
 }
 
-async function activeCell(page: import("@playwright/test").Page) {
+async function pasteAnchorCell(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
     const app = window.pixiApp as
       | {
-          activeCell: { stepIndex: number; qubitIndex: number } | null;
+          pasteAnchorCell: { stepIndex: number; qubitIndex: number } | null;
         }
       | undefined;
 
-    return app?.activeCell ?? null;
+    return app?.pasteAnchorCell ?? null;
   });
 }
 

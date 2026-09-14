@@ -165,7 +165,7 @@ export class Dropzone extends Container {
   }
 
   /**
-   * ゲートがないセルもペースト基準として選べるよう、セル選択を通知する。
+   * ゲートがないセルも挿入アンカーとして選べるよう、セル選択を通知する。
    */
   private emitSelectedEvent(event: FederatedPointerEvent) {
     if (event.shiftKey) {

@@ -70,7 +70,7 @@ export class CircuitRectangleSelection {
     }
 
     if (dropzone !== null) {
-      // ペースト基準選択をステップマーカーの位置確定と混ぜない。
+      // 挿入アンカー選択をステップマーカーの位置確定と混ぜない。
       event.stopPropagation();
     }
 

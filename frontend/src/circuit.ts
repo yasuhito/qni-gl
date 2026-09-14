@@ -187,7 +187,7 @@ export class Circuit extends Container {
   }
 
   /**
-   * ペースト基準から外れた空ステップだけを回路から取り除く。
+   * 挿入アンカーから外れた空ステップだけを回路から取り除く。
    */
   removeEmptyStep(step: CircuitStep): void {
     const stepIndex = this.steps.indexOf(step);
@@ -300,9 +300,9 @@ export class Circuit extends Container {
   }
 
   /**
-   * 選択ゲート群の右端ステップと最上段量子ビットを、ペースト基準として返す。
+   * 選択ゲート群の右端ステップと最上段量子ビットを、挿入アンカーとして返す。
    */
-  findClipboardAnchorForOperations(
+  findPasteAnchorForOperations(
     operations: OperationComponent[],
   ): CircuitCellPosition | null {
     const positionedOperations = this.positionedOperations(operations);
@@ -409,18 +409,18 @@ export class Circuit extends Container {
   }
 
   /**
-   * activeCell の右隣にクリップボード内容をステップ挿入し、追加したゲートを返す。
+   * pasteAnchorCell の右隣にクリップボード内容をステップ挿入し、追加したゲートを返す。
    */
   pasteClipboardAt(
-    activeCell: CircuitCellPosition,
+    pasteAnchorCell: CircuitCellPosition,
     clipboard: CircuitClipboard,
   ): OperationComponent[] {
     if (clipboard.operations.length === 0) {
       return [];
     }
 
-    const insertStartStep = activeCell.stepIndex + 1;
-    this.ensureWireCount(activeCell.qubitIndex + clipboard.height);
+    const insertStartStep = pasteAnchorCell.stepIndex + 1;
+    this.ensureWireCount(pasteAnchorCell.qubitIndex + clipboard.height);
 
     for (let i = 0; i < clipboard.width; i++) {
       this.insertStepAt(insertStartStep + i);
@@ -441,7 +441,7 @@ export class Circuit extends Container {
         insertStartStep + clipboardOperation.relativeStep,
       );
       const dropzone = step.fetchDropzone(
-        activeCell.qubitIndex + clipboardOperation.relativeQubit,
+        pasteAnchorCell.qubitIndex + clipboardOperation.relativeQubit,
       );
       dropzone.assign(operation);
       pastedOperations.push(operation);
