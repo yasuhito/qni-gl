@@ -34,8 +34,6 @@ export type DragEvent = {
 };
 
 export class OperationComponent extends IconableMixin(Container) {
-  private static readonly DOUBLE_CLICK_INTERVAL = 300;
-
   static sizeInPx = {
     xl: spacingInPx(12),
     lg: spacingInPx(10),
@@ -60,8 +58,6 @@ export class OperationComponent extends IconableMixin(Container) {
   protected _shape!: Graphics;
   protected pastedEmphasisCoversBackground = true;
   private emphasisOverlay: Container | null = null;
-  private individualSelectionRequested = false;
-  private lastPointerDownAt = Number.NEGATIVE_INFINITY;
 
   protected stateMachine = createMachine(
     {
@@ -239,13 +235,6 @@ export class OperationComponent extends IconableMixin(Container) {
     this.actor.send({ type: "Mouse up" });
   }
 
-  consumeIndividualSelectionRequest(): boolean {
-    const requested = this.individualSelectionRequested;
-    this.individualSelectionRequested = false;
-
-    return requested;
-  }
-
   deactivate() {
     this.actor.send({ type: "Deactivate" });
     this.clearEmphasis();
@@ -378,12 +367,6 @@ export class OperationComponent extends IconableMixin(Container) {
   }
 
   private onPointerDown(event: FederatedPointerEvent) {
-    const pointerDownAt = performance.now();
-    this.individualSelectionRequested =
-      pointerDownAt - this.lastPointerDownAt <=
-      OperationComponent.DOUBLE_CLICK_INTERVAL;
-    this.lastPointerDownAt = pointerDownAt;
-
     if (event.shiftKey) {
       this.emit(OPERATION_EVENTS.GRABBED, this, event.global, true);
       return;

@@ -795,6 +795,98 @@ test.describe("Copy and paste", () => {
       .toEqual(["ControlGate"]);
   });
 
+  test("selects a whole CCNOT with an ordinary click", async ({ page }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["H",1,1],["•","•","X"]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      circuitInfo.steps[1][2].x,
+      circuitInfo.steps[1][2].y,
+    );
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "ControlGate",
+      "ControlGate",
+      "XGate",
+    ]);
+
+    await page.keyboard.press("Escape");
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.keyboard.down("Shift");
+    await page.mouse.click(
+      circuitInfo.steps[1][2].x,
+      circuitInfo.steps[1][2].y,
+    );
+    await page.keyboard.up("Shift");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "ControlGate",
+      "ControlGate",
+      "HGate",
+      "XGate",
+    ]);
+  });
+
+  test("adds connected gate parts individually with Shift double clicks", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["H",1,1],[1,1,"T"],["•","•","X"]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(
+      circuitInfo.steps[0][0].x,
+      circuitInfo.steps[0][0].y,
+    );
+    await page.keyboard.down("Shift");
+    await page.mouse.click(
+      circuitInfo.steps[1][2].x,
+      circuitInfo.steps[1][2].y,
+    );
+    await page.mouse.dblclick(
+      circuitInfo.steps[2][2].x,
+      circuitInfo.steps[2][2].y,
+    );
+    await page.keyboard.up("Shift");
+
+    await expect
+      .poll(() => selectedGateTypes(page))
+      .toEqual(["HGate", "TGate", "XGate"]);
+
+    await page.keyboard.down("Shift");
+    await page.mouse.dblclick(
+      circuitInfo.steps[2][0].x,
+      circuitInfo.steps[2][0].y,
+    );
+    await page.mouse.dblclick(
+      circuitInfo.steps[2][1].x,
+      circuitInfo.steps[2][1].y,
+    );
+    await page.keyboard.up("Shift");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "ControlGate",
+      "ControlGate",
+      "HGate",
+      "TGate",
+      "XGate",
+    ]);
+  });
+
   test("keeps the clipboard when copying without selected gates", async ({
     page,
     circuitInfo,

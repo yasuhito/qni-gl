@@ -83,6 +83,10 @@ export class App {
     onReveal: () => this.applyPastedStepStyles(),
   });
   private rectangleSelectionBase: Set<OperationComponent> | null = null;
+  private gateGrabSelectionHistory: Array<{
+    gate: OperationComponent;
+    selectedGates: Set<OperationComponent>;
+  }> = [];
   private readonly keyboardShortcutHandler = (event: KeyboardEvent) => {
     this.handleKeyboardShortcut(event);
   };
@@ -141,6 +145,9 @@ export class App {
       window.addEventListener("resize", this.resize.bind(this), false);
 
       el.appendChild(this.app.canvas);
+      this.app.canvas.addEventListener("dblclick", (event) => {
+        this.handleCanvasDoubleClick(event);
+      });
 
       this.setupStage();
 
@@ -1024,6 +1031,7 @@ export class App {
   }
 
   private clearSelectionFromBackground(): void {
+    this.gateGrabSelectionHistory = [];
     this.clearSelectionAndPasteAnchor();
   }
 
@@ -1177,15 +1185,20 @@ export class App {
 
     const position = this.circuit.findOperationPosition(gate);
     if (position === null) {
+      this.gateGrabSelectionHistory = [];
       return;
     }
+
+    this.gateGrabSelectionHistory.push({
+      gate,
+      selectedGates: new Set(this.selectedGates),
+    });
+    this.gateGrabSelectionHistory = this.gateGrabSelectionHistory.slice(-2);
 
     this.pasteAnchorCell = position;
     this.updatePasteAnchorPreview();
 
-    const selectedOperations = gate.consumeIndividualSelectionRequest()
-      ? [gate]
-      : this.circuit.connectedOperationsFor(gate);
+    const selectedOperations = this.circuit.connectedOperationsFor(gate);
 
     if (!additive) {
       this.clearSelectedGates();
@@ -1205,6 +1218,43 @@ export class App {
     selectedOperations.forEach((operation) => {
       this.selectedGates.add(operation);
     });
+
+    this.syncGateSelectionStyles();
+  }
+
+  /**
+   * ブラウザがダブルクリックと判定したとき、接続ゲート全体ではなく
+   * 実際にクリックされた構成要素だけを選択する。
+   */
+  private handleCanvasDoubleClick(event: MouseEvent): void {
+    if (event.button !== 0 || this.gateGrabSelectionHistory.length < 2) {
+      return;
+    }
+
+    const [firstClick, secondClick] = this.gateGrabSelectionHistory.slice(-2);
+    this.gateGrabSelectionHistory = [];
+
+    if (firstClick.gate !== secondClick.gate) {
+      return;
+    }
+
+    const gate = secondClick.gate;
+    if (this.circuit.findOperationPosition(gate) === null) {
+      return;
+    }
+
+    this.selectedGates = event.shiftKey
+      ? new Set(firstClick.selectedGates)
+      : new Set();
+
+    if (event.shiftKey && this.selectedGates.delete(gate)) {
+      if (this.activeGate === gate) {
+        this.activeGate = null;
+      }
+    } else {
+      this.selectedGates.add(gate);
+      this.activeGate = gate;
+    }
 
     this.syncGateSelectionStyles();
   }
