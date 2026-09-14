@@ -207,6 +207,65 @@ export class CircuitFrame extends Container {
     );
   }
 
+  /**
+   * 指定した回路要素が横方向の可視域へ入るようにスクロールする。
+   */
+  revealHorizontally(targets: Container[], padding = 24): void {
+    if (targets.length === 0) {
+      return;
+    }
+
+    const targetBounds = targets.map((target) => target.getBounds());
+    const left = Math.min(...targetBounds.map((bounds) => bounds.left));
+    const right = Math.max(...targetBounds.map((bounds) => bounds.right));
+    this.revealHorizontalBounds(left, right, padding);
+  }
+
+  /**
+   * レイアウト更新のタイミングに依存せず、指定ステップ範囲を可視域へ入れる。
+   */
+  revealStepRange(startStepIndex: number, stepCount: number): void {
+    const referenceDropzone = this.circuit.steps[0]?.dropzones[0];
+    if (referenceDropzone === undefined || stepCount <= 0) {
+      return;
+    }
+
+    const frameX = this.getGlobalPosition().x;
+    const left =
+      frameX +
+      this.scrollContainer.x +
+      this.circuit.x +
+      startStepIndex * referenceDropzone.totalSize;
+    const right = left + stepCount * referenceDropzone.totalSize;
+    this.revealHorizontalBounds(left, right, 24);
+  }
+
+  private revealHorizontalBounds(
+    left: number,
+    right: number,
+    padding: number,
+  ): void {
+    const framePosition = this.getGlobalPosition();
+    const visibleLeft = framePosition.x + padding;
+    const visibleRight =
+      framePosition.x + this.maskSprite.width - padding;
+    const availableWidth = visibleRight - visibleLeft;
+    const targetWidth = right - left;
+
+    let deltaX = 0;
+    if (targetWidth > availableWidth || left < visibleLeft) {
+      deltaX = left - visibleLeft;
+    } else if (right > visibleRight) {
+      deltaX = right - visibleRight;
+    }
+
+    this.scrollContainer.x -= deltaX;
+    this.scrollContainer.x = this.limitScrollPosition(
+      this.scrollContainer.x,
+      this.maxScrollX(),
+    );
+  }
+
   private maxScrollY(): number {
     return Math.max(
       0,
@@ -218,9 +277,18 @@ export class CircuitFrame extends Container {
   }
 
   private maxScrollX(): number {
+    const referenceDropzone = this.circuit.steps[0]?.dropzones[0];
+    const logicalCircuitWidth =
+      referenceDropzone === undefined
+        ? this.circuit.width
+        : this.circuit.steps.length * referenceDropzone.totalSize;
+
     return Math.max(
       0,
-      this.circuit.x + this.circuit.width + 128 - this.maskSprite.width
+      this.circuit.x +
+        Math.max(this.circuit.width, logicalCircuitWidth) +
+        128 -
+        this.maskSprite.width
     );
   }
 

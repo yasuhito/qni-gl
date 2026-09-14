@@ -338,6 +338,73 @@ describe("Circuit", () => {
       expect(pastedStep.fetchDropzone(2).controlConnectTop).toBe(true);
     });
 
+    it("preserves a CCNOT structure when pasting", () => {
+      const firstControl = new ControlGate();
+      const secondControl = new ControlGate();
+      const xGate = new XGate();
+      const sourceStep = circuit.fetchStep(0);
+      sourceStep.fetchDropzone(0).addChild(firstControl);
+      sourceStep.fetchDropzone(1).addChild(secondControl);
+      sourceStep.fetchDropzone(2).addChild(xGate);
+      sourceStep.updateOperationAttributes();
+
+      const clipboard = circuit.createClipboardFromOperations(
+        circuit.connectedOperationsFor(firstControl),
+      );
+      if (clipboard === null) {
+        throw new Error("Expected clipboard data for the CCNOT structure");
+      }
+
+      circuit.pasteClipboardAt({ stepIndex: 0, qubitIndex: 0 }, clipboard);
+
+      const pastedStep = circuit.fetchStep(1);
+      const pastedXGate = pastedStep.fetchDropzone(2).operation as XGate;
+      expect(pastedStep.fetchDropzone(0).operation).toBeInstanceOf(ControlGate);
+      expect(pastedStep.fetchDropzone(1).operation).toBeInstanceOf(ControlGate);
+      expect(pastedXGate).toBeInstanceOf(XGate);
+      expect(pastedXGate.controls).toEqual([0, 1]);
+    });
+
+    it("preserves a SWAP structure when pasting", () => {
+      const firstSwap = new SwapGate();
+      const secondSwap = new SwapGate();
+      circuit.fetchStep(0).fetchDropzone(0).addChild(firstSwap);
+      circuit.fetchStep(0).fetchDropzone(2).addChild(secondSwap);
+
+      const clipboard = circuit.createClipboardFromOperations(
+        circuit.connectedOperationsFor(firstSwap),
+      );
+      if (clipboard === null) {
+        throw new Error("Expected clipboard data for the SWAP structure");
+      }
+
+      circuit.pasteClipboardAt({ stepIndex: 0, qubitIndex: 0 }, clipboard);
+
+      const pastedStep = circuit.fetchStep(1);
+      expect(pastedStep.fetchDropzone(0).operation).toBeInstanceOf(SwapGate);
+      expect(pastedStep.fetchDropzone(2).operation).toBeInstanceOf(SwapGate);
+      expect(pastedStep.fetchDropzone(0).swapConnectBottom).toBe(true);
+      expect(pastedStep.fetchDropzone(2).swapConnectTop).toBe(true);
+    });
+
+    it("does not add wires when a paste would exceed the maximum", () => {
+      const wireCountBeforePaste = circuit.wireCount;
+      const clipboard = {
+        operations: [{ label: "H", relativeStep: 0, relativeQubit: 0 }],
+        width: 1,
+        height: 1,
+      };
+
+      expect(() =>
+        circuit.pasteClipboardAt(
+          { stepIndex: 0, qubitIndex: 32 },
+          clipboard,
+        ),
+      ).toThrow("Required wire count exceeds maximum: 33");
+      expect(circuit.wireCount).toBe(wireCountBeforePaste);
+      expect(circuit.steps).toHaveLength(5);
+    });
+
     it("finds a controlled structure from either connected gate", () => {
       const controlGate = new ControlGate();
       const xGate = new XGate();
@@ -371,6 +438,15 @@ describe("Circuit", () => {
     it("rreturns a correctly formatted JSON string for an empty circuit", () => {
       const expectedJSON = '{"cols":[]}';
       expect(circuit.toJSON()).toBe(`${expectedJSON}`);
+    });
+
+    it("preserves internal empty steps but omits trailing display steps", () => {
+      circuit.fetchStep(0).fetchDropzone(0).addChild(new HGate());
+      circuit.fetchStep(2).fetchDropzone(0).addChild(new XGate());
+
+      expect(circuit.toJSONWithInternalEmptySteps()).toBe(
+        '{"cols":[["H",1,1],[1,1,1],["X",1,1]]}',
+      );
     });
 
     // 単一ステップ内の単一量子ビットゲートのテストケース

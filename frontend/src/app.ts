@@ -34,6 +34,7 @@ import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
 import { PasteAnchorPreview } from "./paste-anchor-preview";
 import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
+import { MAX_QUBIT_COUNT } from "./constants";
 
 declare global {
   interface Window {
@@ -73,6 +74,7 @@ export class App {
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private copyFeedbackAnimationFrame: number | null = null;
   private copyFeedbackGates = new Set<OperationComponent>();
+  private editorNotificationTimer: ReturnType<typeof setTimeout> | null = null;
   private editUndoStack: string[] = [];
   private editRedoStack: string[] = [];
   private dragUndoSnapshot: string | null = null;
@@ -252,6 +254,12 @@ export class App {
     clearButton.addEventListener("click", (e) => {
       e.preventDefault(); // ページ遷移防止
 
+      const undoSnapshot = this.circuit.toJSON(true);
+      const hasCircuitContent = this.circuitOperations().length > 0;
+      if (hasCircuitContent) {
+        this.recordUndoSnapshot(undoSnapshot);
+      }
+
       this.clearSelectionAndPasteAnchor();
       this.clearCopyFeedback();
       this.clearPastedSteps();
@@ -359,7 +367,7 @@ export class App {
   private setupPasteAnchorOverlay(): void {
     this.pasteAnchorPreview = new PasteAnchorPreview(this.circuit);
 
-    this.selectionBoundsOverlay = new SelectionBoundsOverlay();
+    this.selectionBoundsOverlay = new SelectionBoundsOverlay(this.circuit);
     this.circuit.addChild(this.selectionBoundsOverlay);
   }
 
@@ -1350,6 +1358,17 @@ export class App {
       return false;
     }
 
+    const requiredWireCount = this.requiredWireCountForPaste();
+    if (
+      requiredWireCount === null ||
+      !this.circuit.canEnsureWireCount(requiredWireCount)
+    ) {
+      this.showEditorNotification(
+        `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
+      );
+      return false;
+    }
+
     const insertStartStep = this.pasteAnchorCell.stepIndex + 1;
     const stepsBeforePaste = [...this.circuit.steps];
     const pasteAnchorStepIndexBeforePaste = this.pasteAnchorCell.stepIndex;
@@ -1392,6 +1411,7 @@ export class App {
       referenceStepSize: this.referenceDropzoneTotalSize(),
     });
     this.updatePasteAnchorPreview();
+    this.circuitFrame.revealStepRange(insertStartStep, this.clipboard.width);
     this.updateUrlWithCircuit();
     this.updateStateVectorComponentQubitCount();
     this.runSimulator();
@@ -1574,11 +1594,57 @@ export class App {
    */
   private updatePasteAnchorPreview(): void {
     if (this.pasteAnchorCell !== null && this.clipboard !== null) {
-      this.circuit.ensureWireCount(
-        this.pasteAnchorCell.qubitIndex + this.clipboard.height,
+      const requiredWireCount = this.requiredWireCountForPaste();
+      if (
+        requiredWireCount === null ||
+        !this.circuit.canEnsureWireCount(requiredWireCount)
+      ) {
+        this.pasteAnchorPreview.clear();
+        this.showEditorNotification(
+          `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
+        );
+        return;
+      }
+
+      const addedWireCount = Math.max(
+        0,
+        requiredWireCount - this.circuit.wireCount,
       );
+      this.circuit.ensureWireCount(requiredWireCount);
+      if (addedWireCount > 0) {
+        const suffix = addedWireCount === 1 ? "" : "s";
+        this.showEditorNotification(
+          `Paste position adds ${addedWireCount} qubit${suffix}.`,
+        );
+      }
     }
     this.pasteAnchorPreview.sync(this.pasteAnchorCell, this.clipboard);
+  }
+
+  private requiredWireCountForPaste(): number | null {
+    if (this.pasteAnchorCell === null || this.clipboard === null) {
+      return null;
+    }
+
+    return this.pasteAnchorCell.qubitIndex + this.clipboard.height;
+  }
+
+  private showEditorNotification(message: string): void {
+    const notification = document.getElementById("editor-notification");
+    if (notification === null) {
+      return;
+    }
+
+    if (this.editorNotificationTimer !== null) {
+      clearTimeout(this.editorNotificationTimer);
+    }
+
+    notification.textContent = message;
+    notification.classList.remove("hidden");
+    this.editorNotificationTimer = setTimeout(() => {
+      notification.classList.add("hidden");
+      this.editorNotificationTimer = null;
+    }, 3500);
   }
 
   private clearPasteAnchorOverlay(): void {
@@ -1758,7 +1824,9 @@ export class App {
     ) as HTMLInputElement | null;
     const title = titleInput?.value || "";
 
-    const circuitObj = JSON.parse(this.circuit.toJSON());
+    const circuitObj = JSON.parse(
+      this.circuit.toJSONWithInternalEmptySteps(),
+    );
     // titleを追加
     if (title) {
       circuitObj.title = title;
@@ -1797,6 +1865,6 @@ export class App {
     }
 
     // 回路データだけで復元
-    this.circuit.fromJSON(JSON.stringify({ cols: circuitData.cols }));
+    this.circuit.fromJSON(JSON.stringify({ cols: circuitData.cols }), true);
   }
 }

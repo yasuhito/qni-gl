@@ -34,6 +34,21 @@ describe("CircuitFrame", () => {
 
     expect(scrollContainer.x).toBe(-frame["maxScrollX"]());
   });
+
+  it("scrolls a requested circuit step into the horizontal viewport", () => {
+    const frame = CircuitFrame.initialize(100, 300);
+    const scrollContainer = frame["scrollContainer"];
+
+    frame.revealStepRange(4, 1);
+
+    expect(scrollContainer.x).toBeLessThan(0);
+    const rightmostScrollPosition = scrollContainer.x;
+
+    frame.revealStepRange(0, 1);
+
+    expect(scrollContainer.x).toBeGreaterThan(rightmostScrollPosition);
+    expect(scrollContainer.x).toBeLessThanOrEqual(0);
+  });
 });
 
 function wheelEvent({

@@ -178,7 +178,7 @@
                 <td class="whitespace-nowrap text-neutral-500">⌫</td>
               </tr>
               <tr>
-                <th scope="row" class="pr-4 text-left font-normal">Clear selection</th>
+                <th scope="row" class="pr-4 text-left font-normal">Clear selection / marker</th>
                 <td class="whitespace-nowrap text-right text-neutral-500">Esc</td>
                 <td data-shortcut-separator aria-hidden="true" class="px-2 text-center text-neutral-400">/</td>
                 <td class="whitespace-nowrap text-neutral-500">Esc</td>
@@ -193,6 +193,12 @@
       >
         Export to QASM
       </button>
+      <div
+        id="editor-notification"
+        role="status"
+        aria-live="polite"
+        class="pointer-events-none fixed bottom-6 left-1/2 z-50 hidden -translate-x-1/2 rounded-lg bg-neutral-800 px-4 py-2 text-sm text-white shadow-lg"
+      ></div>
       <!-- Share Modal will be loaded here by JavaScript -->
       <div id="share-modal-container"></div>
     </div>

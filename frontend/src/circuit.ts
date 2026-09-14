@@ -468,6 +468,21 @@ export class Circuit extends Container {
   }
 
   /**
+   * 共有URL用に、中間の空ステップだけを保持してシリアライズする。
+   * 表示のために末尾へ補われた空ステップはURLへ含めない。
+   */
+  toJSONWithInternalEmptySteps(): string {
+    const lastOccupiedStepIndex = this.steps.findLastIndex(
+      (step) => !step.isEmpty,
+    );
+    const cols = this.steps
+      .slice(0, lastOccupiedStepIndex + 1)
+      .map((step) => step.toJSON());
+
+    return `{"cols":[${cols.join(",")}]}`;
+  }
+
+  /**
    * JSONデータからCircuitのインスタンスの状態を復元する
    * @param jsonString 回路全体のJSONデータ文字列
    */
@@ -580,15 +595,22 @@ export class Circuit extends Container {
    * ペースト先に必要な量子ビット数まで、全ステップへドロップゾーンを追加する。
    */
   ensureWireCount(requiredWireCount: number): void {
-    while (this.wireCount < requiredWireCount) {
-      const beforeWireCount = this.wireCount;
-      this.maybeAppendWire();
-      if (this.wireCount === beforeWireCount) {
-        throw new Error(
-          `Required wire count exceeds maximum: ${requiredWireCount}`,
-        );
-      }
+    if (!this.canEnsureWireCount(requiredWireCount)) {
+      throw new Error(
+        `Required wire count exceeds maximum: ${requiredWireCount}`,
+      );
     }
+
+    while (this.wireCount < requiredWireCount) {
+      this.maybeAppendWire();
+    }
+  }
+
+  /**
+   * 必要な量子ビット線を、上限を超えずに追加できるか返す。
+   */
+  canEnsureWireCount(requiredWireCount: number): boolean {
+    return requiredWireCount <= this.maxWireCount;
   }
 
   private operationJsonLabel(operation: OperationComponent): string {

@@ -210,6 +210,67 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
+  test("keeps selected gate borders visible while gates are hovered", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, {
+      step: 1,
+      bit: 0,
+    });
+    await dragAndDrop(page, circuitInfo.gatePalette.tGate, {
+      step: 2,
+      bit: 0,
+    });
+
+    await page.mouse.click(circuitInfo.steps[0][0].x, circuitInfo.steps[0][0].y);
+    await page.keyboard.down("Shift");
+    await page.mouse.click(circuitInfo.steps[1][0].x, circuitInfo.steps[1][0].y);
+    await page.keyboard.up("Shift");
+
+    await expect.poll(() => selectedGateEmphasis(page)).toEqual({
+      HGate: true,
+      TGate: false,
+      XGate: true,
+    });
+
+    await page.mouse.move(circuitInfo.steps[2][0].x, circuitInfo.steps[2][0].y);
+    await expect.poll(() => selectedGateEmphasis(page)).toEqual({
+      HGate: true,
+      TGate: false,
+      XGate: true,
+    });
+
+    await page.mouse.move(circuitInfo.steps[0][0].x, circuitInfo.steps[0][0].y);
+    await expect.poll(() => selectedGateEmphasis(page)).toEqual({
+      HGate: true,
+      TGate: false,
+      XGate: true,
+    });
+
+    await page.mouse.move(circuitInfo.steps[4][1].x, circuitInfo.steps[4][1].y);
+    await expect.poll(() => selectedGateEmphasis(page)).toEqual({
+      HGate: true,
+      TGate: false,
+      XGate: true,
+    });
+    await expect.poll(() => selectedGateTypes(page)).toEqual([
+      "HGate",
+      "XGate",
+    ]);
+
+    await page.keyboard.press("Escape");
+    await expect.poll(() => selectedGateEmphasis(page)).toEqual({
+      HGate: false,
+      TGate: false,
+      XGate: false,
+    });
+  });
+
   test("deletes the selected gate with Delete", async ({
     page,
     circuitInfo,
@@ -362,6 +423,59 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
+  test("does not draw a dashed outline around one connected operation", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["•",1,"X"]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(circuitInfo.steps[0][0].x, circuitInfo.steps[0][0].y);
+
+    const outlineInstructionCount = await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        selectionBoundsOverlay: {
+          context: { instructions: unknown[] };
+        };
+      };
+      return app.selectionBoundsOverlay.context.instructions.length;
+    });
+    expect(outlineInstructionCount).toBe(0);
+  });
+
+  test("draws a dashed outline when two connected operations are selected", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      window.pixiApp?.circuit.fromJSON(
+        '{"cols":[["•",1,"X"],["•",1,"X"]]}',
+        true,
+      );
+    });
+
+    const circuitInfo = await getCircuitInfo(page);
+    await page.mouse.click(circuitInfo.steps[0][0].x, circuitInfo.steps[0][0].y);
+    await page.keyboard.down("Shift");
+    await page.mouse.click(circuitInfo.steps[1][0].x, circuitInfo.steps[1][0].y);
+    await page.keyboard.up("Shift");
+
+    const outlineInstructionCount = await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        selectionBoundsOverlay: {
+          context: { instructions: unknown[] };
+        };
+      };
+      return app.selectionBoundsOverlay.context.instructions.length;
+    });
+    expect(outlineInstructionCount).toBeGreaterThan(0);
+  });
+
   test("compacts cut steps and pastes noncontiguous selections without gaps", async ({
     page,
   }) => {
@@ -413,7 +527,9 @@ test.describe("Copy and paste", () => {
     await expect(help.getByRole("row", { name: "Redo Ctrl+Y ⌘Y" })).toBeVisible();
     await expect(help.getByRole("row", { name: "Ctrl+Shift+Z ⇧⌘Z" })).toBeVisible();
     await expect(help.getByRole("row", { name: "Delete Delete ⌫" })).toBeVisible();
-    await expect(help.getByRole("row", { name: "Clear selection Esc Esc" })).toBeVisible();
+    await expect(
+      help.getByRole("row", { name: "Clear selection / marker Esc Esc" }),
+    ).toBeVisible();
 
     const separatorXPositions = await help
       .locator("[data-shortcut-separator]")
@@ -481,6 +597,9 @@ test.describe("Copy and paste", () => {
     expect(preview.markerHeight).toBeGreaterThanOrEqual(preview.stepHeight);
     expect(preview.markerHeight - preview.stepHeight).toBeLessThanOrEqual(4);
     previewCircuitInfo.steps.forEach((step) => expect(step).toHaveLength(5));
+    await expect(page.locator("#editor-notification")).toHaveText(
+      "Paste position adds 2 qubits.",
+    );
 
     await dragAndDrop(page, previewCircuitInfo.gatePalette.hGate, {
       step: 1,
@@ -586,6 +705,26 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => selectedGateTypes(page)).toEqual([]);
     await expect.poll(() => pasteAnchorCell(page)).toBeNull();
     await expect.poll(() => occupiedCells(page)).toEqual([]);
+  });
+
+  test("undoes Clear circuit as the latest edit", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+
+    await page.locator("#menu-button").click();
+    await page.locator("#menu-item-clear-circuit").click();
+    await expect.poll(() => occupiedCells(page)).toEqual([]);
+
+    await page.keyboard.press("Control+z");
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+    ]);
   });
 
   test("separates empty paste anchor clicks from step marker clicks", async ({
@@ -921,6 +1060,176 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
+  test("shows immediate feedback after copying", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, {
+      step: 0,
+      bit: 0,
+    });
+    await page.mouse.click(circuitInfo.steps[0][0].x, circuitInfo.steps[0][0].y);
+
+    await page.keyboard.press("Control+c");
+
+    const feedbackAlpha = await page.evaluate(() => {
+      const gate = window.pixiApp?.circuit.fetchStep(0).fetchDropzone(0)
+        .operation as unknown as {
+          emphasisOverlay: { alpha: number } | null;
+        };
+      return gate.emphasisOverlay?.alpha ?? 0;
+    });
+    expect(feedbackAlpha).toBeGreaterThan(0);
+  });
+
+  test("rejects an over-limit paste without changing circuit or history", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        circuit: NonNullable<typeof window.pixiApp>["circuit"];
+        selectedGates: Set<unknown>;
+        pasteAnchorCell: { stepIndex: number; qubitIndex: number } | null;
+        updatePasteAnchorPreview(): void;
+      };
+      const emptyWires = Array(32).fill(1);
+      const cnotWires: Array<string | number> = Array(32).fill(1);
+      cnotWires[0] = "•";
+      cnotWires[1] = "X";
+      app.circuit.fromJSON(
+        JSON.stringify({ cols: [cnotWires, emptyWires] }),
+        true,
+      );
+      app.selectedGates = new Set(
+        app.circuit.connectedOperationsFor(
+          app.circuit.fetchStep(0).fetchDropzone(0).operation!,
+        ),
+      );
+    });
+    await page.keyboard.press("Control+c");
+    await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        pasteAnchorCell: { stepIndex: number; qubitIndex: number } | null;
+        updatePasteAnchorPreview(): void;
+      };
+      app.pasteAnchorCell = { stepIndex: 1, qubitIndex: 31 };
+      app.updatePasteAnchorPreview();
+    });
+
+    const before = await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        circuit: NonNullable<typeof window.pixiApp>["circuit"];
+        editUndoStack: string[];
+      };
+      return {
+        json: app.circuit.toJSON(true),
+        wireCount: app.circuit.wireCount,
+        undoCount: app.editUndoStack.length,
+      };
+    });
+    await expect(page.locator("#editor-notification")).toHaveText(
+      "Cannot paste beyond 32 qubits.",
+    );
+
+    await page.keyboard.press("Control+v");
+
+    await expect.poll(async () =>
+      page.evaluate(() => {
+        const app = window.pixiApp as unknown as {
+          circuit: NonNullable<typeof window.pixiApp>["circuit"];
+          editUndoStack: string[];
+        };
+        return {
+          json: app.circuit.toJSON(true),
+          wireCount: app.circuit.wireCount,
+          undoCount: app.editUndoStack.length,
+        };
+      }),
+    ).toEqual(before);
+  });
+
+  test("keeps internal empty steps after a URL reload", async ({ page }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const app = window.pixiApp;
+      app?.circuit.fromJSON(
+        '{"cols":[["H",1],[1,1],["X",1]]}',
+        true,
+      );
+      app?.updateUrlWithCircuit();
+    });
+
+    const savedCircuit = await page.evaluate(() =>
+      JSON.parse(decodeURIComponent(location.hash.slice("#circuit=".length))),
+    );
+    expect(savedCircuit.cols).toEqual([["H", 1], [1, 1], ["X", 1]]);
+
+    await page.reload();
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+
+    await expect.poll(() => occupiedCells(page)).toEqual([
+      { stepIndex: 0, qubitIndex: 0, operationType: "HGate" },
+      { stepIndex: 2, qubitIndex: 0, operationType: "XGate" },
+    ]);
+  });
+
+  test("scrolls the pasted range into view", async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        circuit: NonNullable<typeof window.pixiApp>["circuit"];
+        selectedGates: Set<unknown>;
+      };
+      app.circuit.fromJSON(
+        JSON.stringify({ cols: Array(30).fill(["H", 1]) }),
+        true,
+      );
+      app.selectedGates = new Set([
+        app.circuit.fetchStep(29).fetchDropzone(0).operation!,
+      ]);
+    });
+    await page.waitForFunction(() =>
+      (window.pixiApp?.circuit.steps ?? []).every((step) =>
+        step.dropzones.every(
+          (dropzone) =>
+            dropzone.operation === null || dropzone.operation.sprite !== undefined,
+        ),
+      ),
+    );
+
+    await page.keyboard.press("Control+c");
+    await page.keyboard.press("Control+v");
+
+    expect(pageErrors).toEqual([]);
+
+    await expect.poll(async () =>
+      page.evaluate(() => {
+        const app = window.pixiApp as unknown as {
+          circuitFrame: { scrollContainer: { x: number } };
+        };
+        return app.circuitFrame.scrollContainer.x;
+      }),
+    ).toBeLessThan(0);
+    await expect.poll(async () =>
+      page.evaluate(() => {
+        const app = window.pixiApp as unknown as {
+          circuit: NonNullable<typeof window.pixiApp>["circuit"];
+          circuitFrame: {
+            maskSprite: { width: number };
+            getGlobalPosition(): { x: number };
+          };
+        };
+        const viewportRight =
+          app.circuitFrame.getGlobalPosition().x +
+          app.circuitFrame.maskSprite.width;
+        return app.circuit.fetchStep(30).getBounds().right <= viewportRight;
+      }),
+    ).toBe(true);
+  });
+
   test("uses the same paste anchor for consecutive pastes", async ({
     page,
     circuitInfo,
@@ -1092,6 +1401,33 @@ async function selectedGateTypes(page: import("@playwright/test").Page) {
     }
 
     return Array.from(app.selectedGates, (gate) => gate.operationType).sort();
+  });
+}
+
+async function selectedGateEmphasis(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const steps = window.pixiApp?.circuit.steps ?? [];
+
+    return Object.fromEntries(
+      steps.flatMap((step) =>
+        step.dropzones.flatMap((dropzone) => {
+          const operation = dropzone.operation as
+            | (NonNullable<typeof dropzone.operation> & {
+                selectionEmphasisOverlay: unknown | null;
+              })
+            | null;
+
+          return operation === null
+            ? []
+            : [
+                [
+                  operation.operationType,
+                  operation.selectionEmphasisOverlay !== null,
+                ],
+              ];
+        }),
+      ),
+    );
   });
 }
 
