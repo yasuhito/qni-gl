@@ -398,11 +398,7 @@ export class Circuit extends Container {
         });
       }
 
-      const controlOperations = operations.filter(
-        (candidate) => candidate instanceof ControlGate,
-      );
-
-      return controlOperations.length > 1 ? controlOperations : [operation];
+      return [operation];
     }
 
     return [operation];
