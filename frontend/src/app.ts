@@ -34,6 +34,7 @@ import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
 import { PasteAnchorPreview } from "./paste-anchor-preview";
 import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
+import { MAX_QUBIT_COUNT } from "./constants";
 
 declare global {
   interface Window {
@@ -45,7 +46,7 @@ export class App {
   static elementId = "app";
   private static _instance: App;
   private static readonly COPY_FEEDBACK_ALPHA = 0.5;
-  private static readonly COPY_FEEDBACK_DURATION = 260;
+  private static readonly COPY_FEEDBACK_DURATION = 500;
   private static readonly PASTE_PUSH_ANIMATION_DURATION = 120;
   private static readonly PASTE_INSERT_REVEAL_DELAY = 30;
 
@@ -73,6 +74,7 @@ export class App {
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private copyFeedbackAnimationFrame: number | null = null;
   private copyFeedbackGates = new Set<OperationComponent>();
+  private editorNotificationTimer: ReturnType<typeof setTimeout> | null = null;
   private editUndoStack: string[] = [];
   private editRedoStack: string[] = [];
   private dragUndoSnapshot: string | null = null;
@@ -1361,6 +1363,9 @@ export class App {
       requiredWireCount === null ||
       !this.circuit.canEnsureWireCount(requiredWireCount)
     ) {
+      this.showEditorNotification(
+        `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
+      );
       return false;
     }
 
@@ -1595,6 +1600,9 @@ export class App {
         !this.circuit.canEnsureWireCount(requiredWireCount)
       ) {
         this.pasteAnchorPreview.clear();
+        this.showEditorNotification(
+          `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
+        );
         return;
       }
 
@@ -1609,6 +1617,26 @@ export class App {
     }
 
     return this.pasteAnchorCell.qubitIndex + this.clipboard.height;
+  }
+
+  private showEditorNotification(message: string): void {
+    const notification = document.getElementById("editor-notification");
+    if (notification === null) {
+      return;
+    }
+
+    if (this.editorNotificationTimer !== null) {
+      clearTimeout(this.editorNotificationTimer);
+    }
+
+    notification.textContent = message;
+    notification.classList.remove("opacity-0");
+    notification.classList.add("opacity-100");
+    this.editorNotificationTimer = setTimeout(() => {
+      notification.classList.remove("opacity-100");
+      notification.classList.add("opacity-0");
+      this.editorNotificationTimer = null;
+    }, 3500);
   }
 
   private clearPasteAnchorOverlay(): void {

@@ -72,6 +72,22 @@ test.describe("Copy and paste", () => {
     ]);
   });
 
+  test("undoes consecutive circuit edits one operation at a time", async ({
+    page,
+    circuitInfo,
+  }) => {
+    await dragAndDrop(page, circuitInfo.gatePalette.hGate, { step: 0, bit: 0 });
+    await dragAndDrop(page, circuitInfo.gatePalette.xGate, { step: 1, bit: 0 });
+    await dragAndDrop(page, circuitInfo.gatePalette.yGate, { step: 2, bit: 0 });
+
+    await page.keyboard.press("Control+z");
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1],["X",1]]}');
+    await page.keyboard.press("Control+z");
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[["H",1]]}');
+    await page.keyboard.press("Control+z");
+    await expect.poll(() => circuitJson(page)).toBe('{"cols":[]}');
+  });
+
   test("undoes a deletion without reverting the previous paste", async ({
     page,
     circuitInfo,
@@ -597,6 +613,7 @@ test.describe("Copy and paste", () => {
     expect(preview.markerHeight).toBeGreaterThanOrEqual(preview.stepHeight);
     expect(preview.markerHeight - preview.stepHeight).toBeLessThanOrEqual(4);
     previewCircuitInfo.steps.forEach((step) => expect(step).toHaveLength(5));
+    await expect(page.locator("#editor-notification")).toHaveText("");
     await dragAndDrop(page, previewCircuitInfo.gatePalette.hGate, {
       step: 1,
       bit: 3,
@@ -1125,6 +1142,13 @@ test.describe("Copy and paste", () => {
       };
     });
     await page.keyboard.press("Control+v");
+
+    await expect(page.locator("#editor-notification")).toContainText(
+      "Cannot paste beyond 32 qubits.",
+    );
+    await expect(page.locator("#editor-notification")).toHaveClass(
+      /text-red-500/,
+    );
 
     await expect.poll(async () =>
       page.evaluate(() => {
