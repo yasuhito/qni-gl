@@ -34,7 +34,6 @@ import { CircuitRectangleSelection } from "./circuit-rectangle-selection";
 import { PasteInsertionAnimation } from "./paste-insertion-animation";
 import { PasteAnchorPreview } from "./paste-anchor-preview";
 import { SelectionBoundsOverlay } from "./selection-bounds-overlay";
-import { MAX_QUBIT_COUNT } from "./constants";
 
 declare global {
   interface Window {
@@ -74,7 +73,6 @@ export class App {
   private selectionBoundsOverlay!: SelectionBoundsOverlay;
   private copyFeedbackAnimationFrame: number | null = null;
   private copyFeedbackGates = new Set<OperationComponent>();
-  private editorNotificationTimer: ReturnType<typeof setTimeout> | null = null;
   private editUndoStack: string[] = [];
   private editRedoStack: string[] = [];
   private dragUndoSnapshot: string | null = null;
@@ -1363,9 +1361,6 @@ export class App {
       requiredWireCount === null ||
       !this.circuit.canEnsureWireCount(requiredWireCount)
     ) {
-      this.showEditorNotification(
-        `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
-      );
       return false;
     }
 
@@ -1600,23 +1595,10 @@ export class App {
         !this.circuit.canEnsureWireCount(requiredWireCount)
       ) {
         this.pasteAnchorPreview.clear();
-        this.showEditorNotification(
-          `Cannot paste beyond ${MAX_QUBIT_COUNT} qubits.`,
-        );
         return;
       }
 
-      const addedWireCount = Math.max(
-        0,
-        requiredWireCount - this.circuit.wireCount,
-      );
       this.circuit.ensureWireCount(requiredWireCount);
-      if (addedWireCount > 0) {
-        const suffix = addedWireCount === 1 ? "" : "s";
-        this.showEditorNotification(
-          `Paste position adds ${addedWireCount} qubit${suffix}.`,
-        );
-      }
     }
     this.pasteAnchorPreview.sync(this.pasteAnchorCell, this.clipboard);
   }
@@ -1627,24 +1609,6 @@ export class App {
     }
 
     return this.pasteAnchorCell.qubitIndex + this.clipboard.height;
-  }
-
-  private showEditorNotification(message: string): void {
-    const notification = document.getElementById("editor-notification");
-    if (notification === null) {
-      return;
-    }
-
-    if (this.editorNotificationTimer !== null) {
-      clearTimeout(this.editorNotificationTimer);
-    }
-
-    notification.textContent = message;
-    notification.classList.remove("hidden");
-    this.editorNotificationTimer = setTimeout(() => {
-      notification.classList.add("hidden");
-      this.editorNotificationTimer = null;
-    }, 3500);
   }
 
   private clearPasteAnchorOverlay(): void {

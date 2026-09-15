@@ -597,10 +597,6 @@ test.describe("Copy and paste", () => {
     expect(preview.markerHeight).toBeGreaterThanOrEqual(preview.stepHeight);
     expect(preview.markerHeight - preview.stepHeight).toBeLessThanOrEqual(4);
     previewCircuitInfo.steps.forEach((step) => expect(step).toHaveLength(5));
-    await expect(page.locator("#editor-notification")).toHaveText(
-      "Paste position adds 2 qubits.",
-    );
-
     await dragAndDrop(page, previewCircuitInfo.gatePalette.hGate, {
       step: 1,
       bit: 3,
@@ -1128,10 +1124,6 @@ test.describe("Copy and paste", () => {
         undoCount: app.editUndoStack.length,
       };
     });
-    await expect(page.locator("#editor-notification")).toHaveText(
-      "Cannot paste beyond 32 qubits.",
-    );
-
     await page.keyboard.press("Control+v");
 
     await expect.poll(async () =>
