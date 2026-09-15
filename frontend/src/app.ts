@@ -1097,15 +1097,16 @@ export class App {
   }
 
   private setupKeyboardShortcuts(): void {
-    window.addEventListener("keydown", this.keyboardShortcutHandler);
+    window.addEventListener("keydown", this.keyboardShortcutHandler, true);
   }
 
   private handleKeyboardShortcut(event: KeyboardEvent): void {
+    this.handleEscapeShortcut(event);
+
     if (this.isEditableEventTarget(event.target)) {
       return;
     }
 
-    this.handleEscapeShortcut(event);
     this.handleDeleteShortcut(event);
     this.handleClipboardShortcut(event);
   }
@@ -1488,6 +1489,7 @@ export class App {
   private clearSelectionAndPasteAnchor(): boolean {
     if (
       this.selectedGates.size === 0 &&
+      this.activeGate === null &&
       this.pasteAnchorCell === null &&
       this.pasteAnchorDropzone === null
     ) {

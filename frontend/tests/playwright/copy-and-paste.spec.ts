@@ -683,6 +683,53 @@ test.describe("Copy and paste", () => {
     await expect.poll(() => pasteAnchorCell(page)).toBeNull();
   });
 
+  test("clears the selection with Escape while an input is focused", async ({
+    page,
+  }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        circuit: NonNullable<typeof window.pixiApp>["circuit"];
+        selectedGates: Set<unknown>;
+        pasteAnchorCell: { stepIndex: number; qubitIndex: number } | null;
+      };
+      app.circuit.fromJSON('{"cols":[["H",1]]}', true);
+      app.selectedGates = new Set([
+        app.circuit.fetchStep(0).fetchDropzone(0).operation!,
+      ]);
+      app.pasteAnchorCell = { stepIndex: 0, qubitIndex: 0 };
+      const input = document.createElement("input");
+      input.id = "escape-focused-input";
+      document.body.appendChild(input);
+    });
+    await page.locator("#escape-focused-input").focus();
+
+    await page.keyboard.press("Escape");
+
+    await expect.poll(() => selectedGateTypes(page)).toEqual([]);
+    await expect.poll(() => pasteAnchorCell(page)).toBeNull();
+  });
+
+  test("clears a stale active gate with Escape", async ({ page }) => {
+    await page.waitForFunction(() => window.pixiApp !== undefined);
+    await page.evaluate(() => {
+      const app = window.pixiApp as unknown as {
+        activeGate: unknown;
+        circuit: NonNullable<typeof window.pixiApp>["circuit"];
+        selectedGates: Set<unknown>;
+      };
+      app.circuit.fromJSON('{"cols":[["H",1]]}', true);
+      app.activeGate = app.circuit.fetchStep(0).fetchDropzone(0).operation;
+      app.selectedGates = new Set();
+    });
+
+    await page.keyboard.press("Escape");
+
+    await expect.poll(() =>
+      page.evaluate(() => window.pixiApp?.activeGate ?? null),
+    ).toBeNull();
+  });
+
   test("clears stale selection state when the circuit is cleared", async ({
     page,
     circuitInfo,
