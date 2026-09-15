@@ -14,7 +14,7 @@ import { Write1Gate } from "../../src/write1-gate";
 import { XGate } from "../../src/x-gate";
 import { YGate } from "../../src/y-gate";
 import { ZGate } from "../../src/z-gate";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 describe("CircuitStep", () => {
   let circuitStep: CircuitStep;
@@ -211,6 +211,61 @@ describe("CircuitStep", () => {
     });
   });
 
+  describe("pasted emphasis", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    });
+
+    it("starts after 50 ms and fades out over 500 ms", () => {
+      const setAlphaSpies = circuitStep.dropzones.map((dropzone) =>
+        vi.spyOn(dropzone, "setPastedEmphasisAlpha")
+      );
+      let animationFrame: FrameRequestCallback | undefined;
+      vi.stubGlobal(
+        "requestAnimationFrame",
+        vi.fn((callback: FrameRequestCallback) => {
+          animationFrame = callback;
+          return 1;
+        })
+      );
+      circuitStep.applyPastedEmphasis();
+      setAlphaSpies.forEach((spy) => spy.mockClear());
+
+      vi.advanceTimersByTime(50);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenLastCalledWith(0.35);
+      });
+
+      animationFrame?.(performance.now() + 500);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenLastCalledWith(0);
+      });
+    });
+
+    it("cancels a pending emphasis when it is cleared", () => {
+      const setAlphaSpies = circuitStep.dropzones.map((dropzone) =>
+        vi.spyOn(dropzone, "setPastedEmphasisAlpha")
+      );
+      circuitStep.applyPastedEmphasis();
+      setAlphaSpies.forEach((spy) => spy.mockClear());
+
+      circuitStep.clearPastedEmphasis();
+      vi.advanceTimersByTime(50);
+
+      setAlphaSpies.forEach((spy) => {
+        expect(spy).toHaveBeenCalledOnce();
+        expect(spy).toHaveBeenCalledWith(0);
+      });
+    });
+  });
+
   describe("updateConnections", () => {
     it("should update the connections between an X gate and a control gate in the circuit step", () => {
       const xGate = new XGate();
@@ -232,6 +287,47 @@ describe("CircuitStep", () => {
       expect(middleDropzone.controlConnectBottom).toBe(true);
       expect(xGateDropzone.controlConnectTop).toBe(true);
       expect(xGateDropzone.controlConnectBottom).toBe(false);
+    });
+
+    it("clears control connections when the controlled gate is removed", () => {
+      const controlGate1 = new ControlGate();
+      const controlGate2 = new ControlGate();
+      const xGate = new XGate();
+
+      circuitStep.fetchDropzone(0).addChild(controlGate1);
+      circuitStep.fetchDropzone(1).addChild(controlGate2);
+      circuitStep.fetchDropzone(2).addChild(xGate);
+      circuitStep.updateConnections();
+
+      circuitStep.fetchDropzone(2).removeChild(xGate);
+      circuitStep.updateConnections();
+
+      for (const dropzone of circuitStep.dropzones) {
+        expect(dropzone.controlConnectTop).toBe(false);
+        expect(dropzone.controlConnectBottom).toBe(false);
+        expect(dropzone.connectTop).toBe(false);
+        expect(dropzone.connectBottom).toBe(false);
+      }
+    });
+
+    it("clears controllable gate controls when the control gate is removed", () => {
+      const controlGate = new ControlGate();
+      const xGate = new XGate();
+
+      circuitStep.fetchDropzone(0).addChild(controlGate);
+      circuitStep.fetchDropzone(2).addChild(xGate);
+      circuitStep.updateConnections();
+
+      circuitStep.fetchDropzone(0).removeChild(controlGate);
+      circuitStep.updateConnections();
+
+      expect(xGate.controls).toEqual([]);
+      for (const dropzone of circuitStep.dropzones) {
+        expect(dropzone.controlConnectTop).toBe(false);
+        expect(dropzone.controlConnectBottom).toBe(false);
+        expect(dropzone.connectTop).toBe(false);
+        expect(dropzone.connectBottom).toBe(false);
+      }
     });
 
     it("should update the connections between two swap gates in the circuit step", () => {

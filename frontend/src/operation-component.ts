@@ -4,6 +4,7 @@ import { OperationSource } from "./operation-source";
 import { Size } from "./size";
 import { spacingInPx } from "./util";
 import { Spacing } from "./spacing";
+import { Colors } from "./colors";
 import {
   Container,
   FederatedPointerEvent,
@@ -13,6 +14,7 @@ import {
 } from "pixi.js";
 import { IconableMixin } from "./iconable-mixin";
 import { OPERATION_EVENTS } from "./events";
+import { GateShapeConfig } from "./types";
 
 /**
  * ゲートのクリックイベント
@@ -55,6 +57,9 @@ export class OperationComponent extends IconableMixin(Container) {
   debug = false;
 
   protected _shape!: Graphics;
+  protected pastedEmphasisCoversBackground = true;
+  private emphasisOverlay: Container | null = null;
+  private selectionEmphasisOverlay: Graphics | null = null;
 
   protected stateMachine = createMachine(
     {
@@ -234,6 +239,60 @@ export class OperationComponent extends IconableMixin(Container) {
 
   deactivate() {
     this.actor.send({ type: "Deactivate" });
+    this.clearEmphasis();
+    this.clearSelectionEmphasis();
+    if (this.sprite && this.whiteSprite) {
+      this.applyIdleStyle();
+    }
+  }
+
+  /**
+   * コピー対象の枠を独立したレイヤーで表示し、ホバースタイルに消されないようにする。
+   */
+  applySelectionEmphasis(): void {
+    this.applyActiveStyle();
+
+    if (this.selectionEmphasisOverlay === null) {
+      this.selectionEmphasisOverlay = this.createSelectionEmphasisOverlay();
+      this.addChild(this.selectionEmphasisOverlay);
+    }
+  }
+
+  setPastedEmphasisAlpha(alpha: number): void {
+    if (alpha <= 0) {
+      this.clearEmphasis();
+      return;
+    }
+
+    if (this.emphasisOverlay === null) {
+      this.emphasisOverlay = this.createPastedEmphasisOverlay();
+      this.addChild(this.emphasisOverlay);
+    }
+
+    this.emphasisOverlay.alpha = alpha;
+  }
+
+  /**
+   * コピー選択やペースト結果の補助表示を消す。
+   */
+  clearEmphasis(): void {
+    if (this.emphasisOverlay === null) {
+      return;
+    }
+
+    this.removeChild(this.emphasisOverlay);
+    this.emphasisOverlay.destroy();
+    this.emphasisOverlay = null;
+  }
+
+  private clearSelectionEmphasis(): void {
+    if (this.selectionEmphasisOverlay === null) {
+      return;
+    }
+
+    this.removeChild(this.selectionEmphasisOverlay);
+    this.selectionEmphasisOverlay.destroy();
+    this.selectionEmphasisOverlay = null;
   }
 
   move(globalPosition: Point) {
@@ -285,6 +344,60 @@ export class OperationComponent extends IconableMixin(Container) {
 
   applyActiveStyle() {}
 
+  private createPastedEmphasisOverlay(): Container {
+    if (!this.pastedEmphasisCoversBackground) {
+      const whiteSprite = this.createWhiteSprite(this.sprite.texture);
+      whiteSprite.width = this.sizeInPx;
+      whiteSprite.height = this.sizeInPx;
+
+      return whiteSprite;
+    }
+
+    return new Graphics()
+      .roundRect(
+        0,
+        0,
+        this.sizeInPx,
+        this.sizeInPx,
+        this.emphasisCornerRadius,
+      )
+      .fill(0xffffff);
+  }
+
+  private createSelectionEmphasisOverlay(): Graphics {
+    const borderWidth = Spacing.borderWidth.gate[this.size];
+    const constructor = this.constructor as typeof OperationComponent & {
+      SHAPE_CONFIG?: GateShapeConfig;
+    };
+    const shapeConfig = constructor.SHAPE_CONFIG;
+    const overlay = new Graphics()
+      .roundRect(
+        borderWidth / 2,
+        borderWidth / 2,
+        this.sizeInPx - borderWidth,
+        this.sizeInPx - borderWidth,
+        shapeConfig?.cornerRadius ?? OperationComponent.cornerRadius,
+      )
+      .stroke({
+        color: Colors["border-active"],
+        width: borderWidth,
+        alignment: shapeConfig?.strokeAlignment ?? 0,
+      });
+    overlay.eventMode = "none";
+
+    return overlay;
+  }
+
+  private get emphasisCornerRadius(): number {
+    const constructor = this.constructor as typeof OperationComponent & {
+      SHAPE_CONFIG?: GateShapeConfig;
+    };
+
+    return (
+      constructor.SHAPE_CONFIG?.cornerRadius ?? OperationComponent.cornerRadius
+    );
+  }
+
   private onPointerOver() {
     this.actor.send({ type: "Mouse enter" });
     this.cursor = "grab";
@@ -296,6 +409,11 @@ export class OperationComponent extends IconableMixin(Container) {
   }
 
   private onPointerDown(event: FederatedPointerEvent) {
+    if (event.shiftKey) {
+      this.emit(OPERATION_EVENTS.GRABBED, this, event.global, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, this, event.global);
   }
 

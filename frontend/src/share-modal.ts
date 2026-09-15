@@ -20,7 +20,7 @@ export class ShareModal {
         const json = JSON.parse(decodeURIComponent(location.hash.substring(9)));
         if (json.title) title = json.title;
       }
-    } catch (e) {
+    } catch {
       // 失敗しても何もしない
     }
 

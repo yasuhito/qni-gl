@@ -3,9 +3,21 @@ import { Container, Point } from "pixi.js";
 import { List } from "@pixi/ui";
 import { QubitCount, WireType } from "./types";
 import { MAX_QUBIT_COUNT, MIN_QUBIT_COUNT } from "./constants";
-import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
+import {
+  CIRCUIT_STEP_EVENTS,
+  DROPZONE_EVENTS,
+  OPERATION_EVENTS,
+} from "./events";
 import { CircuitStepMarkerManager } from "./circuit-step-marker-manager";
 import { OperationComponent } from "./operation-component";
+import { ControlGate } from "./control-gate";
+import { SwapGate } from "./swap-gate";
+import { Controllable, isControllable } from "./controllable-mixin";
+import { Operation } from "./operation";
+
+type CircuitJson = {
+  cols: unknown[][];
+};
 
 /**
  * Represents the options for a {@link Circuit}.
@@ -13,6 +25,28 @@ import { OperationComponent } from "./operation-component";
 export interface CircuitOptions {
   minWireCount: number;
   stepCount: number;
+}
+
+export interface CircuitCellPosition {
+  stepIndex: number;
+  qubitIndex: number;
+}
+
+export interface ClipboardOperation {
+  label: string;
+  relativeStep: number;
+  relativeQubit: number;
+}
+
+export interface CircuitClipboard {
+  operations: ClipboardOperation[];
+  width: number;
+  height: number;
+}
+
+interface PositionedOperation {
+  operation: OperationComponent;
+  position: CircuitCellPosition;
 }
 
 /**
@@ -24,6 +58,7 @@ export class Circuit extends Container {
   private minStepCount = 5;
   private stepList: List;
   private markerManager: CircuitStepMarkerManager;
+  private stepMarkerUpdatesEnabled = true;
 
   /**
    * Returns an array of {@link CircuitStep}s in the {@link Circuit}.
@@ -66,7 +101,7 @@ export class Circuit extends Container {
     const qubitNumber = Math.max(
       ...this.steps.map((each) => {
         return each.highestOccupiedQubitNumber;
-      })
+      }),
     );
 
     if (qubitNumber === 0) {
@@ -129,6 +164,47 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
+  /**
+   * ペーストしたゲートの相対位置を保ったまま、回路表示を更新する。
+   */
+  updateAfterPaste(
+    preservedEmptySteps = new Set<CircuitStep>(this.steps)
+  ): void {
+    const activeStepIndex = this.activeStepIndex;
+
+    this.removeEmptyStepsExcept(preservedEmptySteps);
+    this.appendMinimumSteps();
+    this.removeUnusedUpperWires();
+    this.redrawDropzoneInputAndOutputWires();
+    this.updateConnections();
+
+    if (activeStepIndex !== null) {
+      this.fetchStep(
+        Math.min(activeStepIndex, this.steps.length - 1)
+      ).activate();
+    }
+    this.markerManager.update(this.steps);
+  }
+
+  /**
+   * 挿入アンカーから外れた空ステップだけを回路から取り除く。
+   */
+  removeEmptyStep(step: CircuitStep): void {
+    const stepIndex = this.steps.indexOf(step);
+    if (stepIndex === -1 || !step.isEmpty) {
+      return;
+    }
+
+    step.destroy();
+    this.stepList.arrangeChildren();
+    this.appendMinimumSteps();
+    this.redrawDropzoneInputAndOutputWires();
+    this.updateConnections();
+
+    this.fetchStep(Math.min(stepIndex, this.steps.length - 1)).activate();
+    this.markerManager.update(this.steps);
+  }
+
   maybeAppendWire() {
     const firstStepWireCount = this.fetchStep(0).wireCount;
 
@@ -145,18 +221,242 @@ export class Circuit extends Container {
     this.markerManager.update(this.steps);
   }
 
+  setStepMarkerUpdatesEnabled(enabled: boolean): void {
+    this.stepMarkerUpdatesEnabled = enabled;
+
+    this.steps.forEach((step) => {
+      step.setHoverEnabled(enabled);
+    });
+    this.markerManager.update(this.steps);
+  }
+
   serialize() {
     return this.steps.map((each) => each.serialize());
+  }
+
+  /**
+   * 配置済みゲートのステップ番号と量子ビット番号を返す。
+   */
+  findOperationPosition(
+    operation: OperationComponent,
+  ): CircuitCellPosition | null {
+    for (let stepIndex = 0; stepIndex < this.steps.length; stepIndex++) {
+      const step = this.fetchStep(stepIndex);
+      for (
+        let qubitIndex = 0;
+        qubitIndex < step.dropzones.length;
+        qubitIndex++
+      ) {
+        if (step.fetchDropzone(qubitIndex).operation === operation) {
+          return { stepIndex, qubitIndex };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * 選択中ゲートからクリップボードデータを作る。
+   * 選択ゲートがない横方向のステップは詰め、量子ビット方向の位置は保持する。
+   */
+  createClipboardFromOperations(
+    operations: OperationComponent[],
+  ): CircuitClipboard | null {
+    const positionedOperations = this.positionedOperations(operations);
+
+    if (positionedOperations.length === 0) {
+      return null;
+    }
+
+    const selectedStepIndexes = Array.from(
+      new Set(
+        positionedOperations.map((entry) => entry.position.stepIndex),
+      ),
+    ).sort((a, b) => a - b);
+    const relativeStepByStepIndex = new Map(
+      selectedStepIndexes.map((stepIndex, relativeStep) => [
+        stepIndex,
+        relativeStep,
+      ]),
+    );
+    const minQubit = Math.min(
+      ...positionedOperations.map((entry) => entry.position.qubitIndex),
+    );
+    const maxQubit = Math.max(
+      ...positionedOperations.map((entry) => entry.position.qubitIndex),
+    );
+
+    return {
+      operations: positionedOperations.map(({ operation, position }) => ({
+        label: this.operationJsonLabel(operation),
+        relativeStep:
+          relativeStepByStepIndex.get(position.stepIndex) ?? 0,
+        relativeQubit: position.qubitIndex - minQubit,
+      })),
+      width: selectedStepIndexes.length,
+      height: maxQubit - minQubit + 1,
+    };
+  }
+
+  /**
+   * 選択ゲート群の右端ステップと最上段量子ビットを、挿入アンカーとして返す。
+   */
+  findPasteAnchorForOperations(
+    operations: OperationComponent[],
+  ): CircuitCellPosition | null {
+    const positionedOperations = this.positionedOperations(operations);
+    if (positionedOperations.length === 0) {
+      return null;
+    }
+
+    return {
+      stepIndex: Math.max(
+        ...positionedOperations.map((entry) => entry.position.stepIndex),
+      ),
+      qubitIndex: Math.min(
+        ...positionedOperations.map((entry) => entry.position.qubitIndex),
+      ),
+    };
+  }
+
+  /**
+   * Qniが保持する接続情報から、指定ゲートと同じ構造に属するゲートを返す。
+   */
+  connectedOperationsFor(
+    operation: OperationComponent,
+  ): OperationComponent[] {
+    const position = this.findOperationPosition(operation);
+    if (position === null) {
+      return [];
+    }
+
+    const step = this.fetchStep(position.stepIndex);
+    const operations = step.dropzones.flatMap((dropzone) =>
+      dropzone.operation === null ? [] : [dropzone.operation],
+    );
+
+    if (operation instanceof SwapGate) {
+      const swapOperations = operations.filter(
+        (candidate) => candidate instanceof SwapGate,
+      );
+
+      return swapOperations.length === 2 ? swapOperations : [operation];
+    }
+
+    if (isControllable(operation) && operation.controls.length > 0) {
+      return operations.filter((candidate) => {
+        if (candidate instanceof ControlGate) {
+          const candidatePosition = this.findOperationPosition(candidate);
+
+          return (
+            candidatePosition !== null &&
+            operation.controls.includes(candidatePosition.qubitIndex)
+          );
+        }
+
+        return (
+          isControllable(candidate) &&
+          candidate.controls.some((control) =>
+            operation.controls.includes(control),
+          )
+        );
+      });
+    }
+
+    if (operation instanceof ControlGate) {
+      const controllableOperations = operations.filter(
+        (candidate): candidate is Operation & Controllable =>
+          isControllable(candidate),
+      );
+      const targetsControlledByOperation = controllableOperations.filter(
+        (candidate) =>
+          candidate.controls.includes(position.qubitIndex),
+      );
+
+      if (targetsControlledByOperation.length > 0) {
+        const connectedControlBits = new Set(
+          targetsControlledByOperation.flatMap((target) => target.controls),
+        );
+
+        return operations.filter((candidate) => {
+          if (candidate instanceof ControlGate) {
+            const candidatePosition = this.findOperationPosition(candidate);
+
+            return (
+              candidatePosition !== null &&
+              connectedControlBits.has(candidatePosition.qubitIndex)
+            );
+          }
+
+          return (
+            isControllable(candidate) &&
+            candidate.controls.some((control) =>
+              connectedControlBits.has(control),
+            )
+          );
+        });
+      }
+
+      return [operation];
+    }
+
+    return [operation];
+  }
+
+  /**
+   * pasteAnchorCell の右隣にクリップボード内容をステップ挿入し、追加したゲートを返す。
+   */
+  pasteClipboardAt(
+    pasteAnchorCell: CircuitCellPosition,
+    clipboard: CircuitClipboard,
+  ): OperationComponent[] {
+    if (clipboard.operations.length === 0) {
+      return [];
+    }
+
+    const insertStartStep = pasteAnchorCell.stepIndex + 1;
+    this.ensureWireCount(pasteAnchorCell.qubitIndex + clipboard.height);
+
+    for (let i = 0; i < clipboard.width; i++) {
+      this.insertStepAt(insertStartStep + i);
+    }
+
+    const pastedOperations: OperationComponent[] = [];
+    for (const clipboardOperation of clipboard.operations) {
+      const operation = CircuitStep.createOperationFromLabel(
+        clipboardOperation.label,
+      );
+      if (operation === null) {
+        throw new Error(
+          `Unknown operation label in clipboard: ${clipboardOperation.label}`,
+        );
+      }
+
+      const step = this.fetchStep(
+        insertStartStep + clipboardOperation.relativeStep,
+      );
+      const dropzone = step.fetchDropzone(
+        pasteAnchorCell.qubitIndex + clipboardOperation.relativeQubit,
+      );
+      dropzone.assign(operation);
+      pastedOperations.push(operation);
+    }
+
+    this.updateConnections();
+    this.redrawDropzoneInputAndOutputWires();
+
+    return pastedOperations;
   }
 
   /**
    * Circuitインスタンスの状態をJSON文字列としてシリアライズする
    * @returns 回路全体のJSON文字列
    */
-  toJSON() {
+  toJSON(preserveEmptySteps = false) {
     const cols: string[] = [];
     for (const each of this.steps) {
-      if (!each.isEmpty) {
+      if (preserveEmptySteps || !each.isEmpty) {
         cols.push(each.toJSON());
       }
     }
@@ -164,16 +464,31 @@ export class Circuit extends Container {
   }
 
   /**
+   * 共有URL用に、中間の空ステップだけを保持してシリアライズする。
+   * 表示のために末尾へ補われた空ステップはURLへ含めない。
+   */
+  toJSONWithInternalEmptySteps(): string {
+    const lastOccupiedStepIndex = this.steps.findLastIndex(
+      (step) => !step.isEmpty,
+    );
+    const cols = this.steps
+      .slice(0, lastOccupiedStepIndex + 1)
+      .map((step) => step.toJSON());
+
+    return `{"cols":[${cols.join(",")}]}`;
+  }
+
+  /**
    * JSONデータからCircuitのインスタンスの状態を復元する
    * @param jsonString 回路全体のJSONデータ文字列
    */
-  fromJSON(jsonString: string): void {
-    const circuitData = JSON.parse(jsonString);
+  fromJSON(jsonString: string, preserveEmptySteps = false): void {
+    const circuitData = JSON.parse(jsonString) as CircuitJson;
 
     this.steps.forEach((step) => step.destroy());
     this.stepList.removeChildren();
 
-    circuitData.cols.forEach((stepJson: any[]) => {
+    circuitData.cols.forEach((stepJson) => {
       const circuitStep = CircuitStep.fromJSON(stepJson);
       this.stepList.addChild(circuitStep);
 
@@ -181,13 +496,18 @@ export class Circuit extends Container {
       circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
       circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
       circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+      circuitStep.on(DROPZONE_EVENTS.SELECTED, this.emitDropzoneSelected, this);
     });
 
     if (this.steps.length > 0) {
       this.fetchStep(0).activate();
     }
 
-    this.update();
+    if (preserveEmptySteps) {
+      this.updateAfterPaste();
+    } else {
+      this.update();
+    }
   }
 
   toString() {
@@ -242,6 +562,7 @@ export class Circuit extends Container {
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+    circuitStep.on(DROPZONE_EVENTS.SELECTED, this.emitDropzoneSelected, this);
 
     this.markerManager.update(this.steps);
 
@@ -256,6 +577,7 @@ export class Circuit extends Container {
     circuitStep.on(CIRCUIT_STEP_EVENTS.HOVERED, this.updateStepMarker, this);
     circuitStep.on(CIRCUIT_STEP_EVENTS.ACTIVATED, this.activateStep, this);
     circuitStep.on(OPERATION_EVENTS.GRABBED, this.emitOnGateGrabSignal, this);
+    circuitStep.on(DROPZONE_EVENTS.SELECTED, this.emitDropzoneSelected, this);
 
     // 復元された各オペレーションにインタラクティブ性を設定する
     circuitStep.dropzones.forEach((dropzone) => {
@@ -265,12 +587,68 @@ export class Circuit extends Container {
     });
   }
 
+  /**
+   * ペースト先に必要な量子ビット数まで、全ステップへドロップゾーンを追加する。
+   */
+  ensureWireCount(requiredWireCount: number): void {
+    if (!this.canEnsureWireCount(requiredWireCount)) {
+      throw new Error(
+        `Required wire count exceeds maximum: ${requiredWireCount}`,
+      );
+    }
+
+    while (this.wireCount < requiredWireCount) {
+      this.maybeAppendWire();
+    }
+  }
+
+  /**
+   * 必要な量子ビット線を、上限を超えずに追加できるか返す。
+   */
+  canEnsureWireCount(requiredWireCount: number): boolean {
+    return requiredWireCount <= this.maxWireCount;
+  }
+
+  private operationJsonLabel(operation: OperationComponent): string {
+    const maybeJsonable = operation as OperationComponent & {
+      toJSON?: () => string;
+    };
+
+    if (typeof maybeJsonable.toJSON !== "function") {
+      throw new Error(`Operation is not JSON serializable: ${operation}`);
+    }
+
+    return JSON.parse(maybeJsonable.toJSON());
+  }
+
+  private positionedOperations(
+    operations: OperationComponent[],
+  ): PositionedOperation[] {
+    return operations
+      .map((operation) => ({
+        operation,
+        position: this.findOperationPosition(operation),
+      }))
+      .filter(
+        (
+          entry,
+        ): entry is {
+          operation: OperationComponent;
+          position: CircuitCellPosition;
+        } => entry.position !== null,
+      );
+  }
+
   private onGateSnapToDropzone() {
     this.redrawDropzoneInputAndOutputWires();
     this.updateConnections();
   }
 
   private updateStepMarker() {
+    if (!this.stepMarkerUpdatesEnabled) {
+      return;
+    }
+
     this.markerManager.update(this.steps);
   }
 
@@ -292,9 +670,28 @@ export class Circuit extends Container {
 
   private emitOnGateGrabSignal(
     gate: OperationComponent,
-    globalPosition: Point
+    globalPosition: Point,
+    additiveSelection = false,
   ) {
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, gate, globalPosition);
+  }
+
+  private emitDropzoneSelected(
+    circuitStep: CircuitStep,
+    dropzone: unknown,
+    additiveSelection = false,
+  ) {
+    if (additiveSelection) {
+      this.emit(DROPZONE_EVENTS.SELECTED, circuitStep, dropzone, true);
+      return;
+    }
+
+    this.emit(DROPZONE_EVENTS.SELECTED, circuitStep, dropzone);
   }
 
   redrawDropzoneInputAndOutputWires() {
@@ -326,6 +723,15 @@ export class Circuit extends Container {
   private removeEmptySteps(): void {
     for (const each of this.emptySteps) {
       each.destroy();
+    }
+    this.stepList.arrangeChildren();
+  }
+
+  private removeEmptyStepsExcept(preservedSteps: Set<CircuitStep>): void {
+    for (const each of this.emptySteps) {
+      if (!preservedSteps.has(each)) {
+        each.destroy();
+      }
     }
     this.stepList.arrangeChildren();
   }

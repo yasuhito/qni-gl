@@ -145,10 +145,16 @@ export class OperationSource extends Container {
 
   private grabOperation(
     operation: InstanceType<OperationClass>,
-    globalPosition: Point
+    globalPosition: Point,
+    additiveSelection = false
   ): void {
     this.generateNewOperation();
     this.removeChild(operation);
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
   }
 

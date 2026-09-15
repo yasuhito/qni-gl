@@ -2,7 +2,14 @@ import { Circuit } from "./circuit";
 import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
 import { CircuitStep } from "./circuit-step";
 import { Colors } from "./colors";
-import { Container, Graphics, Point, Sprite, Texture } from "pixi.js";
+import {
+  Container,
+  FederatedWheelEvent,
+  Graphics,
+  Point,
+  Sprite,
+  Texture,
+} from "pixi.js";
 import { OperationClass } from "./operation";
 import { OperationPalette } from "./operation-palette";
 
@@ -103,9 +110,15 @@ export class CircuitFrame extends Container {
 
   private grabPaletteOperation(
     operation: InstanceType<OperationClass>,
-    pointerPosition: Point
+    pointerPosition: Point,
+    additiveSelection = false
   ): void {
     this.addChild(operation);
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
@@ -126,8 +139,14 @@ export class CircuitFrame extends Container {
 
   private grabCircuitOperation(
     operation: InstanceType<OperationClass>,
-    pointerPosition: Point
+    pointerPosition: Point,
+    additiveSelection = false
   ): void {
+    if (additiveSelection) {
+      this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition, true);
+      return;
+    }
+
     this.emit(OPERATION_EVENTS.GRABBED, operation, pointerPosition);
   }
 
@@ -143,26 +162,145 @@ export class CircuitFrame extends Container {
     this.maskSprite.y = 0;
   }
 
-  private handleScroll(event: WheelEvent): void {
-    if (this.circuit.y + this.circuit.height + 128 <= this.maskSprite.height) {
+  private handleScroll(event: FederatedWheelEvent): void {
+    this.scrollVertically(this.verticalScrollDelta(event));
+    this.scrollHorizontally(this.horizontalScrollDelta(event));
+  }
+
+  private verticalScrollDelta(event: FederatedWheelEvent): number {
+    if (event.shiftKey && event.deltaX === 0) {
+      return 0;
+    }
+
+    return event.deltaY;
+  }
+
+  private horizontalScrollDelta(event: FederatedWheelEvent): number {
+    if (event.deltaX !== 0) {
+      return event.deltaX;
+    }
+
+    return event.shiftKey ? event.deltaY : 0;
+  }
+
+  private scrollVertically(deltaY: number): void {
+    if (this.maxScrollY() <= 0) {
       return;
     }
 
-    const deltaY = event.deltaY;
     this.scrollContainer.y -= deltaY;
+    this.scrollContainer.y = this.limitScrollPosition(
+      this.scrollContainer.y,
+      this.maxScrollY()
+    );
+  }
 
-    // スクロール範囲の制限
-    if (this.scrollContainer.y > 0) {
-      this.scrollContainer.y = 0;
+  private scrollHorizontally(deltaX: number): void {
+    if (this.maxScrollX() <= 0) {
+      return;
     }
 
-    const maxScrollY =
+    this.scrollContainer.x -= deltaX;
+    this.scrollContainer.x = this.limitScrollPosition(
+      this.scrollContainer.x,
+      this.maxScrollX()
+    );
+  }
+
+  /**
+   * 指定した回路要素が横方向の可視域へ入るようにスクロールする。
+   */
+  revealHorizontally(targets: Container[], padding = 24): void {
+    if (targets.length === 0) {
+      return;
+    }
+
+    const targetBounds = targets.map((target) => target.getBounds());
+    const left = Math.min(...targetBounds.map((bounds) => bounds.left));
+    const right = Math.max(...targetBounds.map((bounds) => bounds.right));
+    this.revealHorizontalBounds(left, right, padding);
+  }
+
+  /**
+   * レイアウト更新のタイミングに依存せず、指定ステップ範囲を可視域へ入れる。
+   */
+  revealStepRange(startStepIndex: number, stepCount: number): void {
+    const referenceDropzone = this.circuit.steps[0]?.dropzones[0];
+    if (referenceDropzone === undefined || stepCount <= 0) {
+      return;
+    }
+
+    const frameX = this.getGlobalPosition().x;
+    const left =
+      frameX +
+      this.scrollContainer.x +
+      this.circuit.x +
+      startStepIndex * referenceDropzone.totalSize;
+    const right = left + stepCount * referenceDropzone.totalSize;
+    this.revealHorizontalBounds(left, right, 24);
+  }
+
+  private revealHorizontalBounds(
+    left: number,
+    right: number,
+    padding: number,
+  ): void {
+    const framePosition = this.getGlobalPosition();
+    const visibleLeft = framePosition.x + padding;
+    const visibleRight =
+      framePosition.x + this.maskSprite.width - padding;
+    const availableWidth = visibleRight - visibleLeft;
+    const targetWidth = right - left;
+
+    let deltaX = 0;
+    if (targetWidth > availableWidth || left < visibleLeft) {
+      deltaX = left - visibleLeft;
+    } else if (right > visibleRight) {
+      deltaX = right - visibleRight;
+    }
+
+    this.scrollContainer.x -= deltaX;
+    this.scrollContainer.x = this.limitScrollPosition(
+      this.scrollContainer.x,
+      this.maxScrollX(),
+    );
+  }
+
+  private maxScrollY(): number {
+    return Math.max(
+      0,
       this.circuit.height +
-      this.operationPalette.height +
-      256 -
-      this.maskSprite.height;
-    if (this.scrollContainer.y < -maxScrollY) {
-      this.scrollContainer.y = -maxScrollY;
+        this.operationPalette.height +
+        256 -
+        this.maskSprite.height
+    );
+  }
+
+  private maxScrollX(): number {
+    const referenceDropzone = this.circuit.steps[0]?.dropzones[0];
+    const logicalCircuitWidth =
+      referenceDropzone === undefined
+        ? this.circuit.width
+        : this.circuit.steps.length * referenceDropzone.totalSize;
+
+    return Math.max(
+      0,
+      this.circuit.x +
+        Math.max(this.circuit.width, logicalCircuitWidth) +
+        128 -
+        this.maskSprite.width
+    );
+  }
+
+  private limitScrollPosition(position: number, maxScroll: number): number {
+    if (position > 0) {
+      return 0;
     }
+
+    if (position < -maxScroll) {
+      return -maxScroll;
+    }
+
+    return position;
   }
 }

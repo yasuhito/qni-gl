@@ -1,4 +1,8 @@
-import { CIRCUIT_STEP_EVENTS, OPERATION_EVENTS } from "./events";
+import {
+  CIRCUIT_STEP_EVENTS,
+  DROPZONE_EVENTS,
+  OPERATION_EVENTS,
+} from "./events";
 import { DropzoneList } from "./dropzone-list";
 import { CircuitStepState } from "./circuit-step-state";
 import { Container } from "pixi.js";
@@ -31,11 +35,18 @@ import { SwapGate } from "./swap-gate";
  * special operations like swap gates and controlled operations.
  */
 export class CircuitStep extends Container {
+  private static readonly PASTED_EMPHASIS_DELAY = 50;
+  private static readonly PASTED_EMPHASIS_DURATION = 500;
+  private static readonly PASTED_EMPHASIS_ALPHA = 0.35;
+
   /** The padding space around the dropzones within the circuit step. */
   static readonly PADDING = Dropzone.sizeInPx / 2;
 
   private dropzoneList!: DropzoneList;
   private state!: CircuitStepState;
+  private pastedEmphasisDelayTimer: ReturnType<typeof setTimeout> | null = null;
+  private pastedEmphasisAnimationFrame: number | null = null;
+  private hoverEnabled = true;
 
   /**
    *  Returns the number of wires (qubits) in this circuit step.
@@ -120,7 +131,64 @@ export class CircuitStep extends Container {
     this.initializeState();
     this.initializeDropzoneList();
     this.createDropzones(wireCount);
-    this.setupEventListeners();
+    this.setupHoverEventListeners();
+  }
+
+  applyPastedEmphasis(): void {
+    this.clearPastedEmphasis();
+    this.pastedEmphasisDelayTimer = setTimeout(
+      () => this.startPastedEmphasisFade(),
+      CircuitStep.PASTED_EMPHASIS_DELAY,
+    );
+  }
+
+  clearPastedEmphasis(): void {
+    if (this.pastedEmphasisDelayTimer !== null) {
+      clearTimeout(this.pastedEmphasisDelayTimer);
+      this.pastedEmphasisDelayTimer = null;
+    }
+    if (this.pastedEmphasisAnimationFrame !== null) {
+      cancelAnimationFrame(this.pastedEmphasisAnimationFrame);
+      this.pastedEmphasisAnimationFrame = null;
+    }
+
+    this.setPastedEmphasisAlpha(0);
+  }
+
+  private startPastedEmphasisFade(): void {
+    const fadeStartedAt = performance.now();
+    this.setPastedEmphasisAlpha(CircuitStep.PASTED_EMPHASIS_ALPHA);
+    this.pastedEmphasisAnimationFrame = requestAnimationFrame((now) =>
+      this.fadePastedEmphasis(now, fadeStartedAt),
+    );
+  }
+
+  private fadePastedEmphasis(now: number, fadeStartedAt: number): void {
+    const progress = Math.max(
+      0,
+      Math.min(
+        (now - fadeStartedAt) / CircuitStep.PASTED_EMPHASIS_DURATION,
+        1,
+      ),
+    );
+    this.setPastedEmphasisAlpha(
+      CircuitStep.PASTED_EMPHASIS_ALPHA * (1 - progress),
+    );
+
+    if (progress < 1) {
+      this.pastedEmphasisAnimationFrame = requestAnimationFrame((nextNow) =>
+        this.fadePastedEmphasis(nextNow, fadeStartedAt),
+      );
+      return;
+    }
+
+    this.clearPastedEmphasis();
+  }
+
+  private setPastedEmphasisAlpha(alpha: number): void {
+    this.dropzones.forEach((dropzone) => {
+      dropzone.setPastedEmphasisAlpha(alpha);
+    });
   }
 
   private initializeState(): void {
@@ -140,10 +208,9 @@ export class CircuitStep extends Container {
     }
   }
 
-  private setupEventListeners(): void {
-    this.on("pointerover", this.maybeSetHoverState, this)
-      .on("pointerout", this.maybeSetIdleState, this)
-      .on("pointerdown", this.activate, this);
+  private setupHoverEventListeners(): void {
+    this.on("pointerover", this.hoverStepMarker, this)
+      .on("pointerout", this.clearHoverState, this);
     this.eventMode = "static";
   }
 
@@ -182,9 +249,27 @@ export class CircuitStep extends Container {
     const dropzone = this.dropzoneList.append();
 
     dropzone.on(OPERATION_EVENTS.SNAPPED, this.onDropzoneSnap, this);
-    dropzone.on(OPERATION_EVENTS.GRABBED, (operation, globalPosition) => {
-      this.emit(OPERATION_EVENTS.GRABBED, operation, globalPosition);
-    });
+    dropzone.on(
+      OPERATION_EVENTS.GRABBED,
+      (operation, globalPosition, additiveSelection = false) => {
+        if (additiveSelection) {
+          this.emit(
+            OPERATION_EVENTS.GRABBED,
+            operation,
+            globalPosition,
+            true,
+          );
+          return;
+        }
+
+        this.emit(
+          OPERATION_EVENTS.GRABBED,
+          operation,
+          globalPosition,
+        );
+      },
+    );
+    dropzone.on(DROPZONE_EVENTS.SELECTED, this.onDropzoneSelected, this);
 
     return dropzone;
   }
@@ -222,13 +307,38 @@ export class CircuitStep extends Container {
     this.state.setIdle();
   }
 
+  clearHoverState(): void {
+    if (this.state.isHover()) {
+      this.state.setIdle();
+    }
+  }
+
+  hoverStepMarker(): void {
+    if (!this.hoverEnabled) {
+      return;
+    }
+
+    if (this.state.isIdle()) {
+      this.state.setHover();
+    }
+    this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
+  }
+
+  private maybeSetHoverState(): void {
+    this.hoverStepMarker();
+  }
+
+  setHoverEnabled(enabled: boolean): void {
+    this.hoverEnabled = enabled;
+    this.clearHoverState();
+  }
+
   /**
    * Updates the connections between operations in the circuit step.
    * This method handles the visual connections for swap operations and controlled operations.
    */
   updateConnections(): void {
-    this.updateSwapConnections();
-    this.updateControlledUConnections();
+    this.updateOperationAttributes();
   }
 
   /**
@@ -279,7 +389,7 @@ export class CircuitStep extends Container {
    * @param stepJson ステップのJSONデータ
    * @returns 復元されたCircuitStepのインスタンス
    */
-  static fromJSON(stepJson: any[]): CircuitStep {
+  static fromJSON(stepJson: unknown[]): CircuitStep {
     if (!Array.isArray(stepJson)) {
       console.error("Invalid step data format:", stepJson);
       return new CircuitStep(1);
@@ -305,11 +415,6 @@ export class CircuitStep extends Container {
       }
       return null;
     });
-
-    // Swapゲートのペアリング
-    const swapIdx = ops
-      .map((op, i) => (op instanceof SwapGate ? i : -1))
-      .filter((i) => i !== -1);
 
     // コントロールゲートとXゲートの関係
     const controlIdx = ops
@@ -341,7 +446,7 @@ export class CircuitStep extends Container {
    * @param label ゲートのラベル文字列
    * @returns 生成されたOperationComponentインスタンス、または対応するラベルがない場合はnull
    */
-  private static createOperationFromLabel(
+  static createOperationFromLabel(
     label: string
   ): OperationComponent | null {
     switch (label) {
@@ -402,35 +507,13 @@ export class CircuitStep extends Container {
 
     this.updateSwapConnections();
 
-    if (controlDropzones.length === 1 && controllableDropzones.length === 0) {
+    if (controlDropzones.length === 0 || controllableDropzones.length === 0) {
+      this.clearControlConnections();
       return;
     }
 
     // コントロール線の接続を更新
-    if (controlDropzones.length > 0) {
-      if (controllableDropzones.length === 0) {
-        this.updateControlControlConnections();
-      } else {
-        this.updateControlledUConnections();
-      }
-    }
-
-    this.applyConnectionUpdates();
-  }
-
-  /**
-   * コントロールゲート同士の上下接続を更新
-   */
-  private updateControlControlConnections(): void {
-    const controlDropzones =
-      this.dropzoneList.filterByOperationType(ControlGate);
-    const controlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
-    for (const dz of controlDropzones) {
-      dz.connectTop = controlBits.some((bit) => this.qubitNumberOf(dz) > bit);
-      dz.connectBottom = controlBits.some(
-        (bit) => this.qubitNumberOf(dz) < bit
-      );
-    }
+    this.updateControlledUConnections();
   }
 
   private qubitNumberOf(dropzone: Dropzone): number {
@@ -468,9 +551,14 @@ export class CircuitStep extends Container {
       this.dropzoneList.filterByOperationType(ControlGate);
     const allControlBits = controlDropzones.map((dz) => this.qubitNumberOf(dz));
 
+    for (const each of controllableDropzones) {
+      need(isControllable(each.operation), "operation is not Controllable");
+      each.operation.controls = allControlBits;
+    }
+
     const activeControlBits = allControlBits.slice(0, controlDropzones.length);
     const controllableBits = controllableDropzones.map((dz) =>
-      this.qubitNumberOf(dz)
+      this.qubitNumberOf(dz),
     );
     const activeOperationBits = activeControlBits.concat(controllableBits);
 
@@ -485,17 +573,20 @@ export class CircuitStep extends Container {
         dropzone.controlConnectTop = bit > minBit && bit <= maxBit;
         dropzone.controlConnectBottom = bit >= minBit && bit < maxBit;
       }
-
-      // Set controls for XGates
-      for (const each of controllableDropzones) {
-        need(isControllable(each.operation), "operation is not Controllable");
-        each.operation.controls = allControlBits;
-      }
     } else {
       for (const dropzone of this.dropzones) {
         dropzone.controlConnectTop = false;
         dropzone.controlConnectBottom = false;
       }
+    }
+
+    this.applyConnectionUpdates();
+  }
+
+  private clearControlConnections(): void {
+    for (const dropzone of this.dropzones) {
+      dropzone.controlConnectTop = false;
+      dropzone.controlConnectBottom = false;
     }
 
     this.applyConnectionUpdates();
@@ -520,16 +611,13 @@ export class CircuitStep extends Container {
     this.emit(OPERATION_EVENTS.SNAPPED, this, dropzone);
   }
 
-  private maybeSetHoverState() {
-    if (this.state.isIdle()) {
-      this.state.setHover();
+  private onDropzoneSelected(dropzone: Dropzone, additiveSelection = false) {
+    if (additiveSelection) {
+      this.emit(DROPZONE_EVENTS.SELECTED, this, dropzone, true);
+      return;
     }
-    this.emit(CIRCUIT_STEP_EVENTS.HOVERED, this);
+
+    this.emit(DROPZONE_EVENTS.SELECTED, this, dropzone);
   }
 
-  private maybeSetIdleState() {
-    if (this.state.isHover()) {
-      this.state.setIdle();
-    }
-  }
 }
